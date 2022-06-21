@@ -19,6 +19,7 @@ public class TextDataModel
         {
             _logger.Log(LogLevel.Warning, "Got text data of length {} but was supposed to be {}", _data.Length, _size);
         }
-        _logger.Log(LogLevel.Information, "Text Data (size {}): {}", _size, _data);
+        _logger.Log(LogLevel.Information, "Text Data Size: {}", _size);
+        _logger.Log(LogLevel.Debug, "Text Data: {}", _data);
     }
 }

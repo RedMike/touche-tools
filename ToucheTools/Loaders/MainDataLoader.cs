@@ -16,14 +16,12 @@ public class MainDataLoader
         _reader = new BinaryReader(_stream);
     }
 
-    public void Read(out TextDataModel textData)
+    public void Read(out TextDataModel textData, out BackdropDataModel backdrop)
     {
         _stream.Seek(64, SeekOrigin.Begin);
+        
         uint textDataOffs = _reader.ReadUInt32();
         uint textDataSize = _reader.ReadUInt32();
-        _logger.Log(LogLevel.Information, "Text Data Offset(s?): {}", textDataOffs);
-        _logger.Log(LogLevel.Information, "Text Data Size: {}", textDataSize);
-
         _stream.Seek((int)textDataOffs, SeekOrigin.Current);
         byte[] rawTextData = _reader.ReadBytes((int)textDataSize);
         textData = new TextDataModel((int)textDataSize, rawTextData);
@@ -32,7 +30,6 @@ public class MainDataLoader
 
         ushort bw = _reader.ReadUInt16();
         ushort bh = _reader.ReadUInt16();
-        int backdropSize = bw * bh;
-        _logger.Log(LogLevel.Information, "Backdrop: {w}x{h}", bw, bh);
+        backdrop = new BackdropDataModel((int)bw, (int)bh);
     }
 }
