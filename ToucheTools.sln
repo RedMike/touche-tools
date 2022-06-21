@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToucheTools", "ToucheTools\ToucheTools.csproj", "{E2BC4B59-2803-4979-B8DD-AA310DFBCA8C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToucheTools.Console", "ToucheTools.Console\ToucheTools.Console.csproj", "{1D14393A-1E68-4585-82E3-78EF9368372E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{E2BC4B59-2803-4979-B8DD-AA310DFBCA8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2BC4B59-2803-4979-B8DD-AA310DFBCA8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2BC4B59-2803-4979-B8DD-AA310DFBCA8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D14393A-1E68-4585-82E3-78EF9368372E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D14393A-1E68-4585-82E3-78EF9368372E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D14393A-1E68-4585-82E3-78EF9368372E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D14393A-1E68-4585-82E3-78EF9368372E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
