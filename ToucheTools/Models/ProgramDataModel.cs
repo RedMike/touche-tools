@@ -48,6 +48,11 @@ public class ProgramDataModel
         public int ScaleMul { get; set; }
         public int ScaleDiv { get; set; }
     }
+    
+    //TODO: Hitboxes
+    //TODO: Action script offset
+    //TODO: Conversations
+    //TODO: Char script offset
 
     public List<Rect> Rects { get; set; } = new List<Rect>();
     public List<Point> Points { get; set; } = new List<Point>();
