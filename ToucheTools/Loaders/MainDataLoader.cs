@@ -13,7 +13,7 @@ public class MainDataLoader
     public MainDataLoader(string path)
     {
         _stream = File.OpenRead(path);
-        _reader = new BinaryReader(_stream);
+        _reader = new BinaryReader(_stream, Encoding.ASCII, true);
     }
 
     public void Read(out TextDataModel textData, out BackdropDataModel backdrop)
@@ -22,11 +22,11 @@ public class MainDataLoader
         
         uint textDataOffs = _reader.ReadUInt32();
         uint textDataSize = _reader.ReadUInt32();
-        _stream.Seek((int)textDataOffs, SeekOrigin.Current);
+        _stream.Seek((int)textDataOffs, SeekOrigin.Begin);
         byte[] rawTextData = _reader.ReadBytes((int)textDataSize);
         textData = new TextDataModel((int)textDataSize, rawTextData);
 
-        _stream.Seek(2, SeekOrigin.Current);
+        _stream.Seek(2, SeekOrigin.Begin);
 
         ushort bw = _reader.ReadUInt16();
         ushort bh = _reader.ReadUInt16();
