@@ -7,12 +7,12 @@ namespace ToucheTools.Loaders;
 public class MainDataLoader
 {
     private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(MainDataLoader));
-    private readonly FileStream _stream;
+    private readonly Stream _stream;
     private readonly BinaryReader _reader;
 
-    public MainDataLoader(string path)
+    public MainDataLoader(Stream stream)
     {
-        _stream = File.OpenRead(path);
+        _stream = stream;
         _reader = new BinaryReader(_stream, Encoding.ASCII, true);
     }
 

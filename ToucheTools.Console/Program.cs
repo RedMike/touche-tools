@@ -2,7 +2,9 @@
 
 using ToucheTools.Loaders;
 
-var mainDataLoader = new MainDataLoader(@"C:\Files\Projects\Decompiling\ToucheTools\sample\TOUCHE.DAT");
+const string path = @"C:\Files\Projects\Decompiling\ToucheTools\sample\TOUCHE.DAT";
+var stream = File.OpenRead(path);
+var mainDataLoader = new MainDataLoader(stream);
 mainDataLoader.Read(out var textData, out var backdrop);
 
 Console.ReadKey();
