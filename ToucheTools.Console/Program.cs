@@ -1,7 +1,9 @@
-﻿using ToucheTools.Console;
+﻿using Microsoft.Extensions.Logging;
+using ToucheTools.Console;
 using ToucheTools.Constants;
 using ToucheTools.Loaders;
 
+var logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(Program));
 const string path = @"C:\Files\Projects\Decompiling\ToucheTools\sample\TOUCHE.DAT";
 var stream = File.OpenRead(path);
 var mainDataLoader = new MainDataLoader(stream);
@@ -21,5 +23,9 @@ mainDataLoader.Read(out var textData, out var backdrop);
     DebugImageSaver.Save(w, h, bytes, "conv_kit_data_debug");
 }
 
-programLoader.Read(Game.StartupEpisode);
+programLoader.Read(Game.StartupEpisode, out var instructions);
+File.WriteAllLines("startup_instructions.csv", instructions);
+logger.Log(LogLevel.Information, "Wrote program instructions");
+
+logger.Log(LogLevel.Information, "Finished");
 Console.Read();

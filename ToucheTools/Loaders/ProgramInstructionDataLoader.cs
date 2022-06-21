@@ -16,8 +16,10 @@ public class ProgramInstructionDataLoader
         _reader = new BinaryReader(_stream, Encoding.ASCII, true);
     }
 
-    public void Read(int offset)
+    public void Read(int offset, out List<string> instructions)
     {
+        instructions = new List<string>();
+        
         _stream.Seek(offset, SeekOrigin.Begin);
         while (true)
         {
@@ -276,7 +278,8 @@ public class ProgramInstructionDataLoader
                 default:
                     throw new Exception("Unhandled opcode: " + opcode.ToString("G"));
             }
-            _logger.Log(LogLevel.Information, "Instruction: {}", instruction);
+            _logger.Log(LogLevel.Debug, "Instruction: {}", instruction);
+            instructions.Add(instruction);
         }
     }
 }
