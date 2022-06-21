@@ -1,4 +1,5 @@
 ﻿using ToucheTools.Console;
+using ToucheTools.Constants;
 using ToucheTools.Loaders;
 
 const string path = @"C:\Files\Projects\Decompiling\ToucheTools\sample\TOUCHE.DAT";
@@ -11,14 +12,14 @@ var programLoader = new ProgramDataLoader(stream, resourceLoader);
 mainDataLoader.Read(out var textData, out var backdrop);
 
 {
-    spriteImageLoader.Read(18, false, out int w, out int h, out byte[,] bytes); //menu kit data
+    spriteImageLoader.Read(Resources.MenuKitSpriteImage, false, out int w, out int h, out byte[,] bytes); //menu kit data
     DebugImageSaver.Save(w, h, bytes, "menu_kit_data_debug");
 }
 
 {
-    spriteImageLoader.Read(19, false, out int w, out int h, out byte[,] bytes); //conv kit data
+    spriteImageLoader.Read(Resources.ConversionKitSpriteImage, false, out int w, out int h, out byte[,] bytes); //conv kit data
     DebugImageSaver.Save(w, h, bytes, "conv_kit_data_debug");
 }
 
-programLoader.Read(90); //startup episode
+programLoader.Read(Game.StartupEpisode);
 Console.Read();

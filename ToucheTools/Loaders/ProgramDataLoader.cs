@@ -22,7 +22,7 @@ public class ProgramDataLoader
     public void Read(int number)
     {
         _resourceDataLoader.Read(Resource.Program, number, true, out var offset, out var size);
-        if (size > 61440)
+        if (size > Game.MaxProgramDataSize)
         {
             throw new Exception("Program too large!");
         }
@@ -205,7 +205,7 @@ public class ProgramDataLoader
             };
             
             program.Backgrounds.Add(bg);
-            _logger.Log(LogLevel.Information, "Background: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, type, bgOffset, scaleMul, scaleDiv);
+            _logger.Log(LogLevel.Debug, "Background: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, type, bgOffset, scaleMul, scaleDiv);
         }
         _logger.Log(LogLevel.Information, "Backgrounds found: {}", program.Backgrounds.Count);
     }

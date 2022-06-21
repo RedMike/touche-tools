@@ -49,4 +49,7 @@ public static class Resources
             Resource.Sound, new OffsetCount() { Offset = 0xC28, Count = 120 }
         },
     };
+
+    public static int MenuKitSpriteImage = 18;
+    public static int ConversionKitSpriteImage = 19;
 }
