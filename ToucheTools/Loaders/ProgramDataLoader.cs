@@ -212,20 +212,7 @@ public class ProgramDataLoader
         //operations
         programStream.Seek(32, SeekOrigin.Begin);
         programOffset = programReader.ReadUInt32();
-        programStream.Seek(programOffset, SeekOrigin.Begin);
-        while (true)
-        {
-            var opcode = programReader.ReadByte();
-            
-            if (opcode == byte.MaxValue)
-            {
-                break;
-            }
-            if (!Enum.IsDefined(typeof(ProgramDataModel.Opcode), (int)opcode))
-            {
-                throw new Exception("Unknown opcode: " + opcode);
-            }
-            _logger.Log(LogLevel.Information, "Opcode: {}", (ProgramDataModel.Opcode)opcode);
-        }
+        var programInstructionLoader = new ProgramInstructionDataLoader(programStream);
+        programInstructionLoader.Read((int)programOffset);
     }
 }
