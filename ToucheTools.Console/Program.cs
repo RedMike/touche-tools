@@ -8,6 +8,13 @@ var resourceLoader = new ResourceDataLoader(stream);
 var spriteImageLoader = new SpriteImageDataLoader(stream, resourceLoader);
 
 mainDataLoader.Read(out var textData, out var backdrop);
-spriteImageLoader.Read(18, false, out int w, out int h, out byte[,] bytes); //menu kit data
 
-DebugImageSaver.Save(w, h, bytes, "menu_kit_data_debug");
+{
+    spriteImageLoader.Read(18, false, out int w, out int h, out byte[,] bytes); //menu kit data
+    DebugImageSaver.Save(w, h, bytes, "menu_kit_data_debug");
+}
+
+{
+    spriteImageLoader.Read(19, false, out int w, out int h, out byte[,] bytes); //conv kit data
+    DebugImageSaver.Save(w, h, bytes, "conv_kit_data_debug");
+}
