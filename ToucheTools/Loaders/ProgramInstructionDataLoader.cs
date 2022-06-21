@@ -150,7 +150,129 @@ public class ProgramInstructionDataLoader
                     instruction += $" {num}";
                 }
                     break;
+                case ProgramDataModel.Opcode.SetCharDelay:
+                {
+                    var delay = _reader.ReadUInt16();
+                    //TODO: identify which char
+                    //TODO: quit flag 3?
+                    instruction += $" {delay}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.StartMusic:
+                {
+                    var num = _reader.ReadUInt16();
+
+                    instruction += $" {num}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.AddRoomArea:
+                {
+                    var num = _reader.ReadUInt16();
+                    var flag = _reader.ReadUInt16();
+
+                    instruction += $" room {num} position from flags {flag}, {flag + 1}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.MoveCharToPos:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var num = _reader.ReadUInt16();
+                    var current = ch == 256;
+                    var targetAnotherChar = num == ushort.MaxValue;
+                    if (targetAnotherChar)
+                    {
+                        num = _reader.ReadUInt16();
+                    }
+
+                    //TODO: quit flag 3?
+                    instruction +=
+                        $" {(current ? " current" : ch)} {(targetAnotherChar ? "to char" : "to pos")} {num}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.SetupWaitingChar:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var val1 = _reader.ReadUInt16();
+                    var val2 = _reader.ReadUInt16();
+                    var current = ch == 256;
+                    
+                    //TODO: quit flag 3?
+                    instruction += $" {(current ? "current" : ch)} {val1} {val2}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.InitChar:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var current = ch == 256;
+                    
+                    instruction += $" {(current ? "current" : ch)}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.StartEpisode:
+                {
+                    var num = _reader.ReadUInt16();
+                    var flag = _reader.ReadUInt16();
+
+                    instruction += $" {num} flag {flag}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.GetFlag:
+                {
+                    var flag = _reader.ReadUInt16();
+
+                    instruction += $" set STK value to flag {flag}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.TestEquals:
+                {
+                    instruction +=
+                        $" get STK value, move STK forwards one, check equals; set STK to -1 if yes, 0 if no";
+                }
+                    break;
+                case ProgramDataModel.Opcode.Jz:
+                {
+                    var newOffset = _reader.ReadUInt16();
+                    instruction +=
+                        $" if STK value = 0, jump to new data offset {newOffset}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.Jnz:
+                {
+                    var newOffset = _reader.ReadUInt16();
+                    instruction +=
+                        $" if STK value != 0, jump to new data offset {newOffset}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.StartSound:
+                {
+                    var num = _reader.ReadUInt16();
+                    var delay = _reader.ReadUInt16();
+                    
+                    instruction += $" {num} after {delay}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.StartTalk:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var num = _reader.ReadUInt16();
+                    if (num == 750)
+                    {
+                        instruction += $" do nothing";
+                    }
+                    else
+                    {
+                        var current = ch == 256;
+
+                        instruction += $" {(current ? "current to next" : (ch + " to " + num))}";
+                    }
+                }
+                    break;
                 case ProgramDataModel.Opcode.EnableInput: break;
+                case ProgramDataModel.Opcode.StopScript: break;
+                case ProgramDataModel.Opcode.StartPaletteFadeIn:
+                    _reader.ReadUInt16(); break;
+                case ProgramDataModel.Opcode.StartPaletteFadeOut: 
+                    _reader.ReadUInt16(); break;
                 default:
                     throw new Exception("Unhandled opcode: " + opcode.ToString("G"));
             }
