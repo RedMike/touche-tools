@@ -27,5 +27,20 @@ programLoader.Read(Game.StartupEpisode, out var instructions);
 File.WriteAllLines("startup_instructions.csv", instructions);
 logger.Log(LogLevel.Information, "Wrote program instructions");
 
+{
+    spriteImageLoader.Read(0, false, out var w, out var h, out byte[,] bytes);
+    DebugImageSaver.Save(w, h, bytes, "0");
+}
+
+{
+    spriteImageLoader.Read(50, false, out var w, out var h, out byte[,] bytes);
+    DebugImageSaver.Save(w, h, bytes, "50");
+}
+
+{
+    spriteImageLoader.Read(10, false, out var w, out var h, out byte[,] bytes);
+    DebugImageSaver.Save(w, h, bytes, "10");
+}
+
 logger.Log(LogLevel.Information, "Finished");
 Console.Read();
