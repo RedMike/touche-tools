@@ -165,6 +165,48 @@ public class ProgramDataLoader
         }
         _logger.Log(LogLevel.Information, "Areas found: {}", program.Areas.Count);
         
-        
+        //backgrounds
+        programStream.Seek(12, SeekOrigin.Begin);
+        programOffset = programReader.ReadUInt32();
+        programStream.Seek(programOffset, SeekOrigin.Begin);
+        while(true)
+        {
+            var x = programReader.ReadUInt16();
+            if (x == ushort.MaxValue)
+            {
+                break;
+            }
+            var y = programReader.ReadUInt16();
+            var w = programReader.ReadUInt16();
+            var h = programReader.ReadUInt16();
+            var srcX = programReader.ReadUInt16();
+            var srcY = programReader.ReadUInt16();
+            var type = programReader.ReadUInt16();
+            var bgOffset = programReader.ReadUInt16();
+            var scaleMul = programReader.ReadUInt16();
+            var scaleDiv = programReader.ReadUInt16();
+            
+            var rect = new ProgramDataModel.Rect()
+            {
+                X = x,
+                Y = y,
+                W = w,
+                H = h
+            };
+            var bg = new ProgramDataModel.Background()
+            {
+                Rect = rect,
+                SrcX = srcX,
+                SrcY = srcY,
+                Type = type,
+                Offset = bgOffset,
+                ScaleMul = scaleMul,
+                ScaleDiv = scaleDiv
+            };
+            
+            program.Backgrounds.Add(bg);
+            _logger.Log(LogLevel.Information, "Background: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, type, bgOffset, scaleMul, scaleDiv);
+        }
+        _logger.Log(LogLevel.Information, "Backgrounds found: {}", program.Backgrounds.Count);
     }
 }

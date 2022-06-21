@@ -38,8 +38,20 @@ public class ProgramDataModel
         public int AnimationNext { get; set; }
     }
 
+    public class Background
+    {
+        public Rect Rect { get; set; }
+        public int SrcX { get; set; }
+        public int SrcY { get; set; }
+        public int Type { get; set; }
+        public int Offset { get; set; }
+        public int ScaleMul { get; set; }
+        public int ScaleDiv { get; set; }
+    }
+
     public List<Rect> Rects { get; set; } = new List<Rect>();
     public List<Point> Points { get; set; } = new List<Point>();
     public List<Walk> Walks { get; set; } = new List<Walk>();
     public List<Area> Areas { get; set; } = new List<Area>();
+    public List<Background> Backgrounds { get; set; } = new List<Background>();
 }
