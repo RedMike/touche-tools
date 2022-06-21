@@ -18,6 +18,16 @@ public class ProgramDataModel
         public int Order { get; set; }
     }
 
+    public class Walk
+    {
+        public int Point1 { get; set; }
+        public int Point2 { get; set; }
+        public int ClipRect { get; set; }
+        public int Area1 { get; set; }
+        public int Area2 { get; set; }
+    }
+
     public List<Rect> Rects { get; set; } = new List<Rect>();
     public List<Point> Points { get; set; } = new List<Point>();
+    public List<Walk> Walks { get; set; } = new List<Walk>();
 }

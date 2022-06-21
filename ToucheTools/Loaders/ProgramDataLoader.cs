@@ -83,5 +83,42 @@ public class ProgramDataLoader
             _logger.Log(LogLevel.Debug, "Point: {}x{}x{} {}", x, y, z, order);
         }
         _logger.Log(LogLevel.Information, "Points found: {}", program.Points.Count);
+        
+        //walks
+        programStream.Seek(28, SeekOrigin.Begin);
+        programOffset = programReader.ReadUInt32();
+        programStream.Seek(programOffset, SeekOrigin.Begin);
+        while(true)
+        {
+            var point1 = programReader.ReadUInt16();
+            if (point1 == ushort.MaxValue)
+            {
+                break;
+            }
+
+            if (point1 >= program.Points.Count)
+            {
+                throw new Exception("Unknown point referenced");
+            }
+            var point2 = programReader.ReadUInt16();
+            if (point2 >= program.Points.Count)
+            {
+                throw new Exception("Unknown point referenced");
+            }
+            var clipRect = programReader.ReadUInt16();
+            var area1 = programReader.ReadUInt16();
+            var area2 = programReader.ReadUInt16();
+            programStream.Seek(12, SeekOrigin.Current); //unused
+            program.Walks.Add(new ProgramDataModel.Walk()
+            {
+                Point1 = point1,
+                Point2 = point2,
+                ClipRect = clipRect,
+                Area1 = area1,
+                Area2 = area2
+            });
+            _logger.Log(LogLevel.Information, "Walk: {}->{} clip {} areas {} {}", point1, point2, clipRect, area1, area2);
+        }
+        _logger.Log(LogLevel.Information, "Walks found: {}", program.Walks.Count);
     }
 }
