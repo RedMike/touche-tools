@@ -117,8 +117,54 @@ public class ProgramDataLoader
                 Area1 = area1,
                 Area2 = area2
             });
-            _logger.Log(LogLevel.Information, "Walk: {}->{} clip {} areas {} {}", point1, point2, clipRect, area1, area2);
+            _logger.Log(LogLevel.Debug, "Walk: {}->{} clip {} areas {} {}", point1, point2, clipRect, area1, area2);
         }
         _logger.Log(LogLevel.Information, "Walks found: {}", program.Walks.Count);
+        
+        //areas
+        programStream.Seek(8, SeekOrigin.Begin);
+        programOffset = programReader.ReadUInt32();
+        programStream.Seek(programOffset, SeekOrigin.Begin);
+        while(true)
+        {
+            var x = programReader.ReadUInt16();
+            if (x == ushort.MaxValue)
+            {
+                break;
+            }
+            var y = programReader.ReadUInt16();
+            var w = programReader.ReadUInt16();
+            var h = programReader.ReadUInt16();
+            var srcX = programReader.ReadUInt16();
+            var srcY = programReader.ReadUInt16();
+            var id = programReader.ReadUInt16();
+            var state = programReader.ReadUInt16();
+            var animCount = programReader.ReadUInt16();
+            var animNext = programReader.ReadUInt16();
+            
+            var rect = new ProgramDataModel.Rect()
+            {
+                X = x,
+                Y = y,
+                W = w,
+                H = h
+            };
+            var area = new ProgramDataModel.Area()
+            {
+                Rect = rect,
+                SrcX = srcX,
+                SrcY = srcY,
+                Id = id,
+                State = state,
+                AnimationCount = animCount,
+                AnimationNext = animNext
+            };
+            
+            program.Areas.Add(area);
+            _logger.Log(LogLevel.Debug, "Area: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, id, state, animCount, animNext);
+        }
+        _logger.Log(LogLevel.Information, "Areas found: {}", program.Areas.Count);
+        
+        
     }
 }

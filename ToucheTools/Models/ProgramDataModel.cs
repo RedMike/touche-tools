@@ -27,7 +27,19 @@ public class ProgramDataModel
         public int Area2 { get; set; }
     }
 
+    public class Area
+    {
+        public Rect Rect { get; set; }
+        public int SrcX { get; set; }
+        public int SrcY { get; set; }
+        public int Id { get; set; }
+        public int State { get; set; }
+        public int AnimationCount { get; set; }
+        public int AnimationNext { get; set; }
+    }
+
     public List<Rect> Rects { get; set; } = new List<Rect>();
     public List<Point> Points { get; set; } = new List<Point>();
     public List<Walk> Walks { get; set; } = new List<Walk>();
+    public List<Area> Areas { get; set; } = new List<Area>();
 }
