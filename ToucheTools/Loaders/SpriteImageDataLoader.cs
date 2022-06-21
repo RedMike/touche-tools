@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Text;
+﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using ToucheTools.Constants;
 
