@@ -80,14 +80,14 @@ public class ProgramInstructionDataLoader
                 case ProgramDataModel.Opcode.FetchScriptWord:
                 {
                     var val = _reader.ReadUInt16();
-                    instruction += $" {val}";
+                    instruction += $" set STK value to {val}";
                 }
                     break;
                 case ProgramDataModel.Opcode.SetFlag:
                 {
                     var flag = _reader.ReadUInt16();
                     //TODO: validate flag
-                    instruction += $" {flag} to STK";
+                    instruction += $" {flag} to STK value";
                 }
                     break;
                 case ProgramDataModel.Opcode.SetCharFlags:
@@ -96,6 +96,58 @@ public class ProgramInstructionDataLoader
                     var flags = _reader.ReadUInt16();
                     flags &= 0xFF00;
                     instruction += $" {ch} to {flags}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.SetCharBox:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var num = _reader.ReadUInt16();
+                    var current = ch == 256;
+                    instruction += $" {(current ? "current" : ch)} {num}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.GetInventoryItem:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var item = _reader.ReadUInt16();
+                    var current = ch == 256;
+                    var money = item == 4;
+                    instruction += $" move STK to {(current ? "current" : ch)}'s {(money ? "money" : item)}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.Push:
+                {
+                    instruction += $" move STK back one and set to 0";
+                }
+                    break;
+                case ProgramDataModel.Opcode.Add:
+                {
+                    instruction += $" take STK value, move STK forwards 1, then add to STK";
+                }
+                    break;
+                case ProgramDataModel.Opcode.SetInventoryItem:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var item = _reader.ReadUInt16();
+                    var current = ch == 256;
+                    var money = item == 4;
+                    instruction += $" set {(current ? "current" : ch)}'s {(money ? "money" : item)} to STK value";
+                }
+                    break;
+                case ProgramDataModel.Opcode.AddItemToInventoryAndRedraw:
+                {
+                    var ch = _reader.ReadUInt16();
+                    var current = ch == 256;
+                    
+                    instruction += $" add item of STK value to {(current ? "current" : ch)}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.LoadRoom:
+                {
+                    var num = _reader.ReadUInt16();
+                    //TODO: mark room as needing load
+                    
+                    instruction += $" {num}";
                 }
                     break;
                 case ProgramDataModel.Opcode.EnableInput: break;
