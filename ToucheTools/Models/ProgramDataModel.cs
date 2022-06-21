@@ -54,9 +54,114 @@ public class ProgramDataModel
     //TODO: Conversations
     //TODO: Char script offset
 
+    public enum Opcode
+    {
+        Noop = 0,
+        Jnz = 1,
+        Jz = 2,
+        Jmp = 3,
+        True = 4,
+        False = 5,
+        Push = 6,
+        Not = 7,
+        Add = 8,
+        Sub = 9,
+        Mul = 10,
+        Div = 11,
+        Mod = 12,
+        And = 13,
+        Or = 14,
+        Neg = 15,
+        TestGreater = 16,
+        TestEquals = 17,
+        TestLower = 18,
+        FetchScriptWord = 19,
+        
+        TestGreaterOrEquals = 24,
+        TestLowerOrEquals = 25,
+        TestNotEquals = 26,
+        EndConversation = 27,
+        StopScript = 28,
+        GetFlag = 29,
+        SetFlag = 30,
+        
+        FetchScriptByte = 35,
+        
+        GetCharWalkBox = 46,
+        StartSound = 47,
+        MoveCharToPos = 48,
+        
+        LoadRoom = 52,
+        UpdateRoom = 53,
+        StartTalk = 54,
+        SetCharBox = 55,
+        InitCharScript = 56,
+        LoadSprite = 57,
+        LoadSequence = 58,
+        SetCharFrame = 59,
+        SetCharDirection = 60,
+        ClearConversationChoices = 61,
+        AddConversationChoice = 62,
+        RemoveConversationChoice = 63,
+        GetInventoryItem = 64,
+        SetInventoryItem = 65,
+        StartEpisode = 66,
+        SetConversation = 67,
+        
+        EnableInput = 69,
+        DisableInput = 70,
+        FaceChar = 71,
+        GetCharCurrentAnim = 72,
+        GetCurrentChar = 73,
+        IsCharActive = 74,
+        SetPalette = 75,
+        ChangeWalkPath = 76,
+        LockWalkPath = 77,
+        InitChar = 78,
+        SetupWaitingChar = 79,
+        UpdateRoomAreas = 80,
+        UnlockWalkPath = 81,
+        
+        AddItemToInventoryAndRedraw = 83,
+        GiveItemTo = 84,
+        SetHitboxText = 85,
+        FadePalette = 86,
+        
+        GetInventoryItemFlags = 97,
+        DrawInventory = 98,
+        StopCharScript = 99,
+        RestartCharScript = 100,
+        GetCharCurrentWalkBox = 101,
+        GetCharPointsDataNum = 102,
+        SetupFollowingChar = 103,
+        StartAnimation = 104,
+        SetCharTextColor = 105,
+        
+        StartMusic = 112,
+        
+        Sleep = 114,
+        
+        SetCharDelay = 116,
+        LockHitbox = 117,
+        RemoveItemFromInventory = 118,
+        UnlockHitbox = 119,
+        AddRoomArea = 120,
+        SetCharFlags = 121,
+        
+        UnsetCharFlags = 128,
+        DrawSpriteOnBackdrop = 129,
+        LoadSpeechSegment = 130,
+        
+        StartPaletteFadeIn = 132,
+        StartPaletteFadeOut = 133,
+        SetRoomAreaState = 134
+    }
+    
     public List<Rect> Rects { get; set; } = new List<Rect>();
     public List<Point> Points { get; set; } = new List<Point>();
     public List<Walk> Walks { get; set; } = new List<Walk>();
     public List<Area> Areas { get; set; } = new List<Area>();
     public List<Background> Backgrounds { get; set; } = new List<Background>();
+
+    public List<Opcode> Operations { get; set; } = new List<Opcode>();
 }
