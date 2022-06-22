@@ -25,6 +25,18 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet("/program")]
+    public IActionResult GetPrograms([FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
+
     [HttpGet("/program/{program}")]
     public IActionResult GetProgram(int program, [FromQuery]string id)
     {

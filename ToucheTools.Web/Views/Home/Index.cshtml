@@ -56,24 +56,26 @@
 </div>
 
 @{
-    if (loggedIn && container.DatabaseModel.Programs.Any())
+    if (loggedIn)
     {
-        <div>
-            <h1 class="display-4">Programs</h1>
-            <p>The following is the list of existing programs in the uploaded file:</p>
-            <ul>
-                @foreach (var pair in container.DatabaseModel.Programs)
-                {
-                    var program = pair.Value;
-                    var programRouteData = new Dictionary<string, string>(routeData);
-                    programRouteData.Add("program", pair.Key.ToString());
-                    <li><a asp-area="" asp-controller="Home" asp-action="GetProgram" asp-all-route-data="programRouteData">@pair.Key - @program.Instructions.Count Instructions, @program.Areas.Count Areas, @program.Backgrounds.Count Backgrounds, @program.Points.Count Points, @program.Rects.Count Rectangles, @program.Walks.Count Walks</a></li>
-                }
-                @foreach (var pair in container.DatabaseModel.FailedPrograms)
-                {
-                    <li><span class="text-danger">@pair.Key - Failed: @pair.Value</span></li>
-                }
-            </ul>
+        <div class="row">
+            <div class="col-2 card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Programs</h5>
+                    <p class="card-text">
+                        <ul class="list-unstyled">
+                            <li>
+                                <span class="fw-bold">@container.DatabaseModel.Programs.Count</span>
+                                Parsed
+                            </li>
+                            <li class="text-danger">
+                                <span class="fw-bold">@container.DatabaseModel.FailedPrograms.Count</span>
+                                Invalid
+                            </li>
+                        </ul>
+                    <a asp-area="" asp-controller="Home" asp-action="GetPrograms" asp-all-route-data="routeData" class="card-img-overlay"></a>
+                </div>
+            </div>
         </div>
     }
 }
