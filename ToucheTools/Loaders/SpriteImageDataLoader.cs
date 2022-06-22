@@ -18,7 +18,7 @@ public class SpriteImageDataLoader
         _resourceDataLoader = resourceDataLoader;
     }
 
-    public void Read(int number, bool todoFlag, out int width, out int height, out byte[,] imageData)
+    public void Read(int number, bool decode, out int width, out int height, out byte[,] imageData)
     {
         _resourceDataLoader.Read(Resource.SpriteImage, number, false, out var offset, out _);
         _stream.Seek(offset, SeekOrigin.Begin);
@@ -86,7 +86,7 @@ public class SpriteImageDataLoader
             _logger.Log(LogLevel.Information, "Sprite image {}: true {}x{}", number, width, height);
         }
 
-        if (todoFlag) //TODO: don't know what the flag means, some overlay?
+        if (decode)
         {
             for (var i = 0; i < height; i++)
             {

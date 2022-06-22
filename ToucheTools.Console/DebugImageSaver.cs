@@ -19,17 +19,20 @@ public static class DebugImageSaver
         IntPtr ptr = bitmapData.Scan0;
         byte[] rgbValues = new byte[Math.Abs(bitmapData.Stride) * bitmap.Height];
 
+        HashSet<byte> seenColors = new HashSet<byte>();
         for (var i = 0; i < h; i++)
         {
             for (var j = 0; j < w; j++)
             {
                 var col = bytes[i, j];
+                seenColors.Add(col);
                 var idx = (i*w + j) * 3;
                 rgbValues[idx] = palette.Colors[col].R;
                 rgbValues[idx + 1] = palette.Colors[col].G;
                 rgbValues[idx + 2] = palette.Colors[col].B;
             }
         }
+        Logger.LogInformation("Seen colors: {}", seenColors);
         Marshal.Copy(rgbValues, 0, ptr, Math.Abs(bitmapData.Stride) * bitmap.Height);
         bitmap.UnlockBits(bitmapData);
 
