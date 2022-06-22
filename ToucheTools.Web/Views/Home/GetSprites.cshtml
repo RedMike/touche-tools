@@ -50,7 +50,7 @@
                         </div>
                         <div class="card-img h-100 d-flex flex-column justify-content-center">
                             <div class="w-100 mh-100 overflow-hidden">
-                                <img src="@Url.Action("GetSpriteImage", new { id = sessionId, sprite = pair.Key, palette = 64 })" class="w-100"/>
+                                <img src="@Url.Action("GetSpriteImage", new { id = sessionId, sprite = pair.Key, palette = container.DatabaseModel.Palettes.Keys.First() })" class="w-100"/>
                             </div>
                         </div>
                         <div class="card-img-overlay">
