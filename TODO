@@ -1,6 +1,8 @@
-[ ] Set up web app for viewer
+[x] Set up web app for viewer
+[ ] Implement all program/room information parsing
 [ ] Implement all opcode parsing
 [ ] Finish program model components
 [ ] Save out all programs in sample DAT file
-[ ] Set up model exporter
+[ ] Set up model exporters
 [ ] Export bare-bones model and try in ScummVM
+...
