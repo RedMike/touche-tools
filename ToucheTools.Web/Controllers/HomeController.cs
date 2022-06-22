@@ -115,6 +115,21 @@ public class HomeController : Controller
         var spriteModel = container.DatabaseModel.RoomImages[room];
         return View(spriteModel);
     }
+    
+    [HttpGet("/room/{room}/image")]
+    public IActionResult GetRoomImage(int room, [FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var paletteList = container.DatabaseModel.Palettes[room].Colors;
+        var roomImage = container.DatabaseModel.RoomImages[room].Value;
+        var roomImageBytes = _imageRenderingService.RenderImage(roomImage.Width, roomImage.Height, roomImage.RawData, paletteList);
+
+        return File(roomImageBytes, "image/png");
+    }
 
     [HttpPost("/dat")]
     public IActionResult UploadDat(IFormFile datFile)

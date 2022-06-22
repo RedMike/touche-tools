@@ -43,11 +43,16 @@
             var room = pair.Value.Value;
             var roomRouteData = new Dictionary<string, string>(routeData);
             roomRouteData.Add("room", pair.Key.ToString());
-            <li><a asp-area="" asp-controller="Home" asp-action="GetRoom" asp-all-route-data="roomRouteData">@pair.Key - @room.Width x @room.Height</a></li>
+            <li>
+                <a asp-area="" asp-controller="Home" asp-action="GetRoom" asp-all-route-data="roomRouteData">@pair.Key - @room.Width x @room.Height</a>
+                <img src="@Url.Action("GetRoomImage", new { id = sessionId, room = pair.Key })" />
+            </li>
         }
         @foreach (var pair in Model.FailedRooms)
         {
-            <li><span class="text-danger">@pair.Key - Failed: @pair.Value</span></li>
+            <li>
+                <span class="text-danger">@pair.Key - Failed: @pair.Value</span>
+            </li>
         }
     </ul>
 </div>
