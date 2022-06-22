@@ -15,12 +15,19 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        
         return View();
     }
 
-    public IActionResult Privacy()
+    [HttpPost]
+    public IActionResult UploadDat(IFormFile datFile)
     {
-        return View();
+        //TODO: clear session
+        _logger.Log(LogLevel.Information, "Uploading and processing DAT file of length {}", datFile.Length);
+        //TODO: process DAT file into models
+        //TODO: save models into database and get ID and expiry date
+        //TODO: send ID/expiry date down with request
+        return RedirectToAction("Index");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

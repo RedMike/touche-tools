@@ -14,3 +14,20 @@
     </p>
     <p>This is a free, open-source project. Please see the <a href="#">repository here</a>.</p>
 </div>
+
+<div>
+    <h1 class="display-4">Upload DAT</h1>
+    <p>If you have a DAT file (the original game's TOUCHE.DAT or a custom one), upload it here in order
+        to view the contents.</p>
+    <form asp-area="" asp-controller="Home" asp-action="UploadDat" enctype="multipart/form-data" method="post">
+        <div class="row mb-3">
+            <div class="col-8">
+                <input class="form-control" type="file" id="formFile" name="datFile">
+                <span class="text-danger"></span>
+            </div>
+            <div class="d-grid col-4">
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+        </div>
+    </form>
+</div>
