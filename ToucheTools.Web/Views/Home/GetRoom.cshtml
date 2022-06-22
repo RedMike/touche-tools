@@ -1,6 +1,5 @@
 ﻿@using ToucheTools.Web.Services
-@using ToucheTools.Models
-@model ToucheTools.Models.RoomImageDataModel
+@model Lazy<ToucheTools.Models.RoomImageDataModel>
 @inject IModelStorageService _modelStorageService
 @inject IImageRenderingService _imageRenderingService
 @{
@@ -45,7 +44,8 @@
     var roomId = int.Parse(roomIdRaw);
     var paletteId = roomId;
     var palette = container.DatabaseModel.Palettes[paletteId];
-    var roomImageBytes = _imageRenderingService.RenderImage(Model.Width, Model.Height, Model.RawData, palette.Colors);
+    var roomImage = Model.Value;
+    var roomImageBytes = _imageRenderingService.RenderImage(roomImage.Width, roomImage.Height, roomImage.RawData, palette.Colors);
     var roomImageBase64 = Convert.ToBase64String(roomImageBytes);
     var imageData = "data:image/png;base64," + roomImageBase64;
 }
@@ -54,5 +54,5 @@
     <h1 class="display-4">Room @roomId</h1>
     <img src="@imageData" alt="preview"/>
     <h5 class="display-5">Info</h5>
-    <p>Width: <span>@Model.Width</span>, Height: <span>@Model.Height</span></p>
+    <p>Width: <span>@roomImage.Width</span>, Height: <span>@roomImage.Height</span></p>
 </div>

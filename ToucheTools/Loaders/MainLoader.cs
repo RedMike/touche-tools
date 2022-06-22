@@ -60,8 +60,14 @@ public class MainLoader
         {
             try
             {
-                _spriteImageLoader.Read(i, true, out var sprite);
-                db.Sprites[i] = sprite;
+                //try to read the sprite offset first to check if the sprite exists
+                _resourceLoader.Read(Resource.SpriteImage, i, false, out _, out _);
+                var localI = i;
+                db.Sprites[i] = new Lazy<SpriteImageDataModel>(() =>
+                {
+                    _spriteImageLoader.Read(localI, true, out var sprite);
+                    return sprite;
+                });
             }
             catch (UnknownResourceException)
             {
@@ -81,8 +87,13 @@ public class MainLoader
             {
                 _roomInfoLoader.Read(i, out var palette, out var roomImage);
                 db.Palettes[i] = palette;
-                _roomImageLoader.Read(roomImage, false, out var roomImageModel); //TODO: don't load ahead of time
-                db.RoomImages[i] = roomImageModel;
+                //try to read the sprite offset first to check if the image exists
+                _resourceLoader.Read(Resource.RoomImage, roomImage, false, out _, out _);
+                db.RoomImages[i] = new Lazy<RoomImageDataModel>(() =>
+                {
+                    _roomImageLoader.Read(roomImage, false, out var roomImageModel);
+                    return roomImageModel;
+                });
             }
             catch (UnknownResourceException)
             {

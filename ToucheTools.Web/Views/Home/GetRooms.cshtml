@@ -40,7 +40,7 @@
     <ul>
         @foreach (var pair in Model.RoomImages)
         {
-            var room = pair.Value;
+            var room = pair.Value.Value;
             var roomRouteData = new Dictionary<string, string>(routeData);
             roomRouteData.Add("room", pair.Key.ToString());
             <li><a asp-area="" asp-controller="Home" asp-action="GetRoom" asp-all-route-data="roomRouteData">@pair.Key - @room.Width x @room.Height</a></li>

@@ -1,6 +1,5 @@
 ﻿@using ToucheTools.Web.Services
-@using ToucheTools.Models
-@model ToucheTools.Models.SpriteImageDataModel
+@model Lazy<ToucheTools.Models.SpriteImageDataModel>
 @inject IModelStorageService _modelStorageService
 @inject IImageRenderingService _imageRenderingService
 @{
@@ -50,7 +49,8 @@
         paletteId = int.Parse(paletteIdRaw);
     }
     var palette = container.DatabaseModel.Palettes[paletteId];
-    var spriteImageBytes = _imageRenderingService.RenderImage(Model.Width, Model.Height, Model.RawData, palette.Colors);
+    var spriteImage = Model.Value;
+    var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.RawData, palette.Colors);
     var spriteImageBase64 = Convert.ToBase64String(spriteImageBytes);
     var imageData = "data:image/png;base64," + spriteImageBase64;
 }
@@ -85,5 +85,5 @@
     <h1 class="display-4">Sprite @spriteId</h1>
     <img src="@imageData" alt="preview"/>
     <h5 class="display-5">Info</h5>
-    <p>Width: <span>@Model.Width</span>, Height: <span>@Model.Height</span></p>
+    <p>Width: <span>@spriteImage.Width</span>, Height: <span>@spriteImage.Height</span></p>
 </div>
