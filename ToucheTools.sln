@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{9980617E-768F-4E
 		TODO = TODO
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToucheTools.Web", "ToucheTools.Web\ToucheTools.Web.csproj", "{B5AF1508-FC06-4117-B796-CD46AB3FC313}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{1D14393A-1E68-4585-82E3-78EF9368372E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D14393A-1E68-4585-82E3-78EF9368372E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D14393A-1E68-4585-82E3-78EF9368372E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5AF1508-FC06-4117-B796-CD46AB3FC313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5AF1508-FC06-4117-B796-CD46AB3FC313}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5AF1508-FC06-4117-B796-CD46AB3FC313}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5AF1508-FC06-4117-B796-CD46AB3FC313}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
