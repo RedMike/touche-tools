@@ -1,0 +1,6 @@
+[ ] Set up web app for viewer
+[ ] Implement all opcode parsing
+[ ] Finish program model components
+[ ] Save out all programs in sample DAT file
+[ ] Set up model exporter
+[ ] Export bare-bones model and try in ScummVM
