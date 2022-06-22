@@ -7,6 +7,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{9980617E-768F-4E18-97B7-CDD756C899F0}"
 	ProjectSection(SolutionItems) = preProject
 		TODO = TODO
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToucheTools.Web", "ToucheTools.Web\ToucheTools.Web.csproj", "{B5AF1508-FC06-4117-B796-CD46AB3FC313}"
