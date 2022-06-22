@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using ToucheTools.Constants;
+using ToucheTools.Models;
 
 namespace ToucheTools.Loaders;
 
@@ -18,7 +19,7 @@ public class SpriteImageDataLoader
         _resourceDataLoader = resourceDataLoader;
     }
 
-    public void Read(int number, bool decode, out int width, out int height, out byte[,] imageData)
+    public void Read(int number, bool decode, out SpriteImageDataModel sprite)
     {
         _resourceDataLoader.Read(Resource.SpriteImage, number, false, out var offset, out _);
         _stream.Seek(offset, SeekOrigin.Begin);
@@ -28,7 +29,7 @@ public class SpriteImageDataLoader
         var initialHeight = (int)rawHeight;
         _logger.Log(LogLevel.Information, "Sprite image {}: initially {}x{}", number, initialWidth, initialHeight);
 
-        imageData = new byte[initialHeight, initialWidth];
+        var imageData = new byte[initialHeight, initialWidth];
         //RLE compression
         for (var i = 0; i < initialHeight; i++)
         {
@@ -61,7 +62,8 @@ public class SpriteImageDataLoader
         }
         
         //find true width and height
-        height = initialHeight;
+        var height = initialHeight;
+        //TODO: this wasn't correcting the byte array size
         // for (var i = 0; i < initialHeight; i++)
         // {
         //     if (imageData[i, 0] == 64 || imageData[i, 0] == 255)
@@ -71,7 +73,8 @@ public class SpriteImageDataLoader
         //     }
         // }
 
-        width = initialWidth;
+        var width = initialWidth;
+        //TODO: this wasn't correcting the byte array size
         // for (var i = 0; i < initialWidth; i++)
         // {
         //     if (imageData[0, i] == 64 || imageData[0, i] == 255)
@@ -106,5 +109,12 @@ public class SpriteImageDataLoader
                 }
             }
         }
+
+        sprite = new SpriteImageDataModel()
+        {
+            Width = width,
+            Height = height,
+            RawData = imageData
+        };
     }
 }

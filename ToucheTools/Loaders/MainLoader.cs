@@ -35,6 +35,8 @@ public class MainLoader
     {
         //TODO: load everything
         db = new DatabaseModel();
+        
+        //programs
         for (var i = 0; i < 255; i++)
         {
             try
@@ -50,6 +52,25 @@ public class MainLoader
             {
                 _logger.Log(LogLevel.Warning, exception: e, "Exception when loading program {}", i);
                 db.FailedPrograms[i] = e.Message;
+            }
+        }
+        
+        //sprites
+        for (var i = 0; i < 255; i++)
+        {
+            try
+            {
+                _spriteImageLoader.Read(i, true, out var sprite);
+                db.Sprites[i] = sprite;
+            }
+            catch (UnknownResourceException)
+            {
+                //non-issue
+            }
+            catch (Exception e)
+            {
+                _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sprite {}", i);
+                db.FailedSprites[i] = e.Message;
             }
         }
     }

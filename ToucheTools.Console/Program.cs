@@ -16,36 +16,36 @@ var roomInfoLoader = new RoomInfoDataLoader(stream, resourceLoader);
 var roomImageLoader = new RoomImageDataLoader(stream, resourceLoader);
 var programLoader = new ProgramDataLoader(stream, resourceLoader);
 
-for (var i = 0; i < 255; i++)
-{
-    try
-    {
-        roomInfoLoader.Read(i, out var p, out var roomImageNum);
-        DebugPaletteSaver.Save($"{outputPath}/palette_{i}", p);
-        roomImageLoader.Read(roomImageNum, false, out var w, out var h, out var bytes);
-        if (w == 0 || h == 0) continue;
-        DebugImageSaver.Save(w, h, bytes, $"{outputPath}/room_{i}", p);
-    }
-    catch (Exception e)
-    {
-        //logger.LogError("Failed to read room info", e);
-    }
-}
-
-roomInfoLoader.Read(12, out var palette, out _);
-for (var i = 0; i < 255; i++)
-{
-    try
-    {
-        spriteImageLoader.Read(i, true, out int w, out int h, out byte[,] bytes); //menu kit data
-        if (w == 0 || h == 0) continue;
-        DebugImageSaver.Save(w, h, bytes, $"{outputPath}/sprite_{i}", palette);
-    }
-    catch (Exception e)
-    {
-        //logger.LogError("Failed to read sprite: {}", e);
-    }
-}
+// for (var i = 0; i < 255; i++)
+// {
+//     try
+//     {
+//         roomInfoLoader.Read(i, out var p, out var roomImageNum);
+//         DebugPaletteSaver.Save($"{outputPath}/palette_{i}", p);
+//         roomImageLoader.Read(roomImageNum, false, out var w, out var h, out var bytes);
+//         if (w == 0 || h == 0) continue;
+//         DebugImageSaver.Save(w, h, bytes, $"{outputPath}/room_{i}", p);
+//     }
+//     catch (Exception e)
+//     {
+//         //logger.LogError("Failed to read room info", e);
+//     }
+// }
+//
+// roomInfoLoader.Read(12, out var palette, out _);
+// for (var i = 0; i < 255; i++)
+// {
+//     try
+//     {
+//         spriteImageLoader.Read(i, true, out int w, out int h, out byte[,] bytes); //menu kit data
+//         if (w == 0 || h == 0) continue;
+//         DebugImageSaver.Save(w, h, bytes, $"{outputPath}/sprite_{i}", palette);
+//     }
+//     catch (Exception e)
+//     {
+//         //logger.LogError("Failed to read sprite: {}", e);
+//     }
+// }
 
 // mainDataLoader.Read(out var textData, out var backdrop);
 

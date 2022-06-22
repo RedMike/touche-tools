@@ -59,17 +59,35 @@
     if (loggedIn)
     {
         <div class="row">
-            <div class="col-2 card bg-light">
+            <div class="col-3 card bg-light me-5">
                 <div class="card-body">
                     <h5 class="card-title">Programs</h5>
                     <p class="card-text">
+                    <ul class="list-unstyled">
+                        <li>
+                            <span class="fw-bold">@container.DatabaseModel.Programs.Count</span>
+                            Parsed
+                        </li>
+                        <li class="text-danger">
+                            <span class="fw-bold">@container.DatabaseModel.FailedPrograms.Count</span>
+                            Invalid
+                        </li>
+                    </ul>
+                    <a asp-area="" asp-controller="Home" asp-action="GetPrograms" asp-all-route-data="routeData" class="card-img-overlay"></a>
+                </div>
+            </div>
+            
+            <div class="col-3 card bg-light me-5">
+                <div class="card-body">
+                    <h5 class="card-title">Sprites</h5>
+                    <p class="card-text">
                         <ul class="list-unstyled">
                             <li>
-                                <span class="fw-bold">@container.DatabaseModel.Programs.Count</span>
+                                <span class="fw-bold">@container.DatabaseModel.Sprites.Count</span>
                                 Parsed
                             </li>
                             <li class="text-danger">
-                                <span class="fw-bold">@container.DatabaseModel.FailedPrograms.Count</span>
+                                <span class="fw-bold">@container.DatabaseModel.FailedSprites.Count</span>
                                 Invalid
                             </li>
                         </ul>
