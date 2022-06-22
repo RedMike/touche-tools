@@ -1,0 +1,53 @@
+﻿@using ToucheTools.Web.Services
+@model ToucheTools.Models.DatabaseModel
+@inject IModelStorageService _modelStorageService
+@{
+    string sessionId = "";
+    if (Context.Request.Query.TryGetValue("id", out var val))
+    {
+        sessionId = val[0];
+    }
+    bool loggedIn = false;
+    ModelContainer? container = null;
+    string initialFilename = "";
+    Dictionary<string, string> routeData = new Dictionary<string, string>();
+    if (!string.IsNullOrEmpty(sessionId))
+    {
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out container);
+        if (!loggedIn)
+        {
+            sessionId = "";
+        }
+        else
+        {
+            initialFilename = container.InitialFilename;
+            routeData["id"] = sessionId;
+        }
+    }
+}
+
+@if (!loggedIn)
+{
+    <script>
+        window.location.href = "/";
+    </script>
+    return;
+}
+
+<div>
+    <h1 class="display-4">Rooms</h1>
+    <p>The following is the list of existing rooms in the uploaded file:</p>
+    <ul>
+        @foreach (var pair in Model.RoomImages)
+        {
+            var room = pair.Value;
+            var roomRouteData = new Dictionary<string, string>(routeData);
+            roomRouteData.Add("room", pair.Key.ToString());
+            <li><a asp-area="" asp-controller="Home" asp-action="GetRoom" asp-all-route-data="roomRouteData">@pair.Key - @room.Width x @room.Height</a></li>
+        }
+        @foreach (var pair in Model.FailedRooms)
+        {
+            <li><span class="text-danger">@pair.Key - Failed: @pair.Value</span></li>
+        }
+    </ul>
+</div>

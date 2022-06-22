@@ -72,6 +72,30 @@ public class HomeController : Controller
         var spriteModel = container.DatabaseModel.Sprites[sprite];
         return View(spriteModel);
     }
+    
+    [HttpGet("/room")]
+    public IActionResult GetRooms([FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
+    
+    [HttpGet("/room/{room}")]
+    public IActionResult GetRoom(int room, [FromQuery]string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var spriteModel = container.DatabaseModel.RoomImages[room];
+        return View(spriteModel);
+    }
 
     [HttpPost("/dat")]
     public IActionResult UploadDat(IFormFile datFile)

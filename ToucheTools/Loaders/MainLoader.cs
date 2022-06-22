@@ -81,7 +81,7 @@ public class MainLoader
             {
                 _roomInfoLoader.Read(i, out var palette, out var roomImage);
                 db.Palettes[i] = palette;
-                _roomImageLoader.Read(roomImage, false, out var roomImageModel);
+                _roomImageLoader.Read(roomImage, false, out var roomImageModel); //TODO: don't load ahead of time
                 db.RoomImages[i] = roomImageModel;
             }
             catch (UnknownResourceException)

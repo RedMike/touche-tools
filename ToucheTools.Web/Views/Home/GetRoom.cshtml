@@ -1,0 +1,58 @@
+﻿@using ToucheTools.Web.Services
+@using ToucheTools.Models
+@model ToucheTools.Models.RoomImageDataModel
+@inject IModelStorageService _modelStorageService
+@inject IImageRenderingService _imageRenderingService
+@{
+    string sessionId = "";
+    if (Context.Request.Query.TryGetValue("id", out var val))
+    {
+        sessionId = val[0];
+    }
+    bool loggedIn = false;
+    ModelContainer? container = null;
+    string initialFilename = "";
+    Dictionary<string, string> routeData = new Dictionary<string, string>();
+    if (!string.IsNullOrEmpty(sessionId))
+    {
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out container);
+        if (!loggedIn)
+        {
+            sessionId = "";
+        }
+        else
+        {
+            initialFilename = container.InitialFilename;
+            routeData["id"] = sessionId;
+        }
+    }
+}
+
+@if (!loggedIn)
+{
+    <script>
+        window.location.href = "/";
+    </script>
+    return;
+}
+
+@{
+    var roomIdRaw = (string)(Context.Request.RouteValues["room"]);
+    if (string.IsNullOrEmpty(roomIdRaw))
+    {
+        throw new Exception("Unknown room");
+    }
+    var roomId = int.Parse(roomIdRaw);
+    var paletteId = roomId;
+    var palette = container.DatabaseModel.Palettes[paletteId];
+    var roomImageBytes = _imageRenderingService.RenderImage(Model.Width, Model.Height, Model.RawData, palette.Colors);
+    var roomImageBase64 = Convert.ToBase64String(roomImageBytes);
+    var imageData = "data:image/png;base64," + roomImageBase64;
+}
+
+<div>
+    <h1 class="display-4">Room @roomId</h1>
+    <img src="@imageData" alt="preview"/>
+    <h5 class="display-5">Info</h5>
+    <p>Width: <span>@Model.Width</span>, Height: <span>@Model.Height</span></p>
+</div>
