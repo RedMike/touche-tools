@@ -75,12 +75,14 @@ public class MainLoader
         }
         
         //TODO: rooms
-        for (var i = 0; i < 255; i++)
+        for (var i = 1; i < 255; i++) //no room 0
         {
             try
             {
                 _roomInfoLoader.Read(i, out var palette, out var roomImage);
                 db.Palettes[i] = palette;
+                _roomImageLoader.Read(roomImage, false, out var roomImageModel);
+                db.RoomImages[i] = roomImageModel;
             }
             catch (UnknownResourceException)
             {
@@ -89,7 +91,7 @@ public class MainLoader
             catch (Exception e)
             {
                 _logger.Log(LogLevel.Warning, exception: e, "Exception when loading room {}", i);
-                //db.FailedSprites[i] = e.Message;
+                db.FailedRooms[i] = e.Message;
             }
         }
     }

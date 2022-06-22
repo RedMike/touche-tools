@@ -8,6 +8,8 @@ public class DatabaseModel
     public Dictionary<int, string> FailedSprites { get; set; } = new Dictionary<int, string>();
     public Dictionary<int, SpriteImageDataModel> Sprites { get; set; } = new Dictionary<int, SpriteImageDataModel>();
 
-    public Dictionary<int, string> FailedPalettes { get; set; } = new Dictionary<int, string>();
+    public Dictionary<int, RoomImageDataModel> RoomImages { get; set; } = new Dictionary<int, RoomImageDataModel>();
     public Dictionary<int, PaletteDataModel> Palettes { get; set; } = new Dictionary<int, PaletteDataModel>();
+
+    public Dictionary<int, string> FailedRooms { get; set; } = new Dictionary<int, string>();
 }
