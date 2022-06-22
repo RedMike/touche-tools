@@ -1,9 +1,33 @@
-﻿<!DOCTYPE html>
+﻿@using ToucheTools.Web.Services
+@inject IModelStorageService _modelStorageService
+@{
+    string sessionId = "";
+    if (Context.Request.Query.TryGetValue("id", out var val))
+    {
+        sessionId = val[0];
+    }
+    bool loggedIn = false;
+    string initialFilename = "";
+    Dictionary<string, string> routeData = new Dictionary<string, string>();
+    if (!string.IsNullOrEmpty(sessionId))
+    {
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out initialFilename);
+        if (!loggedIn)
+        {
+            sessionId = "";
+        }
+        else
+        {
+            routeData["id"] = sessionId;
+        }
+    }
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - ToucheTools.Web</title>
+    <title>Touche Database Tools</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/ToucheTools.Web.styles.css" asp-append-version="true"/>
@@ -12,7 +36,7 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Touche Database Tools</a>
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" asp-all-route-data="routeData">Touche Database Tools</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -20,10 +44,20 @@
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index" asp-all-route-data="routeData">Home</a>
                     </li>
                 </ul>
             </div>
+        @if (loggedIn)
+        {
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
+                <ul class="navbar-nav flex-grow-0">
+                    <li class="nav-item me-5">
+                        <span class="navbar-text text-dark">Examining <span class="text-secondary">@initialFilename</span></span>
+                    </li>
+                </ul>
+            </div>
+        }
         </div>
     </nav>
 </header>

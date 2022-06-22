@@ -4,6 +4,7 @@ namespace ToucheTools.Web.Services;
 
 public interface IModelStorageService
 {
+    bool Exists(string sessionId);
     bool TryGetModels(string sessionId, out string initialFilename);
     string SaveNewSession(string initialFilename);
     void WipeSession(string sessionId);
@@ -21,6 +22,11 @@ public class ModelStorageService : IModelStorageService
     public ModelStorageService(ILogger<ModelStorageService> logger)
     {
         _logger = logger;
+    }
+
+    public bool Exists(string sessionId)
+    {
+        return _storedSessions.TryGetValue(sessionId, out _);
     }
 
     public bool TryGetModels(string sessionId, out string initialFilename)

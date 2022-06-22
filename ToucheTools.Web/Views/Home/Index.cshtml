@@ -1,5 +1,26 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using ToucheTools.Web.Services
+@inject IModelStorageService _modelStorageService
+@{
+    string sessionId = "";
+    if (Context.Request.Query.TryGetValue("id", out var val))
+    {
+        sessionId = val[0];
+    }
+    bool loggedIn = false;
+    string initialFilename = "";
+    Dictionary<string, string> routeData = new Dictionary<string, string>();
+    if (!string.IsNullOrEmpty(sessionId))
+    {
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out initialFilename);
+        if (!loggedIn)
+        {
+            sessionId = "";
+        }
+        else
+        {
+            routeData["id"] = sessionId;
+        }
+    }
 }
 
 <div>
@@ -19,7 +40,7 @@
     <h1 class="display-4">Upload DAT</h1>
     <p>If you have a DAT file (the original game's TOUCHE.DAT or a custom one), upload it here in order
         to view the contents.</p>
-    <form asp-area="" asp-controller="Home" asp-action="UploadDat" enctype="multipart/form-data" method="post">
+    <form asp-area="" asp-controller="Home" asp-action="UploadDat" asp-all-route-data="routeData" enctype="multipart/form-data" method="post">
         <div class="row mb-3">
             <div class="col-8">
                 <input class="form-control" type="file" id="formFile" name="datFile">
