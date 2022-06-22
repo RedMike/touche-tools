@@ -73,5 +73,24 @@ public class MainLoader
                 db.FailedSprites[i] = e.Message;
             }
         }
+        
+        //TODO: rooms
+        for (var i = 0; i < 255; i++)
+        {
+            try
+            {
+                _roomInfoLoader.Read(i, out var palette, out var roomImage);
+                db.Palettes[i] = palette;
+            }
+            catch (UnknownResourceException)
+            {
+                //non-issue
+            }
+            catch (Exception e)
+            {
+                _logger.Log(LogLevel.Warning, exception: e, "Exception when loading room {}", i);
+                //db.FailedSprites[i] = e.Message;
+            }
+        }
     }
 }

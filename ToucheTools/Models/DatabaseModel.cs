@@ -7,4 +7,7 @@ public class DatabaseModel
 
     public Dictionary<int, string> FailedSprites { get; set; } = new Dictionary<int, string>();
     public Dictionary<int, SpriteImageDataModel> Sprites { get; set; } = new Dictionary<int, SpriteImageDataModel>();
+
+    public Dictionary<int, string> FailedPalettes { get; set; } = new Dictionary<int, string>();
+    public Dictionary<int, PaletteDataModel> Palettes { get; set; } = new Dictionary<int, PaletteDataModel>();
 }

@@ -48,6 +48,30 @@ public class HomeController : Controller
         var programModel = container.DatabaseModel.Programs[program];
         return View(programModel);
     }
+    
+    [HttpGet("/sprite")]
+    public IActionResult GetSprites([FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
+    
+    [HttpGet("/sprite/{sprite}")]
+    public IActionResult GetSprite(int sprite, [FromQuery]string id, [FromQuery]string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var spriteModel = container.DatabaseModel.Sprites[sprite];
+        return View(spriteModel);
+    }
 
     [HttpPost("/dat")]
     public IActionResult UploadDat(IFormFile datFile)

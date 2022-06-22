@@ -10,4 +10,8 @@
       <ProjectReference Include="..\ToucheTools\ToucheTools.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    </ItemGroup>
+
 </Project>

@@ -1,0 +1,53 @@
+﻿@using ToucheTools.Web.Services
+@model ToucheTools.Models.DatabaseModel
+@inject IModelStorageService _modelStorageService
+@{
+    string sessionId = "";
+    if (Context.Request.Query.TryGetValue("id", out var val))
+    {
+        sessionId = val[0];
+    }
+    bool loggedIn = false;
+    ModelContainer? container = null;
+    string initialFilename = "";
+    Dictionary<string, string> routeData = new Dictionary<string, string>();
+    if (!string.IsNullOrEmpty(sessionId))
+    {
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out container);
+        if (!loggedIn)
+        {
+            sessionId = "";
+        }
+        else
+        {
+            initialFilename = container.InitialFilename;
+            routeData["id"] = sessionId;
+        }
+    }
+}
+
+@if (!loggedIn)
+{
+    <script>
+        window.location.href = "/";
+    </script>
+    return;
+}
+
+<div>
+    <h1 class="display-4">Sprites</h1>
+    <p>The following is the list of existing sprites in the uploaded file:</p>
+    <ul>
+        @foreach (var pair in Model.Sprites)
+        {
+            var sprite = pair.Value;
+            var spriteRouteData = new Dictionary<string, string>(routeData);
+            spriteRouteData.Add("sprite", pair.Key.ToString());
+            <li><a asp-area="" asp-controller="Home" asp-action="GetSprite" asp-all-route-data="spriteRouteData">@pair.Key</a></li>
+        }
+        @foreach (var pair in Model.FailedSprites)
+        {
+            <li><span class="text-danger">@pair.Key - Failed: @pair.Value</span></li>
+        }
+    </ul>
+</div>

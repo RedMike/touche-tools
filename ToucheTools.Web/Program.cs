@@ -7,6 +7,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IModelStorageService, ModelStorageService>();
 builder.Services.AddSingleton<IFileProcessingService, FileProcessingService>();
+builder.Services.AddSingleton<IImageRenderingService, MemoryImageRenderingService>();
 
 var app = builder.Build();
 
