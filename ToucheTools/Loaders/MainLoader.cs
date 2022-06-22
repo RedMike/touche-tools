@@ -55,6 +55,8 @@ public class MainLoader
             }
         }
         
+        object lockObj = new object(); //for lazy loading
+        
         //sprites
         for (var i = 0; i < 255; i++)
         {
@@ -65,8 +67,11 @@ public class MainLoader
                 var localI = i;
                 db.Sprites[i] = new Lazy<SpriteImageDataModel>(() =>
                 {
-                    _spriteImageLoader.Read(localI, true, out var sprite);
-                    return sprite;
+                    lock (lockObj)
+                    {
+                        _spriteImageLoader.Read(localI, true, out var sprite);
+                        return sprite;
+                    }
                 });
             }
             catch (UnknownResourceException)
@@ -91,8 +96,11 @@ public class MainLoader
                 _resourceLoader.Read(Resource.RoomImage, roomImage, false, out _, out _);
                 db.RoomImages[i] = new Lazy<RoomImageDataModel>(() =>
                 {
-                    _roomImageLoader.Read(roomImage, false, out var roomImageModel);
-                    return roomImageModel;
+                    lock (lockObj)
+                    {
+                        _roomImageLoader.Read(roomImage, false, out var roomImageModel);
+                        return roomImageModel;
+                    }
                 });
             }
             catch (UnknownResourceException)

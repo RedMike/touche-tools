@@ -10,12 +10,15 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly IModelStorageService _storageService;
     private readonly IFileProcessingService _fileProcessingService;
+    private readonly IImageRenderingService _imageRenderingService;
 
-    public HomeController(ILogger<HomeController> logger, IModelStorageService storageService, IFileProcessingService fileProcessingService)
+    public HomeController(ILogger<HomeController> logger, IModelStorageService storageService, 
+        IFileProcessingService fileProcessingService, IImageRenderingService imageRenderingService)
     {
         _logger = logger;
         _storageService = storageService;
         _fileProcessingService = fileProcessingService;
+        _imageRenderingService = imageRenderingService;
     }
 
     [HttpGet("/")]
@@ -71,6 +74,22 @@ public class HomeController : Controller
 
         var spriteModel = container.DatabaseModel.Sprites[sprite];
         return View(spriteModel);
+    }
+
+    [HttpGet("/sprite/{sprite}/image")]
+    public IActionResult GetSpriteImage(int sprite, [FromQuery] string id, [FromQuery] string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var parsedPalette = int.Parse(palette);
+        var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
+        var spriteImage = container.DatabaseModel.Sprites[sprite].Value;
+        var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.RawData, paletteList);
+
+        return File(spriteImageBytes, "image/png");
     }
     
     [HttpGet("/room")]

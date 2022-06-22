@@ -43,11 +43,16 @@
             var sprite = pair.Value;
             var spriteRouteData = new Dictionary<string, string>(routeData);
             spriteRouteData.Add("sprite", pair.Key.ToString());
-            <li><a asp-area="" asp-controller="Home" asp-action="GetSprite" asp-all-route-data="spriteRouteData">@pair.Key</a></li>
+            <li>
+                <a asp-area="" asp-controller="Home" asp-action="GetSprite" asp-all-route-data="spriteRouteData">@pair.Key</a>
+                <img src="@Url.Action("GetSpriteImage", new { id = sessionId, sprite = pair.Key, palette = 1 })" />
+            </li>
         }
         @foreach (var pair in Model.FailedSprites)
         {
-            <li><span class="text-danger">@pair.Key - Failed: @pair.Value</span></li>
+            <li>
+                <span class="text-danger">@pair.Key - Failed: @pair.Value</span>
+            </li>
         }
     </ul>
 </div>
