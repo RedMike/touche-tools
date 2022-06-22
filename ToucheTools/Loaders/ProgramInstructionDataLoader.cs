@@ -269,7 +269,20 @@ public class ProgramInstructionDataLoader
                     }
                 }
                     break;
+                case ProgramDataModel.Opcode.LoadSpeechSegment:
+                {
+                    var num = _reader.ReadUInt16();
+                    instruction += $" {num}";
+                }
+                    break;
+                case ProgramDataModel.Opcode.UpdateRoomAreas:
+                {
+                    var area = _reader.ReadUInt16();
+                    instruction += $" area {area}";
+                }
+                    break;
                 case ProgramDataModel.Opcode.EnableInput: break;
+                case ProgramDataModel.Opcode.DisableInput: break;
                 case ProgramDataModel.Opcode.StopScript: break;
                 case ProgramDataModel.Opcode.StartPaletteFadeIn:
                     _reader.ReadUInt16(); break;
