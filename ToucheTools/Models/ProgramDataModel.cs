@@ -163,5 +163,5 @@ public class ProgramDataModel
     public List<Area> Areas { get; set; } = new List<Area>();
     public List<Background> Backgrounds { get; set; } = new List<Background>();
 
-    public List<Opcode> Operations { get; set; } = new List<Opcode>();
+    public List<string> Instructions { get; set; } = new List<string>();
 }

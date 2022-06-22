@@ -7,17 +7,19 @@
         sessionId = val[0];
     }
     bool loggedIn = false;
+    ModelContainer? container;
     string initialFilename = "";
     Dictionary<string, string> routeData = new Dictionary<string, string>();
     if (!string.IsNullOrEmpty(sessionId))
     {
-        loggedIn = _modelStorageService.TryGetModels(sessionId, out initialFilename);
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out container);
         if (!loggedIn)
         {
             sessionId = "";
         }
         else
         {
+            initialFilename = container.InitialFilename;
             routeData["id"] = sessionId;
         }
     }

@@ -9,11 +9,13 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly IModelStorageService _storageService;
+    private readonly IFileProcessingService _fileProcessingService;
 
-    public HomeController(ILogger<HomeController> logger, IModelStorageService storageService)
+    public HomeController(ILogger<HomeController> logger, IModelStorageService storageService, IFileProcessingService fileProcessingService)
     {
         _logger = logger;
         _storageService = storageService;
+        _fileProcessingService = fileProcessingService;
     }
 
     [HttpGet("/")]
@@ -33,7 +35,10 @@ public class HomeController : Controller
         }
         _logger.Log(LogLevel.Information, "Uploading and processing DAT file of length {}", datFile.Length);
         //TODO: process DAT file into models
-        var id = _storageService.SaveNewSession(datFile.FileName);
+        var container = _fileProcessingService.Process(datFile.OpenReadStream());
+        container.InitialFilename = datFile.FileName;
+        container.UploadDate = DateTime.UtcNow;
+        var id = _storageService.SaveNewSession(container);
         return RedirectToAction("Index", new { id = id });
     }
 

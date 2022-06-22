@@ -7,17 +7,19 @@
         sessionId = val[0];
     }
     bool loggedIn = false;
+    ModelContainer? container = null;
     string initialFilename = "";
     Dictionary<string, string> routeData = new Dictionary<string, string>();
     if (!string.IsNullOrEmpty(sessionId))
     {
-        loggedIn = _modelStorageService.TryGetModels(sessionId, out initialFilename);
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out container);
         if (!loggedIn)
         {
             sessionId = "";
         }
         else
         {
+            initialFilename = container.InitialFilename;
             routeData["id"] = sessionId;
         }
     }
@@ -52,3 +54,24 @@
         </div>
     </form>
 </div>
+
+@{
+    if (loggedIn && container.DatabaseModel.Programs.Any())
+    {
+        <div>
+            <h1 class="display-4">Programs</h1>
+            <p>The following is the list of existing programs in the uploaded file:</p>
+            <ul>
+                @foreach (var pair in container.DatabaseModel.Programs)
+                {
+                    var program = pair.Value;
+                    <li><a href="#">@pair.Key - @program.Instructions.Count Instructions, @program.Areas.Count Areas, @program.Backgrounds.Count Backgrounds, @program.Points.Count Points, @program.Rects.Count Rectangles, @program.Walks.Count Walks</a></li>
+                }
+                @foreach (var pair in container.DatabaseModel.FailedPrograms)
+                {
+                    <li><span class="text-danger">@pair.Key - Failed: @pair.Value</span></li>
+                }
+            </ul>
+        </div>
+    }
+}

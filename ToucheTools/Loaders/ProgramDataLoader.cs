@@ -19,7 +19,7 @@ public class ProgramDataLoader
         _resourceDataLoader = resourceDataLoader;
     }
 
-    public void Read(int number, out List<string> instructions)
+    public void Read(int number, out ProgramDataModel program)
     {
         _resourceDataLoader.Read(Resource.Program, number, true, out var offset, out var size);
         if (size > Game.MaxProgramDataSize)
@@ -32,7 +32,7 @@ public class ProgramDataLoader
         using var programStream = new MemoryStream(bytes);
         using var programReader = new BinaryReader(programStream);
 
-        var program = new ProgramDataModel();
+        program = new ProgramDataModel();
         uint programOffset = 0;
         //rects
         programStream.Seek(20, SeekOrigin.Begin);
@@ -213,6 +213,7 @@ public class ProgramDataLoader
         programStream.Seek(32, SeekOrigin.Begin);
         programOffset = programReader.ReadUInt32();
         var programInstructionLoader = new ProgramInstructionDataLoader(programStream);
-        programInstructionLoader.Read((int)programOffset, out instructions);
+        programInstructionLoader.Read((int)programOffset, out var instructions);
+        program.Instructions = instructions;
     }
 }

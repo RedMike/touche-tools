@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IModelStorageService, ModelStorageService>();
+builder.Services.AddSingleton<IFileProcessingService, FileProcessingService>();
 
 var app = builder.Build();
 

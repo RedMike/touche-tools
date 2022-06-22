@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using ToucheTools.Constants;
+using ToucheTools.Exceptions;
 
 namespace ToucheTools.Loaders;
 
@@ -20,7 +21,7 @@ public class ResourceDataLoader
     {
         if (Resources.DataInfo[resource].Count < number)
         {
-            throw new Exception("Asked for unknown resource number");
+            throw new UnknownResourceException();
         }
         _stream.Seek(Resources.DataInfo[resource].Offset + number * 4, SeekOrigin.Begin);
         uint rawOffset = _reader.ReadUInt32();

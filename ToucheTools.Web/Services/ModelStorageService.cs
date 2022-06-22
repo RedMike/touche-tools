@@ -5,8 +5,8 @@ namespace ToucheTools.Web.Services;
 public interface IModelStorageService
 {
     bool Exists(string sessionId);
-    bool TryGetModels(string sessionId, out string initialFilename);
-    string SaveNewSession(string initialFilename);
+    bool TryGetModels(string sessionId, out ModelContainer? container);
+    string SaveNewSession(ModelContainer? container);
     void WipeSession(string sessionId);
 }
 
@@ -15,7 +15,7 @@ public class ModelStorageService : IModelStorageService
     private const int MaxConcurrentEntries = 1000;
     private const int MaxConcurrentEntriesAfterClear = 900;
     private static readonly object Lock = new object();
-    private readonly Dictionary<string, ModelContainer> _storedSessions = new Dictionary<string, ModelContainer>();
+    private readonly Dictionary<string, ModelContainer?> _storedSessions = new Dictionary<string, ModelContainer?>();
     
     private readonly ILogger _logger;
 
@@ -29,19 +29,17 @@ public class ModelStorageService : IModelStorageService
         return _storedSessions.TryGetValue(sessionId, out _);
     }
 
-    public bool TryGetModels(string sessionId, out string initialFilename)
+    public bool TryGetModels(string sessionId, out ModelContainer? container)
     {
-        initialFilename = "";
-        if (!_storedSessions.TryGetValue(sessionId, out var container))
+        if (!_storedSessions.TryGetValue(sessionId, out container))
         {
             return false;
         }
 
-        initialFilename = container.InitialFilename;
         return true;
     }
 
-    public string SaveNewSession(string initialFilename)
+    public string SaveNewSession(ModelContainer? container)
     {
         if (_storedSessions.Count > MaxConcurrentEntries)
         {
@@ -65,11 +63,7 @@ public class ModelStorageService : IModelStorageService
         }
 
         var id = Guid.NewGuid().ToString();
-        _storedSessions[id] = new ModelContainer()
-        {
-            UploadDate = DateTime.UtcNow,
-            InitialFilename = initialFilename
-        };
+        _storedSessions[id] = container;
         _logger.Log(LogLevel.Information, "Saved new session {}", id);
         return id;
     }
