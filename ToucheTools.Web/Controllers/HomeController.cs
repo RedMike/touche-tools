@@ -25,6 +25,18 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet("/program/{program}")]
+    public IActionResult GetProgram(int program, [FromQuery]string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var programModel = container.DatabaseModel.Programs[program];
+        return View(programModel);
+    }
+
     [HttpPost("/dat")]
     public IActionResult UploadDat(IFormFile datFile)
     {

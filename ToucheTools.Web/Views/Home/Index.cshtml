@@ -65,7 +65,9 @@
                 @foreach (var pair in container.DatabaseModel.Programs)
                 {
                     var program = pair.Value;
-                    <li><a href="#">@pair.Key - @program.Instructions.Count Instructions, @program.Areas.Count Areas, @program.Backgrounds.Count Backgrounds, @program.Points.Count Points, @program.Rects.Count Rectangles, @program.Walks.Count Walks</a></li>
+                    var programRouteData = new Dictionary<string, string>(routeData);
+                    programRouteData.Add("program", pair.Key.ToString());
+                    <li><a asp-area="" asp-controller="Home" asp-action="GetProgram" asp-all-route-data="programRouteData">@pair.Key - @program.Instructions.Count Instructions, @program.Areas.Count Areas, @program.Backgrounds.Count Backgrounds, @program.Points.Count Points, @program.Rects.Count Rectangles, @program.Walks.Count Walks</a></li>
                 }
                 @foreach (var pair in container.DatabaseModel.FailedPrograms)
                 {
