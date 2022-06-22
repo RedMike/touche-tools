@@ -61,11 +61,18 @@
                 </div>
             </div>
         }
-        @foreach (var pair in Model.FailedRooms)
+    </div>
+    <div>
+        @if (Model.FailedRooms.Count > 0)
         {
-            <li>
-                <span class="text-danger">@pair.Key - Failed: @pair.Value</span>
-            </li>
+            <ul>
+            @foreach (var pair in Model.FailedRooms)
+            {
+                <li>
+                    <span class="text-danger">@pair.Key - Failed: @pair.Value</span>
+                </li>
+            }
+            </ul>
         }
     </div>
 </div>
