@@ -4,14 +4,14 @@ using ToucheTools.Constants;
 
 namespace ToucheTools.Loaders;
 
-public class SpriteImageDataLoader
+public class RoomImageDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(SpriteImageDataLoader));
+    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(RoomImageDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;
     
-    public SpriteImageDataLoader(Stream stream, ResourceDataLoader resourceDataLoader)
+    public RoomImageDataLoader(Stream stream, ResourceDataLoader resourceDataLoader)
     {
         _stream = stream;
         _reader = new BinaryReader(_stream, Encoding.ASCII, true);
@@ -20,13 +20,13 @@ public class SpriteImageDataLoader
 
     public void Read(int number, bool decode, out int width, out int height, out byte[,] imageData)
     {
-        _resourceDataLoader.Read(Resource.SpriteImage, number, false, out var offset, out _);
+        _resourceDataLoader.Read(Resource.RoomImage, number, false, out var offset, out _);
         _stream.Seek(offset, SeekOrigin.Begin);
         ushort rawWidth = _reader.ReadUInt16();
         ushort rawHeight = _reader.ReadUInt16();
         var initialWidth = (int)rawWidth;
         var initialHeight = (int)rawHeight;
-        _logger.Log(LogLevel.Information, "Sprite image {}: initially {}x{}", number, initialWidth, initialHeight);
+        _logger.Log(LogLevel.Information, "Room image {}: initially {}x{}", number, initialWidth, initialHeight);
 
         imageData = new byte[initialHeight, initialWidth];
         //RLE compression
@@ -83,7 +83,7 @@ public class SpriteImageDataLoader
 
         if (width != initialWidth || height != initialHeight)
         {
-            _logger.Log(LogLevel.Information, "Sprite image {}: true {}x{}", number, width, height);
+            _logger.Log(LogLevel.Information, "Room image {}: true {}x{}", number, width, height);
         }
 
         if (decode)

@@ -13,14 +13,18 @@ var mainDataLoader = new MainDataLoader(stream);
 var resourceLoader = new ResourceDataLoader(stream);
 var spriteImageLoader = new SpriteImageDataLoader(stream, resourceLoader);
 var roomInfoLoader = new RoomInfoDataLoader(stream, resourceLoader);
+var roomImageLoader = new RoomImageDataLoader(stream, resourceLoader);
 var programLoader = new ProgramDataLoader(stream, resourceLoader);
 
 for (var i = 0; i < 255; i++)
 {
     try
     {
-        roomInfoLoader.Read(i, out var p);
+        roomInfoLoader.Read(i, out var p, out var roomImageNum);
         DebugPaletteSaver.Save($"{outputPath}/palette_{i}", p);
+        roomImageLoader.Read(roomImageNum, false, out var w, out var h, out var bytes);
+        if (w == 0 || h == 0) continue;
+        DebugImageSaver.Save(w, h, bytes, $"{outputPath}/room_{i}", p);
     }
     catch (Exception e)
     {
@@ -28,7 +32,7 @@ for (var i = 0; i < 255; i++)
     }
 }
 
-roomInfoLoader.Read(12, out var palette);
+roomInfoLoader.Read(12, out var palette, out _);
 for (var i = 0; i < 255; i++)
 {
     try
