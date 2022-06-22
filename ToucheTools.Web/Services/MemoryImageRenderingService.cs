@@ -36,9 +36,9 @@ public class MemoryImageRenderingService : IImageRenderingService
                 var col = indexColorData[i, j];
                 seenColors.Add(col);
                 var idx = (i*w + j) * 3;
-                rgbValues[idx] = palette[col].R;
+                rgbValues[idx + 2] = palette[col].R;
                 rgbValues[idx + 1] = palette[col].G;
-                rgbValues[idx + 2] = palette[col].B;
+                rgbValues[idx + 0] = palette[col].B;
             }
         }
         _logger.LogInformation("Seen colors: {}", seenColors);
