@@ -37,22 +37,39 @@
 <div>
     <h1 class="display-4">Sprites</h1>
     <p>The following is the list of existing sprites in the uploaded file:</p>
-    <ul>
+    <div class="row">
         @foreach (var pair in Model.Sprites)
         {
-            var sprite = pair.Value;
             var spriteRouteData = new Dictionary<string, string>(routeData);
             spriteRouteData.Add("sprite", pair.Key.ToString());
-            <li>
-                <a asp-area="" asp-controller="Home" asp-action="GetSprite" asp-all-route-data="spriteRouteData">@pair.Key</a>
-                <img src="@Url.Action("GetSpriteImage", new { id = sessionId, sprite = pair.Key, palette = 1 })" />
-            </li>
+            <div class="col-2">
+                <div class="ratio ratio-1x1 mb-2">
+                    <div class="card bg-dark overflow-hidden">
+                        <div class="card-header bg-light">
+                            Sprite @pair.Key
+                        </div>
+                        <div class="card-img h-100 d-flex flex-column justify-content-center">
+                            <div class="w-100 mh-100 overflow-hidden">
+                                <img src="@Url.Action("GetSpriteImage", new { id = sessionId, sprite = pair.Key, palette = 64 })" class="w-100"/>
+                            </div>
+                        </div>
+                        <div class="card-img-overlay">
+                            <a asp-area="" asp-controller="Home" asp-action="GetSprite" asp-all-route-data="spriteRouteData" class="stretched-link"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
-        @foreach (var pair in Model.FailedSprites)
-        {
-            <li>
-                <span class="text-danger">@pair.Key - Failed: @pair.Value</span>
-            </li>
-        }
-    </ul>
+    </div>
+    @if (Model.FailedSprites.Count > 0)
+    {
+        <ul>
+            @foreach (var pair in Model.FailedSprites)
+            {
+                <li>
+                    <span class="text-danger">@pair.Key - Failed: @pair.Value</span>
+                </li>
+            }
+        </ul>
+    }
 </div>
