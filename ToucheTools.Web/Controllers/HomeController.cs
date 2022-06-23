@@ -148,6 +148,20 @@ public class HomeController : Controller
         return RedirectToAction("Index", new { id = id });
     }
 
+    [HttpGet("/save")]
+    public IActionResult DownloadDat([FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var bytes = _fileProcessingService.Download(container);
+
+        var filename = $"TOUCHE_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.DAT";
+        return File(bytes, "application/octet-stream", filename);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

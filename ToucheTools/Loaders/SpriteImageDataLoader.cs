@@ -89,7 +89,7 @@ public class SpriteImageDataLoader
             _logger.Log(LogLevel.Information, "Sprite image {}: true {}x{}", number, width, height);
         }
 
-        if (decode)
+        if (decode) //TODO: this shouldn't be here
         {
             for (var i = 0; i < height; i++)
             {

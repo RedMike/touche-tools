@@ -1,4 +1,5 @@
-﻿using ToucheTools.Loaders;
+﻿using ToucheTools.Exporters;
+using ToucheTools.Loaders;
 using ToucheTools.Web.Models;
 
 namespace ToucheTools.Web.Services;
@@ -6,6 +7,8 @@ namespace ToucheTools.Web.Services;
 public interface IFileProcessingService
 {
     ModelContainer? Process(Stream stream);
+
+    byte[] Download(ModelContainer container);
 }
 
 public class FileProcessingService : IFileProcessingService
@@ -22,5 +25,13 @@ public class FileProcessingService : IFileProcessingService
             LoadedBuffer = memoryStream,
             DatabaseModel = db
         };
+    }
+
+    public byte[] Download(ModelContainer container)
+    {
+        var memoryStream = new MemoryStream();
+        var mainExporter = new MainExporter(memoryStream);
+        mainExporter.Export(container.DatabaseModel);
+        return memoryStream.GetBuffer();
     }
 }

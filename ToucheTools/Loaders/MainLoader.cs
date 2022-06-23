@@ -50,8 +50,11 @@ public class MainLoader
             }
             catch (Exception e)
             {
-                _logger.Log(LogLevel.Warning, exception: e, "Exception when loading program {}", i);
-                db.FailedPrograms[i] = e.Message;
+                if (!e.Message.Contains("Null offset"))
+                {
+                    _logger.Log(LogLevel.Warning, exception: e, "Exception when loading program {}", i);
+                    db.FailedPrograms[i] = e.Message;
+                }
             }
         }
         
@@ -69,7 +72,7 @@ public class MainLoader
                 {
                     lock (lockObj)
                     {
-                        _spriteImageLoader.Read(localI, true, out var sprite);
+                        _spriteImageLoader.Read(localI, false, out var sprite);
                         return sprite;
                     }
                 });
@@ -80,8 +83,11 @@ public class MainLoader
             }
             catch (Exception e)
             {
-                _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sprite {}", i);
-                db.FailedSprites[i] = e.Message;
+                if (!e.Message.Contains("Null offset"))
+                {
+                    _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sprite {}", i);
+                    db.FailedSprites[i] = e.Message;
+                }
             }
         }
         
@@ -109,8 +115,11 @@ public class MainLoader
             }
             catch (Exception e)
             {
-                _logger.Log(LogLevel.Warning, exception: e, "Exception when loading room {}", i);
-                db.FailedRooms[i] = e.Message;
+                if (!e.Message.Contains("Null offset"))
+                {
+                    _logger.Log(LogLevel.Warning, exception: e, "Exception when loading room {}", i);
+                    db.FailedRooms[i] = e.Message;
+                }
             }
         }
     }

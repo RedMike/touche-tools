@@ -66,8 +66,11 @@
         {
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
                 <ul class="navbar-nav flex-grow-0">
-                    <li class="nav-item me-5">
+                    <li class="nav-item me-1">
                         <span class="navbar-text text-dark">Examining <span class="text-secondary">@initialFilename</span></span>
+                    </li>
+                    <li class="nav-item me-5">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="DownloadDat" asp-all-route-data="routeData">Download</a>
                     </li>
                 </ul>
             </div>
