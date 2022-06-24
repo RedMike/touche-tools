@@ -72,7 +72,7 @@ public class MainLoader
                 {
                     lock (lockObj)
                     {
-                        _spriteImageLoader.Read(localI, false, out var sprite);
+                        _spriteImageLoader.Read(localI, out var sprite);
                         return sprite;
                     }
                 });
@@ -104,7 +104,7 @@ public class MainLoader
                 {
                     lock (lockObj)
                     {
-                        _roomImageLoader.Read(roomImage, false, out var roomImageModel);
+                        _roomImageLoader.Read(roomImage, out var roomImageModel);
                         return roomImageModel;
                     }
                 });

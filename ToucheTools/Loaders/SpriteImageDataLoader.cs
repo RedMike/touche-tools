@@ -19,7 +19,7 @@ public class SpriteImageDataLoader
         _resourceDataLoader = resourceDataLoader;
     }
 
-    public void Read(int number, bool decode, out SpriteImageDataModel sprite)
+    public void Read(int number, out SpriteImageDataModel sprite)
     {
         _resourceDataLoader.Read(Resource.SpriteImage, number, false, out var offset, out _);
         _stream.Seek(offset, SeekOrigin.Begin);
@@ -89,23 +89,25 @@ public class SpriteImageDataLoader
             _logger.Log(LogLevel.Information, "Sprite image {}: true {}x{}", number, width, height);
         }
 
-        if (decode) //TODO: this shouldn't be here
+        var decodedImageData = new byte[height, width];
+        for (var i = 0; i < height; i++)
         {
-            for (var i = 0; i < height; i++)
+            for (var j = 0; j < width; j++)
             {
-                for (var j = 0; j < width; j++)
+                if (imageData[i, j] != 0)
                 {
-                    if (imageData[i, j] != 0)
+                    if (imageData[i, j] < 64)
                     {
-                        if (imageData[i, j] < 64)
-                        {
-                            imageData[i, j] += 192;
-                        }
-                        else
-                        {
-                            imageData[i, j] = 0;
-                        }
+                        decodedImageData[i, j] = (byte)(imageData[i, j] + 192);
                     }
+                    else
+                    {
+                        decodedImageData[i, j] = 0;
+                    }
+                }
+                else
+                {
+                    decodedImageData[i, j] = 0;
                 }
             }
         }
@@ -114,7 +116,8 @@ public class SpriteImageDataLoader
         {
             Width = width,
             Height = height,
-            RawData = imageData
+            RawData = imageData,
+            DecodedData = decodedImageData
         };
     }
 }

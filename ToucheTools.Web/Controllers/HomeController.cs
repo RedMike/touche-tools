@@ -87,7 +87,7 @@ public class HomeController : Controller
         var parsedPalette = int.Parse(palette);
         var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
         var spriteImage = container.DatabaseModel.Sprites[sprite].Value;
-        var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.RawData, paletteList);
+        var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.DecodedData, paletteList);
 
         return File(spriteImageBytes, "image/png");
     }

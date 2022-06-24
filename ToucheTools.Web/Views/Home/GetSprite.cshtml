@@ -50,7 +50,7 @@
     }
     var palette = container.DatabaseModel.Palettes[paletteId];
     var spriteImage = Model.Value;
-    var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.RawData, palette.Colors);
+    var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.DecodedData, palette.Colors);
     var spriteImageBase64 = Convert.ToBase64String(spriteImageBytes);
     var imageData = "data:image/png;base64," + spriteImageBase64;
 }

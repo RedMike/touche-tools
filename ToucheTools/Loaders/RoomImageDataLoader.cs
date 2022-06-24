@@ -19,7 +19,7 @@ public class RoomImageDataLoader
         _resourceDataLoader = resourceDataLoader;
     }
 
-    public void Read(int number, bool decode, out RoomImageDataModel roomImage)
+    public void Read(int number, out RoomImageDataModel roomImage)
     {
         _resourceDataLoader.Read(Resource.RoomImage, number, false, out var offset, out _);
         _stream.Seek(offset, SeekOrigin.Begin);
@@ -87,27 +87,6 @@ public class RoomImageDataLoader
         if (width != initialWidth || height != initialHeight)
         {
             _logger.Log(LogLevel.Information, "Room image {}: true {}x{}", number, width, height);
-        }
-
-        if (decode)
-        {
-            for (var i = 0; i < height; i++)
-            {
-                for (var j = 0; j < width; j++)
-                {
-                    if (imageData[i, j] != 0)
-                    {
-                        if (imageData[i, j] < 64)
-                        {
-                            imageData[i, j] += 192;
-                        }
-                        else
-                        {
-                            imageData[i, j] = 0;
-                        }
-                    }
-                }
-            }
         }
 
         roomImage = new RoomImageDataModel()
