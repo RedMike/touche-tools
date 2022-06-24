@@ -16,12 +16,11 @@ public class RoomInfoDataExporter
         _writer = new BinaryWriter(_stream, Encoding.ASCII, true);
     }
 
-    public void Export(PaletteDataModel palette, ushort roomImageNum)
+    public void Export(PaletteDataModel palette, ushort roomImageOffset)
     {
-        _stream.Seek(0, SeekOrigin.Begin);
-        _writer.Write((ushort)0);
-        _writer.Write(roomImageNum);
-        _writer.Write((ushort)0);
+        _stream.Seek(2, SeekOrigin.Begin);
+        _writer.Write(roomImageOffset);
+        _stream.Seek(2, SeekOrigin.Current);
 
         for (var i = 0; i < 256; i++)
         {

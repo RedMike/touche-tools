@@ -47,15 +47,26 @@ public class MainExporter
         {
             var id = pair.Key;
             var palette = pair.Value;
-            ushort roomNum = 0;
-            if (!db.RoomImages.ContainsKey(id))
+            var roomImageNum = 0;
+            if (db.RoomImages.ContainsKey(id))
             {
-                roomNum = (ushort)id;
+                roomImageNum = id;
+                //first save the room image as it's referenced by the room info
+                using var roomImageStream = new MemoryStream();
+                var roomImageExporter = new RoomImageDataExporter(roomImageStream);
+                roomImageExporter.Export(db.RoomImages[id].Value);
+                var roomImageBytes = roomImageStream.GetBuffer();
+                var roomImageOffset = AllocateAndReturnOffset(roomImageBytes.Length);
+                //save the actual data first
+                _stream.Seek(roomImageOffset, SeekOrigin.Begin);
+                _writer.Write(roomImageBytes);
+                //now save the offset for it
+                _resourceExporter.Export(Resource.RoomImage, roomImageNum, roomImageOffset);
             }
 
             using var memStream = new MemoryStream();
             var roomInfoExporter = new RoomInfoDataExporter(memStream);
-            roomInfoExporter.Export(palette, roomNum);
+            roomInfoExporter.Export(palette, (ushort)roomImageNum);
             var bytes = memStream.GetBuffer();
 
             var offset = AllocateAndReturnOffset(bytes.Length);

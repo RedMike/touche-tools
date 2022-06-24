@@ -132,6 +132,7 @@ public class HomeController : Controller
     }
 
     [HttpPost("/dat")]
+    [RequestSizeLimit(100*1000*1000)]
     public IActionResult UploadDat(IFormFile datFile)
     {
         if (HttpContext.Request.Query.TryGetValue("id", out var val))
