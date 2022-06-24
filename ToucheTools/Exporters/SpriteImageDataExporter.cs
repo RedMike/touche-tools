@@ -52,7 +52,10 @@ public class SpriteImageDataExporter
                         sprite.RawData[i, j + 1] != color) //or there's a single colour so no point
                     {
                         //can't RLE compress
-                        //color = (byte)(color / 4 * 3);
+                        if (color >= 0xC0)
+                        {
+                            color = (byte)(color - 64); //make sure colour does not reach RLE encoding limit
+                        }
                         _writer.Write(color);
                     }
                     else
