@@ -97,6 +97,24 @@
             
             <div class="col-3 card bg-light me-5">
                 <div class="card-body">
+                    <h5 class="card-title">Icons</h5>
+                    <p class="card-text">
+                    <ul class="list-unstyled">
+                        <li>
+                            <span class="fw-bold">@container.DatabaseModel.Icons.Count</span>
+                            Parsed
+                        </li>
+                        <li class="text-danger">
+                            <span class="fw-bold">@container.DatabaseModel.FailedIcons.Count</span>
+                            Invalid
+                        </li>
+                    </ul>
+                    <a asp-area="" asp-controller="Home" asp-action="GetIcons" asp-all-route-data="routeData" class="card-img-overlay"></a>
+                </div>
+            </div>
+            
+            <div class="col-3 card bg-light me-5">
+                <div class="card-body">
                     <h5 class="card-title">Rooms</h5>
                     <p class="card-text">
                         <ul class="list-unstyled">

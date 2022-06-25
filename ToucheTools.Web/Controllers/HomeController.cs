@@ -92,6 +92,46 @@ public class HomeController : Controller
         return File(spriteImageBytes, "image/png");
     }
     
+    [HttpGet("/icon")]
+    public IActionResult GetIcons([FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
+    
+    [HttpGet("/icon/{icon}")]
+    public IActionResult GetIcon(int icon, [FromQuery]string id, [FromQuery]string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var iconModel = container.DatabaseModel.Icons[icon];
+        return View(iconModel);
+    }
+
+    [HttpGet("/icon/{icon}/image")]
+    public IActionResult GetIconImage(int icon, [FromQuery] string id, [FromQuery] string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var parsedPalette = int.Parse(palette);
+        var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
+        var iconImage = container.DatabaseModel.Icons[icon].Value;
+        var iconImageBytes = _imageRenderingService.RenderImage(iconImage.Width, iconImage.Height, iconImage.DecodedData, paletteList);
+
+        return File(iconImageBytes, "image/png");
+    }
+    
     [HttpGet("/room")]
     public IActionResult GetRooms([FromQuery] string id)
     {

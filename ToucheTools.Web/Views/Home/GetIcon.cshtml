@@ -1,0 +1,88 @@
+﻿@using ToucheTools.Web.Services
+@model Lazy<ToucheTools.Models.IconImageDataModel>
+@inject IModelStorageService _modelStorageService
+@inject IImageRenderingService _imageRenderingService
+@{
+    string sessionId = "";
+    if (Context.Request.Query.TryGetValue("id", out var val))
+    {
+        sessionId = val[0];
+    }
+    bool loggedIn = false;
+    ModelContainer? container = null;
+    string initialFilename = "";
+    Dictionary<string, string> routeData = new Dictionary<string, string>();
+    if (!string.IsNullOrEmpty(sessionId))
+    {
+        loggedIn = _modelStorageService.TryGetModels(sessionId, out container);
+        if (!loggedIn)
+        {
+            sessionId = "";
+        }
+        else
+        {
+            initialFilename = container.InitialFilename;
+            routeData["id"] = sessionId;
+        }
+    }
+}
+
+@if (!loggedIn)
+{
+    <script>
+        window.location.href = "/";
+    </script>
+    return;
+}
+
+@{
+    var iconIdRaw = (string)(Context.Request.RouteValues["icon"]);
+    if (string.IsNullOrEmpty(iconIdRaw))
+    {
+        throw new Exception("Unknown icon");
+    }
+    var iconId = int.Parse(iconIdRaw);
+    var paletteId = container.DatabaseModel.Palettes.First().Key;
+    var paletteIdRaw = (string)(Context.Request.Query["palette"]);
+    if (!string.IsNullOrEmpty(paletteIdRaw))
+    {
+        paletteId = int.Parse(paletteIdRaw);
+    }
+    var palette = container.DatabaseModel.Palettes[paletteId];
+    var iconImage = Model.Value;
+    var iconImageBytes = _imageRenderingService.RenderImage(iconImage.Width, iconImage.Height, iconImage.DecodedData, palette.Colors);
+    var iconImageBase64 = Convert.ToBase64String(iconImageBytes);
+    var imageData = "data:image/png;base64," + iconImageBase64;
+}
+
+<div>
+    <form asp-area="" asp-controller="Home" asp-action="GetIcon" asp-all-route-data="routeData" method="get">
+        <input type="hidden" name="id" value="@sessionId"/>
+        <div class="row mb-3">
+            <div class="col-8">
+                <select class="form-select" name="palette">
+                    @{
+                        bool selectFirst = container.DatabaseModel.Palettes.All(p => p.Key != paletteId);
+                        foreach (var pair in container.DatabaseModel.Palettes)
+                        {
+                            var selected = paletteId == pair.Key;
+                            if (selectFirst)
+                            {
+                                selected = true;
+                                selectFirst = false;
+                            }
+                            <option selected=@(selected ? "selected" : null) value="@pair.Key">Room @pair.Key</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="d-grid col-4">
+                <button type="submit" class="btn btn-primary">Switch</button>
+            </div>
+        </div>
+    </form>
+    <h1 class="display-4">Icon @iconId</h1>
+    <img src="@imageData" alt="preview"/>
+    <h5 class="display-5">Info</h5>
+    <p>Width: <span>@iconImage.Width</span>, Height: <span>@iconImage.Height</span></p>
+</div>

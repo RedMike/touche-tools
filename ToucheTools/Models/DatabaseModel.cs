@@ -7,6 +7,10 @@ public class DatabaseModel
 
     public Dictionary<int, string> FailedSprites { get; set; } = new Dictionary<int, string>();
     public Dictionary<int, Lazy<SpriteImageDataModel>> Sprites { get; set; } = new Dictionary<int, Lazy<SpriteImageDataModel>>();
+    
+    public Dictionary<int, string> FailedIcons { get; set; } = new Dictionary<int, string>();
+    public Dictionary<int, Lazy<IconImageDataModel>> Icons { get; set; } = new Dictionary<int, Lazy<IconImageDataModel>>();
+
 
     public Dictionary<int, Lazy<RoomImageDataModel>> RoomImages { get; set; } = new Dictionary<int, Lazy<RoomImageDataModel>>();
     public Dictionary<int, PaletteDataModel> Palettes { get; set; } = new Dictionary<int, PaletteDataModel>();

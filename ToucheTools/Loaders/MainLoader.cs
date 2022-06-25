@@ -15,6 +15,7 @@ public class MainLoader
     private readonly MainDataLoader _mainDataLoader;
     private readonly ResourceDataLoader _resourceLoader;
     private readonly SpriteImageDataLoader _spriteImageLoader;
+    private readonly IconImageDataLoader _iconImageLoader;
     private readonly RoomInfoDataLoader _roomInfoLoader;
     private readonly RoomImageDataLoader _roomImageLoader;
     private readonly ProgramDataLoader _programLoader;
@@ -26,6 +27,7 @@ public class MainLoader
         _mainDataLoader = new MainDataLoader(stream);
         _resourceLoader = new ResourceDataLoader(stream);
         _spriteImageLoader = new SpriteImageDataLoader(stream, _resourceLoader);
+        _iconImageLoader = new IconImageDataLoader(stream, _resourceLoader);
         _roomInfoLoader = new RoomInfoDataLoader(stream, _resourceLoader);
         _roomImageLoader = new RoomImageDataLoader(stream, _resourceLoader);
         _programLoader = new ProgramDataLoader(stream, _resourceLoader);
@@ -87,6 +89,37 @@ public class MainLoader
                 {
                     _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sprite {}", i);
                     db.FailedSprites[i] = e.Message;
+                }
+            }
+        }
+        
+        //icons
+        for (var i = 0; i < Resources.DataInfo[Resource.IconImage].Count; i++)
+        {
+            try
+            {
+                //try to read the icon offset first to check if the icon exists
+                _resourceLoader.Read(Resource.IconImage, i, false, out _, out _);
+                var localI = i;
+                db.Icons[i] = new Lazy<IconImageDataModel>(() =>
+                {
+                    lock (lockObj)
+                    {
+                        _iconImageLoader.Read(localI, out var icon);
+                        return icon;
+                    }
+                });
+            }
+            catch (UnknownResourceException)
+            {
+                //non-issue
+            }
+            catch (Exception e)
+            {
+                if (!e.Message.Contains("Null offset"))
+                {
+                    _logger.Log(LogLevel.Warning, exception: e, "Exception when loading icon {}", i);
+                    db.FailedIcons[i] = e.Message;
                 }
             }
         }
