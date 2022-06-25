@@ -22,4 +22,5 @@ public class DatabaseModel
 
     public Dictionary<int, SequenceDataModel> Sequences { get; set; } = new Dictionary<int, SequenceDataModel>();
     public Dictionary<int, SoundDataModel> Sounds { get; set; } = new Dictionary<int, SoundDataModel>();
+    public Dictionary<int, MusicDataModel> MusicTracks { get; set; } = new Dictionary<int, MusicDataModel>();
 }

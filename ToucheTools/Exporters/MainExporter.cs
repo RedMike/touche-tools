@@ -206,6 +206,32 @@ public class MainExporter
         }
         
         //also save resources we don't have, as null offsets
+        for (var i = 0; i < Resources.DataInfo[Resource.Music].Count; i++)
+        {
+            if (!db.MusicTracks.ContainsKey(i))
+            {
+                var offset = AllocateAndReturnOffset(4);
+                _resourceExporter.Export(Resource.Music, i, offset);
+            }
+        }
+        foreach (var pair in db.MusicTracks)
+        {
+            var id = pair.Key;
+            var music = pair.Value;
+            using var memStream = new MemoryStream();
+            var musicExporter = new MusicDataExporter(memStream);
+            musicExporter.Export(music);
+            var bytes = memStream.GetBuffer();
+            
+            var offset = AllocateAndReturnOffset(bytes.Length);
+            //save the actual data first
+            _stream.Seek(offset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //now save the offset for it
+            _resourceExporter.Export(Resource.Music, id, offset);
+        }
+        
+        //also save resources we don't have, as null offsets
         for (var i = 0; i <= Resources.DataInfo[Resource.Sound].Count; i++)
         {
             if (!db.Sounds.ContainsKey(i))

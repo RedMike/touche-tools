@@ -21,6 +21,7 @@ public class MainLoader
     private readonly ProgramDataLoader _programLoader;
     private readonly SequenceDataLoader _sequenceLoader;
     private readonly SoundDataLoader _soundLoader;
+    private readonly MusicDataLoader _musicLoader;
 
     public MainLoader(Stream stream)
     {
@@ -35,6 +36,7 @@ public class MainLoader
         _programLoader = new ProgramDataLoader(stream, _resourceLoader);
         _sequenceLoader = new SequenceDataLoader(stream, _resourceLoader);
         _soundLoader = new SoundDataLoader(stream, _resourceLoader);
+        _musicLoader = new MusicDataLoader(stream, _resourceLoader);
     }
 
     public void Load(out DatabaseModel db)
@@ -86,6 +88,27 @@ public class MainLoader
                 if (!e.Message.Contains("Null offset"))
                 {
                     _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sequence {}", i);
+                }
+            }
+        }
+        
+        //music
+        for (var i = 0; i < Resources.DataInfo[Resource.Music].Count; i++)
+        {
+            try
+            {
+                _musicLoader.Read(i, out var music);
+                db.MusicTracks[i] = music;
+            }
+            catch (UnknownResourceException)
+            {
+                // non-issue
+            }
+            catch (Exception e)
+            {
+                if (!e.Message.Contains("Null offset"))
+                {
+                    _logger.Log(LogLevel.Warning, exception: e, "Exception when loading music {}", i);
                 }
             }
         }
