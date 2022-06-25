@@ -10,6 +10,11 @@ public class FetchScriptWordInstruction : BaseInstruction
     {
         Val = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Val);
+    }
 
     public override string ToString()
     {

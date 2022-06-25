@@ -14,6 +14,12 @@ public class SetCharBoxInstruction : BaseInstruction
         Character = reader.ReadUInt16();
         Num = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Character);
+        writer.Write((ushort)Num);
+    }
 
     public override string ToString()
     {

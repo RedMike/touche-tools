@@ -10,6 +10,11 @@ public class SetFlagInstruction : BaseInstruction
     {
         Flag = reader.ReadUInt16(); //TODO: validate flag
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Flag);
+    }
 
     public override string ToString()
     {

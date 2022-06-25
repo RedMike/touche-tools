@@ -12,6 +12,12 @@ public class LoadSequenceInstruction : BaseInstruction
         Index = reader.ReadUInt16();
         Num = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Index);
+        writer.Write((ushort)Num);
+    }
 
     public override string ToString()
     {

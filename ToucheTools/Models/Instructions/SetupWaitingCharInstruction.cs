@@ -16,6 +16,13 @@ public class SetupWaitingCharInstruction : BaseInstruction
         Val1 = reader.ReadUInt16();
         Val2 = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Character);
+        writer.Write((ushort)Val1);
+        writer.Write((ushort)Val2);
+    }
 
     public override string ToString()
     {

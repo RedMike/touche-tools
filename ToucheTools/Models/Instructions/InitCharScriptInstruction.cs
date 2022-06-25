@@ -18,6 +18,15 @@ public class InitCharScriptInstruction : BaseInstruction
         F2 = reader.ReadUInt16();
         F3 = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Character);
+        writer.Write((ushort)Color);
+        writer.Write((ushort)F1);
+        writer.Write((ushort)F2);
+        writer.Write((ushort)F3);
+    }
 
     public override string ToString()
     {

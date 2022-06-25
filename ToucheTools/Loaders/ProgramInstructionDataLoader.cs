@@ -37,12 +37,6 @@ public class ProgramInstructionDataLoader
             }
 
             var opcode = (ProgramDataModel.Opcode)rawOpcode;
-            if (opcode == ProgramDataModel.Opcode.Noop)
-            {
-                //not interesting
-                _logger.Log(LogLevel.Debug, "Opcode: Noop");
-                continue;
-            }
             _logger.Log(LogLevel.Debug, "Opcode: {}", opcode);
             var instruction = ProgramInstructionHelper.Get(opcode);
             instruction.Load(_reader);

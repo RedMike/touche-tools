@@ -12,6 +12,12 @@ public class StartEpisodeInstruction : BaseInstruction
         Num = reader.ReadUInt16();
         Flag = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Num);
+        writer.Write((ushort)Flag);
+    }
 
     public override string ToString()
     {

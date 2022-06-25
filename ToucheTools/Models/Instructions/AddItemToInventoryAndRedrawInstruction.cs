@@ -13,6 +13,11 @@ public class AddItemToInventoryAndRedrawInstruction : BaseInstruction
         Character = reader.ReadUInt16();
     }
 
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Character);
+    }
+
     public override string ToString()
     {
         return $"{Opcode:G} add item of STK value to {(CurrentCharacter ? "current" : Character)}";

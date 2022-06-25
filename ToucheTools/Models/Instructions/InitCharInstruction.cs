@@ -12,6 +12,11 @@ public class InitCharInstruction : BaseInstruction
     {
         Character = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Character);
+    }
 
     public override string ToString()
     {

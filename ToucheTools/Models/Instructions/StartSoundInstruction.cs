@@ -12,6 +12,12 @@ public class StartSoundInstruction : BaseInstruction
         Num = reader.ReadUInt16();
         Delay = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Num);
+        writer.Write((ushort)Delay);
+    }
 
     public override string ToString()
     {

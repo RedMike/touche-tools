@@ -10,6 +10,11 @@ public class SetCharDelayInstruction : BaseInstruction
     {
         Delay = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Delay);
+    }
 
     public override string ToString()
     {

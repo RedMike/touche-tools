@@ -35,6 +35,7 @@ public class ProgramDataLoader
         program = new ProgramDataModel();
         uint programOffset = 0;
         //rects
+        //TODO: check if program actually exists or if each section exists
         programStream.Seek(20, SeekOrigin.Begin);
         programOffset = programReader.ReadUInt32();
         programStream.Seek(programOffset, SeekOrigin.Begin);
@@ -98,12 +99,12 @@ public class ProgramDataLoader
 
             if (point1 >= program.Points.Count)
             {
-                throw new Exception("Unknown point referenced");
+                throw new Exception($"Unknown point referenced: {point1} out of {program.Points.Count}");
             }
             var point2 = programReader.ReadUInt16();
             if (point2 >= program.Points.Count)
             {
-                throw new Exception("Unknown point referenced");
+                throw new Exception($"Unknown point referenced:  {point2} out of {program.Points.Count}");
             }
             var clipRect = programReader.ReadUInt16();
             var area1 = programReader.ReadUInt16();

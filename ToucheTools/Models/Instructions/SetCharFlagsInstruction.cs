@@ -13,6 +13,12 @@ public class SetCharFlagsInstruction : BaseInstruction
         Flags = reader.ReadUInt16();
         Flags &= 0xFF00;
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Character);
+        writer.Write((ushort)Flags);
+    }
 
     public override string ToString()
     {

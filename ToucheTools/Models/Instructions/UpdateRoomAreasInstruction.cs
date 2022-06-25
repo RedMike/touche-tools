@@ -10,6 +10,11 @@ public class UpdateRoomAreasInstruction : BaseInstruction
     {
         Area = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Area);
+    }
 
     public override string ToString()
     {

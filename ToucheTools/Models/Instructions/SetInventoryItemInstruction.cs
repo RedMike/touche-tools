@@ -15,6 +15,12 @@ public class SetInventoryItemInstruction : BaseInstruction
         Character = reader.ReadUInt16();
         Item = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Character);
+        writer.Write((ushort)Item);
+    }
 
     public override string ToString()
     {

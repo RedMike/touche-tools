@@ -9,7 +9,13 @@ public abstract class BaseInstruction
         
     }
 
-    public virtual void Export(BinaryWriter writer)
+    public void Export(BinaryWriter writer)
+    {
+        writer.Write((byte)Opcode);
+        ExportInternal(writer);
+    }
+
+    protected virtual void ExportInternal(BinaryWriter writer)
     {
         
     }

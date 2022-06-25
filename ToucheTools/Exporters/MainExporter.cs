@@ -76,6 +76,14 @@ public class MainExporter
             //now save the offset for it
             _resourceExporter.Export(Resource.RoomInfo, id, offset);
         }
+        //also save resources we don't have, as null offsets
+        for (var i = 0; i < Resources.DataInfo[Resource.RoomInfo].Count; i++)
+        {
+            if (!db.Palettes.ContainsKey(i + 1))
+            {
+                _resourceExporter.Export(Resource.RoomInfo, i + 1, 0);
+            }
+        }
 
         foreach (var pair in db.Sprites)
         {
@@ -92,6 +100,40 @@ public class MainExporter
             _writer.Write(bytes);
             //now save the offset for it
             _resourceExporter.Export(Resource.SpriteImage, id, offset);
+        }
+        //also save resources we don't have, as null offsets
+        for (var i = 0; i < Resources.DataInfo[Resource.SpriteImage].Count; i++)
+        {
+            if (!db.Sprites.ContainsKey(i))
+            {
+                _resourceExporter.Export(Resource.SpriteImage, i, 0);
+            }
+        }
+
+        foreach (var pair in db.Programs)
+        {
+            var id = pair.Key;
+            var program = pair.Value;
+            using var memStream = new MemoryStream();
+            var programExporter = new ProgramDataExporter(memStream);
+            programExporter.Export(program);
+            var bytes = memStream.GetBuffer();
+            
+            var offset = AllocateAndReturnOffset(bytes.Length);
+            //save the actual data first
+            _stream.Seek(offset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //now save the offset for it
+            _resourceExporter.Export(Resource.Program, id, offset);
+        }
+        //now also save programs that are empty so that the size calculations work, and an additional final program
+        for (var i = 0; i < Resources.DataInfo[Resource.Program].Count + 1; i++)
+        {
+            if (!db.Programs.ContainsKey(i))
+            {
+                var offset = AllocateAndReturnOffset(0);
+                _resourceExporter.Export(Resource.Program, i, offset);
+            }
         }
     }
 

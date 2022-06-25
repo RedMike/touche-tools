@@ -10,6 +10,11 @@ public class StartMusicInstruction : BaseInstruction
     {
         Num = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)Num);
+    }
 
     public override string ToString()
     {

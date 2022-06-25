@@ -87,6 +87,21 @@
         }
     </ul>
     
+    <h5 class="display-5">Backgrounds</h5>
+    <ul>
+        @for (var i = 0; i < Model.Backgrounds.Count; i++)
+        {
+            var bg = Model.Backgrounds[i];
+            var rect = bg.Rect;
+            <li><span class="text-dark fw-bold">@i - </span>
+                <span class="text-dark">@bg.Type 
+                    with rect @rect.X x @rect.Y to @(rect.X+rect.W) x @(rect.Y + rect.H), 
+                    with source @bg.SrcX x @bg.SrcY, 
+                    with offset @bg.Offset, 
+                    scale @bg.ScaleMul div @bg.ScaleDiv</span></li>
+        }
+    </ul>
+    
     <h5 class="display-5">Instructions</h5>
     <ul>
         @foreach (var instruction in Model.Instructions)

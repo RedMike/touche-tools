@@ -10,6 +10,11 @@ public class JzInstruction : BaseInstruction
     {
         NewOffset = reader.ReadUInt16();
     }
+    
+    protected override void ExportInternal(BinaryWriter writer)
+    {
+        writer.Write((ushort)NewOffset);
+    }
 
     public override string ToString()
     {
