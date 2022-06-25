@@ -5,4 +5,5 @@
 [ ] Save out all programs in sample DAT file
 [ ] Set up model exporters
 [ ] Export bare-bones model and try in ScummVM
+[ ] VOC audio conversion to/from WAV (browser play)
 ...

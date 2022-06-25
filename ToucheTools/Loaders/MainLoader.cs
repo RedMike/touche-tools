@@ -20,6 +20,7 @@ public class MainLoader
     private readonly RoomImageDataLoader _roomImageLoader;
     private readonly ProgramDataLoader _programLoader;
     private readonly SequenceDataLoader _sequenceLoader;
+    private readonly SoundDataLoader _soundLoader;
 
     public MainLoader(Stream stream)
     {
@@ -33,6 +34,7 @@ public class MainLoader
         _roomImageLoader = new RoomImageDataLoader(stream, _resourceLoader);
         _programLoader = new ProgramDataLoader(stream, _resourceLoader);
         _sequenceLoader = new SequenceDataLoader(stream, _resourceLoader);
+        _soundLoader = new SoundDataLoader(stream, _resourceLoader);
     }
 
     public void Load(out DatabaseModel db)
@@ -84,6 +86,27 @@ public class MainLoader
                 if (!e.Message.Contains("Null offset"))
                 {
                     _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sequence {}", i);
+                }
+            }
+        }
+        
+        //sounds
+        for (var i = 0; i < Resources.DataInfo[Resource.Sound].Count; i++)
+        {
+            try
+            {
+                _soundLoader.Read(i, out var sound);
+                db.Sounds[i] = sound;
+            }
+            catch (UnknownResourceException)
+            {
+                // non-issue
+            }
+            catch (Exception e)
+            {
+                if (!e.Message.Contains("Null offset"))
+                {
+                    _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sound {}", i);
                 }
             }
         }

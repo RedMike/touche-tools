@@ -59,6 +59,18 @@
     if (loggedIn)
     {
         <div class="row">
+            <div class="col-12">
+                <h5 class="display-4">Overview</h5>
+                <ul>
+                    <li>Backdrop: @container.DatabaseModel.Backdrop.Width x @container.DatabaseModel.Backdrop.Height</li>
+                    <li>Sounds: @container.DatabaseModel.Sounds.Count</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <h5 class="display-4">Details</h5>
+            </div>
             <div class="col-3 card bg-light me-5">
                 <div class="card-body">
                     <h5 class="card-title">Programs</h5>
@@ -76,7 +88,7 @@
                     <a asp-area="" asp-controller="Home" asp-action="GetPrograms" asp-all-route-data="routeData" class="card-img-overlay"></a>
                 </div>
             </div>
-            
+
             <div class="col-3 card bg-light me-5">
                 <div class="card-body">
                     <h5 class="card-title">Sprites</h5>
@@ -94,7 +106,7 @@
                     <a asp-area="" asp-controller="Home" asp-action="GetSprites" asp-all-route-data="routeData" class="card-img-overlay"></a>
                 </div>
             </div>
-            
+
             <div class="col-3 card bg-light me-5">
                 <div class="card-body">
                     <h5 class="card-title">Icons</h5>
@@ -112,21 +124,21 @@
                     <a asp-area="" asp-controller="Home" asp-action="GetIcons" asp-all-route-data="routeData" class="card-img-overlay"></a>
                 </div>
             </div>
-            
+
             <div class="col-3 card bg-light me-5">
                 <div class="card-body">
                     <h5 class="card-title">Rooms</h5>
                     <p class="card-text">
-                        <ul class="list-unstyled">
-                            <li>
-                                <span class="fw-bold">@container.DatabaseModel.RoomImages.Count</span>
-                                Parsed
-                            </li>
-                            <li class="text-danger">
-                                <span class="fw-bold">@container.DatabaseModel.FailedRooms.Count</span>
-                                Invalid
-                            </li>
-                        </ul>
+                    <ul class="list-unstyled">
+                        <li>
+                            <span class="fw-bold">@container.DatabaseModel.RoomImages.Count</span>
+                            Parsed
+                        </li>
+                        <li class="text-danger">
+                            <span class="fw-bold">@container.DatabaseModel.FailedRooms.Count</span>
+                            Invalid
+                        </li>
+                    </ul>
                     <a asp-area="" asp-controller="Home" asp-action="GetRooms" asp-all-route-data="routeData" class="card-img-overlay"></a>
                 </div>
             </div>

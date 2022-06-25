@@ -21,4 +21,5 @@ public class DatabaseModel
     public Dictionary<int, string> FailedRooms { get; set; } = new Dictionary<int, string>();
 
     public Dictionary<int, SequenceDataModel> Sequences { get; set; } = new Dictionary<int, SequenceDataModel>();
+    public Dictionary<int, SoundDataModel> Sounds { get; set; } = new Dictionary<int, SoundDataModel>();
 }
