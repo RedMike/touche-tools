@@ -152,15 +152,16 @@ public class MainLoader
         {
             try
             {
-                _roomInfoLoader.Read(i, out var palette, out var roomImage);
+                _roomInfoLoader.Read(i, out var palette, out var roomInfo);
                 db.Palettes[i] = palette;
+                db.Rooms[i] = roomInfo;
                 //try to read the sprite offset first to check if the image exists
-                _resourceLoader.Read(Resource.RoomImage, roomImage, false, out _, out _);
-                db.RoomImages[i] = new Lazy<RoomImageDataModel>(() =>
+                _resourceLoader.Read(Resource.RoomImage, roomInfo.RoomImageNum, false, out _, out _);
+                db.RoomImages[roomInfo.RoomImageNum] = new Lazy<RoomImageDataModel>(() =>
                 {
                     lock (lockObj)
                     {
-                        _roomImageLoader.Read(roomImage, out var roomImageModel);
+                        _roomImageLoader.Read(roomInfo.RoomImageNum, out var roomImageModel);
                         return roomImageModel;
                     }
                 });
@@ -171,6 +172,8 @@ public class MainLoader
             }
             catch (Exception e)
             {
+                db.Palettes.Remove(i);
+                db.Rooms.Remove(i);
                 if (!e.Message.Contains("Null offset"))
                 {
                     _logger.Log(LogLevel.Warning, exception: e, "Exception when loading room {}", i);

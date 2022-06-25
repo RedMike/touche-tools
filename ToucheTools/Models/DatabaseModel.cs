@@ -14,6 +14,7 @@ public class DatabaseModel
 
     public Dictionary<int, Lazy<RoomImageDataModel>> RoomImages { get; set; } = new Dictionary<int, Lazy<RoomImageDataModel>>();
     public Dictionary<int, PaletteDataModel> Palettes { get; set; } = new Dictionary<int, PaletteDataModel>();
+    public Dictionary<int, RoomInfoDataModel> Rooms { get; set; } = new Dictionary<int, RoomInfoDataModel>();
 
     public Dictionary<int, string> FailedRooms { get; set; } = new Dictionary<int, string>();
 

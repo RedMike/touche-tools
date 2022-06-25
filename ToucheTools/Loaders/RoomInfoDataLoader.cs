@@ -19,13 +19,15 @@ public class RoomInfoDataLoader
         _resourceDataLoader = resourceDataLoader;
     }
 
-    public void Read(int number, out PaletteDataModel palette, out ushort roomImageNum)
+    public void Read(int number, out PaletteDataModel palette, out RoomInfoDataModel roomInfo)
     {
+        roomInfo = new RoomInfoDataModel();
         _resourceDataLoader.Read(Resource.RoomInfo, number, false, out var offset, out _);
         _stream.Seek(offset, SeekOrigin.Begin);
         
         _stream.Seek(2, SeekOrigin.Current);
-        roomImageNum = _reader.ReadUInt16();
+        var roomImageNum = _reader.ReadUInt16();
+        roomInfo.RoomImageNum = roomImageNum;
         _stream.Seek(2, SeekOrigin.Current);
 
         var paletteBytes = _reader.ReadBytes(3 * 256);

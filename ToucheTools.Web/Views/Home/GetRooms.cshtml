@@ -38,28 +38,49 @@
     <h1 class="display-4">Rooms</h1>
     <p>The following is the list of existing rooms in the uploaded file:</p>
     <div class="row">
-        @foreach (var pair in Model.RoomImages)
+        @foreach (var pair in Model.Rooms)
         {
-            var room = pair.Value.Value;
-            var roomRouteData = new Dictionary<string, string>(routeData);
-            roomRouteData.Add("room", pair.Key.ToString());
-            <div class="col-2">
-                <div class="ratio ratio-1x1 mb-2">
-                    <div class="card bg-dark">
-                        <div class="card-header bg-light">
-                            Room @pair.Key - @room.Width x @room.Height
-                        </div>
-                        <div class="card-img h-100 d-flex flex-column justify-content-center">
-                            <div class="w-100">
-                                <img src="@Url.Action("GetRoomImage", new { id = sessionId, room = pair.Key })" class="w-100"/>
+            var roomInfo = pair.Value;
+            if (Model.RoomImages.ContainsKey(roomInfo.RoomImageNum))
+            {
+                var room = Model.RoomImages[roomInfo.RoomImageNum].Value;
+                var roomRouteData = new Dictionary<string, string>(routeData);
+                roomRouteData.Add("room", pair.Key.ToString());
+                <div class="col-2">
+                    <div class="ratio ratio-1x1 mb-2">
+                        <div class="card bg-dark">
+                            <div class="card-header bg-light">
+                                Room @pair.Key (@roomInfo.RoomImageNum) - @room.Width x @room.Height
                             </div>
-                        </div>
-                        <div class="card-img-overlay">
-                            <a asp-area="" asp-controller="Home" asp-action="GetRoom" asp-all-route-data="roomRouteData" class="stretched-link"></a>
+                            <div class="card-img h-100 d-flex flex-column justify-content-center">
+                                <div class="w-100">
+                                    <img src="@Url.Action("GetRoomImage", new { id = sessionId, room = pair.Key })" class="w-100"/>
+                                </div>
+                            </div>
+                            <div class="card-img-overlay">
+                                <a asp-area="" asp-controller="Home" asp-action="GetRoom" asp-all-route-data="roomRouteData" class="stretched-link"></a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                var roomRouteData = new Dictionary<string, string>(routeData);
+                roomRouteData.Add("room", pair.Key.ToString());
+                <div class="col-2">
+                    <div class="ratio ratio-1x1 mb-2">
+                        <div class="card bg-dark">
+                            <div class="card-header bg-light">
+                                Room @pair.Key (@roomInfo.RoomImageNum) - no image
+                            </div>
+                            <div class="card-img-overlay">
+                                <a asp-area="" asp-controller="Home" asp-action="GetRoom" asp-all-route-data="roomRouteData" class="stretched-link"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         }
     </div>
     <div>

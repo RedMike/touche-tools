@@ -152,8 +152,13 @@ public class HomeController : Controller
             return RedirectToAction("Index");
         }
 
-        var spriteModel = container.DatabaseModel.RoomImages[room];
-        return View(spriteModel);
+        var roomInfo = container.DatabaseModel.Rooms[room];
+        if (!container.DatabaseModel.RoomImages.ContainsKey(roomInfo.RoomImageNum))
+        {
+            return View(null);
+        }
+        var roomImageModel = container.DatabaseModel.RoomImages[roomInfo.RoomImageNum];
+        return View(roomImageModel);
     }
     
     [HttpGet("/room/{room}/image")]
@@ -164,8 +169,9 @@ public class HomeController : Controller
             return BadRequest();
         }
 
+        var roomInfo = container.DatabaseModel.Rooms[room];
         var paletteList = container.DatabaseModel.Palettes[room].Colors;
-        var roomImage = container.DatabaseModel.RoomImages[room].Value;
+        var roomImage = container.DatabaseModel.RoomImages[roomInfo.RoomImageNum].Value;
         var roomImageBytes = _imageRenderingService.RenderImage(roomImage.Width, roomImage.Height, roomImage.RawData, paletteList);
 
         return File(roomImageBytes, "image/png");

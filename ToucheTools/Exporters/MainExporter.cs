@@ -73,33 +73,33 @@ public class MainExporter
         {
             if (!db.Palettes.ContainsKey(i))
             {
-                _resourceExporter.Export(Resource.RoomInfo, i-1, 0);
+                _resourceExporter.Export(Resource.RoomInfo, i, 0);
             }
         }
-        foreach (var pair in db.Palettes)
+        foreach (var pair in db.Rooms)
         {
             var id = pair.Key;
-            var palette = pair.Value;
-            var roomImageNum = 0;
-            if (db.RoomImages.ContainsKey(id-1))
+            var roomInfo = pair.Value;
+            var palette = db.Palettes[id];
+            
+            if (db.RoomImages.ContainsKey(roomInfo.RoomImageNum))
             {
-                roomImageNum = id-1;
                 //first save the room image as it's referenced by the room info
                 using var roomImageStream = new MemoryStream();
                 var roomImageExporter = new RoomImageDataExporter(roomImageStream);
-                roomImageExporter.Export(db.RoomImages[roomImageNum].Value);
+                roomImageExporter.Export(db.RoomImages[roomInfo.RoomImageNum].Value);
                 var roomImageBytes = roomImageStream.GetBuffer();
                 var roomImageOffset = AllocateAndReturnOffset(roomImageBytes.Length);
                 //save the actual data first
                 _stream.Seek(roomImageOffset, SeekOrigin.Begin);
                 _writer.Write(roomImageBytes);
                 //now save the offset for it
-                _resourceExporter.Export(Resource.RoomImage, roomImageNum, roomImageOffset);
+                _resourceExporter.Export(Resource.RoomImage, roomInfo.RoomImageNum, roomImageOffset);
             }
-
+            
             using var memStream = new MemoryStream();
             var roomInfoExporter = new RoomInfoDataExporter(memStream);
-            roomInfoExporter.Export(palette, (ushort)roomImageNum);
+            roomInfoExporter.Export(palette, (ushort)roomInfo.RoomImageNum);
             var bytes = memStream.GetBuffer();
 
             var offset = AllocateAndReturnOffset(bytes.Length);
@@ -107,7 +107,7 @@ public class MainExporter
             _stream.Seek(offset, SeekOrigin.Begin);
             _writer.Write(bytes);
             //now save the offset for it
-            _resourceExporter.Export(Resource.RoomInfo, id-1, offset);
+            _resourceExporter.Export(Resource.RoomInfo, id, offset);
         }
 
         //also save resources we don't have, as null offsets
