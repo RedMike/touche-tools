@@ -23,7 +23,7 @@ public class ResourceDataExporter
         {
             throw new UnknownResourceException();
         }
-        if (Resources.DataInfo[resource].Count <= number)
+        if (Resources.DataInfo[resource].Count < number)
         {
             throw new UnknownResourceException();
         }

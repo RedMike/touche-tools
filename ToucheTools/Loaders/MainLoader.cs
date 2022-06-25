@@ -41,7 +41,7 @@ public class MainLoader
         db = new DatabaseModel();
         
         //programs
-        for (var i = 0; i < Resources.DataInfo[Resource.Program].Count; i++)
+        for (var i = 0; i <= Resources.DataInfo[Resource.Program].Count; i++)
         {
             try
             {
@@ -63,7 +63,7 @@ public class MainLoader
         }
         
         //sequences
-        for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count; i++)
+        for (var i = 0; i <= Resources.DataInfo[Resource.Sequence].Count; i++)
         {
             try
             {
@@ -86,7 +86,7 @@ public class MainLoader
         object lockObj = new object(); //for lazy loading
         
         //sprites
-        for (var i = 0; i < Resources.DataInfo[Resource.SpriteImage].Count; i++)
+        for (var i = 0; i <= Resources.DataInfo[Resource.SpriteImage].Count; i++)
         {
             try
             {
@@ -117,7 +117,7 @@ public class MainLoader
         }
         
         //icons
-        for (var i = 0; i < Resources.DataInfo[Resource.IconImage].Count; i++)
+        for (var i = 0; i <= Resources.DataInfo[Resource.IconImage].Count; i++)
         {
             try
             {
@@ -148,7 +148,7 @@ public class MainLoader
         }
         
         //TODO: rooms
-        for (var i = 1; i < Resources.DataInfo[Resource.RoomInfo].Count + 1; i++) //no room 0
+        for (var i = 1; i <= Resources.DataInfo[Resource.RoomInfo].Count + 1; i++) //no room 0
         {
             try
             {
