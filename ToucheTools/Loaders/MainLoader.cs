@@ -19,6 +19,7 @@ public class MainLoader
     private readonly RoomInfoDataLoader _roomInfoLoader;
     private readonly RoomImageDataLoader _roomImageLoader;
     private readonly ProgramDataLoader _programLoader;
+    private readonly SequenceDataLoader _sequenceLoader;
 
     public MainLoader(Stream stream)
     {
@@ -31,6 +32,7 @@ public class MainLoader
         _roomInfoLoader = new RoomInfoDataLoader(stream, _resourceLoader);
         _roomImageLoader = new RoomImageDataLoader(stream, _resourceLoader);
         _programLoader = new ProgramDataLoader(stream, _resourceLoader);
+        _sequenceLoader = new SequenceDataLoader(stream, _resourceLoader);
     }
 
     public void Load(out DatabaseModel db)
@@ -56,6 +58,27 @@ public class MainLoader
                 {
                     _logger.Log(LogLevel.Warning, exception: e, "Exception when loading program {}", i);
                     db.FailedPrograms[i] = e.Message;
+                }
+            }
+        }
+        
+        //sequences
+        for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count; i++)
+        {
+            try
+            {
+                _sequenceLoader.Read(i, out var sequence);
+                db.Sequences[i] = sequence;
+            }
+            catch (UnknownResourceException)
+            {
+                // non-issue
+            }
+            catch (Exception e)
+            {
+                if (!e.Message.Contains("Null offset"))
+                {
+                    _logger.Log(LogLevel.Warning, exception: e, "Exception when loading sequence {}", i);
                 }
             }
         }

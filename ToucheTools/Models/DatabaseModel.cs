@@ -16,4 +16,6 @@ public class DatabaseModel
     public Dictionary<int, PaletteDataModel> Palettes { get; set; } = new Dictionary<int, PaletteDataModel>();
 
     public Dictionary<int, string> FailedRooms { get; set; } = new Dictionary<int, string>();
+
+    public Dictionary<int, SequenceDataModel> Sequences { get; set; } = new Dictionary<int, SequenceDataModel>();
 }

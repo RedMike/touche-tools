@@ -160,6 +160,31 @@ public class MainExporter
                 _resourceExporter.Export(Resource.Program, i, offset);
             }
         }
+        
+        foreach (var pair in db.Sequences)
+        {
+            var id = pair.Key;
+            var sequence = pair.Value;
+            using var memStream = new MemoryStream();
+            var sequenceExporter = new SequenceDataExporter(memStream);
+            sequenceExporter.Export(sequence);
+            var bytes = memStream.GetBuffer();
+            
+            var offset = AllocateAndReturnOffset(bytes.Length);
+            //save the actual data first
+            _stream.Seek(offset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //now save the offset for it
+            _resourceExporter.Export(Resource.Sequence, id, offset);
+        }
+        //now also save programs that are empty so that the size calculations work, and an additional final program
+        for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count + 1; i++)
+        {
+            if (!db.Sequences.ContainsKey(i))
+            {
+                _resourceExporter.Export(Resource.Sequence, i, 0);
+            }
+        }
     }
 
     private int AllocateAndReturnOffset(int size)
