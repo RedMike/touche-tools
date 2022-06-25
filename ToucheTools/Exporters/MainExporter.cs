@@ -109,6 +109,31 @@ public class MainExporter
                 _resourceExporter.Export(Resource.SpriteImage, i, 0);
             }
         }
+        
+        foreach (var pair in db.Icons)
+        {
+            var id = pair.Key;
+            var iconImage = pair.Value.Value;
+            using var memStream = new MemoryStream();
+            var iconExporter = new IconImageDataExporter(memStream);
+            iconExporter.Export(iconImage);
+            var bytes = memStream.GetBuffer();
+            
+            var offset = AllocateAndReturnOffset(bytes.Length);
+            //save the actual data first
+            _stream.Seek(offset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //now save the offset for it
+            _resourceExporter.Export(Resource.IconImage, id, offset);
+        }
+        //also save resources we don't have, as null offsets
+        for (var i = 0; i < Resources.DataInfo[Resource.IconImage].Count; i++)
+        {
+            if (!db.Icons.ContainsKey(i))
+            {
+                _resourceExporter.Export(Resource.IconImage, i, 0);
+            }
+        }
 
         foreach (var pair in db.Programs)
         {
