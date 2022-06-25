@@ -16,20 +16,26 @@ public class MainDataLoader
         _reader = new BinaryReader(_stream, Encoding.ASCII, true);
     }
 
-    public void Read(out TextDataModel textData, out BackdropDataModel backdrop)
+    public void Read(out TextDataModel? textData, out BackdropDataModel? backdrop)
     {
         _stream.Seek(64, SeekOrigin.Begin);
         
         uint textDataOffs = _reader.ReadUInt32();
         uint textDataSize = _reader.ReadUInt32();
+        textData = new TextDataModel();
+        textData.Offsets = textDataOffs;
+        textData.Size = textDataSize;
+        
         _stream.Seek((int)textDataOffs, SeekOrigin.Begin);
         byte[] rawTextData = _reader.ReadBytes((int)textDataSize);
-        textData = new TextDataModel((int)textDataSize, rawTextData);
+        textData.Data = rawTextData;
 
         _stream.Seek(2, SeekOrigin.Begin);
 
         ushort bw = _reader.ReadUInt16();
         ushort bh = _reader.ReadUInt16();
-        backdrop = new BackdropDataModel((int)bw, (int)bh);
+        backdrop = new BackdropDataModel();
+        backdrop.Width = bw;
+        backdrop.Height = bh;
     }
 }

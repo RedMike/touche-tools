@@ -40,6 +40,11 @@ public class MainLoader
         //TODO: load everything
         db = new DatabaseModel();
         
+        //main data
+        _mainDataLoader.Read(out var textData, out var backdrop);
+        db.Text = textData;
+        db.Backdrop = backdrop;
+        
         //programs
         for (var i = 0; i <= Resources.DataInfo[Resource.Program].Count; i++)
         {

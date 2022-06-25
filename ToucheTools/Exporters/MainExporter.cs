@@ -42,6 +42,24 @@ public class MainExporter
     public void Export(DatabaseModel db)
     {
         //TODO: export everything
+        if (db.Text == null)
+        {
+            throw new Exception("Missing text data");
+        }
+
+        _stream.Seek(64, SeekOrigin.Begin);
+        _writer.Write((uint)db.Text.Offsets);
+        _writer.Write((uint)db.Text.Size);
+        _stream.Seek(db.Text.Offsets, SeekOrigin.Begin);
+        _writer.Write(db.Text.Data);
+        
+        if (db.Backdrop == null)
+        {
+            throw new Exception("Missing backdrop data");
+        }
+        _stream.Seek(2, SeekOrigin.Begin);
+        _writer.Write((ushort)db.Backdrop.Width);
+        _writer.Write((ushort)db.Backdrop.Height);
         
         for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count-1; i++)
         {

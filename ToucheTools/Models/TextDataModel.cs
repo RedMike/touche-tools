@@ -1,25 +1,9 @@
-﻿using System.Text;
-using Microsoft.Extensions.Logging;
-
-namespace ToucheTools.Models;
+﻿namespace ToucheTools.Models;
 
 public class TextDataModel
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(TextDataModel));
+    public uint Offsets { get; set; }
+    public uint Size { get; set; }
     
-    private readonly int _size;
-    private readonly string _data;
-
-    public TextDataModel(int size, byte[] data)
-    {
-        _size = size;
-        _data = Encoding.ASCII.GetString(data);
-
-        if (_data.Length > _size)
-        {
-            _logger.Log(LogLevel.Warning, "Got text data of length {} but was supposed to be {}", _data.Length, _size);
-        }
-        _logger.Log(LogLevel.Information, "Text Data Size: {}", _size);
-        _logger.Log(LogLevel.Debug, "Text Data: {}", _data);
-    }
+    public byte[] Data { get; set; }
 }
