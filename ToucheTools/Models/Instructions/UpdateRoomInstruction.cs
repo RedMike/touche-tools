@@ -1,8 +1,8 @@
 ﻿namespace ToucheTools.Models.Instructions;
 
-public class UpdateRoomAreasInstruction : BaseInstruction
+public class UpdateRoomInstruction : BaseInstruction
 {
-    public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.UpdateRoomAreas;
+    public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.UpdateRoom;
     
     public ushort Area { get; set; }
 
@@ -18,6 +18,6 @@ public class UpdateRoomAreasInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} area {Area} with redrawing";
+        return $"{Opcode:G} area {Area} without redrawing";
     }
 }
