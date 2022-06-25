@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ToucheTools.Helpers;
 using ToucheTools.Models;
+using ToucheTools.Models.Instructions;
 
 namespace ToucheTools.Loaders;
 
@@ -17,9 +18,9 @@ public class ProgramInstructionDataLoader
         _reader = new BinaryReader(_stream, Encoding.ASCII, true);
     }
 
-    public void Read(int offset, out List<string> instructions)
+    public void Read(int offset, out List<BaseInstruction> instructions)
     {
-        instructions = new List<string>();
+        instructions = new List<BaseInstruction>();
         
         _stream.Seek(offset, SeekOrigin.Begin);
         while (true)
@@ -46,7 +47,7 @@ public class ProgramInstructionDataLoader
             var instruction = ProgramInstructionHelper.Get(opcode);
             instruction.Load(_reader);
             _logger.Log(LogLevel.Debug, "Instruction: {}", instruction.ToString());
-            instructions.Add(instruction.ToString());
+            instructions.Add(instruction);
         }
     }
 }

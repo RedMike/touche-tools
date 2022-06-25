@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models;
+﻿using ToucheTools.Models.Instructions;
+
+namespace ToucheTools.Models;
 
 public class ProgramDataModel
 {
@@ -163,5 +165,5 @@ public class ProgramDataModel
     public List<Area> Areas { get; set; } = new List<Area>();
     public List<Background> Backgrounds { get; set; } = new List<Background>();
 
-    public List<string> Instructions { get; set; } = new List<string>();
+    public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
 }

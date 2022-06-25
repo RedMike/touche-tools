@@ -45,11 +45,53 @@
 
 <div>
     <h1 class="display-4">Program @programId</h1>
+    <h5 class="display-5">Rectangles</h5>
+    <ul>
+        @for (var i = 0; i < Model.Rects.Count; i++)
+        {
+            var rect = Model.Rects[i];
+            <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@rect.X x @rect.Y to @(rect.X + rect.W) x @(rect.Y + rect.H)</span></li>
+        }
+    </ul>
+    
+    <h5 class="display-5">Points</h5>
+    <ul>
+        @for (var i = 0; i < Model.Points.Count; i++)
+        {
+            var point = Model.Points[i];
+            <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@point.X x @point.Y x @point.Z order @point.Order</span></li>
+        }
+    </ul>
+    
+    <h5 class="display-5">Areas</h5>
+    <ul>
+        @for (var i = 0; i < Model.Areas.Count; i++)
+        {
+            var area = Model.Areas[i];
+            var rect = area.Rect;
+            <li><span class="text-dark fw-bold">@i - </span>
+                <span class="text-dark">@area.Id 
+                with rect @rect.X x @rect.Y to @(rect.X+rect.W) x @(rect.Y + rect.H), 
+                with source @area.SrcX x @area.SrcY, 
+                with state @area.State, 
+                animation @area.AnimationCount @area.AnimationNext</span></li>
+        }
+    </ul>
+    
+    <h5 class="display-5">Walks</h5>
+    <ul>
+        @for (var i = 0; i < Model.Walks.Count; i++)
+        {
+            var walk = Model.Walks[i];
+            <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">Point @walk.Point1 to point @walk.Point2, clip rect @walk.ClipRect, areas @walk.Area1 @walk.Area2</span></li>
+        }
+    </ul>
+    
     <h5 class="display-5">Instructions</h5>
     <ul>
         @foreach (var instruction in Model.Instructions)
         {
-            <li><span class="text-dark">@instruction</span></li>
+            <li><span class="text-dark">@instruction.ToString()</span></li>
         }
     </ul>
 </div>
