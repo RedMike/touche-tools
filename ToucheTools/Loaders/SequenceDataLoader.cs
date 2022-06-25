@@ -25,6 +25,7 @@ public class SequenceDataLoader
         _stream.Seek(offset, SeekOrigin.Begin);
 
         sequence = new SequenceDataModel();
+        sequence.Bytes = new byte[16000];
         _stream.Read(sequence.Bytes, 0, 16000);
     }
 }
