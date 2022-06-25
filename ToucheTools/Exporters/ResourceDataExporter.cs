@@ -19,7 +19,11 @@ public class ResourceDataExporter
 
     public void Export(Resource resource, int number, int offset)
     {
-        if (Resources.DataInfo[resource].Count < number)
+        if (number < 0)
+        {
+            throw new UnknownResourceException();
+        }
+        if (Resources.DataInfo[resource].Count <= number)
         {
             throw new UnknownResourceException();
         }

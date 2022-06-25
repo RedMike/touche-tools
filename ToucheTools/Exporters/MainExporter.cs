@@ -43,18 +43,26 @@ public class MainExporter
     {
         //TODO: export everything
 
+        //also save resources we don't have, as null offsets
+        for (var i = 1; i < Resources.DataInfo[Resource.RoomInfo].Count; i++)
+        {
+            if (!db.Palettes.ContainsKey(i))
+            {
+                _resourceExporter.Export(Resource.RoomInfo, i-1, 0);
+            }
+        }
         foreach (var pair in db.Palettes)
         {
             var id = pair.Key;
             var palette = pair.Value;
             var roomImageNum = 0;
-            if (db.RoomImages.ContainsKey(id))
+            if (db.RoomImages.ContainsKey(id-1))
             {
-                roomImageNum = id;
+                roomImageNum = id-1;
                 //first save the room image as it's referenced by the room info
                 using var roomImageStream = new MemoryStream();
                 var roomImageExporter = new RoomImageDataExporter(roomImageStream);
-                roomImageExporter.Export(db.RoomImages[id].Value);
+                roomImageExporter.Export(db.RoomImages[roomImageNum].Value);
                 var roomImageBytes = roomImageStream.GetBuffer();
                 var roomImageOffset = AllocateAndReturnOffset(roomImageBytes.Length);
                 //save the actual data first
@@ -74,17 +82,17 @@ public class MainExporter
             _stream.Seek(offset, SeekOrigin.Begin);
             _writer.Write(bytes);
             //now save the offset for it
-            _resourceExporter.Export(Resource.RoomInfo, id, offset);
-        }
-        //also save resources we don't have, as null offsets
-        for (var i = 0; i < Resources.DataInfo[Resource.RoomInfo].Count; i++)
-        {
-            if (!db.Palettes.ContainsKey(i + 1))
-            {
-                _resourceExporter.Export(Resource.RoomInfo, i + 1, 0);
-            }
+            _resourceExporter.Export(Resource.RoomInfo, id-1, offset);
         }
 
+        //also save resources we don't have, as null offsets
+        for (var i = 0; i < Resources.DataInfo[Resource.SpriteImage].Count-1; i++)
+        {
+            if (!db.Sprites.ContainsKey(i))
+            {
+                _resourceExporter.Export(Resource.SpriteImage, i, 0);
+            }
+        }
         foreach (var pair in db.Sprites)
         {
             var id = pair.Key;
@@ -99,17 +107,18 @@ public class MainExporter
             _stream.Seek(offset, SeekOrigin.Begin);
             _writer.Write(bytes);
             //now save the offset for it
+            _logger.LogError("sprite: {} to {}", id, offset);
             _resourceExporter.Export(Resource.SpriteImage, id, offset);
         }
+        
         //also save resources we don't have, as null offsets
-        for (var i = 0; i < Resources.DataInfo[Resource.SpriteImage].Count; i++)
+        for (var i = 0; i < Resources.DataInfo[Resource.IconImage].Count-1; i++)
         {
-            if (!db.Sprites.ContainsKey(i))
+            if (!db.Icons.ContainsKey(i))
             {
-                _resourceExporter.Export(Resource.SpriteImage, i, 0);
+                _resourceExporter.Export(Resource.IconImage, i, 0);
             }
         }
-        
         foreach (var pair in db.Icons)
         {
             var id = pair.Key;
@@ -125,14 +134,6 @@ public class MainExporter
             _writer.Write(bytes);
             //now save the offset for it
             _resourceExporter.Export(Resource.IconImage, id, offset);
-        }
-        //also save resources we don't have, as null offsets
-        for (var i = 0; i < Resources.DataInfo[Resource.IconImage].Count; i++)
-        {
-            if (!db.Icons.ContainsKey(i))
-            {
-                _resourceExporter.Export(Resource.IconImage, i, 0);
-            }
         }
 
         foreach (var pair in db.Programs)
@@ -152,7 +153,7 @@ public class MainExporter
             _resourceExporter.Export(Resource.Program, id, offset);
         }
         //now also save programs that are empty so that the size calculations work, and an additional final program
-        for (var i = 0; i < Resources.DataInfo[Resource.Program].Count + 1; i++)
+        for (var i = 0; i < Resources.DataInfo[Resource.Program].Count; i++)
         {
             if (!db.Programs.ContainsKey(i))
             {
@@ -161,6 +162,14 @@ public class MainExporter
             }
         }
         
+        for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count-1; i++)
+        {
+            //also save resources we don't have, as null offsets
+            if (!db.Sequences.ContainsKey(i))
+            {
+                _resourceExporter.Export(Resource.Sequence, i, 0);
+            }
+        }
         foreach (var pair in db.Sequences)
         {
             var id = pair.Key;
@@ -176,14 +185,6 @@ public class MainExporter
             _writer.Write(bytes);
             //now save the offset for it
             _resourceExporter.Export(Resource.Sequence, id, offset);
-        }
-        //now also save programs that are empty so that the size calculations work, and an additional final program
-        for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count + 1; i++)
-        {
-            if (!db.Sequences.ContainsKey(i))
-            {
-                _resourceExporter.Export(Resource.Sequence, i, 0);
-            }
         }
     }
 
