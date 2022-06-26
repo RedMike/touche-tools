@@ -35,186 +35,216 @@ public class ProgramDataLoader
         program = new ProgramDataModel();
         uint programOffset = 0;
         //rects
-        //TODO: check if program actually exists or if each section exists
-        programStream.Seek(20, SeekOrigin.Begin);
-        programOffset = programReader.ReadUInt32();
-        programStream.Seek(programOffset, SeekOrigin.Begin);
-        while(true)
+        if (programStream.Length > 20)
         {
-            var x = programReader.ReadUInt16();
-            var y = programReader.ReadUInt16();
-            var w = programReader.ReadUInt16();
-            var h = programReader.ReadUInt16();
-            if (x == ushort.MaxValue)
+            programStream.Seek(20, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while (true)
             {
-                break;
-            }
-            program.Rects.Add(new ProgramDataModel.Rect()
-            {
-                X = x,
-                Y = y,
-                W = w,
-                H = h
-            });
-            _logger.Log(LogLevel.Information, "Rect: {}x{} {}x{}", x, y, w, h);
-        }
-        _logger.Log(LogLevel.Debug, "Rects found: {}", program.Rects.Count);
-        
-        //points
-        programStream.Seek(24, SeekOrigin.Begin);
-        programOffset = programReader.ReadUInt32();
-        programStream.Seek(programOffset, SeekOrigin.Begin);
-        while(true)
-        {
-            var x = programReader.ReadUInt16();
-            var y = programReader.ReadUInt16();
-            var z = programReader.ReadUInt16();
-            var order = programReader.ReadUInt16();
-            if (x == ushort.MaxValue)
-            {
-                break;
-            }
-            program.Points.Add(new ProgramDataModel.Point()
-            {
-                X = x,
-                Y = y,
-                Z = z,
-                Order = order
-            });
-            _logger.Log(LogLevel.Debug, "Point: {}x{}x{} {}", x, y, z, order);
-        }
-        _logger.Log(LogLevel.Information, "Points found: {}", program.Points.Count);
-        
-        //walks
-        programStream.Seek(28, SeekOrigin.Begin);
-        programOffset = programReader.ReadUInt32();
-        programStream.Seek(programOffset, SeekOrigin.Begin);
-        while(true)
-        {
-            var point1 = programReader.ReadUInt16();
-            if (point1 == ushort.MaxValue)
-            {
-                break;
+                var x = programReader.ReadUInt16();
+                var y = programReader.ReadUInt16();
+                var w = programReader.ReadUInt16();
+                var h = programReader.ReadUInt16();
+                if (x == ushort.MaxValue)
+                {
+                    break;
+                }
+
+                program.Rects.Add(new ProgramDataModel.Rect()
+                {
+                    X = x,
+                    Y = y,
+                    W = w,
+                    H = h
+                });
+                _logger.Log(LogLevel.Information, "Rect: {}x{} {}x{}", x, y, w, h);
             }
 
-            if (point1 >= program.Points.Count)
-            {
-                throw new Exception($"Unknown point referenced: {point1} out of {program.Points.Count}");
-            }
-            var point2 = programReader.ReadUInt16();
-            if (point2 >= program.Points.Count)
-            {
-                throw new Exception($"Unknown point referenced:  {point2} out of {program.Points.Count}");
-            }
-            var clipRect = programReader.ReadUInt16();
-            var area1 = programReader.ReadUInt16();
-            var area2 = programReader.ReadUInt16();
-            programStream.Seek(12, SeekOrigin.Current); //unused
-            program.Walks.Add(new ProgramDataModel.Walk()
-            {
-                Point1 = point1,
-                Point2 = point2,
-                ClipRect = clipRect,
-                Area1 = area1,
-                Area2 = area2
-            });
-            _logger.Log(LogLevel.Debug, "Walk: {}->{} clip {} areas {} {}", point1, point2, clipRect, area1, area2);
+            _logger.Log(LogLevel.Debug, "Rects found: {}", program.Rects.Count);
         }
-        _logger.Log(LogLevel.Information, "Walks found: {}", program.Walks.Count);
-        
+
+        //points
+        if (programStream.Length > 24)
+        {
+            programStream.Seek(24, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while (true)
+            {
+                var x = programReader.ReadUInt16();
+                var y = programReader.ReadUInt16();
+                var z = programReader.ReadUInt16();
+                var order = programReader.ReadUInt16();
+                if (x == ushort.MaxValue)
+                {
+                    break;
+                }
+
+                program.Points.Add(new ProgramDataModel.Point()
+                {
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Order = order
+                });
+                _logger.Log(LogLevel.Debug, "Point: {}x{}x{} {}", x, y, z, order);
+            }
+
+            _logger.Log(LogLevel.Information, "Points found: {}", program.Points.Count);
+        }
+
+        //walks
+        if (programStream.Length > 28)
+        {
+            programStream.Seek(28, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while (true)
+            {
+                var point1 = programReader.ReadUInt16();
+                if (point1 == ushort.MaxValue)
+                {
+                    break;
+                }
+
+                if (point1 > program.Points.Count)
+                {
+                    throw new Exception($"Unknown point referenced: {point1} out of {program.Points.Count}");
+                }
+
+                var point2 = programReader.ReadUInt16();
+                if (point2 > program.Points.Count)
+                {
+                    throw new Exception($"Unknown point referenced: {point2} out of {program.Points.Count}");
+                }
+
+                var clipRect = programReader.ReadUInt16();
+                var area1 = programReader.ReadUInt16();
+                var area2 = programReader.ReadUInt16();
+                programStream.Seek(12, SeekOrigin.Current); //unused
+                program.Walks.Add(new ProgramDataModel.Walk()
+                {
+                    Point1 = point1,
+                    Point2 = point2,
+                    ClipRect = clipRect,
+                    Area1 = area1,
+                    Area2 = area2
+                });
+                _logger.Log(LogLevel.Debug, "Walk: {}->{} clip {} areas {} {}", point1, point2, clipRect, area1, area2);
+            }
+
+            _logger.Log(LogLevel.Information, "Walks found: {}", program.Walks.Count);
+        }
+
         //areas
-        programStream.Seek(8, SeekOrigin.Begin);
-        programOffset = programReader.ReadUInt32();
-        programStream.Seek(programOffset, SeekOrigin.Begin);
-        while(true)
+        if (programStream.Length > 8)
         {
-            var x = programReader.ReadUInt16();
-            if (x == ushort.MaxValue)
+            programStream.Seek(8, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while (true)
             {
-                break;
+                var x = programReader.ReadUInt16();
+                if (x == ushort.MaxValue)
+                {
+                    break;
+                }
+
+                var y = programReader.ReadUInt16();
+                var w = programReader.ReadUInt16();
+                var h = programReader.ReadUInt16();
+                var srcX = programReader.ReadUInt16();
+                var srcY = programReader.ReadUInt16();
+                var id = programReader.ReadUInt16();
+                var state = programReader.ReadUInt16();
+                var animCount = programReader.ReadUInt16();
+                var animNext = programReader.ReadUInt16();
+
+                var rect = new ProgramDataModel.Rect()
+                {
+                    X = x,
+                    Y = y,
+                    W = w,
+                    H = h
+                };
+                var area = new ProgramDataModel.Area()
+                {
+                    Rect = rect,
+                    SrcX = srcX,
+                    SrcY = srcY,
+                    Id = id,
+                    State = state,
+                    AnimationCount = animCount,
+                    AnimationNext = animNext
+                };
+
+                program.Areas.Add(area);
+                _logger.Log(LogLevel.Debug, "Area: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, id, state,
+                    animCount, animNext);
             }
-            var y = programReader.ReadUInt16();
-            var w = programReader.ReadUInt16();
-            var h = programReader.ReadUInt16();
-            var srcX = programReader.ReadUInt16();
-            var srcY = programReader.ReadUInt16();
-            var id = programReader.ReadUInt16();
-            var state = programReader.ReadUInt16();
-            var animCount = programReader.ReadUInt16();
-            var animNext = programReader.ReadUInt16();
-            
-            var rect = new ProgramDataModel.Rect()
-            {
-                X = x,
-                Y = y,
-                W = w,
-                H = h
-            };
-            var area = new ProgramDataModel.Area()
-            {
-                Rect = rect,
-                SrcX = srcX,
-                SrcY = srcY,
-                Id = id,
-                State = state,
-                AnimationCount = animCount,
-                AnimationNext = animNext
-            };
-            
-            program.Areas.Add(area);
-            _logger.Log(LogLevel.Debug, "Area: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, id, state, animCount, animNext);
+
+            _logger.Log(LogLevel.Information, "Areas found: {}", program.Areas.Count);
         }
-        _logger.Log(LogLevel.Information, "Areas found: {}", program.Areas.Count);
-        
+
         //backgrounds
-        programStream.Seek(12, SeekOrigin.Begin);
-        programOffset = programReader.ReadUInt32();
-        programStream.Seek(programOffset, SeekOrigin.Begin);
-        while(true)
+        if (programStream.Length > 12)
         {
-            var x = programReader.ReadUInt16();
-            if (x == ushort.MaxValue)
+            programStream.Seek(12, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while (true)
             {
-                break;
+                var x = programReader.ReadUInt16();
+                if (x == ushort.MaxValue)
+                {
+                    break;
+                }
+
+                var y = programReader.ReadUInt16();
+                var w = programReader.ReadUInt16();
+                var h = programReader.ReadUInt16();
+                var srcX = programReader.ReadUInt16();
+                var srcY = programReader.ReadUInt16();
+                var type = programReader.ReadUInt16();
+                var bgOffset = programReader.ReadUInt16();
+                var scaleMul = programReader.ReadUInt16();
+                var scaleDiv = programReader.ReadUInt16();
+
+                var rect = new ProgramDataModel.Rect()
+                {
+                    X = x,
+                    Y = y,
+                    W = w,
+                    H = h
+                };
+                var bg = new ProgramDataModel.Background()
+                {
+                    Rect = rect,
+                    SrcX = srcX,
+                    SrcY = srcY,
+                    Type = type,
+                    Offset = bgOffset,
+                    ScaleMul = scaleMul,
+                    ScaleDiv = scaleDiv
+                };
+
+                program.Backgrounds.Add(bg);
+                _logger.Log(LogLevel.Debug, "Background: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, type,
+                    bgOffset, scaleMul, scaleDiv);
             }
-            var y = programReader.ReadUInt16();
-            var w = programReader.ReadUInt16();
-            var h = programReader.ReadUInt16();
-            var srcX = programReader.ReadUInt16();
-            var srcY = programReader.ReadUInt16();
-            var type = programReader.ReadUInt16();
-            var bgOffset = programReader.ReadUInt16();
-            var scaleMul = programReader.ReadUInt16();
-            var scaleDiv = programReader.ReadUInt16();
-            
-            var rect = new ProgramDataModel.Rect()
-            {
-                X = x,
-                Y = y,
-                W = w,
-                H = h
-            };
-            var bg = new ProgramDataModel.Background()
-            {
-                Rect = rect,
-                SrcX = srcX,
-                SrcY = srcY,
-                Type = type,
-                Offset = bgOffset,
-                ScaleMul = scaleMul,
-                ScaleDiv = scaleDiv
-            };
-            
-            program.Backgrounds.Add(bg);
-            _logger.Log(LogLevel.Debug, "Background: {}x{}x{}x{} {}x{} {} {} {} {}", x, y, w, h, srcX, srcY, type, bgOffset, scaleMul, scaleDiv);
+
+            _logger.Log(LogLevel.Information, "Backgrounds found: {}", program.Backgrounds.Count);
         }
-        _logger.Log(LogLevel.Information, "Backgrounds found: {}", program.Backgrounds.Count);
-        
+
         //operations
-        programStream.Seek(32, SeekOrigin.Begin);
-        programOffset = programReader.ReadUInt32();
-        var programInstructionLoader = new ProgramInstructionDataLoader(programStream);
-        programInstructionLoader.Read((int)programOffset, out var instructions);
-        program.Instructions = instructions;
+        if (programStream.Length > 32)
+        {
+            programStream.Seek(32, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            var programInstructionLoader = new ProgramInstructionDataLoader(programStream);
+            programInstructionLoader.Read((int)programOffset, out var instructions);
+            program.Instructions = instructions;
+        }
     }
 }
