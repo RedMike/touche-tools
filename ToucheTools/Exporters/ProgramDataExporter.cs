@@ -18,13 +18,12 @@ public class ProgramDataExporter
 
     public void Export(ProgramDataModel program)
     {
-        var startOfDataSegment = 128;
-        var gapBetweenBlocks = 0;
-        var nextOffset = startOfDataSegment + gapBetweenBlocks;
+        var startOfDataSegment = 48;
+        var nextOffset = startOfDataSegment;
         var allocate = (int size) =>
         {
             var offset = nextOffset;
-            nextOffset += size + gapBetweenBlocks;
+            nextOffset += size;
             return offset;
         };
 

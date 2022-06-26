@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using ToucheTools.Constants;
+using ToucheTools.Exceptions;
 using ToucheTools.Models;
 
 namespace ToucheTools.Loaders;
@@ -25,7 +26,11 @@ public class MusicDataLoader
         _stream.Seek(offset, SeekOrigin.Begin);
 
         music = new MusicDataModel();
-        
+
+        if (size <= 0)
+        {
+            throw new UnknownResourceException();
+        }
         var rawMusic = _reader.ReadBytes(size);
         music.RawData = rawMusic;
     }

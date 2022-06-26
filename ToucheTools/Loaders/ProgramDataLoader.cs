@@ -24,7 +24,7 @@ public class ProgramDataLoader
         _resourceDataLoader.Read(Resource.Program, number, true, out var offset, out var size);
         if (size > Game.MaxProgramDataSize)
         {
-            throw new Exception("Program too large!");
+            throw new Exception($"Program too large! Max: {Game.MaxProgramDataSize} Got: {size}");
         }
 
         _stream.Seek(offset, SeekOrigin.Begin);
@@ -33,6 +33,7 @@ public class ProgramDataLoader
         using var programReader = new BinaryReader(programStream);
 
         program = new ProgramDataModel();
+        program.OriginalSize = size;
         uint programOffset = 0;
         //rects
         if (programStream.Length > 20)

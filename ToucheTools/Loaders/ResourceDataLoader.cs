@@ -41,7 +41,7 @@ public class ResourceDataLoader
         {
             uint nextOffset = _reader.ReadUInt32();
             size = (int)(nextOffset - offset);
-            if (size < 0)
+            if (size <= 0)
             {
                 throw new UnknownResourceException();
             }

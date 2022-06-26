@@ -166,4 +166,6 @@ public class ProgramDataModel
     public List<Background> Backgrounds { get; set; } = new List<Background>();
 
     public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
+    
+    public int OriginalSize { get; set; }
 }

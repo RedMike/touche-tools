@@ -9,9 +9,8 @@ public class MainExporter
 {
     private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(MainExporter));
     private const int GapBetweenOffsetBlockAndDataBlock = 100; //how many bytes to leave between offsets and data block
-    private const int DataBlockEntityOffsetGap = 2; //how many bytes to leave between entities in data block
     private static readonly int StartOfDataBlockOffset; //where the data can live
-    private int _currentNextEntityOffset = DataBlockEntityOffsetGap; //where the data will currently be inserted
+    private int _currentNextEntityOffset = 0; //where the data will currently be inserted
 
     private readonly Stream _stream;
     private readonly BinaryWriter _writer;
@@ -179,56 +178,54 @@ public class MainExporter
             _resourceExporter.Export(Resource.IconImage, id, offset);
         }
 
-        foreach (var pair in db.Programs)
-        {
-            var id = pair.Key;
-            var program = pair.Value;
-            using var memStream = new MemoryStream();
-            var programExporter = new ProgramDataExporter(memStream);
-            programExporter.Export(program);
-            var bytes = memStream.GetBuffer();
-            
-            var offset = AllocateAndReturnOffset(bytes.Length);
-            //save the actual data first
-            _stream.Seek(offset, SeekOrigin.Begin);
-            _writer.Write(bytes);
-            //now save the offset for it
-            _resourceExporter.Export(Resource.Program, id, offset);
-        }
-        //now also save programs that are empty so that the size calculations work, and an additional final program
+        //also save programs that are empty so that the size calculations work, and an additional final program
         for (var i = 0; i <= Resources.DataInfo[Resource.Program].Count; i++)
         {
             if (!db.Programs.ContainsKey(i))
             {
-                var offset = AllocateAndReturnOffset(4);
-                _resourceExporter.Export(Resource.Program, i, offset);
+                _resourceExporter.Export(Resource.Program, i, _currentNextEntityOffset + StartOfDataBlockOffset);
+            }
+            else
+            {
+                var id = i;
+                var program = db.Programs[i];
+                using var memStream = new MemoryStream();
+                var programExporter = new ProgramDataExporter(memStream);
+                programExporter.Export(program);
+                var bytes = memStream.GetBuffer();
+            
+                var offset = AllocateAndReturnOffset(bytes.Length);
+                //save the actual data first
+                _stream.Seek(offset, SeekOrigin.Begin);
+                _writer.Write(bytes);
+                //now save the offset for it
+                _resourceExporter.Export(Resource.Program, id, offset);
             }
         }
         
         //also save resources we don't have, as null offsets
-        for (var i = 0; i < Resources.DataInfo[Resource.Music].Count; i++)
+        for (var i = 0; i <= Resources.DataInfo[Resource.Music].Count; i++)
         {
             if (!db.MusicTracks.ContainsKey(i))
             {
-                var offset = AllocateAndReturnOffset(4);
-                _resourceExporter.Export(Resource.Music, i, offset);
+                _resourceExporter.Export(Resource.Music, i, _currentNextEntityOffset + StartOfDataBlockOffset);
             }
-        }
-        foreach (var pair in db.MusicTracks)
-        {
-            var id = pair.Key;
-            var music = pair.Value;
-            using var memStream = new MemoryStream();
-            var musicExporter = new MusicDataExporter(memStream);
-            musicExporter.Export(music);
-            var bytes = memStream.GetBuffer();
+            else
+            {
+                var id = i;
+                var music = db.MusicTracks[i];
+                using var memStream = new MemoryStream();
+                var musicExporter = new MusicDataExporter(memStream);
+                musicExporter.Export(music);
+                var bytes = memStream.GetBuffer();
             
-            var offset = AllocateAndReturnOffset(bytes.Length);
-            //save the actual data first
-            _stream.Seek(offset, SeekOrigin.Begin);
-            _writer.Write(bytes);
-            //now save the offset for it
-            _resourceExporter.Export(Resource.Music, id, offset);
+                var offset = AllocateAndReturnOffset(bytes.Length);
+                //save the actual data first
+                _stream.Seek(offset, SeekOrigin.Begin);
+                _writer.Write(bytes);
+                //now save the offset for it
+                _resourceExporter.Export(Resource.Music, id, offset);
+            }
         }
         
         //also save resources we don't have, as null offsets
@@ -236,32 +233,31 @@ public class MainExporter
         {
             if (!db.Sounds.ContainsKey(i))
             {
-                var offset = AllocateAndReturnOffset(4);
-                _resourceExporter.Export(Resource.Sound, i, offset);
+                _resourceExporter.Export(Resource.Sound, i, _currentNextEntityOffset + StartOfDataBlockOffset);
             }
-        }
-        foreach (var pair in db.Sounds)
-        {
-            var id = pair.Key;
-            var sound = pair.Value;
-            using var memStream = new MemoryStream();
-            var soundExporter = new SoundDataExporter(memStream);
-            soundExporter.Export(sound);
-            var bytes = memStream.GetBuffer();
+            else
+            {
+                var id = i;
+                var sound = db.Sounds[i];
+                using var memStream = new MemoryStream();
+                var soundExporter = new SoundDataExporter(memStream);
+                soundExporter.Export(sound);
+                var bytes = memStream.GetBuffer();
             
-            var offset = AllocateAndReturnOffset(bytes.Length);
-            //save the actual data first
-            _stream.Seek(offset, SeekOrigin.Begin);
-            _writer.Write(bytes);
-            //now save the offset for it
-            _resourceExporter.Export(Resource.Sound, id, offset);
+                var offset = AllocateAndReturnOffset(bytes.Length);
+                //save the actual data first
+                _stream.Seek(offset, SeekOrigin.Begin);
+                _writer.Write(bytes);
+                //now save the offset for it
+                _resourceExporter.Export(Resource.Sound, id, offset);
+            }
         }
     }
 
     private int AllocateAndReturnOffset(int size)
     {
         var nextEntityOffset = _currentNextEntityOffset;
-        _currentNextEntityOffset += size + DataBlockEntityOffsetGap;
+        _currentNextEntityOffset += size;
         return nextEntityOffset + StartOfDataBlockOffset;
     }
 }
