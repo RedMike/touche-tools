@@ -70,7 +70,13 @@ public class ProgramDataModel
         public int Object2 { get; set; }
         public int Offset { get; set; }
     }
-    //TODO: Conversations
+
+    public class Conversation
+    {
+        public int Num { get; set; }
+        public int Offset { get; set; }
+        public int Message { get; set; }
+    }
     //TODO: Char script offset
 
     public enum Opcode
@@ -183,6 +189,7 @@ public class ProgramDataModel
     public List<Background> Backgrounds { get; set; } = new List<Background>();
     public List<Hitbox> Hitboxes { get; set; } = new List<Hitbox>();
     public List<ActionScriptOffset> ActionScriptOffsets { get; set; } = new List<ActionScriptOffset>();
+    public List<Conversation> Conversations { get; set; } = new List<Conversation>();
 
     public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
     

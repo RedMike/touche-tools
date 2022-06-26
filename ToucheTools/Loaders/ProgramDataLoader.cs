@@ -371,6 +371,34 @@ public class ProgramDataLoader
 
             _logger.Log(LogLevel.Information, "Action script offsets found: {}", program.ActionScriptOffsets.Count);
         }
+        
+        //conversations
+        if (programStream.Length > 44)
+        {
+            programStream.Seek(40, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(44, SeekOrigin.Begin);
+            var nextOffset = programReader.ReadUInt32();
+            var count = (nextOffset - programOffset) / 6;
+            
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            for (var i = 0; i < count; i++)
+            {
+                var num = programReader.ReadUInt16();
+                var offs = programReader.ReadUInt16();
+                var msg = programReader.ReadUInt16();
+                
+                program.Conversations.Add(new ProgramDataModel.Conversation()
+                {
+                    Num = num,
+                    Offset = offs,
+                    Message = msg
+                });
+                _logger.Log(LogLevel.Debug, "Conversations: {} {} {}", num, offs, msg);
+            }
+
+            _logger.Log(LogLevel.Information, "Conversations found: {}", program.Conversations.Count);
+        }
 
         //operations
         if (programStream.Length > 32)

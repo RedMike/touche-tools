@@ -46,7 +46,8 @@
             <li><a asp-area="" asp-controller="Home" asp-action="GetProgram" asp-all-route-data="programRouteData">@pair.Key (@pair.Value.OriginalSize bytes) - @program.Instructions.Count Instructions, @program.Areas.Count Areas, @program.Backgrounds.Count Backgrounds, 
                 @program.Points.Count Points, @program.Rects.Count Rectangles, 
                 @program.Walks.Count Walks, @program.Hitboxes.Count Hitboxes,
-                @program.ActionScriptOffsets.Count Action Script Offsets</a></li>
+                @program.ActionScriptOffsets.Count Action Script Offsets,
+                @program.Conversations.Count Conversations</a></li>
         }
         @foreach (var pair in Model.FailedPrograms)
         {

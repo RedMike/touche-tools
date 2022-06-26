@@ -254,8 +254,37 @@ public class ProgramDataExporter
             _stream.Seek(36, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);
         }
+        
+        //conversations
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var conversation in program.Conversations)
+            {
+                writer.Write((ushort)conversation.Num);
+                writer.Write((ushort)conversation.Offset);
+                writer.Write((ushort)conversation.Message);
+            }
 
-        //TODO: others
+            var bytes = memStream.GetBuffer();
+            var size = bytes.Length;
+
+            var programOffset = allocate(size);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //write the offset after writing the data
+            _stream.Seek(40, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
+        
+        //char script offsets
+        {
+            var programOffset = allocate(4);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            //write the offset after writing the data
+            _stream.Seek(44, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
         
         //instructions
         {

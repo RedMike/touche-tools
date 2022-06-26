@@ -121,14 +121,23 @@
     </ul>
     
     <h5 class="display-5">Action Script Offsets</h5>
-        <ul>
-            @for (var i = 0; i < Model.ActionScriptOffsets.Count; i++)
-            {
-                var aso = Model.ActionScriptOffsets[i];
-                <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@aso.Object1 does @aso.Action to @aso.Object2 offset @aso.Offset</span></li>
-            }
-        </ul>
+    <ul>
+        @for (var i = 0; i < Model.ActionScriptOffsets.Count; i++)
+        {
+            var aso = Model.ActionScriptOffsets[i];
+            <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@aso.Object1 does @aso.Action to @aso.Object2 offset @aso.Offset</span></li>
+        }
+    </ul>
     
+    <h5 class="display-5">Conversations</h5>
+    <ul>
+        @for (var i = 0; i < Model.Conversations.Count; i++)
+        {
+            var conv = Model.Conversations[i];
+            <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@conv.Num offset @conv.Offset msg @conv.Message</span></li>
+        }
+    </ul>
+
     <h5 class="display-5">Instructions</h5>
     <ul>
         @foreach (var instruction in Model.Instructions)
