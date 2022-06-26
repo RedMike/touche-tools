@@ -279,8 +279,21 @@ public class ProgramDataExporter
         
         //char script offsets
         {
-            var programOffset = allocate(4);
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var cso in program.CharScriptOffsets)
+            {
+                writer.Write((ushort)cso.Character);
+                writer.Write((ushort)cso.Offs);
+            }
+            writer.Write((ushort)0); //weirdly uses 0 instead of maxvalue
+
+            var bytes = memStream.GetBuffer();
+            var size = bytes.Length;
+
+            var programOffset = allocate(size);
             _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
             //write the offset after writing the data
             _stream.Seek(44, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);

@@ -77,7 +77,12 @@ public class ProgramDataModel
         public int Offset { get; set; }
         public int Message { get; set; }
     }
-    //TODO: Char script offset
+
+    public class CharScriptOffset
+    {
+        public int Character { get; set; }
+        public int Offs { get; set; }
+    }
 
     public enum Opcode
     {
@@ -190,6 +195,7 @@ public class ProgramDataModel
     public List<Hitbox> Hitboxes { get; set; } = new List<Hitbox>();
     public List<ActionScriptOffset> ActionScriptOffsets { get; set; } = new List<ActionScriptOffset>();
     public List<Conversation> Conversations { get; set; } = new List<Conversation>();
+    public List<CharScriptOffset> CharScriptOffsets { get; set; } = new List<CharScriptOffset>();
 
     public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
     

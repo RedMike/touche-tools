@@ -399,6 +399,33 @@ public class ProgramDataLoader
 
             _logger.Log(LogLevel.Information, "Conversations found: {}", program.Conversations.Count);
         }
+        
+        //char script offset
+        if (programStream.Length > 44)
+        {
+            programStream.Seek(44, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while(true)
+            {
+                var ch = programReader.ReadUInt16();
+                if (ch == 0)
+                {
+                    break;
+                }
+                var offs = programReader.ReadUInt16();
+                
+                program.CharScriptOffsets.Add(new ProgramDataModel.CharScriptOffset()
+                {
+                    Character = ch,
+                    Offs = offs
+                });
+                _logger.Log(LogLevel.Debug, "Char script offsets: {} {}", ch, offs);
+            }
+
+            _logger.Log(LogLevel.Information, "Char script offsets found: {}", program.CharScriptOffsets.Count);
+        }
 
         //operations
         if (programStream.Length > 32)

@@ -137,6 +137,15 @@
             <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@conv.Num offset @conv.Offset msg @conv.Message</span></li>
         }
     </ul>
+    
+    <h5 class="display-5">Character Script Offsets</h5>
+    <ul>
+        @for (var i = 0; i < Model.CharScriptOffsets.Count; i++)
+        {
+            var cso = Model.CharScriptOffsets[i];
+            <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@cso.Character offset @cso.Offs</span></li>
+        }
+    </ul>
 
     <h5 class="display-5">Instructions</h5>
     <ul>
