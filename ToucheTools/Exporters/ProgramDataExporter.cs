@@ -185,6 +185,50 @@ public class ProgramDataExporter
             _stream.Seek(12, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);
         }
+        
+        //hitboxes
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var hitbox in program.Hitboxes)
+            {
+                writer.Write((ushort)hitbox.Item);
+                writer.Write((ushort)hitbox.Talk);
+                writer.Write((ushort)hitbox.State);
+                writer.Write((ushort)hitbox.String);
+                writer.Write((ushort)hitbox.DefaultString);
+                writer.Write((ushort)hitbox.Actions[0]);
+                writer.Write((ushort)hitbox.Actions[1]);
+                writer.Write((ushort)hitbox.Actions[2]);
+                writer.Write((ushort)hitbox.Actions[3]);
+                writer.Write((ushort)hitbox.Actions[4]);
+                writer.Write((ushort)hitbox.Actions[5]);
+                writer.Write((ushort)hitbox.Actions[6]);
+                writer.Write((ushort)hitbox.Actions[7]);
+                writer.Write((ushort)hitbox.Rect1.X);
+                writer.Write((ushort)hitbox.Rect1.Y);
+                writer.Write((ushort)hitbox.Rect1.W);
+                writer.Write((ushort)hitbox.Rect1.H);
+                writer.Write((ushort)hitbox.Rect2.X);
+                writer.Write((ushort)hitbox.Rect2.Y);
+                writer.Write((ushort)hitbox.Rect2.W);
+                writer.Write((ushort)hitbox.Rect2.H);
+                writer.Write((uint)0); //unused
+                writer.Write((uint)0); //unused
+            }
+
+            writer.Write((ushort)0); //weirdly uses 0 instead of maxvalue
+            
+            var bytes = memStream.GetBuffer();
+            var size = bytes.Length;
+            
+            var programOffset = allocate(size);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //write the offset after writing the data
+            _stream.Seek(16, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
 
         //TODO: others
         
