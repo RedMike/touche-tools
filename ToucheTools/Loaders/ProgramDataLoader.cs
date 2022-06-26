@@ -334,10 +334,6 @@ public class ProgramDataLoader
                     break; //seems to be necessary because the game expects it to succeed even if EOS?
                 }
                 var object1 = programReader.ReadUInt16();
-                if (number == 11)
-                {
-                    _logger.LogError("test: {}", object1);
-                }
 
                 if (object1 == 0) //weirdly it uses 0 instead of maxvalue
                 {
