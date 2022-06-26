@@ -102,6 +102,24 @@
         }
     </ul>
     
+    
+    <h5 class="display-5">Hitboxes</h5>
+    <ul>
+        @for (var i = 0; i < Model.Hitboxes.Count; i++)
+        {
+            var hitbox = Model.Hitboxes[i];
+            var rect1 = hitbox.Rect1;
+            var rect2 = hitbox.Rect2;
+            <li><span class="text-dark fw-bold">@i - </span>
+                <span class="text-dark">@hitbox.Item 
+                    with rect1 @rect1.X x @rect1.Y to @(rect1.X+rect1.W) x @(rect1.Y + rect1.H),
+                    with rect2 @rect2.X x @rect2.Y to @(rect2.X+rect2.W) x @(rect2.Y + rect2.H),
+                    with talk @hitbox.Talk, state @hitbox.State,
+                    with string @hitbox.String, default @hitbox.DefaultString,
+                    with actions @string.Join(", ", hitbox.Actions)</span></li>
+        }
+    </ul>
+    
     <h5 class="display-5">Instructions</h5>
     <ul>
         @foreach (var instruction in Model.Instructions)

@@ -43,7 +43,7 @@
             var program = pair.Value;
             var programRouteData = new Dictionary<string, string>(routeData);
             programRouteData.Add("program", pair.Key.ToString());
-            <li><a asp-area="" asp-controller="Home" asp-action="GetProgram" asp-all-route-data="programRouteData">@pair.Key (@pair.Value.OriginalSize bytes) - @program.Instructions.Count Instructions, @program.Areas.Count Areas, @program.Backgrounds.Count Backgrounds, @program.Points.Count Points, @program.Rects.Count Rectangles, @program.Walks.Count Walks</a></li>
+            <li><a asp-area="" asp-controller="Home" asp-action="GetProgram" asp-all-route-data="programRouteData">@pair.Key (@pair.Value.OriginalSize bytes) - @program.Instructions.Count Instructions, @program.Areas.Count Areas, @program.Backgrounds.Count Backgrounds, @program.Points.Count Points, @program.Rects.Count Rectangles, @program.Walks.Count Walks, @program.Hitboxes.Count Hitboxes</a></li>
         }
         @foreach (var pair in Model.FailedPrograms)
         {

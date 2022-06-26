@@ -50,8 +50,18 @@ public class ProgramDataModel
         public int ScaleMul { get; set; }
         public int ScaleDiv { get; set; }
     }
-    
-    //TODO: Hitboxes
+
+    public class Hitbox
+    {
+        public int Item { get; set; }
+        public int Talk { get; set; }
+        public int State { get; set; }
+        public int String { get; set; }
+        public int DefaultString { get; set; }
+        public int[] Actions { get; set; } //always length 8
+        public Rect Rect1 { get; set; }
+        public Rect Rect2 { get; set; }
+    }
     //TODO: Action script offset
     //TODO: Conversations
     //TODO: Char script offset
@@ -164,6 +174,7 @@ public class ProgramDataModel
     public List<Walk> Walks { get; set; } = new List<Walk>();
     public List<Area> Areas { get; set; } = new List<Area>();
     public List<Background> Backgrounds { get; set; } = new List<Background>();
+    public List<Hitbox> Hitboxes { get; set; } = new List<Hitbox>();
 
     public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
     

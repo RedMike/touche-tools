@@ -237,6 +237,89 @@ public class ProgramDataLoader
 
             _logger.Log(LogLevel.Information, "Backgrounds found: {}", program.Backgrounds.Count);
         }
+        
+        //hitboxes
+        if (programStream.Length > 16)
+        {
+            programStream.Seek(16, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while (true)
+            {
+                var item = programReader.ReadUInt16();
+                if (item == 0) //weirdly it uses 0 instead of maxvalue
+                {
+                    break;
+                }
+
+                var talk = programReader.ReadUInt16();
+                var state = programReader.ReadUInt16();
+                var str = programReader.ReadUInt16();
+                var defaultStr = programReader.ReadUInt16();
+                var action1 = programReader.ReadUInt16();
+                var action2 = programReader.ReadUInt16();
+                var action3 = programReader.ReadUInt16();
+                var action4 = programReader.ReadUInt16();
+                var action5 = programReader.ReadUInt16();
+                var action6 = programReader.ReadUInt16();
+                var action7 = programReader.ReadUInt16();
+                var action8 = programReader.ReadUInt16();
+                var x1 = programReader.ReadUInt16();
+                var y1 = programReader.ReadUInt16();
+                var w1 = programReader.ReadUInt16();
+                var h1 = programReader.ReadUInt16();
+                var x2 = programReader.ReadUInt16();
+                var y2 = programReader.ReadUInt16();
+                var w2 = programReader.ReadUInt16();
+                var h2 = programReader.ReadUInt16();
+                try
+                {
+                    programReader.ReadUInt32(); //unused
+                    programReader.ReadUInt32(); //unused
+                }
+                catch (Exception)
+                {
+                    //ignore errors because these aren't used and sometimes not populated
+                    //but the game doesn't actually check them
+                }
+
+                var rect1 = new ProgramDataModel.Rect()
+                {
+                    X = x1,
+                    Y = y1,
+                    W = w1,
+                    H = h1
+                };
+                var rect2 = new ProgramDataModel.Rect()
+                {
+                    X = x2,
+                    Y = y2,
+                    W = w2,
+                    H = h2
+                };
+                var hitbox = new ProgramDataModel.Hitbox()
+                {
+                    Item = item,
+                    Talk = talk,
+                    State = state,
+                    String = str,
+                    DefaultString = defaultStr,
+                    Actions = new int[]
+                    {
+                        action1, action2, action3,
+                        action4, action5, action6,
+                        action7, action8
+                    },
+                    Rect1 = rect1,
+                    Rect2 = rect2
+                };
+
+                program.Hitboxes.Add(hitbox);
+                _logger.Log(LogLevel.Debug, "Hitbox: {} {}x{}x{}x{} {}x{}x{}x{}", item, x1, y1, w1, h1, x2, y2, w2, h2);
+            }
+
+            _logger.Log(LogLevel.Information, "Hitboxes found: {}", program.Hitboxes.Count);
+        }
 
         //operations
         if (programStream.Length > 32)
