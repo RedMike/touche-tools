@@ -62,7 +62,14 @@ public class ProgramDataModel
         public Rect Rect1 { get; set; }
         public Rect Rect2 { get; set; }
     }
-    //TODO: Action script offset
+
+    public class ActionScriptOffset
+    {
+        public int Object1 { get; set; }
+        public int Action { get; set; }
+        public int Object2 { get; set; }
+        public int Offset { get; set; }
+    }
     //TODO: Conversations
     //TODO: Char script offset
 
@@ -175,6 +182,7 @@ public class ProgramDataModel
     public List<Area> Areas { get; set; } = new List<Area>();
     public List<Background> Backgrounds { get; set; } = new List<Background>();
     public List<Hitbox> Hitboxes { get; set; } = new List<Hitbox>();
+    public List<ActionScriptOffset> ActionScriptOffsets { get; set; } = new List<ActionScriptOffset>();
 
     public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
     

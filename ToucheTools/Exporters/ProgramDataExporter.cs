@@ -229,6 +229,31 @@ public class ProgramDataExporter
             _stream.Seek(16, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);
         }
+        
+        //action script offsets
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var actionScriptOffset in program.ActionScriptOffsets)
+            {
+                writer.Write((ushort)actionScriptOffset.Object1);
+                writer.Write((ushort)actionScriptOffset.Action);
+                writer.Write((ushort)actionScriptOffset.Object2);
+                writer.Write((ushort)actionScriptOffset.Offset);
+            }
+
+            writer.Write((ushort)0); //weirdly uses 0 instead of maxvalue
+
+            var bytes = memStream.GetBuffer();
+            var size = bytes.Length;
+
+            var programOffset = allocate(size);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //write the offset after writing the data
+            _stream.Seek(36, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
 
         //TODO: others
         

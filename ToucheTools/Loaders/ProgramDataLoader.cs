@@ -320,6 +320,61 @@ public class ProgramDataLoader
 
             _logger.Log(LogLevel.Information, "Hitboxes found: {}", program.Hitboxes.Count);
         }
+        
+        //action script offsets
+        if (programStream.Length > 36)
+        {
+            programStream.Seek(36, SeekOrigin.Begin);
+            programOffset = programReader.ReadUInt32();
+            programStream.Seek(programOffset, SeekOrigin.Begin);
+            while (true)
+            {
+                if (programStream.Position + 2 >= programStream.Length)
+                {
+                    break; //seems to be necessary because the game expects it to succeed even if EOS?
+                }
+                var object1 = programReader.ReadUInt16();
+                if (number == 11)
+                {
+                    _logger.LogError("test: {}", object1);
+                }
+
+                if (object1 == 0) //weirdly it uses 0 instead of maxvalue
+                {
+                    break;
+                }
+                if (programStream.Position + 2 >= programStream.Length)
+                {
+                    break; //seems to be necessary because the game expects it to succeed even if EOS?
+                }
+                var action = programReader.ReadUInt16();
+                if (programStream.Position + 2 >= programStream.Length)
+                {
+                    break; //seems to be necessary because the game expects it to succeed even if EOS?
+                }
+                var object2 = programReader.ReadUInt16();
+                if (programStream.Position + 2 >= programStream.Length)
+                {
+                    break; //seems to be necessary because the game expects it to succeed even if EOS?
+                }
+                var offs = programReader.ReadUInt16();
+                if (programStream.Position + 2 >= programStream.Length)
+                {
+                    break; //seems to be necessary because the game expects it to succeed even if EOS?
+                }
+
+                program.ActionScriptOffsets.Add(new ProgramDataModel.ActionScriptOffset()
+                {
+                    Object1 = object1,
+                    Action = action,
+                    Object2 = object2,
+                    Offset = offs
+                });
+                _logger.Log(LogLevel.Debug, "Action script offsets: {} does {} to {} offset {}", object1, action, object2, offs);
+            }
+
+            _logger.Log(LogLevel.Information, "Action script offsets found: {}", program.ActionScriptOffsets.Count);
+        }
 
         //operations
         if (programStream.Length > 32)
