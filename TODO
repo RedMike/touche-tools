@@ -2,10 +2,10 @@
 [x] Implement all opcode parsing
 [x] Check if empty programs need to be shown at all
 [x] Implement all program/room information parsing
+[x] Finish program model components
+[x] Save out all programs in sample DAT file
+[x] Set up model exporters
 [ ] Correctly turn jump offsets to labels in opcode parsing
-[ ] Finish program model components
-[ ] Save out all programs in sample DAT file
-[ ] Set up model exporters
 [ ] Export bare-bones model and try in ScummVM
 [ ] VOC audio conversion to/from WAV (browser play)
 [ ] Simple scripting language that compiles down to opcodes
