@@ -24,12 +24,9 @@ public class MainDataLoader
         uint textDataOffs = _reader.ReadUInt32();
         uint textDataSize = _reader.ReadUInt32();
         textData = new TextDataModel();
-        textData.Offsets = textDataOffs;
-        textData.Size = textDataSize;
         
         _stream.Seek((int)textDataOffs, SeekOrigin.Begin);
         byte[] rawTextData = _reader.ReadBytes((int)textDataSize);
-        textData.Data = rawTextData;
         using var memStream = new MemoryStream(rawTextData);
         var binaryReader = new BinaryReader(memStream);
         for (var i = 1; i < rawTextData.Length / 4; i++)
