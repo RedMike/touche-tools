@@ -8,7 +8,7 @@ namespace ToucheTools.Exporters;
 public class MainExporter
 {
     private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(MainExporter));
-    private const int GapBetweenOffsetBlockAndDataBlock = 100; //how many bytes to leave between offsets and data block
+    private const int GapBetweenOffsetBlockAndDataBlock = 128; //how many bytes to leave between offsets and data block
     private static readonly int StartOfDataBlockOffset; //where the data can live
     private int _currentNextEntityOffset = 0; //where the data will currently be inserted
 
@@ -45,12 +45,51 @@ public class MainExporter
         {
             throw new Exception("Missing text data");
         }
+       
+        //text data
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            var nextOffset = db.Text.Strings.Count * 4 + 4;
+            var allocate = (int size) =>
+            {
+                var retOffset = nextOffset;
+                nextOffset += size;
+                return retOffset;
+            };
 
-        _stream.Seek(64, SeekOrigin.Begin);
-        _writer.Write((uint)db.Text.Offsets);
-        _writer.Write((uint)db.Text.Size);
-        _stream.Seek(db.Text.Offsets, SeekOrigin.Begin);
-        _writer.Write(db.Text.Data);
+            for(var i = 1; i <= db.Text.Strings.Count; i++) //1-indexed
+            {
+                var s = "";
+                if (db.Text.Strings.ContainsKey(i))
+                {
+                    s = db.Text.Strings[i];
+                }
+                
+                var offset = allocate(s.Length + 1);
+                memStream.Seek(offset, SeekOrigin.Begin);
+                for (var j = 0; j < s.Length; j++)
+                {
+                    writer.Write((byte)s[j]);
+                }
+                writer.Write((byte)0);
+
+                memStream.Seek(i * 4, SeekOrigin.Begin);
+                writer.Write((uint)offset);
+            }
+            
+            var bytes = memStream.GetBuffer();
+            
+            //first save the data
+            var textOffset = AllocateAndReturnOffset(bytes.Length);
+            var textSize = bytes.Length;
+            _stream.Seek(textOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //then save the offsets
+            _stream.Seek(64, SeekOrigin.Begin);
+            _writer.Write((uint)textOffset);
+            _writer.Write((uint)textSize);
+        }
         
         if (db.Backdrop == null)
         {
