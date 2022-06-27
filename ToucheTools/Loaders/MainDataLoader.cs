@@ -38,7 +38,6 @@ public class MainDataLoader
             while (_stream.Position-textDataOffs < textDataSize)
             {
                 var chr = _reader.ReadChar();
-                _logger.LogError("String {} char {} {}", i, chr, (byte)chr);
                 if (chr == 0)
                 {
                     break;
