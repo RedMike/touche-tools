@@ -146,6 +146,15 @@
             <li><span class="text-dark fw-bold">@i - </span><span class="text-dark">@cso.Character offset @cso.Offs</span></li>
         }
     </ul>
+    
+    
+    <h5 class="display-5">Strings</h5>
+    <ul>
+        @foreach (var pair in Model.Strings)
+        {
+            <li><span class="text-dark"><span class="text-dark fw-bold">@pair.Key - </span> - "@pair.Value"</span></li>
+        }
+    </ul>
 
     <h5 class="display-5">Instructions</h5>
     <ul>

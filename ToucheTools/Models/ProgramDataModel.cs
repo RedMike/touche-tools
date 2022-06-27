@@ -198,6 +198,8 @@ public class ProgramDataModel
     public List<CharScriptOffset> CharScriptOffsets { get; set; } = new List<CharScriptOffset>();
 
     public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
+
+    public Dictionary<int, string> Strings { get; set; } = new Dictionary<int, string>();
     
     public int OriginalSize { get; set; }
 }
