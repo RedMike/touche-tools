@@ -32,6 +32,6 @@ public class FileProcessingService : IFileProcessingService
         var memoryStream = new MemoryStream();
         var mainExporter = new MainExporter(memoryStream);
         mainExporter.Export(container.DatabaseModel);
-        return memoryStream.GetBuffer();
+        return memoryStream.ToArray();
     }
 }

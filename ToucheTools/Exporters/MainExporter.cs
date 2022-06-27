@@ -78,7 +78,7 @@ public class MainExporter
                 writer.Write((uint)offset);
             }
             
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             
             //first save the data
             var textOffset = AllocateAndReturnOffset(bytes.Length);
@@ -114,7 +114,7 @@ public class MainExporter
             using var memStream = new MemoryStream();
             var sequenceExporter = new SequenceDataExporter(memStream);
             sequenceExporter.Export(sequence);
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             
             var offset = AllocateAndReturnOffset(bytes.Length);
             //save the actual data first
@@ -144,7 +144,7 @@ public class MainExporter
                 using var roomImageStream = new MemoryStream();
                 var roomImageExporter = new RoomImageDataExporter(roomImageStream);
                 roomImageExporter.Export(db.RoomImages[roomInfo.RoomImageNum].Value);
-                var roomImageBytes = roomImageStream.GetBuffer();
+                var roomImageBytes = roomImageStream.ToArray();
                 var roomImageOffset = AllocateAndReturnOffset(roomImageBytes.Length);
                 //save the actual data first
                 _stream.Seek(roomImageOffset, SeekOrigin.Begin);
@@ -156,7 +156,7 @@ public class MainExporter
             using var memStream = new MemoryStream();
             var roomInfoExporter = new RoomInfoDataExporter(memStream);
             roomInfoExporter.Export(palette, (ushort)roomInfo.RoomImageNum);
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
 
             var offset = AllocateAndReturnOffset(bytes.Length);
             //save the actual data first
@@ -181,7 +181,7 @@ public class MainExporter
             using var memStream = new MemoryStream();
             var spriteExporter = new SpriteImageDataExporter(memStream);
             spriteExporter.Export(spriteImage);
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             
             var offset = AllocateAndReturnOffset(bytes.Length);
             //save the actual data first
@@ -207,7 +207,7 @@ public class MainExporter
             using var memStream = new MemoryStream();
             var iconExporter = new IconImageDataExporter(memStream);
             iconExporter.Export(iconImage);
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             
             var offset = AllocateAndReturnOffset(bytes.Length);
             //save the actual data first
@@ -231,7 +231,7 @@ public class MainExporter
                 using var memStream = new MemoryStream();
                 var programExporter = new ProgramDataExporter(memStream);
                 programExporter.Export(program);
-                var bytes = memStream.GetBuffer();
+                var bytes = memStream.ToArray();
             
                 var offset = AllocateAndReturnOffset(bytes.Length);
                 //save the actual data first
@@ -256,7 +256,7 @@ public class MainExporter
                 using var memStream = new MemoryStream();
                 var musicExporter = new MusicDataExporter(memStream);
                 musicExporter.Export(music);
-                var bytes = memStream.GetBuffer();
+                var bytes = memStream.ToArray();
             
                 var offset = AllocateAndReturnOffset(bytes.Length);
                 //save the actual data first
@@ -281,7 +281,7 @@ public class MainExporter
                 using var memStream = new MemoryStream();
                 var soundExporter = new SoundDataExporter(memStream);
                 soundExporter.Export(sound);
-                var bytes = memStream.GetBuffer();
+                var bytes = memStream.ToArray();
             
                 var offset = AllocateAndReturnOffset(bytes.Length);
                 //save the actual data first

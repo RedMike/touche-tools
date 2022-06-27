@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
+using ToucheTools.Constants;
 using ToucheTools.Models;
 
 namespace ToucheTools.Exporters;
@@ -26,90 +27,49 @@ public class ProgramDataExporter
             nextOffset += size;
             return offset;
         };
-
-        //rects
-        {
-            var memStream = new MemoryStream();
-            var writer = new BinaryWriter(memStream);
-            foreach (var rect in program.Rects)
-            {
-                writer.Write((ushort)rect.X);
-                writer.Write((ushort)rect.Y);
-                writer.Write((ushort)rect.W);
-                writer.Write((ushort)rect.H);
-            }
-
-            writer.Write(ushort.MaxValue);
-            writer.Write((ushort)0);
-            writer.Write((ushort)0);
-            writer.Write((ushort)0);
-
-            var bytes = memStream.GetBuffer();
-            var size = bytes.Length;
-
-            var programOffset = allocate(size);
-            _stream.Seek(programOffset, SeekOrigin.Begin);
-            _writer.Write(bytes);
-            //write the offset after writing the data
-            _stream.Seek(20, SeekOrigin.Begin);
-            _writer.Write((uint)programOffset);
-        }
-
-        //points
-        {
-            var memStream = new MemoryStream();
-            var writer = new BinaryWriter(memStream);
-            foreach (var point in program.Points)
-            {
-                writer.Write((ushort)point.X);
-                writer.Write((ushort)point.Y);
-                writer.Write((ushort)point.Z);
-                writer.Write((ushort)point.Order);
-            }
-
-            writer.Write(ushort.MaxValue);
-            writer.Write((ushort)0);
-            writer.Write((ushort)0);
-            writer.Write((ushort)0);
-
-            var bytes = memStream.GetBuffer();
-            var size = bytes.Length;
-
-            var programOffset = allocate(size);
-            _stream.Seek(programOffset, SeekOrigin.Begin);
-            _writer.Write(bytes);
-            //write the offset after writing the data
-            _stream.Seek(24, SeekOrigin.Begin);
-            _writer.Write((uint)programOffset);
-        }
         
-        //walks
+        //text
         {
             var memStream = new MemoryStream();
             var writer = new BinaryWriter(memStream);
-            foreach (var walk in program.Walks)
+            
+            var programOffset = allocate((program.Strings.Keys.Max()+3)*4);
+            
+            for (var i = 0; i < program.Strings.Keys.Max()+2; i++) //1-indexed
             {
-                //TODO: validate points
-                writer.Write((ushort)walk.Point1);
-                writer.Write((ushort)walk.Point2);
-                writer.Write((ushort)walk.ClipRect);
-                writer.Write((ushort)walk.Area1);
-                writer.Write((ushort)walk.Area2);
-                writer.Write((uint)0); //unused
-                writer.Write((uint)0); //unused
-                writer.Write((uint)0); //unused
+                var s = "";
+                if (program.Strings.ContainsKey(i))
+                {
+                    s = program.Strings[i];
+                }
+
+                var chars = s.ToCharArray();
+
+                var textOffset = nextOffset;
+                if (chars.Length != 0)
+                {
+                    textOffset = allocate(chars.Length + 1);
+                    //NOTE: the data is being written to the original stream, not the mem stream!
+                    _stream.Seek(textOffset, SeekOrigin.Begin);
+                    for (var j = 0; j < chars.Length; j++)
+                    {
+                        _writer.Write((byte)chars[j]);
+                    }
+
+                    _writer.Write((byte)0);
+                }
+                
+                //then write offset to the current stream
+                memStream.Seek(i * 4, SeekOrigin.Begin);
+                writer.Write((uint)(textOffset-programOffset));
             }
-
-            writer.Write(ushort.MaxValue);
-
-            var bytes = memStream.GetBuffer();
-            var size = bytes.Length;
-
-            var programOffset = allocate(size);
+            
+            var bytes = memStream.ToArray();
             _stream.Seek(programOffset, SeekOrigin.Begin);
             _writer.Write(bytes);
+
             //write the offset after writing the data
-            _stream.Seek(28, SeekOrigin.Begin);
+            _stream.Seek(4, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);
         }
         
@@ -143,7 +103,7 @@ public class ProgramDataExporter
             writer.Write((ushort)0);
             writer.Write((ushort)0);
             
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             var size = bytes.Length;
 
             var programOffset = allocate(size);
@@ -153,7 +113,7 @@ public class ProgramDataExporter
             _stream.Seek(8, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);
         }
-
+        
         //backgrounds
         {
             var memStream = new MemoryStream();
@@ -175,7 +135,7 @@ public class ProgramDataExporter
 
             writer.Write(ushort.MaxValue);
             
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             var size = bytes.Length;
             
             var programOffset = allocate(size);
@@ -219,7 +179,7 @@ public class ProgramDataExporter
 
             writer.Write((ushort)0); //weirdly uses 0 instead of maxvalue
             
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             var size = bytes.Length;
             
             var programOffset = allocate(size);
@@ -229,7 +189,114 @@ public class ProgramDataExporter
             _stream.Seek(16, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);
         }
+
+        //rects
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var rect in program.Rects)
+            {
+                writer.Write((ushort)rect.X);
+                writer.Write((ushort)rect.Y);
+                writer.Write((ushort)rect.W);
+                writer.Write((ushort)rect.H);
+            }
+
+            writer.Write(ushort.MaxValue);
+            writer.Write((ushort)0);
+            writer.Write((ushort)0);
+            writer.Write((ushort)0);
+
+            var bytes = memStream.ToArray();
+            var size = bytes.Length;
+
+            var programOffset = allocate(size);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //write the offset after writing the data
+            _stream.Seek(20, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
+
+        //points
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var point in program.Points)
+            {
+                writer.Write((ushort)point.X);
+                writer.Write((ushort)point.Y);
+                writer.Write((ushort)point.Z);
+                writer.Write((ushort)point.Order);
+            }
+
+            writer.Write(ushort.MaxValue);
+            writer.Write((ushort)0);
+            writer.Write((ushort)0);
+            writer.Write((ushort)0);
+
+            var bytes = memStream.ToArray();
+            var size = bytes.Length;
+
+            var programOffset = allocate(size);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //write the offset after writing the data
+            _stream.Seek(24, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
         
+        //walks
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var walk in program.Walks)
+            {
+                //TODO: validate points
+                writer.Write((ushort)walk.Point1);
+                writer.Write((ushort)walk.Point2);
+                writer.Write((ushort)walk.ClipRect);
+                writer.Write((ushort)walk.Area1);
+                writer.Write((ushort)walk.Area2);
+                writer.Write((uint)0); //unused
+                writer.Write((uint)0); //unused
+                writer.Write((uint)0); //unused
+            }
+
+            writer.Write(ushort.MaxValue);
+
+            var bytes = memStream.ToArray();
+            var size = bytes.Length;
+
+            var programOffset = allocate(size);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //write the offset after writing the data
+            _stream.Seek(28, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
+        
+        //instructions
+        {
+            var memStream = new MemoryStream();
+            var writer = new BinaryWriter(memStream);
+            foreach (var instruction in program.Instructions)
+            {
+                instruction.Export(writer);
+            }
+            writer.Write(byte.MaxValue);
+
+            var bytes = memStream.ToArray();
+            var size = bytes.Length;
+
+            var programOffset = allocate(size);
+            _stream.Seek(programOffset, SeekOrigin.Begin);
+            _writer.Write(bytes);
+            //write the offset after writing the data
+            _stream.Seek(32, SeekOrigin.Begin);
+            _writer.Write((uint)programOffset);
+        }
+
         //action script offsets
         {
             var memStream = new MemoryStream();
@@ -244,7 +311,7 @@ public class ProgramDataExporter
 
             writer.Write((ushort)0); //weirdly uses 0 instead of maxvalue
 
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             var size = bytes.Length;
 
             var programOffset = allocate(size);
@@ -266,7 +333,7 @@ public class ProgramDataExporter
                 writer.Write((ushort)conversation.Message);
             }
 
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             var size = bytes.Length;
 
             var programOffset = allocate(size);
@@ -288,7 +355,7 @@ public class ProgramDataExporter
             }
             writer.Write((ushort)0); //weirdly uses 0 instead of maxvalue
 
-            var bytes = memStream.GetBuffer();
+            var bytes = memStream.ToArray();
             var size = bytes.Length;
 
             var programOffset = allocate(size);
@@ -298,26 +365,42 @@ public class ProgramDataExporter
             _stream.Seek(44, SeekOrigin.Begin);
             _writer.Write((uint)programOffset);
         }
-        
-        //instructions
+
+        if (_stream.Length > Game.MaxProgramDataSize)
         {
-            var memStream = new MemoryStream();
-            var writer = new BinaryWriter(memStream);
-            foreach (var instruction in program.Instructions)
+            //program is too large, debug info
+            var reader = new BinaryReader(_stream);
+            var labelDict = new Dictionary<int, string>()
             {
-                instruction.Export(writer);
+                { 0, "None" },
+                { 1, "Text" },
+                { 2, "Areas" },
+                { 3, "Backgrounds" },
+                { 4, "Hitboxes" },
+                { 5, "Rects" },
+                { 6, "Points" },
+                { 7, "Walks" },
+                { 8, "Instructions" },
+                { 9, "ASO" },
+                { 10, "Conversations" },
+                { 11, "CSO" }
+            };
+            var dict = new Dictionary<int, int>();
+            for (var i = 0; i < 12; i++)
+            {
+                _stream.Seek(i * 4, SeekOrigin.Begin);
+                var offset1 = reader.ReadUInt32();
+                var offset2 = _stream.Length;
+                if (i != 11)
+                {
+                    offset2 = reader.ReadUInt32();
+                }
+
+                dict[i] = (int)offset2 - (int)(offset1);
             }
-            writer.Write(byte.MaxValue);
 
-            var bytes = memStream.GetBuffer();
-            var size = bytes.Length;
-
-            var programOffset = allocate(size);
-            _stream.Seek(programOffset, SeekOrigin.Begin);
-            _writer.Write(bytes);
-            //write the offset after writing the data
-            _stream.Seek(32, SeekOrigin.Begin);
-            _writer.Write((uint)programOffset);
+            var total = dict.Values.Sum();
+            throw new Exception($"Program too large! Max: {Game.MaxProgramDataSize} Made: {_stream.Length}. Sections: {string.Join(",", dict.Select(p => labelDict[p.Key] + "=" + p.Value))} Total data: {total}");
         }
     }
 }

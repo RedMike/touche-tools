@@ -41,6 +41,6 @@ public class MemoryImageRenderingService : IImageRenderingService
         
         using var mem = new MemoryStream();
         image.SaveAsPng(mem);
-        return mem.GetBuffer();
+        return mem.ToArray();
     }
 }

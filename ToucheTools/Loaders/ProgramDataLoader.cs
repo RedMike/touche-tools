@@ -42,14 +42,14 @@ public class ProgramDataLoader
             programStream.Seek(4, SeekOrigin.Begin);
             programOffset = programReader.ReadUInt32();
             var nextOffset = programReader.ReadUInt32();
-            var textSize = (int)(nextOffset - programOffset);
-            if (textSize < 0)
+            var textSize = (long)nextOffset - (long)programOffset;
+            if (nextOffset <= programOffset)
             {
                 throw new Exception("Unknown text size: " + textSize);
             }
             programStream.Seek(programOffset, SeekOrigin.Begin);
             var i = 1;
-
+            
             while (i*4 < textSize)
             {
                 programStream.Seek(programOffset + i * 4, SeekOrigin.Begin);
@@ -60,8 +60,8 @@ public class ProgramDataLoader
                 }
 
                 var nextTextOffset = programReader.ReadUInt32();
-                var strSize = (int)(nextTextOffset - textOffset);
-                if (strSize <= 0)
+                var strSize = (long)nextTextOffset - (long)textOffset;
+                if (nextTextOffset <= textOffset)
                 {
                     break;
                 }
@@ -69,19 +69,19 @@ public class ProgramDataLoader
                 var s = "";
                 while (s.Length < strSize)
                 {
-                    var chr = programReader.ReadChar();
+                    var chr = programReader.ReadByte();
                     
                     if (chr == 0)
                     {
                         break;
                     }
 
-                    if ((chr < 32 || chr >= 32 + Fonts.FontOffsets.Length) && (byte)chr != 253) //253 exception is for an accented character?
+                    if (chr < 32 || chr >= 32 + Fonts.FontOffsets.Length)
                     {
-                        throw new Exception("Invalid character: string '" + s + "' length " + s.Length + " char " + (byte)chr);
+                        throw new Exception("Invalid character: string '" + s + "' length " + s.Length + " char " + chr);
                     }
 
-                    s += chr;
+                    s += (char)chr;
                 }
 
                 if (!string.IsNullOrWhiteSpace(s) && s != "~")
