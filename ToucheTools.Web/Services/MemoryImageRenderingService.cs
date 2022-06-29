@@ -37,7 +37,9 @@ public class MemoryImageRenderingService : IImageRenderingService
             }
         });
 
+        _logger.LogInformation("Palette: {}", palette.Select(c => $"({c.R}, {c.G}, {c.B})"));
         _logger.LogInformation("Seen colors: {}", seenColors);
+        _logger.LogInformation("Seen colors broken down: {}", seenColors.Select(c => $"({palette[c].R}, {palette[c].G}, {palette[c].B})"));
         
         using var mem = new MemoryStream();
         image.SaveAsPng(mem);
