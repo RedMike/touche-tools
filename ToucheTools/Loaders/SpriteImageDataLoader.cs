@@ -63,36 +63,34 @@ public class SpriteImageDataLoader
         
         //find true width and height
         var height = initialHeight;
-        //TODO: this wasn't correcting the byte array size
-        // for (var i = 0; i < initialHeight; i++)
-        // {
-        //     if (imageData[i, 0] == 64 || imageData[i, 0] == 255)
-        //     {
-        //         height = i;
-        //         break;
-        //     }
-        // }
+        for (var i = 0; i < initialHeight; i++)
+        {
+            if (imageData[i, 0] == 64 || imageData[i, 0] == 255)
+            {
+                height = i;
+                break;
+            }
+        }
 
         var width = initialWidth;
-        //TODO: this wasn't correcting the byte array size
-        // for (var i = 0; i < initialWidth; i++)
-        // {
-        //     if (imageData[0, i] == 64 || imageData[0, i] == 255)
-        //     {
-        //         width = i;
-        //         break;
-        //     }
-        // }
+        for (var i = 0; i < initialWidth; i++)
+        {
+            if (imageData[0, i] == 64 || imageData[0, i] == 255)
+            {
+                width = i;
+                break;
+            }
+        }
 
         if (width != initialWidth || height != initialHeight)
         {
             _logger.Log(LogLevel.Information, "Sprite image {}: true {}x{}", number, width, height);
         }
 
-        var decodedImageData = new byte[height, width];
-        for (var i = 0; i < height; i++)
+        var decodedImageData = new byte[initialHeight, initialWidth];
+        for (var i = 0; i < initialHeight; i++)
         {
-            for (var j = 0; j < width; j++)
+            for (var j = 0; j < initialWidth; j++)
             {
                 if (imageData[i, j] != 0)
                 {
@@ -114,8 +112,10 @@ public class SpriteImageDataLoader
 
         sprite = new SpriteImageDataModel()
         {
-            Width = width,
-            Height = height,
+            Width = initialWidth,
+            Height = initialHeight,
+            SpriteWidth = width,
+            SpriteHeight = height,
             RawData = imageData,
             DecodedData = decodedImageData
         };

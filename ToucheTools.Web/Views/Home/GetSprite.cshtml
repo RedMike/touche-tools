@@ -43,6 +43,7 @@
     }
     var spriteId = int.Parse(spriteIdRaw);
     var paletteId = container.DatabaseModel.Palettes.First().Key;
+    var raw = !string.IsNullOrEmpty((string)(Context.Request.Query["raw"]));
     var paletteIdRaw = (string)(Context.Request.Query["palette"]);
     if (!string.IsNullOrEmpty(paletteIdRaw))
     {
@@ -50,7 +51,7 @@
     }
     var palette = container.DatabaseModel.Palettes[paletteId];
     var spriteImage = Model.Value;
-    var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.DecodedData, palette.Colors);
+    var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.SpriteWidth, spriteImage.SpriteHeight, raw ? spriteImage.RawData : spriteImage.DecodedData, palette.Colors, raw);
     var spriteImageBase64 = Convert.ToBase64String(spriteImageBytes);
     var imageData = "data:image/png;base64," + spriteImageBase64;
 }
@@ -85,4 +86,5 @@
     <img src="@imageData" alt="preview"/>
     <h5 class="display-5">Info</h5>
     <p>Width: <span>@spriteImage.Width</span>, Height: <span>@spriteImage.Height</span></p>
+    <p>Individual width: <span>@spriteImage.SpriteWidth</span>, Individual height: <span>@spriteImage.SpriteHeight</span></p>
 </div>

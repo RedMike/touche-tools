@@ -50,7 +50,7 @@
     }
     var palette = container.DatabaseModel.Palettes[paletteId];
     var iconImage = Model.Value;
-    var iconImageBytes = _imageRenderingService.RenderImage(iconImage.Width, iconImage.Height, iconImage.DecodedData, palette.Colors);
+    var iconImageBytes = _imageRenderingService.RenderImage(iconImage.Width, iconImage.Height, iconImage.Width, iconImage.Height, iconImage.DecodedData, palette.Colors);
     var iconImageBase64 = Convert.ToBase64String(iconImageBytes);
     var imageData = "data:image/png;base64," + iconImageBase64;
 }

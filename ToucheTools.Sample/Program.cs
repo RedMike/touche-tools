@@ -11,6 +11,15 @@ using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
 
 var log = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(Program));
+
+//load sequences
+var sequenceBytes = File.ReadAllBytes("data/sequence_0.bytes");
+//load palette
+var palette = File.ReadAllLines("data/palette_1.csv").Select(l =>
+{
+    var c = l.Split(',').Select(byte.Parse).ToList();
+    return new Rgb24(c[0], c[1], c[2]);
+}).ToList();
 //load images
 var spriteBytes = File.ReadAllBytes("data/sprite.png");
 var spriteImg = Image.Load<Rgb24>(spriteBytes, new PngDecoder());
@@ -25,10 +34,12 @@ if (roomImage == null)
     throw new Exception("Can't decode room");
 }
 
-byte colourIndex = 1;
-var foundColours = new Dictionary<Rgb24, byte>();
-foundColours[new Rgb24(255, 0, 255)] = 0; //default
 var spriteIndexedBytes = new byte[spriteImg.Height, spriteImg.Width];
+var spriteW = spriteImg.Width;
+var foundW = false;
+var spriteH = spriteImg.Height;
+var foundH = false;
+var spriteColours = new HashSet<byte>();
 spriteImg.ProcessPixelRows(pixelAccessor => {
     for (var i = 0; i < pixelAccessor.Height; i++)
     {
@@ -36,27 +47,27 @@ spriteImg.ProcessPixelRows(pixelAccessor => {
         for (var j = 0; j < pixelAccessor.Width; j++)
         {
             var pixel = row[j];
-            if (!foundColours.ContainsKey(pixel))
+            if (pixel.R != pixel.G || pixel.G != pixel.B || pixel.R != pixel.B)
             {
-                var spriteCol = new Rgb24(pixel.R, pixel.G, pixel.B);
-                spriteCol.R += 1;
-                spriteCol.G += 1;
-                spriteCol.B += 1;
-                log.Log(LogLevel.Information, "Adding sprite colour: {} ({},{},{})", colourIndex, pixel.R, pixel.G, pixel.B);
-                log.Log(LogLevel.Information, "Adding sprite colour: {} ({},{},{})", colourIndex + 192, spriteCol.R, spriteCol.G, spriteCol.B);
-                foundColours[pixel] = colourIndex;
-                foundColours[spriteCol] = (byte)(colourIndex + 192);
-                colourIndex++;
-                if (colourIndex >= 64)
-                {
-                    throw new Exception("Hit colour limit");
-                }
+                throw new Exception($"Invalid input image: {pixel.R} {pixel.G} {pixel.B}");
             }
-            spriteIndexedBytes[i, j] = foundColours[pixel];
+            var col = palette[pixel.R];
+            if (!foundH && (pixel.R == 64 || pixel.R == 255) && j == 0)
+            {
+                foundH = true;
+                spriteH = i;
+            }
+            if (!foundW && (pixel.R == 64 || pixel.R == 255) && i == 0 && j != 0)
+            {
+                foundW = true;
+                spriteW = j;
+            }
+
+            spriteColours.Add(pixel.R);
+            spriteIndexedBytes[i, j] = pixel.R;
         }
     }
 });
-log.Log(LogLevel.Information, "Sprite colours: {}", colourIndex);
 var roomIndexedBytes = new byte[roomImage.Height, roomImage.Width];
 roomImage.ProcessPixelRows(pixelAccessor => {
     for (var i = 0; i < pixelAccessor.Height; i++)
@@ -65,63 +76,67 @@ roomImage.ProcessPixelRows(pixelAccessor => {
         for (var j = 0; j < pixelAccessor.Width; j++)
         {
             var pixel = row[j];
-            if (!foundColours.ContainsKey(pixel))
+            var col = palette.FindIndex(p => p.R == pixel.R && p.G == pixel.G && p.B == pixel.B);
+            if (col == -1)
             {
-                log.Log(LogLevel.Information, "Adding room colour: {} ({},{},{})", colourIndex, pixel.R, pixel.G, pixel.B);
-                foundColours[pixel] = colourIndex;
-                colourIndex++;
-                
-                if (colourIndex >= 64)
+                var found = false;
+                //try to replace an unused colour in the palette
+                for (var q = 0; q < 255; q++)
                 {
-                    throw new Exception("Hit colour limit");
+                    if (!spriteColours.Contains((byte)q))
+                    {
+                        found = true;
+                        spriteColours.Add((byte)q);
+                        palette[q] = new Rgb24(pixel.R, pixel.G, pixel.B);
+                        col = q;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    //closest approximation
+                    col = palette.Min(p =>
+                        Math.Abs(p.R - pixel.R) * 3 + Math.Abs(p.G - pixel.G) + Math.Abs(p.B - pixel.B) * 2);
                 }
             }
-            roomIndexedBytes[i, j] = foundColours[pixel];
+
+            roomIndexedBytes[i, j] = (byte)col;
         }
     }
 });
-log.Log(LogLevel.Information, "Room colours: {}", colourIndex);
-var colourPalette = new List<PaletteDataModel.Rgb>();
-for (var i = 0; i < 255; i++)
-{
-    if (foundColours.All(c => c.Value != i))
-    {
-        foundColours[new Rgb24((byte)i, 0, (byte)i)] = (byte)i;
-        log.Log(LogLevel.Information, "Adding default colour: {} ({},{},{})", i, i, 0, i);
-    }
-
-    var col = foundColours.First(c => c.Value == i);
-    colourPalette.Add(new PaletteDataModel.Rgb()
-    {
-        R = col.Key.R,
-        G = col.Key.G,
-        B = col.Key.B,
-    });
-}
 
 //build image-related things
 var sprite = new SpriteImageDataModel()
 {
     Width = spriteImg.Width,
     Height = spriteImg.Height,
+    SpriteWidth = spriteW,
+    SpriteHeight = spriteH,
     RawData = spriteIndexedBytes
 };
 var inventory = new SpriteImageDataModel()
 {
     Width = 640,
     Height = 48,
+    SpriteWidth = 640,
+    SpriteHeight = 48,
     RawData = new byte[48, 640]
 };
 var menu = new SpriteImageDataModel()
 {
     Width = 42,
     Height = 120,
+    SpriteWidth = 42,
+    SpriteHeight = 120,
     RawData = new byte[120, 42]
 };
 var conv = new SpriteImageDataModel()
 {
     Width = 152,
     Height = 80,
+    SpriteWidth = 152,
+    SpriteHeight = 80,
     RawData = new byte[80, 152]
 };
 var cursor = new IconImageDataModel()
@@ -136,9 +151,14 @@ var roomImg = new RoomImageDataModel()
     Height = roomImage.Height,
     RawData = roomIndexedBytes
 };
-var palette = new PaletteDataModel()
+var paletteModel = new PaletteDataModel()
 {
-    Colors = colourPalette
+    Colors = palette.Select(p => new PaletteDataModel.Rgb()
+    {
+        R = p.R,
+        G = p.G,
+        B = p.B
+    }).ToList()
 };
 
 
@@ -170,7 +190,7 @@ db.Sequences = new Dictionary<int, SequenceDataModel>()
     {
         0, new SequenceDataModel()
         {
-            Bytes = new byte[16000]
+            Bytes = sequenceBytes
         }
     }
 };
@@ -196,12 +216,31 @@ db.Rooms = new Dictionary<int, RoomInfoDataModel>()
 };
 db.Palettes = new Dictionary<int, PaletteDataModel>()
 {
-    { 1, palette },
-    { 2, palette }
+    { 1, paletteModel },
+    { 2, paletteModel }
 };
 db.Programs = new Dictionary<int, ProgramDataModel>();
 db.Programs[Game.StartupEpisode] = new ProgramDataModel()
 {
+      // Areas = new List<ProgramDataModel.Area>()
+      // {
+      //     new ProgramDataModel.Area()
+      //     {
+      //         Rect = new ProgramDataModel.Rect()
+      //         {
+      //             X = 0,
+      //             Y = 0,
+      //             W = 640,
+      //             H = 400
+      //         },
+      //         Id = 0,
+      //         AnimationCount = 0,
+      //         AnimationNext = 0,
+      //         State = 0,
+      //         SrcX = 0,
+      //         SrcY = 0
+      //     }
+      // },
       Rects = new List<ProgramDataModel.Rect>()
       {
           new ProgramDataModel.Rect()
@@ -225,7 +264,14 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           {
               X = 200,
               Y = 200,
-              Z = 200,
+              Z = 160,
+              Order = 0
+          },
+          new ProgramDataModel.Point()
+          {
+              X = 500,
+              Y = 200,
+              Z = 160,
               Order = 0
           },
       },
@@ -254,6 +300,10 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
       Instructions = new List<BaseInstruction>()
       {
           new NoopInstruction(),
+          new InitCharInstruction()
+          {
+              Character = 0
+          },
           new LoadSpriteInstruction()
           {
               Index = 0,
@@ -274,9 +324,9 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           new SetCharFrameInstruction()
           {
               Character = 0,
-              Val1 = 2,
-              Val2 = 2,
-              Val3 = 3
+              Val1 = 0,
+              Val2 = 0,
+              Val3 = 1
           },
           new SetCharBoxInstruction()
           {
@@ -303,6 +353,15 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
               Flag = 618 //hide mouse cursor 
           },
           
+          // new FetchScriptWordInstruction()
+          // {
+          //     Val = 1
+          // },
+          // new SetFlagInstruction()
+          // {
+          //     Flag = 902 //debug walks 
+          // },
+          
           new FetchScriptWordInstruction()
           {
               Val = 20000
@@ -323,25 +382,48 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           new SetCharFlagsInstruction()
           {
               Character = 0,
-              Flags = 32768
+              Flags = 0
           },
           
           new LoadRoomInstruction()
           {
               Num = 1
           },
-          new InitCharInstruction()
+          new FetchScriptWordInstruction()
           {
-              Character = 0
+              Val = 104
           },
-          new SetCharDelayInstruction()
+          new SetFlagInstruction()
           {
-              Delay = 0
+              Flag = 0 //active char
+          },
+          
+          new FetchScriptWordInstruction()
+          {
+              Val = 0
+          },
+          new SetFlagInstruction()
+          {
+              Flag = 614 //room offset x
+          },
+          
+          new FetchScriptWordInstruction()
+          {
+              Val = 0
+          },
+          new SetFlagInstruction()
+          {
+              Flag = 615 //room offset h
+          },
+          new SetCharDirectionInstruction()
+          {
+              Character = 0,
+              Direction = 3
           },
           new MoveCharToPosInstruction()
           {
               Character = 0,
-              Num = 1
+              Num = 2
           },
           new StopScriptInstruction(),
           new StopScriptInstruction(),
