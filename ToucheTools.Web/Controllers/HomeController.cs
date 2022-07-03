@@ -91,6 +91,29 @@ public class HomeController : Controller
 
         return File(spriteImageBytes, "image/png");
     }
+
+    [HttpGet("/sequence")]
+    public IActionResult GetSequences([FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
+    
+    [HttpGet("/sequence/{sequence}")]
+    public IActionResult GetSequence(int sequence, [FromQuery]string id, [FromQuery]string sprite, [FromQuery]string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
     
     [HttpGet("/icon")]
     public IActionResult GetIcons([FromQuery] string id)

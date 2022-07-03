@@ -144,6 +144,21 @@
                     <a asp-area="" asp-controller="Home" asp-action="GetRooms" asp-all-route-data="routeData" class="card-img-overlay"></a>
                 </div>
             </div>
+            
+            
+            <div class="col-3 card bg-light me-5">
+                <div class="card-body">
+                    <h5 class="card-title">Sequences</h5>
+                    <p class="card-text">
+                    <ul class="list-unstyled">
+                        <li>
+                            <span class="fw-bold">@container.DatabaseModel.Sequences.Count</span>
+                            Parsed
+                        </li>
+                    </ul>
+                    <a asp-area="" asp-controller="Home" asp-action="GetSequences" asp-all-route-data="routeData" class="card-img-overlay"></a>
+                </div>
+            </div>
         </div>
     }
 }
