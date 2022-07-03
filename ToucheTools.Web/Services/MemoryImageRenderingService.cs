@@ -115,9 +115,31 @@ public class MemoryImageRenderingService : IImageRenderingService
 
     public byte[] RenderAnimationImage(SequenceDataModel.FrameInformation frame, SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette)
     {
-        var w = sprite.SpriteWidth * 2;//TODO: calculate size correctly
-        var h = sprite.SpriteHeight * 2;//TODO: calculate size correctly
-        var rawData = new byte[h, w]; 
+        var w = 0;
+        if (frame.Parts.Any(p => p.DestX < 0))
+        {
+            w += Math.Abs(frame.Parts.Select(p => p.DestX).Min());
+        }
+        if (frame.Parts.Any(p => p.DestX > 0))
+        {
+            w += Math.Abs(frame.Parts.Select(p => p.DestX).Max());
+        }
+        w += sprite.SpriteWidth;
+        
+        var h = 0;
+        if (frame.Parts.Any(p => p.DestY < 0))
+        {
+            h += Math.Abs(frame.Parts.Select(p => p.DestY).Min());
+        }
+        if (frame.Parts.Any(p => p.DestY > 0))
+        {
+            h += Math.Abs(frame.Parts.Select(p => p.DestY).Max());
+        }
+        h += sprite.SpriteHeight;
+        
+        var ox = w/2;
+        var oy = h/2+sprite.SpriteHeight;
+        var rawData = new byte[h, w];
         var framesPerLine = sprite.Width / sprite.SpriteWidth;
         foreach (var part in frame.Parts)
         {
@@ -127,7 +149,19 @@ public class MemoryImageRenderingService : IImageRenderingService
             {
                 for (var y = 0; y < sprite.SpriteHeight; y++)
                 {
-                    rawData[y, x] = sprite.DecodedData[srcY + y, srcX + x];
+                    var rawPixel = sprite.RawData[srcY + y, srcX + x];
+                    var pixel = sprite.DecodedData[srcY + y, srcX + x];
+                    if (rawPixel != 0 && rawPixel != 64 && rawPixel != 255)
+                    {
+                        try
+                        {
+                            rawData[oy + y + part.DestY, ox + x + part.DestX] = pixel;
+                        }
+                        catch (Exception)
+                        {
+                            //
+                        }
+                    }
                 }
             }
         }

@@ -115,6 +115,28 @@ public class HomeController : Controller
         return View(databaseModel);
     }
     
+    [HttpGet("/sequence/{sequence}/{characterId}/{animationId}/{directionId}/{frameId}/image")]
+    public IActionResult GetSequenceImage(int sequence, int characterId, int animationId, int directionId, int frameId,
+        [FromQuery] string id, [FromQuery] string sprite, [FromQuery] string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var parsedPalette = int.Parse(palette);
+        var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
+        var sequenceImage = container.DatabaseModel.Sequences[sequence];
+        var character = sequenceImage.Characters[characterId];
+        var animation = character.Animations[animationId];
+        var dir = animation.Directions[directionId];
+        var frame = dir.Frames[frameId];
+        var spriteImage = container.DatabaseModel.Sprites[int.Parse(sprite)].Value;
+        var sequenceImageBytes = _imageRenderingService.RenderAnimationImage(frame, spriteImage, paletteList);
+
+        return File(sequenceImageBytes, "image/png");
+    }
+    
     [HttpGet("/icon")]
     public IActionResult GetIcons([FromQuery] string id)
     {

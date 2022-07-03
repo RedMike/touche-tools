@@ -132,6 +132,16 @@
                                     <li><span class="fw-bold">Walk DY:</span> <span>@frame.WalkDy</span></li>
                                     <li><span class="fw-bold">Walk DZ:</span> <span>@frame.WalkDz</span></li>
                                     <li><span class="fw-bold">Delay:</span> <span>@frame.Delay</span></li>
+                                    <li><img src="@Url.Action("GetSequenceImage", "Home", new {
+                                                      sequence = sequenceId,
+                                                      characterId = charPair.Key,
+                                                      animationId = animPair.Key,
+                                                      directionId = dirPair.Key,
+                                                      frameId = frameId,
+                                                      id = sessionId,
+                                                      sprite = spriteId,
+                                                      palette = paletteId
+                                                  })"/></li>
                                     <li>Parts</li>
                                     <ul>
                                         @{
@@ -144,12 +154,12 @@
                                                     <li><span class="fw-bold">Dest X:</span> <span>@part.DestX</span></li>
                                                     <li><span class="fw-bold">Dest Y:</span> <span>@part.DestY</span></li>
                                                     <li><span class="fw-bold">V Flipped:</span> <span>@(part.VFlipped ? "yes" : "no")</span></li>
-                                                    @partId++;
+                                                    @{ partId++; }
                                                 </ul>
                                             }
                                         }
                                     </ul>
-                                    @frameId++;
+                                    @{ frameId++; }
                                 </ul>
                             }
                         }
