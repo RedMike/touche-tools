@@ -87,7 +87,7 @@ public class HomeController : Controller
         var parsedPalette = int.Parse(palette);
         var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
         var spriteImage = container.DatabaseModel.Sprites[sprite].Value;
-        var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.SpriteWidth, spriteImage.SpriteHeight, spriteImage.DecodedData, paletteList);
+        var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage, paletteList);
 
         return File(spriteImageBytes, "image/png");
     }
@@ -150,7 +150,7 @@ public class HomeController : Controller
         var parsedPalette = int.Parse(palette);
         var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
         var iconImage = container.DatabaseModel.Icons[icon].Value;
-        var iconImageBytes = _imageRenderingService.RenderImage(iconImage.Width, iconImage.Height, iconImage.Width, iconImage.Height, iconImage.DecodedData, paletteList);
+        var iconImageBytes = _imageRenderingService.RenderImage(iconImage, paletteList);
 
         return File(iconImageBytes, "image/png");
     }
@@ -195,7 +195,7 @@ public class HomeController : Controller
         var roomInfo = container.DatabaseModel.Rooms[room];
         var paletteList = container.DatabaseModel.Palettes[room].Colors;
         var roomImage = container.DatabaseModel.RoomImages[roomInfo.RoomImageNum].Value;
-        var roomImageBytes = _imageRenderingService.RenderImage(roomImage.Width, roomImage.Height, roomImage.Width, roomImage.Height, roomImage.RawData, paletteList);
+        var roomImageBytes = _imageRenderingService.RenderImage(roomImage, paletteList);
 
         return File(roomImageBytes, "image/png");
     }
