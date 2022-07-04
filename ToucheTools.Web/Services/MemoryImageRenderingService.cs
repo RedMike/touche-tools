@@ -73,20 +73,11 @@ public class MemoryImageRenderingService : IImageRenderingService
                 for (var j = 0; j < width; j++)
                 {
                     var col = data[i, j];
-                    if (!savedWidth && i == 0 && j < spriteWidth && col == 64)
-                    {
-                        throw new Exception("64 on top row before separator");
-                    }
 
                     if (!savedWidth && i == 0 && j == spriteWidth)
                     {
                         col = 64;
                         savedWidth = true;
-                    }
-
-                    if (!savedHeight && j == 0 && i < spriteHeight && col == 64)
-                    {
-                        throw new Exception("64 on top row before separator");
                     }
 
                     if (!savedHeight && j == 0 && i == spriteHeight)
