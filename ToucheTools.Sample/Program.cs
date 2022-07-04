@@ -13,7 +13,8 @@ using ToucheTools.Models.Instructions;
 var log = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(Program));
 
 //load sequences
-var sequenceBytes = File.ReadAllBytes("data/sequence_0.bytes");
+var sequenceBytes1 = File.ReadAllBytes("data/sequence_0.bytes");
+var sequenceBytes2 = File.ReadAllBytes("data/sequence_14.bytes");
 //load palette
 var palette = File.ReadAllLines("data/palette_1.csv").Select(l =>
 {
@@ -27,6 +28,12 @@ if (spriteImg == null)
 {
     throw new Exception("Can't decode sprite");
 }
+var spriteBytes2 = File.ReadAllBytes("data/sprite2.png");
+var spriteImg2 = Image.Load<Rgb24>(spriteBytes2, new PngDecoder());
+if (spriteImg2 == null)
+{
+    throw new Exception("Can't decode sprite");
+}
 var roomBytes = File.ReadAllBytes("data/room.png");
 var roomImage = Image.Load<Rgb24>(roomBytes, new PngDecoder());
 if (roomImage == null)
@@ -36,38 +43,81 @@ if (roomImage == null)
 
 var spriteIndexedBytes = new byte[spriteImg.Height, spriteImg.Width];
 var spriteW = spriteImg.Width;
-var foundW = false;
 var spriteH = spriteImg.Height;
-var foundH = false;
 var spriteColours = new HashSet<byte>();
-spriteImg.ProcessPixelRows(pixelAccessor => {
-    for (var i = 0; i < pixelAccessor.Height; i++)
+{
+    var foundW = false;
+    var foundH = false;
+    spriteImg.ProcessPixelRows(pixelAccessor =>
     {
-        var row = pixelAccessor.GetRowSpan(i);
-        for (var j = 0; j < pixelAccessor.Width; j++)
+        for (var i = 0; i < pixelAccessor.Height; i++)
         {
-            var pixel = row[j];
-            if (pixel.R != pixel.G || pixel.G != pixel.B || pixel.R != pixel.B)
+            var row = pixelAccessor.GetRowSpan(i);
+            for (var j = 0; j < pixelAccessor.Width; j++)
             {
-                throw new Exception($"Invalid input image: {pixel.R} {pixel.G} {pixel.B}");
-            }
-            var col = palette[pixel.R];
-            if (!foundH && (pixel.R == 64 || pixel.R == 255) && j == 0)
-            {
-                foundH = true;
-                spriteH = i;
-            }
-            if (!foundW && (pixel.R == 64 || pixel.R == 255) && i == 0 && j != 0)
-            {
-                foundW = true;
-                spriteW = j;
-            }
+                var pixel = row[j];
+                if (pixel.R != pixel.G || pixel.G != pixel.B || pixel.R != pixel.B)
+                {
+                    throw new Exception($"Invalid input image: {pixel.R} {pixel.G} {pixel.B}");
+                }
 
-            spriteColours.Add(pixel.R);
-            spriteIndexedBytes[i, j] = pixel.R;
+                var col = palette[pixel.R];
+                if (!foundH && (pixel.R == 64 || pixel.R == 255) && j == 0)
+                {
+                    foundH = true;
+                    spriteH = i;
+                }
+
+                if (!foundW && (pixel.R == 64 || pixel.R == 255) && i == 0 && j != 0)
+                {
+                    foundW = true;
+                    spriteW = j;
+                }
+
+                spriteColours.Add(pixel.R);
+                spriteIndexedBytes[i, j] = pixel.R;
+            }
         }
-    }
-});
+    });
+}
+var spriteIndexedBytes2 = new byte[spriteImg.Height, spriteImg.Width];
+var spriteW2 = spriteImg.Width;
+var spriteH2 = spriteImg.Height;
+{
+    var foundW = false;
+    var foundH = false;
+    spriteImg2.ProcessPixelRows(pixelAccessor =>
+    {
+        for (var i = 0; i < pixelAccessor.Height; i++)
+        {
+            var row = pixelAccessor.GetRowSpan(i);
+            for (var j = 0; j < pixelAccessor.Width; j++)
+            {
+                var pixel = row[j];
+                if (pixel.R != pixel.G || pixel.G != pixel.B || pixel.R != pixel.B)
+                {
+                    throw new Exception($"Invalid input image: {pixel.R} {pixel.G} {pixel.B}");
+                }
+
+                var col = palette[pixel.R];
+                if (!foundH && (pixel.R == 64 || pixel.R == 255) && j == 0)
+                {
+                    foundH = true;
+                    spriteH2 = i;
+                }
+
+                if (!foundW && (pixel.R == 64 || pixel.R == 255) && i == 0 && j != 0)
+                {
+                    foundW = true;
+                    spriteW2 = j;
+                }
+
+                spriteColours.Add(pixel.R);
+                spriteIndexedBytes2[i, j] = pixel.R;
+            }
+        }
+    });
+}
 var roomIndexedBytes = new byte[roomImage.Height, roomImage.Width];
 roomImage.ProcessPixelRows(pixelAccessor => {
     for (var i = 0; i < pixelAccessor.Height; i++)
@@ -114,6 +164,14 @@ var sprite = new SpriteImageDataModel()
     SpriteWidth = spriteW,
     SpriteHeight = spriteH,
     RawData = spriteIndexedBytes
+};
+var sprite2 = new SpriteImageDataModel()
+{
+    Width = spriteImg2.Width,
+    Height = spriteImg2.Height,
+    SpriteWidth = spriteW2,
+    SpriteHeight = spriteH2,
+    RawData = spriteIndexedBytes2
 };
 var inventory = new SpriteImageDataModel()
 {
@@ -180,6 +238,7 @@ db.Icons = new Dictionary<int, Lazy<IconImageDataModel>>()
 db.Sprites = new Dictionary<int, Lazy<SpriteImageDataModel>>()
 {
     { 0, new Lazy<SpriteImageDataModel>(sprite) },
+    { 1, new Lazy<SpriteImageDataModel>(sprite2) },
     
     { 12, new Lazy<SpriteImageDataModel>(inventory)}, //inventory background
     { 18, new Lazy<SpriteImageDataModel>(menu) }, //menu
@@ -190,7 +249,13 @@ db.Sequences = new Dictionary<int, SequenceDataModel>()
     {
         0, new SequenceDataModel()
         {
-            Bytes = sequenceBytes
+            Bytes = sequenceBytes1
+        }
+    },
+    {
+        1, new SequenceDataModel()
+        {
+            Bytes = sequenceBytes2
         }
     }
 };
@@ -263,15 +328,15 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           new ProgramDataModel.Point()
           {
               X = 200,
-              Y = 200,
-              Z = 160,
+              Y = 360,
+              Z = 260,
               Order = 0
           },
           new ProgramDataModel.Point()
           {
-              X = 500,
-              Y = 200,
-              Z = 160,
+              X = 450,
+              Y = 350,
+              Z = 260,
               Order = 0
           },
       },
@@ -295,11 +360,20 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
       },
       Strings = new Dictionary<int, string>()
       {
-          { 1, "Dummy" }
+          { 1, "Dummy" },
+          
+          { 2, "You seem a decent fellow.."}, // 0
+          { 3, "I hate to kill you."}, // 0
+          { 4, "Begin." }, // 0
+          
+          { 5, "You seem a decent fellow.."}, // 1
+          { 6, "I hate to die." }, // 1
       },
       Instructions = new List<BaseInstruction>()
       {
           new NoopInstruction(),
+          
+          //char 1
           new InitCharInstruction()
           {
               Character = 0
@@ -311,28 +385,101 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           },
           new LoadSequenceInstruction()
           {
-              Num = 0
+              Num = 0,
+              Index = 0
           },
           new InitCharScriptInstruction()
           {
               Character = 0,
               Color = 255,
-              F1 = 0,
-              F2 = 0,
-              F3 = 0
+              SpriteIndex = 0,
+              SequenceIndex = 0,
+              SequenceCharacterId = 0
           },
           new SetCharFrameInstruction()
           {
               Character = 0,
-              Val1 = 0,
-              Val2 = 0,
-              Val3 = 1
+              Val1 = 0, //loop
+              Val2 = 18,
+              Val3 = 0
+          },
+          new SetCharFrameInstruction()
+          {
+              Character = 0,
+              Val1 = 2, //talking?
+              Val2 = 19,
+              Val3 = 0
+          },
+          new SetCharDirectionInstruction()
+          {
+              Character = 0,
+              Direction = 0
           },
           new SetCharBoxInstruction()
           {
               Character = 0,
               Num = 1
           },
+          new SetCharFlagsInstruction()
+          {
+              Character = 0,
+              Flags = 0
+          },
+          
+          //char 2
+          new InitCharInstruction()
+          {
+              Character = 1
+          },
+          new LoadSpriteInstruction()
+          {
+              Index = 1,
+              Num = 1
+          },
+          new LoadSequenceInstruction()
+          {
+              Num = 1,
+              Index = 1
+          },
+          new InitCharScriptInstruction()
+          {
+              Character = 1,
+              Color = 255,
+              SpriteIndex = 1, //sprite num
+              SequenceIndex = 1, //sequence
+              SequenceCharacterId = 0  //seq character
+          },
+          new SetCharFrameInstruction()
+          {
+              Character = 1,
+              Val1 = 0, //loop
+              Val2 = 0,
+              Val3 = 0
+          },
+          new SetCharFrameInstruction()
+          {
+              Character = 1,
+              Val1 = 2, //talking?
+              Val2 = 2,
+              Val3 = 0
+          },
+          new SetCharDirectionInstruction()
+          {
+              Character = 1,
+              Direction = 3
+          },
+          new SetCharBoxInstruction()
+          {
+              Character = 1,
+              Num = 2
+          },
+          new SetCharFlagsInstruction()
+          {
+              Character = 1,
+              Flags = 0
+          },
+          
+          //done
           new EnableInputInstruction(),
           
           new FetchScriptWordInstruction()
@@ -378,13 +525,7 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           {
               Flag = 253
           },
-          
-          new SetCharFlagsInstruction()
-          {
-              Character = 0,
-              Flags = 0
-          },
-          
+
           new LoadRoomInstruction()
           {
               Num = 1
@@ -415,16 +556,52 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           {
               Flag = 615 //room offset h
           },
-          new SetCharDirectionInstruction()
-          {
-              Character = 0,
-              Direction = 3
-          },
-          new MoveCharToPosInstruction()
+          
+          //dialogue
+          new StartTalkInstruction()
           {
               Character = 0,
               Num = 2
           },
+          new StartTalkInstruction()
+          {
+              Character = 0,
+              Num = 3
+          },
+          
+          new StartTalkInstruction()
+          {
+              Character = 1,
+              Num = 5
+          },
+          new StartTalkInstruction()
+          {
+              Character = 1,
+              Num = 6
+          },
+          
+          new SetCharFrameInstruction()
+          {
+              Character = 1,
+              Val1 = 0, //loop
+              Val2 = 4,
+              Val3 = 0
+          },
+          new StartTalkInstruction()
+          {
+              Character = 0,
+              Num = 4
+          },
+          
+          
+          new SetCharFrameInstruction()
+          {
+              Character = 0,
+              Val1 = 0, //loop
+              Val2 = 30,
+              Val3 = 0
+          },
+          
           new StopScriptInstruction(),
           new StopScriptInstruction(),
           new StopScriptInstruction(),

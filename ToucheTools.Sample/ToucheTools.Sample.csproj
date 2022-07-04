@@ -28,6 +28,14 @@
       <Content Include="data\palette_1.csv">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="data\sequence_14.bytes" />
+      <Content Include="data\sequence_14.bytes">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="data\sprite2.png" />
+      <Content Include="data\sprite2.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>

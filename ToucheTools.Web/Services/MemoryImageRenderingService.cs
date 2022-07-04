@@ -55,7 +55,12 @@ public class MemoryImageRenderingService : IImageRenderingService
     private Image RenderImageInternal(int width, int height, int spriteWidth, int spriteHeight, List<PaletteDataModel.Rgb> palette, bool raw, byte[,] data,
         byte r = 255, byte g = 0, byte b = 255, byte a = 255)
     {
-        var image = new Image<Rgba32>(width, height, new Rgba32(r, g, b, a));
+        var bg = new Rgba32(r, g, b, a);
+        if (raw)
+        {
+            bg = new Rgba32(0, 0, 0, 255);
+        }
+        var image = new Image<Rgba32>(width, height, bg);
         
         HashSet<byte> seenColors = new HashSet<byte>();
         var savedWidth = false;

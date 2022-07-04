@@ -6,30 +6,30 @@ public class InitCharScriptInstruction : BaseInstruction
     
     public ushort Character { get; set; }
     public ushort Color { get; set; }
-    public ushort F1 { get; set; }
-    public ushort F2 { get; set; }
-    public ushort F3 { get; set; }
+    public ushort SpriteIndex { get; set; }
+    public ushort SequenceIndex { get; set; }
+    public ushort SequenceCharacterId { get; set; }
 
     public override void Load(BinaryReader reader)
     {
         Character = reader.ReadUInt16();
         Color = reader.ReadUInt16();
-        F1 = reader.ReadUInt16();
-        F2 = reader.ReadUInt16();
-        F3 = reader.ReadUInt16();
+        SpriteIndex = reader.ReadUInt16();
+        SequenceIndex = reader.ReadUInt16();
+        SequenceCharacterId = reader.ReadUInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
         writer.Write((ushort)Character);
         writer.Write((ushort)Color);
-        writer.Write((ushort)F1);
-        writer.Write((ushort)F2);
-        writer.Write((ushort)F3);
+        writer.Write((ushort)SpriteIndex);
+        writer.Write((ushort)SequenceIndex);
+        writer.Write((ushort)SequenceCharacterId);
     }
 
     public override string ToString()
     {
-        return $"{Opcode:G} {Character} {Color} {F1} {F2} {F3}";
+        return $"{Opcode:G} {Character} {Color} {SpriteIndex} {SequenceIndex} {SequenceCharacterId}";
     }
 }
