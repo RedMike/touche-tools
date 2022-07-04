@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using ToucheTools.Constants;
+using ToucheTools.Exceptions;
 using ToucheTools.Models;
 
 namespace ToucheTools.Loaders;
@@ -24,6 +25,10 @@ public class IconImageDataLoader
         _resourceDataLoader.Read(Resource.IconImage, number, false, out var offset, out _);
         _stream.Seek(offset, SeekOrigin.Begin);
         ushort rawWidth = _reader.ReadUInt16();
+        if (rawWidth == 0)
+        {
+            throw new UnknownResourceException();
+        }
         ushort rawHeight = _reader.ReadUInt16();
         var initialWidth = (int)rawWidth;
         var initialHeight = (int)rawHeight;

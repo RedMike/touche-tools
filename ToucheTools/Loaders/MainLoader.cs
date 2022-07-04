@@ -175,6 +175,7 @@ public class MainLoader
                 //try to read the icon offset first to check if the icon exists
                 _resourceLoader.Read(Resource.IconImage, i, false, out _, out _);
                 var localI = i;
+                _iconImageLoader.Read(localI, out _); //to trigger the unknown resource
                 db.Icons[i] = new Lazy<IconImageDataModel>(() =>
                 {
                     lock (lockObj)
