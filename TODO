@@ -5,8 +5,12 @@
 [x] Finish program model components
 [x] Save out all programs in sample DAT file
 [x] Set up model exporters
+[x] Export bare-bones model and try in ScummVM
 [ ] Correctly turn jump offsets to labels in opcode parsing
-[ ] Export bare-bones model and try in ScummVM
+[ ] Conversation system
+[ ] Bare-bones model gameplay
+[ ] Editor for sequence data
+[ ] Editor for program areas/hitboxes/etc
 [ ] VOC audio conversion to/from WAV (browser play)
 [ ] Simple scripting language that compiles down to opcodes
 ...
