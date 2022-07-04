@@ -132,9 +132,30 @@ public class HomeController : Controller
         var dir = animation.Directions[directionId];
         var frame = dir.Frames[frameId];
         var spriteImage = container.DatabaseModel.Sprites[int.Parse(sprite)].Value;
-        var sequenceImageBytes = _imageRenderingService.RenderAnimationImage(frame, spriteImage, paletteList);
+        var sequenceImageBytes = _imageRenderingService.RenderAnimationImage(directionId, frame, spriteImage, paletteList);
 
         return File(sequenceImageBytes, "image/png");
+    }
+    
+    [HttpGet("/sequence/{sequence}/{characterId}/{animationId}/{directionId}/image")]
+    public IActionResult GetSequenceImageAnimation(int sequence, int characterId, int animationId, int directionId,
+        [FromQuery] string id, [FromQuery] string sprite, [FromQuery] string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var parsedPalette = int.Parse(palette);
+        var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
+        var sequenceImage = container.DatabaseModel.Sequences[sequence];
+        var character = sequenceImage.Characters[characterId];
+        var animation = character.Animations[animationId];
+        var dir = animation.Directions[directionId];
+        var spriteImage = container.DatabaseModel.Sprites[int.Parse(sprite)].Value;
+        var sequenceImageBytes = _imageRenderingService.RenderAnimation(directionId, dir.Frames, spriteImage, paletteList);
+
+        return File(sequenceImageBytes, "image/gif");
     }
     
     [HttpGet("/icon")]

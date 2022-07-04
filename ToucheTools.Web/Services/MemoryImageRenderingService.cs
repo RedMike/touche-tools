@@ -1,4 +1,5 @@
 ﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
 using ToucheTools.Models;
 
@@ -9,7 +10,8 @@ public interface IImageRenderingService
     byte[] RenderImage(SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette, bool raw=false);
     byte[] RenderImage(IconImageDataModel icon, List<PaletteDataModel.Rgb> palette, bool raw=false);
     byte[] RenderImage(RoomImageDataModel room, List<PaletteDataModel.Rgb> palette, bool raw=false);
-    byte[] RenderAnimationImage(SequenceDataModel.FrameInformation frame, SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette);
+    byte[] RenderAnimationImage(int direction, SequenceDataModel.FrameInformation frame, SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette);
+    byte[] RenderAnimation(int directionId, List<SequenceDataModel.FrameInformation> dirFrames, SpriteImageDataModel spriteImage, List<PaletteDataModel.Rgb> paletteList);
 }
 
 public class MemoryImageRenderingService : IImageRenderingService
@@ -25,22 +27,36 @@ public class MemoryImageRenderingService : IImageRenderingService
     {
         var data = raw ? sprite.RawData : sprite.DecodedData;
 
-        return RenderImageInternal(sprite.Width, sprite.Height, sprite.SpriteWidth, sprite.SpriteHeight, palette, raw, data);
+        var image = RenderImageInternal(sprite.Width, sprite.Height, sprite.SpriteWidth, sprite.SpriteHeight, palette, raw, data);
+        
+        using var mem = new MemoryStream();
+        image.SaveAsPng(mem);
+        return mem.ToArray();
     }
 
     public byte[] RenderImage(IconImageDataModel icon, List<PaletteDataModel.Rgb> palette, bool raw = false)
     {
-        return RenderImageInternal(icon.Width, icon.Height, icon.Width, icon.Height, palette, raw, icon.DecodedData);
+        var image = RenderImageInternal(icon.Width, icon.Height, icon.Width, icon.Height, palette, raw, icon.DecodedData);
+        
+        using var mem = new MemoryStream();
+        image.SaveAsPng(mem);
+        return mem.ToArray();
     }
 
     public byte[] RenderImage(RoomImageDataModel room, List<PaletteDataModel.Rgb> palette, bool raw = false)
     {
-        return RenderImageInternal(room.Width, room.Height, room.Width, room.Height, palette, raw, room.RawData);
+        var image = RenderImageInternal(room.Width, room.Height, room.Width, room.Height, palette, raw, room.RawData);
+        
+        using var mem = new MemoryStream();
+        image.SaveAsPng(mem);
+        return mem.ToArray();
     }
 
-    private byte[] RenderImageInternal(int width, int height, int spriteWidth, int spriteHeight, List<PaletteDataModel.Rgb> palette, bool raw, byte[,] data)
+    private Image RenderImageInternal(int width, int height, int spriteWidth, int spriteHeight, List<PaletteDataModel.Rgb> palette, bool raw, byte[,] data,
+        byte r = 255, byte g = 0, byte b = 255, byte a = 255)
     {
-        var image = new Image<Rgb24>(width, height);
+        var image = new Image<Rgba32>(width, height, new Rgba32(r, g, b, a));
+        
         HashSet<byte> seenColors = new HashSet<byte>();
         var savedWidth = false;
         var savedHeight = false;
@@ -76,7 +92,7 @@ public class MemoryImageRenderingService : IImageRenderingService
 
                     seenColors.Add(col);
                     var p = palette[col];
-                    var rgb = new Rgb24(p.R, p.G, p.B);
+                    var rgb = new Rgba32(p.R, p.G, p.B, 255);
                     if (p.R == 0 && p.G == 0 && p.B == 0 && col != 64 && col != 255)
                     {
                         //it's a non-edge black, so just bump it up by a tiny bit to maintain the information
@@ -97,7 +113,10 @@ public class MemoryImageRenderingService : IImageRenderingService
                         rgb.B = col;
                     }
 
-                    row[j] = rgb;
+                    if (col != 0)
+                    {
+                        row[j] = rgb;
+                    }
                 }
             }
         });
@@ -107,13 +126,10 @@ public class MemoryImageRenderingService : IImageRenderingService
         _logger.LogInformation("Seen colors: {}", seenColors);
         _logger.LogInformation("Seen colors broken down: {}",
             seenColors.Select(c => $"({palette[c].R}, {palette[c].G}, {palette[c].B})"));
-
-        using var mem = new MemoryStream();
-        image.SaveAsPng(mem);
-        return mem.ToArray();
+        return image;
     }
 
-    public byte[] RenderAnimationImage(SequenceDataModel.FrameInformation frame, SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette)
+    public byte[] RenderAnimationImage(int direction, SequenceDataModel.FrameInformation frame, SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette)
     {
         var w = 0;
         if (frame.Parts.Any(p => p.DestX < 0))
@@ -149,13 +165,48 @@ public class MemoryImageRenderingService : IImageRenderingService
             {
                 for (var y = 0; y < sprite.SpriteHeight; y++)
                 {
-                    var rawPixel = sprite.RawData[srcY + y, srcX + x];
-                    var pixel = sprite.DecodedData[srcY + y, srcX + x];
+                    var dy = srcY + y;
+                    var dx = srcX + x;
+                    if (part.HFlipped)
+                    {
+                        dx = srcX + (sprite.SpriteWidth - x);
+                    }
+                    if (part.VFlipped)
+                    {
+                        dy = srcY + (sprite.SpriteHeight - y);
+                    }
+
+                    if (dy >= sprite.Height)
+                    {
+                        dy = sprite.Height - 1;
+                    }
+                    if (dy < 0)
+                    {
+                        dy = 0;
+                    }
+                    
+                    if (dx >= sprite.Width)
+                    {
+                        dx = sprite.Width - 1;
+                    }
+                    if (dx < 0)
+                    {
+                        dx = 0;
+                    }
+                    
+                    var rawPixel = sprite.RawData[dy, dx];
+                    var pixel = sprite.DecodedData[dy, dx];
                     if (rawPixel != 0 && rawPixel != 64 && rawPixel != 255)
                     {
                         try
                         {
-                            rawData[oy + y + part.DestY, ox + x + part.DestX] = pixel;
+                            var qy = oy + y + part.DestY;
+                            var qx = ox + x + part.DestX;
+                            if (direction == 3)
+                            {
+                                qx -= sprite.SpriteWidth;
+                            }
+                            rawData[qy, qx] = pixel;
                         }
                         catch (Exception)
                         {
@@ -166,6 +217,149 @@ public class MemoryImageRenderingService : IImageRenderingService
             }
         }
 
-        return RenderImageInternal(w, h, w, h, palette, false, rawData);
+        var image = RenderImageInternal(w, h, w, h, palette, false, rawData);
+        
+        using var mem = new MemoryStream();
+        image.SaveAsPng(mem);
+        return mem.ToArray();
+    }
+
+    public byte[] RenderAnimation(int direction, List<SequenceDataModel.FrameInformation> frames,
+        SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette)
+    {
+        const int frameDelay = 100; //hundredths of a second
+        //figure out image size
+        var maxW = 0;
+        var maxH = 0;
+        foreach (var frame in frames)
+        {
+            var w = 0;
+            var h = 0;
+            if (frame.Parts.Any(p => p.DestX < 0))
+            {
+                w += Math.Abs(frame.Parts.Select(p => p.DestX).Min());
+            }
+
+            if (frame.Parts.Any(p => p.DestX > 0))
+            {
+                w += Math.Abs(frame.Parts.Select(p => p.DestX).Max());
+            }
+
+            w += sprite.SpriteWidth;
+
+            if (frame.Parts.Any(p => p.DestY < 0))
+            {
+                h += Math.Abs(frame.Parts.Select(p => p.DestY).Min());
+            }
+
+            if (frame.Parts.Any(p => p.DestY > 0))
+            {
+                h += Math.Abs(frame.Parts.Select(p => p.DestY).Max());
+            }
+
+            h += sprite.SpriteHeight;
+
+            if (maxW < w)
+            {
+                maxW = w;
+            }
+
+            if (maxH < h)
+            {
+                maxH = h;
+            }
+        }
+
+        var fullImage = new Image<Rgba32>(maxW, maxH);
+        var firstFrame = true;
+        
+        var ox = maxW/2;
+        var oy = maxH/2+sprite.SpriteHeight;
+        var framesPerLine = sprite.Width / sprite.SpriteWidth;
+
+        foreach (var frame in frames)
+        {
+            var rawData = new byte[maxH, maxW];
+            foreach (var part in frame.Parts)
+            {
+                var srcX = sprite.SpriteWidth * (part.FrameIndex % framesPerLine);
+                var srcY = sprite.SpriteHeight * (part.FrameIndex / framesPerLine);
+                for (var x = 0; x < sprite.SpriteWidth; x++)
+                {
+                    for (var y = 0; y < sprite.SpriteHeight; y++)
+                    {
+                        var dy = srcY + y;
+                        var dx = srcX + x;
+                        if (part.HFlipped)
+                        {
+                            dx = srcX + (sprite.SpriteWidth - x);
+                        }
+
+                        if (part.VFlipped)
+                        {
+                            dy = srcY + (sprite.SpriteHeight - y);
+                        }
+
+                        if (dy >= sprite.Height)
+                        {
+                            dy = sprite.Height - 1;
+                        }
+
+                        if (dy < 0)
+                        {
+                            dy = 0;
+                        }
+
+                        if (dx >= sprite.Width)
+                        {
+                            dx = sprite.Width - 1;
+                        }
+
+                        if (dx < 0)
+                        {
+                            dx = 0;
+                        }
+
+                        var rawPixel = sprite.RawData[dy, dx];
+                        var pixel = sprite.DecodedData[dy, dx];
+                        if (rawPixel != 0 && rawPixel != 64 && rawPixel != 255)
+                        {
+                            try
+                            {
+                                var qy = oy + y + part.DestY;
+                                var qx = ox + x + part.DestX;
+                                if (direction == 3)
+                                {
+                                    qx -= sprite.SpriteWidth;
+                                }
+
+                                rawData[qy, qx] = pixel;
+                            }
+                            catch (Exception)
+                            {
+                                //
+                            }
+                        }
+                    }
+                }
+            }
+
+            using var image = RenderImageInternal(maxW, maxH, maxW, maxH, palette, false, rawData, 0, 0, 0, 0);
+            image.Frames.RootFrame.Metadata.GetGifMetadata().FrameDelay = frame.Delay == 0 ? 10 : frame.Delay*10;
+            image.Frames.RootFrame.Metadata.GetGifMetadata().DisposalMethod = GifDisposalMethod.RestoreToBackground;
+            
+            fullImage.Frames.AddFrame(image.Frames.RootFrame);
+            if (firstFrame)
+            {
+                fullImage.Frames.RemoveFrame(0);
+                firstFrame = false;
+            }
+        }
+
+        fullImage.Metadata.GetGifMetadata().RepeatCount = 0;
+        fullImage.Metadata.GetGifMetadata().ColorTableMode = GifColorTableMode.Local;
+        using var mem = new MemoryStream();
+        fullImage.SaveAsGif(mem);
+        return mem.ToArray();
     }
 }

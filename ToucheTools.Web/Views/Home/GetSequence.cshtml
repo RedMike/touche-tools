@@ -57,7 +57,8 @@
         paletteId = int.Parse(paletteIdRaw);
     }
     var palette = container.DatabaseModel.Palettes[paletteId];
-    
+
+    var detailed = !string.IsNullOrEmpty((string)(Context.Request.Query["detailed"]));
 }
 
 <div>
@@ -111,59 +112,70 @@
     <h1 class="display-3">Sequence @sequenceId</h1>
     @{
         var sequence = Model.Sequences[sequenceId];
-        foreach (var charPair in sequence.Characters)
+
+        if (detailed)
         {
-            <h5 class="display-4">Character @charPair.Key</h5>
-            <p><span class="fw-bold">Frame Dir Flag:</span> <span>@charPair.Value.FrameDirFlag</span></p>
-            foreach (var animPair in charPair.Value.Animations)
+            foreach (var charPair in sequence.Characters)
             {
-                <h5 class="display-5">Animation @animPair.Key</h5>
-                foreach (var dirPair in animPair.Value.Directions)
+                <h5 class="display-4">Character @charPair.Key</h5>
+                <p><span class="fw-bold">Frame Dir Flag:</span> <span>@charPair.Value.FrameDirFlag</span></p>
+                foreach (var animPair in charPair.Value.Animations)
                 {
-                    <h5 class="display-6">Direction @dirPair.Key</h5>
-                    <ul>
-                        @{
-                            var frameId = 0;
-                            foreach (var frame in dirPair.Value.Frames)
-                            {
-                                <li>Frame @frameId</li>
-                                <ul>
-                                    <li><span class="fw-bold">Walk DX:</span> <span>@frame.WalkDx</span></li>
-                                    <li><span class="fw-bold">Walk DY:</span> <span>@frame.WalkDy</span></li>
-                                    <li><span class="fw-bold">Walk DZ:</span> <span>@frame.WalkDz</span></li>
-                                    <li><span class="fw-bold">Delay:</span> <span>@frame.Delay</span></li>
-                                    <li><img src="@Url.Action("GetSequenceImage", "Home", new {
-                                                      sequence = sequenceId,
-                                                      characterId = charPair.Key,
-                                                      animationId = animPair.Key,
-                                                      directionId = dirPair.Key,
-                                                      frameId = frameId,
-                                                      id = sessionId,
-                                                      sprite = spriteId,
-                                                      palette = paletteId
-                                                  })"/></li>
-                                    <li>Parts</li>
+                    <h5 class="display-5">Animation @animPair.Key</h5>
+                    foreach (var dirPair in animPair.Value.Directions)
+                    {
+                        <h5 class="display-6">Direction @dirPair.Key</h5>
+                        <ul>
+                            @{
+                                var frameId = 0;
+                                foreach (var frame in dirPair.Value.Frames)
+                                {
+                                    <li>Frame @frameId</li>
                                     <ul>
-                                        @{
-                                            var partId = 0;
-                                            foreach (var part in frame.Parts)
-                                            {
-                                                <li>Part @partId</li>
-                                                <ul>
-                                                    <li><span class="fw-bold">Frame Index:</span> <span>@part.FrameIndex</span></li>
-                                                    <li><span class="fw-bold">Dest X:</span> <span>@part.DestX</span></li>
-                                                    <li><span class="fw-bold">Dest Y:</span> <span>@part.DestY</span></li>
-                                                    <li><span class="fw-bold">V Flipped:</span> <span>@(part.VFlipped ? "yes" : "no")</span></li>
-                                                    @{ partId++; }
-                                                </ul>
+                                        <li><span class="fw-bold">Walk DX:</span> <span>@frame.WalkDx</span></li>
+                                        <li><span class="fw-bold">Walk DY:</span> <span>@frame.WalkDy</span></li>
+                                        <li><span class="fw-bold">Walk DZ:</span> <span>@frame.WalkDz</span></li>
+                                        <li><span class="fw-bold">Delay:</span> <span>@frame.Delay</span></li>
+                                        <li><img src="@Url.Action("GetSequenceImage", "Home", new { sequence = sequenceId, characterId = charPair.Key, animationId = animPair.Key, directionId = dirPair.Key, frameId = frameId, id = sessionId, sprite = spriteId, palette = paletteId })"/></li>
+                                        <li>Parts</li>
+                                        <ul>
+                                            @{
+                                                var partId = 0;
+                                                foreach (var part in frame.Parts)
+                                                {
+                                                    <li>Part @partId</li>
+                                                    <ul>
+                                                        <li><span class="fw-bold">Frame Index:</span> <span>@part.FrameIndex</span></li>
+                                                        <li><span class="fw-bold">Dest X:</span> <span>@part.DestX</span></li>
+                                                        <li><span class="fw-bold">Dest Y:</span> <span>@part.DestY</span></li>
+                                                        <li><span class="fw-bold">V Flipped:</span> <span>@(part.HFlipped ? "yes" : "no")</span></li>
+                                                        @{ partId++; }
+                                                    </ul>
+                                                }
                                             }
-                                        }
+                                        </ul>
+                                        @{ frameId++; }
                                     </ul>
-                                    @{ frameId++; }
-                                </ul>
+                                }
                             }
-                        }
-                    </ul>
+                        </ul>
+                    }
+                }
+            }
+        }
+        else
+        {
+            foreach (var charPair in sequence.Characters)
+            {
+                <h5 class="display-4">Character @charPair.Key</h5>
+                foreach (var animPair in charPair.Value.Animations)
+                {
+                    <h5 class="display-5">Animation @animPair.Key</h5>
+                    foreach (var dirPair in animPair.Value.Directions)
+                    {
+                        <h5 class="display-6">Direction @dirPair.Key</h5>
+                        <img src="@Url.Action("GetSequenceImageAnimation", "Home", new { sequence = sequenceId, characterId = charPair.Key, animationId = animPair.Key, directionId = dirPair.Key, id = sessionId, sprite = spriteId, palette = paletteId })"/>
+                    }
                 }
             }
         }

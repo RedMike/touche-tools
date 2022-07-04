@@ -8,6 +8,7 @@ public class SequenceDataModel
         public int DestX { get; set; }
         public int DestY { get; set; }
         public bool VFlipped { get; set; }
+        public bool HFlipped { get; set; }
     }
 
     public class FrameInformation
