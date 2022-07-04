@@ -3,6 +3,7 @@
 public class SetCharDelayInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharDelay;
+    public override int Width => 2;
     
     public ushort Delay { get; set; }
 

@@ -3,6 +3,7 @@
 public class FetchScriptWordInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.FetchScriptWord;
+    public override int Width => 2;
     
     public ushort Val { get; set; }
 

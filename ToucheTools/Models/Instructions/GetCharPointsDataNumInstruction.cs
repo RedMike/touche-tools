@@ -3,6 +3,7 @@
 public class GetCharPointsDataNumInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.GetCharPointsDataNum;
+    public override int Width => 2;
     
     public ushort Character { get; set; }
     

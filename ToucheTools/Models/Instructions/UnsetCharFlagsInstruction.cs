@@ -3,6 +3,7 @@
 public class UnsetCharFlagsInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.UnsetCharFlags;
+    public override int Width => 4;
     
     public ushort Character { get; set; }
     public ushort Flags { get; set; }

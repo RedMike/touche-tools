@@ -3,6 +3,7 @@
 public class LoadRoomInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.LoadRoom;
+    public override int Width => 2;
     
     public ushort Num { get; set; }
 

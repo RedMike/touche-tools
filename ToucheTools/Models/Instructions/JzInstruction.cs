@@ -3,6 +3,7 @@
 public class JzInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.Jz;
+    public override int Width => 2;
     
     public ushort NewOffset { get; set; }
 

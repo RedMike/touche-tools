@@ -3,6 +3,7 @@
 public class SetPaletteInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetPalette;
+    public override int Width => 6;
     
     public ushort R { get; set; }
     public ushort G { get; set; }

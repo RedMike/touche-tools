@@ -3,6 +3,7 @@
 public class AddRoomAreaInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.AddRoomArea;
+    public override int Width => 4;
     
     public ushort Num { get; set; }
     public ushort Flag { get; set; }

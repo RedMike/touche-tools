@@ -3,6 +3,7 @@
 public class GetInventoryItemFlagsInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.GetInventoryItemFlags;
+    public override int Width => 2;
     
     public ushort Item { get; set; }
 

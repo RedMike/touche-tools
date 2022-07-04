@@ -3,6 +3,7 @@
 public class UnlockHitboxInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.UnlockHitbox;
+    public override int Width => 2;
     
     public ushort Num { get; set; }
 

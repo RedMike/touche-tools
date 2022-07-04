@@ -3,6 +3,7 @@
 public class GetCharWalkBoxInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.GetCharWalkBox;
+    public override int Width => 2;
     
     public ushort Character { get; set; }
     

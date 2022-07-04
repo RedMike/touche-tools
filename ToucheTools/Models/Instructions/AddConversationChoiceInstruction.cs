@@ -3,7 +3,8 @@
 public class AddConversationChoiceInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.AddConversationChoice;
-    
+    public override int Width => 2;
+
     public ushort Num { get; set; }
 
     public override void Load(BinaryReader reader)

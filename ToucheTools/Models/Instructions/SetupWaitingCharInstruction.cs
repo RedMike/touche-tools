@@ -3,6 +3,7 @@
 public class SetupWaitingCharInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetupWaitingChar;
+    public override int Width => 6;
     
     public ushort Character { get; set; }
     public ushort Val1 { get; set; }

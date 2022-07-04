@@ -3,6 +3,7 @@
 public class IsCharActiveInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.IsCharActive;
+    public override int Width => 2;
     
     public ushort Character { get; set; }
     

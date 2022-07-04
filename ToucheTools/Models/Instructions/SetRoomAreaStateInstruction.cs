@@ -3,6 +3,7 @@
 public class SetRoomAreaStateInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetRoomAreaState;
+    public override int Width => 4;
     
     public ushort Num { get; set; }
     public ushort Val { get; set; }

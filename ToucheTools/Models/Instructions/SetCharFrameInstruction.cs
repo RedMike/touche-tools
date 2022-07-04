@@ -11,6 +11,7 @@ public class SetCharFrameInstruction : BaseInstruction
         Todo4 = 4 
     }
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharFrame;
+    public override int Width => 8;
     
     public ushort Character { get; set; }
     public ushort Val1 { get; set; }

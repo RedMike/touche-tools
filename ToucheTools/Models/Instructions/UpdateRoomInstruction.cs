@@ -3,6 +3,7 @@
 public class UpdateRoomInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.UpdateRoom;
+    public override int Width => 2;
     
     public ushort Area { get; set; }
 

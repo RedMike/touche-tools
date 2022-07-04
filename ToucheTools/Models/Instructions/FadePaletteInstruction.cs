@@ -3,6 +3,7 @@
 public class FadePaletteInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.FadePalette;
+    public override int Width => 2;
     
     public ushort FadeOutRaw { get; set; }
 

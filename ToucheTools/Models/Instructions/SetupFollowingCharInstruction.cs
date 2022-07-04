@@ -3,6 +3,7 @@
 public class SetupFollowingCharInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetupFollowingChar;
+    public override int Width => 4;
     
     public ushort Val { get; set; }
     public ushort Character { get; set; }

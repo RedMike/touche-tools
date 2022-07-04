@@ -3,6 +3,7 @@
 public class StopCharScriptInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.StopCharScript;
+    public override int Width => 2;
     
     public ushort Character { get; set; }
     public bool CurrentCharacter => Character == 256;

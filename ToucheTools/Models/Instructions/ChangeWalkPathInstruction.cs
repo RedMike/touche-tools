@@ -3,6 +3,7 @@
 public class ChangeWalkPathInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.ChangeWalkPath;
+    public override int Width => 6;
     
     public ushort Num1 { get; set; }
     public ushort Num2 { get; set; }

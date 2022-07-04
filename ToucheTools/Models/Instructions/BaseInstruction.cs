@@ -3,6 +3,7 @@
 public abstract class BaseInstruction
 {
     public abstract ProgramDataModel.Opcode Opcode { get; }
+    public abstract int Width { get; } //in bytes
 
     public virtual void Load(BinaryReader reader)
     {

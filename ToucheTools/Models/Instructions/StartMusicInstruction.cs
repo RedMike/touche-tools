@@ -3,6 +3,7 @@
 public class StartMusicInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.StartMusic;
+    public override int Width => 2;
     
     public ushort Num { get; set; }
 

@@ -3,6 +3,7 @@
 public class StartAnimationInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.StartAnimation;
+    public override int Width => 4;
     
     public ushort Character { get; set; }
     public ushort Position { get; set; }

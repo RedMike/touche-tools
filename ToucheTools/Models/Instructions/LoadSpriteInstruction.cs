@@ -3,6 +3,7 @@
 public class LoadSpriteInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.LoadSprite;
+    public override int Width => 4;
     
     public ushort Index { get; set; }
     public ushort Num { get; set; }

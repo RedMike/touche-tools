@@ -3,6 +3,7 @@
 public class SetInventoryItemInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetInventoryItem;
+    public override int Width => 4;
     
     public ushort Character { get; set; }
     public ushort Item { get; set; }

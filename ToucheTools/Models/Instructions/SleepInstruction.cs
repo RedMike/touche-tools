@@ -3,6 +3,7 @@
 public class SleepInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.Sleep;
+    public override int Width => 2;
     
     public ushort RawCycles { get; set; }
     public int Cycles => RawCycles * 2;

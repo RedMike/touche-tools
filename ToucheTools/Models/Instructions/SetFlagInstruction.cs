@@ -3,6 +3,7 @@
 public class SetFlagInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetFlag;
+    public override int Width => 2;
     
     public ushort Flag { get; set; }
 

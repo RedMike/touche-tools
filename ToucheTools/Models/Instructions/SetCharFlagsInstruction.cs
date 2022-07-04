@@ -3,6 +3,7 @@
 public class SetCharFlagsInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharFlags;
+    public override int Width => 4;
     
     public ushort Character { get; set; }
     public ushort Flags { get; set; }

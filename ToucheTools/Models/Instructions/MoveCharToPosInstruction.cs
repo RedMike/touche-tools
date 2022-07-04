@@ -3,6 +3,7 @@
 public class MoveCharToPosInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.MoveCharToPos;
+    public override int Width => TargetingAnotherCharacter ? 6 : 4;
     
     public ushort Character { get; set; }
     public ushort Num { get; set; }

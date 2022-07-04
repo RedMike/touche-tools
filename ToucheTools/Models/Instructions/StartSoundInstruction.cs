@@ -3,6 +3,7 @@
 public class StartSoundInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.StartSound;
+    public override int Width => 4;
     
     public ushort Num { get; set; }
     public ushort Delay { get; set; }

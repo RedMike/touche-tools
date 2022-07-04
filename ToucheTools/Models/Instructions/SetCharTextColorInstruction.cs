@@ -3,6 +3,7 @@
 public class SetCharTextColorInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharTextColor;
+    public override int Width => 4;
     
     public ushort Character { get; set; }
     public ushort Color { get; set; }

@@ -3,6 +3,7 @@
 public class LoadSequenceInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.LoadSequence;
+    public override int Width => 4;
     
     public ushort Index { get; set; }
     public ushort Num { get; set; }

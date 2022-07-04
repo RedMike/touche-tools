@@ -3,6 +3,7 @@
 public class InitCharInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.InitChar;
+    public override int Width => 2;
     
     public ushort Character { get; set; }
 

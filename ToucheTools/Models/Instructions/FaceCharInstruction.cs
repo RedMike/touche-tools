@@ -3,6 +3,7 @@
 public class FaceCharInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.FaceChar;
+    public override int Width => 4;
     
     public ushort Character1 { get; set; }
     public ushort Character2 { get; set; }

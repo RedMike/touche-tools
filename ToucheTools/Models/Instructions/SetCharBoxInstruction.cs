@@ -3,6 +3,7 @@
 public class SetCharBoxInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharBox;
+    public override int Width => 4;
     
     public ushort Character { get; set; }
     public ushort Num { get; set; }

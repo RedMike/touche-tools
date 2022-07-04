@@ -3,6 +3,7 @@
 public class RemoveItemFromInventoryInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.RemoveItemFromInventory;
+    public override int Width => 2;
     
     public ushort Character { get; set; }
     

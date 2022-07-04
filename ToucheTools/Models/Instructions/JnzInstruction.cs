@@ -3,6 +3,7 @@
 public class JnzInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.Jnz;
+    public override int Width => 2;
     
     public ushort NewOffset { get; set; }
 

@@ -3,6 +3,7 @@
 public class SetCharDirectionInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharDirection;
+    public override int Width => 4;
     
     public ushort Character { get; set; }
     public ushort Direction { get; set; }

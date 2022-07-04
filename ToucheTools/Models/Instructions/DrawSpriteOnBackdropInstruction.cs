@@ -3,6 +3,7 @@
 public class DrawSpriteOnBackdropInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.DrawSpriteOnBackdrop;
+    public override int Width => 6;
     
     public ushort Num { get; set; }
     public ushort X { get; set; }

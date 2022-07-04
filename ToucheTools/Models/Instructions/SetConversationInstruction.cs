@@ -3,6 +3,7 @@
 public class SetConversationInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetConversation;
+    public override int Width => 2;
     
     public ushort Num { get; set; }
 

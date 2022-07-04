@@ -3,6 +3,7 @@
 public class GetCharCurrentWalkBoxInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.GetCharCurrentWalkBox;
+    public override int Width => 2;
     
     public ushort Character { get; set; }
     

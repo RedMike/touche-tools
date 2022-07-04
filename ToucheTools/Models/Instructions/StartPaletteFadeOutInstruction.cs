@@ -3,6 +3,7 @@
 public class StartPaletteFadeOutInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.StartPaletteFadeOut;
+    public override int Width => 2;
     
     public ushort Num { get; set; }
 

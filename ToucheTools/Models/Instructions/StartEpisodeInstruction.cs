@@ -3,6 +3,7 @@
 public class StartEpisodeInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.StartEpisode;
+    public override int Width => 4;
     
     public ushort Num { get; set; }
     public ushort Flag { get; set; }

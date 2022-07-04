@@ -3,6 +3,7 @@
 public class RemoveConversationChoiceInstruction : BaseInstruction
 {
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.RemoveConversationChoice;
+    public override int Width => 2;
     
     public ushort Num { get; set; }
 
