@@ -54,7 +54,7 @@
         return;
     }
     var roomImage = Model.Value;
-    var roomImageBytes = _imageRenderingService.RenderImage(roomImage.Width, roomImage.Height, roomImage.RawData, palette.Colors);
+    var roomImageBytes = _imageRenderingService.RenderImage(roomImage, palette.Colors);
     var roomImageBase64 = Convert.ToBase64String(roomImageBytes);
     var imageData = "data:image/png;base64," + roomImageBase64;
 }

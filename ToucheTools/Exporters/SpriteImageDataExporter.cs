@@ -18,11 +18,14 @@ public class SpriteImageDataExporter
 
     public void Export(SpriteImageDataModel sprite)
     {
-        _logger.LogInformation("Saving sprite of size {}x{}", sprite.Width, sprite.Height);
+        _logger.LogInformation("Saving sprite of size {}x{} (individual {}x{})", sprite.Width, sprite.Height, sprite.SpriteWidth, sprite.SpriteHeight);
         
         _stream.Seek(0, SeekOrigin.Begin);
         _writer.Write((ushort)sprite.Width);
         _writer.Write((ushort)sprite.Height);
+
+        var addedHeightMeasure = false;
+        var addedWidthMeasure = false;
         //RLE compression
         for (var i = 0; i < sprite.Height; i++)
         {
@@ -32,6 +35,34 @@ public class SpriteImageDataExporter
             for (var j = 0; j < sprite.Width; j++)
             {
                 byte color = sprite.RawData[i, j];
+                if (!addedHeightMeasure && j == 0)
+                {
+                    if (i < sprite.SpriteHeight && color == 64)
+                    {
+                        throw new Exception("Got color 64 outside of separator H");
+                        color = 0;
+                    }
+                }
+                if (!addedHeightMeasure && i == sprite.SpriteHeight && j == 0)
+                {
+                    addedHeightMeasure = true;
+                    color = 64;
+                }
+
+                if (!addedWidthMeasure && i == 0)
+                {
+                    if (j < sprite.SpriteWidth && color == 64)
+                    {
+                        throw new Exception("Got color 64 outside of separator W");
+                        color = 0;
+                    }
+                }
+                if (!addedWidthMeasure && i == 0 && j == sprite.SpriteWidth)
+                {
+                    addedWidthMeasure = true;
+                    color = 64;
+                }
+                
                 if (compressing && 
                     (
                         color != compressingColor || //we're done compressing

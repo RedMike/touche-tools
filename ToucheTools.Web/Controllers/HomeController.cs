@@ -87,9 +87,75 @@ public class HomeController : Controller
         var parsedPalette = int.Parse(palette);
         var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
         var spriteImage = container.DatabaseModel.Sprites[sprite].Value;
-        var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage.Width, spriteImage.Height, spriteImage.DecodedData, paletteList);
+        var spriteImageBytes = _imageRenderingService.RenderImage(spriteImage, paletteList);
 
         return File(spriteImageBytes, "image/png");
+    }
+
+    [HttpGet("/sequence")]
+    public IActionResult GetSequences([FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
+    
+    [HttpGet("/sequence/{sequence}")]
+    public IActionResult GetSequence(int sequence, [FromQuery]string id, [FromQuery]string sprite, [FromQuery]string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return RedirectToAction("Index");
+        }
+        var databaseModel = container.DatabaseModel;
+        return View(databaseModel);
+    }
+    
+    [HttpGet("/sequence/{sequence}/{characterId}/{animationId}/{directionId}/{frameId}/image")]
+    public IActionResult GetSequenceImage(int sequence, int characterId, int animationId, int directionId, int frameId,
+        [FromQuery] string id, [FromQuery] string sprite, [FromQuery] string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var parsedPalette = int.Parse(palette);
+        var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
+        var sequenceImage = container.DatabaseModel.Sequences[sequence];
+        var character = sequenceImage.Characters[characterId];
+        var animation = character.Animations[animationId];
+        var dir = animation.Directions[directionId];
+        var frame = dir.Frames[frameId];
+        var spriteImage = container.DatabaseModel.Sprites[int.Parse(sprite)].Value;
+        var sequenceImageBytes = _imageRenderingService.RenderAnimationImage(directionId, frame, spriteImage, paletteList);
+
+        return File(sequenceImageBytes, "image/png");
+    }
+    
+    [HttpGet("/sequence/{sequence}/{characterId}/{animationId}/{directionId}/image")]
+    public IActionResult GetSequenceImageAnimation(int sequence, int characterId, int animationId, int directionId,
+        [FromQuery] string id, [FromQuery] string sprite, [FromQuery] string palette)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var parsedPalette = int.Parse(palette);
+        var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
+        var sequenceImage = container.DatabaseModel.Sequences[sequence];
+        var character = sequenceImage.Characters[characterId];
+        var animation = character.Animations[animationId];
+        var dir = animation.Directions[directionId];
+        var spriteImage = container.DatabaseModel.Sprites[int.Parse(sprite)].Value;
+        var sequenceImageBytes = _imageRenderingService.RenderAnimation(directionId, dir.Frames, spriteImage, paletteList);
+
+        return File(sequenceImageBytes, "image/gif");
     }
     
     [HttpGet("/icon")]
@@ -127,7 +193,7 @@ public class HomeController : Controller
         var parsedPalette = int.Parse(palette);
         var paletteList = container.DatabaseModel.Palettes[parsedPalette].Colors;
         var iconImage = container.DatabaseModel.Icons[icon].Value;
-        var iconImageBytes = _imageRenderingService.RenderImage(iconImage.Width, iconImage.Height, iconImage.DecodedData, paletteList);
+        var iconImageBytes = _imageRenderingService.RenderImage(iconImage, paletteList);
 
         return File(iconImageBytes, "image/png");
     }
@@ -172,7 +238,7 @@ public class HomeController : Controller
         var roomInfo = container.DatabaseModel.Rooms[room];
         var paletteList = container.DatabaseModel.Palettes[room].Colors;
         var roomImage = container.DatabaseModel.RoomImages[roomInfo.RoomImageNum].Value;
-        var roomImageBytes = _imageRenderingService.RenderImage(roomImage.Width, roomImage.Height, roomImage.RawData, paletteList);
+        var roomImageBytes = _imageRenderingService.RenderImage(roomImage, paletteList);
 
         return File(roomImageBytes, "image/png");
     }
