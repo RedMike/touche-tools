@@ -6,8 +6,10 @@
 [x] Save out all programs in sample DAT file
 [x] Set up model exporters
 [x] Export bare-bones model and try in ScummVM
-[ ] Correctly turn jump offsets to labels in opcode parsing
+[x] Correctly turn jump offsets to labels in opcode parsing (at least added offsets)
+[ ] Export sequence data correctly
 [ ] Conversation system
+[ ] Export conversation data correctly
 [ ] Bare-bones model gameplay
 [ ] Editor for sequence data
 [ ] Editor for program areas/hitboxes/etc

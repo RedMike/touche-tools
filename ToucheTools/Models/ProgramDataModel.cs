@@ -197,7 +197,7 @@ public class ProgramDataModel
     public List<Conversation> Conversations { get; set; } = new List<Conversation>();
     public List<CharScriptOffset> CharScriptOffsets { get; set; } = new List<CharScriptOffset>();
 
-    public List<BaseInstruction> Instructions { get; set; } = new List<BaseInstruction>();
+    public Dictionary<int, BaseInstruction> Instructions { get; set; } = new Dictionary<int, BaseInstruction>();
 
     public Dictionary<int, string> Strings { get; set; } = new Dictionary<int, string>();
     

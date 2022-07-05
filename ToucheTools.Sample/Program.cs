@@ -284,6 +284,252 @@ db.Palettes = new Dictionary<int, PaletteDataModel>()
     { 1, paletteModel },
     { 2, paletteModel }
 };
+
+var rawInstructions = new List<BaseInstruction>()
+{
+    new NoopInstruction(),
+
+    //char 1
+    new InitCharInstruction()
+    {
+        Character = 0
+    },
+    new LoadSpriteInstruction()
+    {
+        Index = 0,
+        Num = 0
+    },
+    new LoadSequenceInstruction()
+    {
+        Num = 0,
+        Index = 0
+    },
+    new InitCharScriptInstruction()
+    {
+        Character = 0,
+        Color = 255,
+        SpriteIndex = 0,
+        SequenceIndex = 0,
+        SequenceCharacterId = 0
+    },
+    new SetCharFrameInstruction()
+    {
+        Character = 0,
+        Val1 = 0, //loop
+        Val2 = 18,
+        Val3 = 0
+    },
+    new SetCharFrameInstruction()
+    {
+        Character = 0,
+        Val1 = 2, //talking?
+        Val2 = 19,
+        Val3 = 0
+    },
+    new SetCharDirectionInstruction()
+    {
+        Character = 0,
+        Direction = 0
+    },
+    new SetCharBoxInstruction()
+    {
+        Character = 0,
+        Num = 1
+    },
+    new SetCharFlagsInstruction()
+    {
+        Character = 0,
+        Flags = 0
+    },
+
+    //char 2
+    new InitCharInstruction()
+    {
+        Character = 1
+    },
+    new LoadSpriteInstruction()
+    {
+        Index = 1,
+        Num = 1
+    },
+    new LoadSequenceInstruction()
+    {
+        Num = 1,
+        Index = 1
+    },
+    new InitCharScriptInstruction()
+    {
+        Character = 1,
+        Color = 255,
+        SpriteIndex = 1, //sprite num
+        SequenceIndex = 1, //sequence
+        SequenceCharacterId = 0 //seq character
+    },
+    new SetCharFrameInstruction()
+    {
+        Character = 1,
+        Val1 = 0, //loop
+        Val2 = 0,
+        Val3 = 0
+    },
+    new SetCharFrameInstruction()
+    {
+        Character = 1,
+        Val1 = 2, //talking?
+        Val2 = 2,
+        Val3 = 0
+    },
+    new SetCharDirectionInstruction()
+    {
+        Character = 1,
+        Direction = 3
+    },
+    new SetCharBoxInstruction()
+    {
+        Character = 1,
+        Num = 2
+    },
+    new SetCharFlagsInstruction()
+    {
+        Character = 1,
+        Flags = 0
+    },
+
+    //done
+    new EnableInputInstruction(),
+
+    new FetchScriptWordInstruction()
+    {
+        Val = 1
+    },
+    new SetFlagInstruction()
+    {
+        Flag = 606 //disable inventory redraw
+    },
+
+    new FetchScriptWordInstruction()
+    {
+        Val = 0
+    },
+    new SetFlagInstruction()
+    {
+        Flag = 618 //hide mouse cursor 
+    },
+
+    // new FetchScriptWordInstruction()
+    // {
+    //     Val = 1
+    // },
+    // new SetFlagInstruction()
+    // {
+    //     Flag = 902 //debug walks 
+    // },
+
+    new FetchScriptWordInstruction()
+    {
+        Val = 20000
+    },
+    new SetFlagInstruction()
+    {
+        Flag = 252
+    },
+    new FetchScriptWordInstruction()
+    {
+        Val = 20000
+    },
+    new SetFlagInstruction()
+    {
+        Flag = 253
+    },
+
+    new LoadRoomInstruction()
+    {
+        Num = 1
+    },
+    new FetchScriptWordInstruction()
+    {
+        Val = 104
+    },
+    new SetFlagInstruction()
+    {
+        Flag = 0 //active char
+    },
+
+    new FetchScriptWordInstruction()
+    {
+        Val = 0
+    },
+    new SetFlagInstruction()
+    {
+        Flag = 614 //room offset x
+    },
+
+    new FetchScriptWordInstruction()
+    {
+        Val = 0
+    },
+    new SetFlagInstruction()
+    {
+        Flag = 615 //room offset h
+    },
+
+    //dialogue
+    new StartTalkInstruction()
+    {
+        Character = 0,
+        Num = 2
+    },
+    new StartTalkInstruction()
+    {
+        Character = 0,
+        Num = 3
+    },
+
+    new StartTalkInstruction()
+    {
+        Character = 1,
+        Num = 5
+    },
+    new StartTalkInstruction()
+    {
+        Character = 1,
+        Num = 6
+    },
+
+    new SetCharFrameInstruction()
+    {
+        Character = 1,
+        Val1 = 0, //loop
+        Val2 = 4,
+        Val3 = 0
+    },
+    new StartTalkInstruction()
+    {
+        Character = 0,
+        Num = 4
+    },
+
+
+    new SetCharFrameInstruction()
+    {
+        Character = 0,
+        Val1 = 0, //loop
+        Val2 = 30,
+        Val3 = 0
+    },
+
+    new StopScriptInstruction(),
+    new StopScriptInstruction(),
+    new StopScriptInstruction(),
+    new StopScriptInstruction()
+};
+var instructionOffset = 0;
+var instructions = new Dictionary<int, BaseInstruction>();
+foreach (var instruction in rawInstructions)
+{
+    instructions[instructionOffset] = instruction;
+    instructionOffset += instruction.Width + 1; //opcode plus width
+}
 db.Programs = new Dictionary<int, ProgramDataModel>();
 db.Programs[Game.StartupEpisode] = new ProgramDataModel()
 {
@@ -369,244 +615,7 @@ db.Programs[Game.StartupEpisode] = new ProgramDataModel()
           { 5, "You seem a decent fellow.."}, // 1
           { 6, "I hate to die." }, // 1
       },
-      Instructions = new List<BaseInstruction>()
-      {
-          new NoopInstruction(),
-          
-          //char 1
-          new InitCharInstruction()
-          {
-              Character = 0
-          },
-          new LoadSpriteInstruction()
-          {
-              Index = 0,
-              Num = 0
-          },
-          new LoadSequenceInstruction()
-          {
-              Num = 0,
-              Index = 0
-          },
-          new InitCharScriptInstruction()
-          {
-              Character = 0,
-              Color = 255,
-              SpriteIndex = 0,
-              SequenceIndex = 0,
-              SequenceCharacterId = 0
-          },
-          new SetCharFrameInstruction()
-          {
-              Character = 0,
-              Val1 = 0, //loop
-              Val2 = 18,
-              Val3 = 0
-          },
-          new SetCharFrameInstruction()
-          {
-              Character = 0,
-              Val1 = 2, //talking?
-              Val2 = 19,
-              Val3 = 0
-          },
-          new SetCharDirectionInstruction()
-          {
-              Character = 0,
-              Direction = 0
-          },
-          new SetCharBoxInstruction()
-          {
-              Character = 0,
-              Num = 1
-          },
-          new SetCharFlagsInstruction()
-          {
-              Character = 0,
-              Flags = 0
-          },
-          
-          //char 2
-          new InitCharInstruction()
-          {
-              Character = 1
-          },
-          new LoadSpriteInstruction()
-          {
-              Index = 1,
-              Num = 1
-          },
-          new LoadSequenceInstruction()
-          {
-              Num = 1,
-              Index = 1
-          },
-          new InitCharScriptInstruction()
-          {
-              Character = 1,
-              Color = 255,
-              SpriteIndex = 1, //sprite num
-              SequenceIndex = 1, //sequence
-              SequenceCharacterId = 0  //seq character
-          },
-          new SetCharFrameInstruction()
-          {
-              Character = 1,
-              Val1 = 0, //loop
-              Val2 = 0,
-              Val3 = 0
-          },
-          new SetCharFrameInstruction()
-          {
-              Character = 1,
-              Val1 = 2, //talking?
-              Val2 = 2,
-              Val3 = 0
-          },
-          new SetCharDirectionInstruction()
-          {
-              Character = 1,
-              Direction = 3
-          },
-          new SetCharBoxInstruction()
-          {
-              Character = 1,
-              Num = 2
-          },
-          new SetCharFlagsInstruction()
-          {
-              Character = 1,
-              Flags = 0
-          },
-          
-          //done
-          new EnableInputInstruction(),
-          
-          new FetchScriptWordInstruction()
-          {
-              Val = 1
-          },
-          new SetFlagInstruction()
-          {
-              Flag = 606 //disable inventory redraw
-          },
-          
-          new FetchScriptWordInstruction()
-          {
-              Val = 0
-          },
-          new SetFlagInstruction()
-          {
-              Flag = 618 //hide mouse cursor 
-          },
-          
-          // new FetchScriptWordInstruction()
-          // {
-          //     Val = 1
-          // },
-          // new SetFlagInstruction()
-          // {
-          //     Flag = 902 //debug walks 
-          // },
-          
-          new FetchScriptWordInstruction()
-          {
-              Val = 20000
-          },
-          new SetFlagInstruction()
-          {
-              Flag = 252
-          },
-          new FetchScriptWordInstruction()
-          {
-              Val = 20000
-          },
-          new SetFlagInstruction()
-          {
-              Flag = 253
-          },
-
-          new LoadRoomInstruction()
-          {
-              Num = 1
-          },
-          new FetchScriptWordInstruction()
-          {
-              Val = 104
-          },
-          new SetFlagInstruction()
-          {
-              Flag = 0 //active char
-          },
-          
-          new FetchScriptWordInstruction()
-          {
-              Val = 0
-          },
-          new SetFlagInstruction()
-          {
-              Flag = 614 //room offset x
-          },
-          
-          new FetchScriptWordInstruction()
-          {
-              Val = 0
-          },
-          new SetFlagInstruction()
-          {
-              Flag = 615 //room offset h
-          },
-          
-          //dialogue
-          new StartTalkInstruction()
-          {
-              Character = 0,
-              Num = 2
-          },
-          new StartTalkInstruction()
-          {
-              Character = 0,
-              Num = 3
-          },
-          
-          new StartTalkInstruction()
-          {
-              Character = 1,
-              Num = 5
-          },
-          new StartTalkInstruction()
-          {
-              Character = 1,
-              Num = 6
-          },
-          
-          new SetCharFrameInstruction()
-          {
-              Character = 1,
-              Val1 = 0, //loop
-              Val2 = 4,
-              Val3 = 0
-          },
-          new StartTalkInstruction()
-          {
-              Character = 0,
-              Num = 4
-          },
-          
-          
-          new SetCharFrameInstruction()
-          {
-              Character = 0,
-              Val1 = 0, //loop
-              Val2 = 30,
-              Val3 = 0
-          },
-          
-          new StopScriptInstruction(),
-          new StopScriptInstruction(),
-          new StopScriptInstruction(),
-          new StopScriptInstruction()
-      }
+      Instructions = instructions
 };
 
 var memStream = new MemoryStream();

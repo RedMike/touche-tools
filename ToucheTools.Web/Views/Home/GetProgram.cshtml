@@ -160,7 +160,7 @@
     <ul>
         @foreach (var instruction in Model.Instructions)
         {
-            <li><span class="text-dark">@instruction.ToString()</span></li>
+            <li><span class="text-dark">@instruction.Key - @instruction.Value.ToString()</span></li>
         }
     </ul>
 </div>
