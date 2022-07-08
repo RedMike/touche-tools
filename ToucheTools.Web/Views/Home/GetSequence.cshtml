@@ -58,6 +58,7 @@
     }
     var palette = container.DatabaseModel.Palettes[paletteId];
 
+    var summary = !string.IsNullOrEmpty((string)(Context.Request.Query["summary"]));
     var detailed = !string.IsNullOrEmpty((string)(Context.Request.Query["detailed"]));
 }
 
@@ -113,7 +114,34 @@
     @{
         var sequence = Model.Sequences[sequenceId];
 
-        if (detailed)
+        if (summary)
+        {
+            <ul>
+                @foreach (var charPair in sequence.Characters)
+                {
+                    <li>Character @charPair.Key</li>
+                    <ul>
+                        @foreach (var animPair in charPair.Value.Animations)
+                        {
+                            <li>Animation @animPair.Key</li>
+                            <ul>
+                                @foreach (var dirPair in animPair.Value.Directions)
+                                {
+                                    <li>Direction @dirPair.Key</li>
+                                    <ul>
+                                        @{ var frameId = 0; }
+                                        @foreach (var frame in dirPair.Value.Frames)
+                                        {
+                                            <li>Frame @(frameId++): @frame.Parts.Count</li>
+                                        }
+                                    </ul>
+                                }
+                            </ul>
+                        }
+                    </ul>
+                }
+            </ul>  
+        } else if (detailed)
         {
             foreach (var charPair in sequence.Characters)
             {
@@ -148,7 +176,8 @@
                                                         <li><span class="fw-bold">Frame Index:</span> <span>@part.FrameIndex</span></li>
                                                         <li><span class="fw-bold">Dest X:</span> <span>@part.DestX</span></li>
                                                         <li><span class="fw-bold">Dest Y:</span> <span>@part.DestY</span></li>
-                                                        <li><span class="fw-bold">V Flipped:</span> <span>@(part.HFlipped ? "yes" : "no")</span></li>
+                                                        <li><span class="fw-bold">V Flipped:</span> <span>@(part.VFlipped ? "yes" : "no")</span></li>
+                                                        <li><span class="fw-bold">H Flipped:</span> <span>@(part.HFlipped ? "yes" : "no")</span></li>
                                                         @{ partId++; }
                                                     </ul>
                                                 }
