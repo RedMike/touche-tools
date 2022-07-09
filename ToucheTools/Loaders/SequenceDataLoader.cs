@@ -253,7 +253,6 @@ public class SequenceDataLoader
                                  .Distinct())
                     {
                         var anim = new SequenceDataModel.AnimationInfo();
-                        //TODO:
                         ch.Animations[animId] = anim;
                         foreach (var dirId in charAndAnimAndDirToFrameOffs.Keys
                                      .Where(i => i.Item1 == charId && i.Item2 == animId)
@@ -261,7 +260,6 @@ public class SequenceDataLoader
                                      .Distinct())
                         {
                             var dir = new SequenceDataModel.DirectedAnimationInfo();
-                            //TODO:
                             anim.Directions[dirId] = dir;
                             var frameOff = charAndAnimAndDirToFrameOffs[(charId, animId, dirId)];
 
