@@ -38,6 +38,7 @@ public class SequenceDataLoader
             {
                 var partStartOffs = new List<int>();
                 var charToPartStartOff = new Dictionary<int, int>();
+                var charToFrameFlag = new Dictionary<int, ushort>();
                 var animOffs = new List<int>();
                 var charToAnimOff = new Dictionary<int, int>(); 
                 var dirOffs = new List<int>();
@@ -79,6 +80,10 @@ public class SequenceDataLoader
                     }
 
                     charToPartStartOff[characterId] = partStartOff;
+                    
+                    memStream.Seek(characterId * 8 + 4, SeekOrigin.Begin);
+                    var charFrameFlag = reader.ReadUInt16();
+                    charToFrameFlag[characterId] = charFrameFlag;
 
                     var animationId = 0;
                     while (true)
@@ -222,22 +227,11 @@ public class SequenceDataLoader
                         var rawFrameIndex = reader.ReadUInt16();
                         var frameIndex = BitConverter.ToInt16(BitConverter.GetBytes(rawFrameIndex), 0);
 
-                        var vFlipped = (frameIndex & 0x4000) != 0;
-                        var hFlipped = (frameIndex & 0x8000) != 0;
-                        // if (direction == 3)
-                        // {
-                        //     hFlipped = !hFlipped;
-                        //     dstX = (short)-dstX;
-                        // }
-
-                        frameIndex &= 0xFFF;
                         part.DestX = dstX;
                         part.DestY = dstY;
-                        part.FrameIndex = frameIndex;
-                        part.VFlipped = vFlipped;
-                        part.HFlipped = hFlipped;
+                        part.RawFrameIndex = frameIndex;
 
-                        if (frameIndex == 0x800)
+                        if (part.FrameIndex == 0x800)
                         {
                             continue;
                         }
@@ -251,7 +245,7 @@ public class SequenceDataLoader
                 foreach (var charId in charAndAnimAndDirToFrameOffs.Keys.Select(i => i.Item1).Distinct())
                 {
                     var ch = new SequenceDataModel.CharacterInfo();
-                    //TODO:
+                    ch.FrameDirFlag = ch.FrameDirFlag;
                     sequence.Characters[charId] = ch;
                     foreach (var animId in charAndAnimAndDirToFrameOffs.Keys
                                  .Where(i => i.Item1 == charId)
@@ -281,13 +275,29 @@ public class SequenceDataLoader
                                 //TODO: don't duplicate frames and parts
                                 dir.Frames.Add(new SequenceDataModel.FrameInformation()
                                     {
-                                        Parts = parts.Select(p => new SequenceDataModel.PartInformation()
+                                        Parts = parts.Select(p =>
                                         {
-                                            FrameIndex = p.FrameIndex,
-                                            DestX = (dirId == 3 ? ((short)-p.DestX) : p.DestX),
-                                            DestY = p.DestY,
-                                            HFlipped = (dirId == 3 ? !p.HFlipped : p.HFlipped),
-                                            VFlipped = p.VFlipped
+                                            var frameIndex = p.RawFrameIndex;
+                                            var destX = p.DestX;
+                                            if (dirId == 3)
+                                            {
+                                                if (p.HFlipped)
+                                                {
+                                                    frameIndex = (short)(frameIndex & 0x7FFF);
+                                                }
+                                                else
+                                                {
+                                                    frameIndex = (short)(frameIndex | 0x8000);
+                                                }
+
+                                                destX = (short)-destX;
+                                            }
+                                            return new SequenceDataModel.PartInformation()
+                                            {
+                                                RawFrameIndex = frameIndex,
+                                                DestX = destX,
+                                                DestY = p.DestY,
+                                            };
                                         }).ToList(),
                                         WalkDx = frame.WalkDx,
                                         WalkDy = frame.WalkDy,

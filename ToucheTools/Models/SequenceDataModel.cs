@@ -4,11 +4,12 @@ public class SequenceDataModel
 {
     public class PartInformation
     {
-        public short FrameIndex { get; set; }
+        public short RawFrameIndex { get; set; }
+        public short FrameIndex => (short)(RawFrameIndex & 0xFFF);
         public int DestX { get; set; }
         public int DestY { get; set; }
-        public bool VFlipped { get; set; }
-        public bool HFlipped { get; set; }
+        public bool VFlipped => (RawFrameIndex & 0x4000) != 0;
+        public bool HFlipped => (RawFrameIndex & 0x8000) != 0;
     }
 
     public class FrameInformation
