@@ -29,24 +29,18 @@ public class SequenceDataLoader
         _stream.Read(sequence.Bytes, 0, 16000);
        
         {
-            var partStartOffsets = new List<int>();
-            var frameStartOffsets = new Dictionary<int, SequenceDataModel.FrameInformation>();
-            
             var memStream = new MemoryStream(sequence.Bytes);
             var reader = new BinaryReader(memStream);
 
             {
                 var partStartOffs = new List<int>();
                 var charToPartStartOff = new Dictionary<int, int>();
-                var charToFrameFlag = new Dictionary<int, ushort>();
                 var animOffs = new List<int>();
                 var charToAnimOff = new Dictionary<int, int>(); 
                 var dirOffs = new List<int>();
                 var charAndAnimToDirOff = new Dictionary<(int, int), int>();
                 var frameOffs = new List<int>();
-                var charAndAnimAndDirToFrameOffs = new Dictionary<(int, int, int), int>();
                 var partOffs = new List<int>();
-                var charAndAnimAndDirAndFrameToPartOffs = new Dictionary<(int, int, int, int), int>();
                 var characterId = 0;
                 while (true)
                 {
@@ -83,7 +77,7 @@ public class SequenceDataLoader
                     
                     memStream.Seek(characterId * 8 + 4, SeekOrigin.Begin);
                     var charFrameFlag = reader.ReadUInt16();
-                    charToFrameFlag[characterId] = charFrameFlag;
+                    sequence.CharToFrameFlag[characterId] = charFrameFlag;
 
                     var animationId = 0;
                     while (true)
@@ -136,7 +130,7 @@ public class SequenceDataLoader
                             {
                                 frameOffs.Add(frameOff);
                             }
-                            charAndAnimAndDirToFrameOffs[(characterId, animationId, dirId)] = frameOff;
+                            sequence.FrameMappings[(characterId, animationId, dirId)] = frameOff;
 
                             var frameId = 0;
                             var lastFrame = false;
@@ -160,7 +154,7 @@ public class SequenceDataLoader
                                     partOffs.Add(partOff);
                                 }
 
-                                charAndAnimAndDirAndFrameToPartOffs[(characterId, animationId, dirId, frameId)] = partOff;
+                                sequence.PartMappings[(characterId, animationId, dirId, frameId)] = partOff;
                                 
                                 frameId++;
                             }
@@ -172,10 +166,9 @@ public class SequenceDataLoader
                     characterId++;
                 }
 
-                var frameOffToFrame = new Dictionary<int, List<SequenceDataModel.FrameInformation>>();
                 foreach (var frameOff in frameOffs)
                 {
-                    frameOffToFrame[frameOff] = new List<SequenceDataModel.FrameInformation>();
+                    sequence.Frames[frameOff] = new List<SequenceDataModel.FrameInformation>();
                     
                     var frameId = 0;
                     var lastFrame = false;
@@ -198,15 +191,14 @@ public class SequenceDataLoader
                         frame.WalkDz = walkDz;
                         frame.Delay = delay;
 
-                        frameOffToFrame[frameOff].Add(frame);
+                        sequence.Frames[frameOff].Add(frame);
                         frameId++;
                     }
                 }
 
-                var partOffsToPart = new Dictionary<int, List<SequenceDataModel.PartInformation>>();
                 foreach (var partOff in partOffs)
                 {
-                    partOffsToPart[partOff] = new List<SequenceDataModel.PartInformation>();
+                    sequence.Parts[partOff] = new List<SequenceDataModel.PartInformation>();
 
                     var partId = 0;
                     while (true)
@@ -236,78 +228,12 @@ public class SequenceDataLoader
                             continue;
                         }
                         
-                        partOffsToPart[partOff].Add(part);
+                        sequence.Parts[partOff].Add(part);
                         partId++;
                     }
                 }
 
-                sequence.Characters = new Dictionary<int, SequenceDataModel.CharacterInfo>();
-                foreach (var charId in charAndAnimAndDirToFrameOffs.Keys.Select(i => i.Item1).Distinct())
-                {
-                    var ch = new SequenceDataModel.CharacterInfo();
-                    ch.FrameDirFlag = ch.FrameDirFlag;
-                    sequence.Characters[charId] = ch;
-                    foreach (var animId in charAndAnimAndDirToFrameOffs.Keys
-                                 .Where(i => i.Item1 == charId)
-                                 .Select(i => i.Item2)
-                                 .Distinct())
-                    {
-                        var anim = new SequenceDataModel.AnimationInfo();
-                        ch.Animations[animId] = anim;
-                        foreach (var dirId in charAndAnimAndDirToFrameOffs.Keys
-                                     .Where(i => i.Item1 == charId && i.Item2 == animId)
-                                     .Select(i => i.Item3)
-                                     .Distinct())
-                        {
-                            var dir = new SequenceDataModel.DirectedAnimationInfo();
-                            anim.Directions[dirId] = dir;
-                            var frameOff = charAndAnimAndDirToFrameOffs[(charId, animId, dirId)];
-
-                            var frameId = 0;
-                            foreach (var frame in frameOffToFrame[frameOff])
-                            {
-                                var partOff = charAndAnimAndDirAndFrameToPartOffs[(charId, animId, dirId, frameId)];
-
-                                var parts = partOffsToPart[partOff];
-
-                                //TODO: don't duplicate frames and parts
-                                dir.Frames.Add(new SequenceDataModel.FrameInformation()
-                                    {
-                                        Parts = parts.Select(p =>
-                                        {
-                                            var frameIndex = p.RawFrameIndex;
-                                            var destX = p.DestX;
-                                            if (dirId == 3)
-                                            {
-                                                if (p.HFlipped)
-                                                {
-                                                    frameIndex = (short)(frameIndex & 0x7FFF);
-                                                }
-                                                else
-                                                {
-                                                    frameIndex = (short)(frameIndex | 0x8000);
-                                                }
-
-                                                destX = (short)-destX;
-                                            }
-                                            return new SequenceDataModel.PartInformation()
-                                            {
-                                                RawFrameIndex = frameIndex,
-                                                DestX = destX,
-                                                DestY = p.DestY,
-                                            };
-                                        }).ToList(),
-                                        WalkDx = frame.WalkDx,
-                                        WalkDy = frame.WalkDy,
-                                        WalkDz = frame.WalkDz,
-                                        Delay = frame.Delay,
-                                    }
-                                );
-                                frameId++;
-                            }
-                        }
-                    }
-                }
+                
                 
                 var q = 0;
             }
