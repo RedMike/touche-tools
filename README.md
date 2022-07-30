@@ -14,4 +14,4 @@ Making a small hacky (and probably not very stable) fan-game on the engine appea
 
 The library and application are usable to load and export the database file with some amount of compatibility already, but without any useful authoring tools in the application. The application also cannot display some useful assets (sound/music) due to the legacy formats.
 
-Importing and subsequently exporting the original game database currently reaches part of the way through the introduction cutscene successfully.
+Importing and subsequently exporting the original game database currently reaches the starting scene all successfully, however there are issues around the conversation system and other small things.
