@@ -202,7 +202,7 @@
                     <h5 class="display-5">Animation @animPair.Key</h5>
                     foreach (var dirPair in animPair.Value.Directions)
                     {
-                        <h5 class="display-6">Direction @dirPair.Key</h5>
+                        <!--<h5 class="display-6">Direction @dirPair.Key</h5>-->
                         <img src="@Url.Action("GetSequenceImageAnimation", "Home", new { sequence = sequenceId, characterId = charPair.Key, animationId = animPair.Key, directionId = dirPair.Key, id = sessionId, sprite = spriteId, palette = paletteId })"/>
                     }
                 }
