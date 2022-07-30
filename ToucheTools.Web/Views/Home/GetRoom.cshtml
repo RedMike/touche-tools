@@ -61,6 +61,7 @@
 
 <div>
     <h1 class="display-4">Room @roomId (@roomInfo.RoomImageNum)</h1>
+    <img src="@Url.Action("GetRoomPaletteImage", new { room = roomId, id = sessionId })" alt="palette"/>
     <img src="@imageData" alt="preview"/>
     <h5 class="display-5">Info</h5>
     <p>Width: <span>@roomImage.Width</span>, Height: <span>@roomImage.Height</span></p>

@@ -242,6 +242,20 @@ public class HomeController : Controller
 
         return File(roomImageBytes, "image/png");
     }
+    
+    [HttpGet("/room/{room}/palette")]
+    public IActionResult GetRoomPaletteImage(int room, [FromQuery] string id)
+    {
+        if (!_storageService.TryGetModels(id, out var container))
+        {
+            return BadRequest();
+        }
+
+        var paletteList = container.DatabaseModel.Palettes[room].Colors;
+        var paletteImageBytes = _imageRenderingService.RenderPalette(paletteList);
+
+        return File(paletteImageBytes, "image/png");
+    }
 
     [HttpPost("/dat")]
     [RequestSizeLimit(100*1000*1000)]

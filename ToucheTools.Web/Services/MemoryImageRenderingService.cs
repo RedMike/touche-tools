@@ -7,6 +7,7 @@ namespace ToucheTools.Web.Services;
 
 public interface IImageRenderingService
 {
+    byte[] RenderPalette(List<PaletteDataModel.Rgb> palette);
     byte[] RenderImage(SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette, bool raw=false);
     byte[] RenderImage(IconImageDataModel icon, List<PaletteDataModel.Rgb> palette, bool raw=false);
     byte[] RenderImage(RoomImageDataModel room, List<PaletteDataModel.Rgb> palette, bool raw=false);
@@ -21,6 +22,40 @@ public class MemoryImageRenderingService : IImageRenderingService
     public MemoryImageRenderingService(ILogger<MemoryImageRenderingService> logger)
     {
         _logger = logger;
+    }
+
+    public byte[] RenderPalette(List<PaletteDataModel.Rgb> palette)
+    {
+        const int width = 640;
+        const int height = 480;
+        const int colsPerLine = 32;
+        int lines = (int)Math.Ceiling(palette.Count / 32.0f);
+        var image = new Image<Rgba32>(width, height, new Rgba32(0, 0, 0, 0));
+        
+        image.ProcessPixelRows(pixelAccessor =>
+        {
+            for (var i = 0; i < height; i++)
+            {
+                var row = pixelAccessor.GetRowSpan(i);
+                for (var j = 0; j < width; j++)
+                {
+                    var x = (int)Math.Floor(((float)j/width) * colsPerLine);
+                    var y = (int)Math.Floor(((float)i/height) * lines);
+                    var idx = y * colsPerLine + x;
+                    if (idx > palette.Count)
+                    {
+                        continue;
+                    }
+
+                    row[j] = new Rgba32(palette[idx].R, palette[idx].G, palette[idx].B);
+                }
+            }
+        });
+
+        //TODO: add text labels
+        using var mem = new MemoryStream();
+        image.SaveAsPng(mem);
+        return mem.ToArray();
     }
 
     public byte[] RenderImage(SpriteImageDataModel sprite, List<PaletteDataModel.Rgb> palette, bool raw=false)
