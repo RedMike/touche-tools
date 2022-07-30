@@ -111,7 +111,8 @@ public class MainExporter
         {
             var id = pair.Key;
             var sequence = pair.Value;
-            using var memStream = new MemoryStream();
+            var sequenceBytes = new byte[16000];
+            using var memStream = new MemoryStream(sequenceBytes);
             var sequenceExporter = new SequenceDataExporter(memStream);
             sequenceExporter.Export(sequence);
             var bytes = memStream.ToArray();
