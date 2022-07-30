@@ -27,7 +27,6 @@ public class SequenceDataLoader
         sequence = new SequenceDataModel();
         sequence.Bytes = new byte[16000];
         _stream.Read(sequence.Bytes, 0, 16000);
-       
         {
             var memStream = new MemoryStream(sequence.Bytes);
             var reader = new BinaryReader(memStream);
@@ -86,6 +85,11 @@ public class SequenceDataLoader
 
                         var dirOff = reader.ReadUInt16();
                         if (dirOff == 0)
+                        {
+                            break;
+                        }
+
+                        if (reader.ReadUInt16() != 0)
                         {
                             break;
                         }
