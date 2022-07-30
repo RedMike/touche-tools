@@ -49,7 +49,11 @@ public class SequenceDataModel
 
             return _characters;
         }
-        private set => _characters = value;
+        private set
+        {
+            _updatedCharacters = false;
+            _characters = value;
+        }
     }
 
     private Dictionary<int, CharacterInfo> _characters = null!;
@@ -105,6 +109,7 @@ public class SequenceDataModel
 
                                         destX = (short)-destX;
                                     }
+
                                     return new SequenceDataModel.PartInformation()
                                     {
                                         RawFrameIndex = frameIndex,
@@ -133,20 +138,5 @@ public class SequenceDataModel
     public Dictionary<int, List<SequenceDataModel.FrameInformation>> Frames { get; set; } = new Dictionary<int, List<FrameInformation>>();
     public Dictionary<int, List<SequenceDataModel.PartInformation>> Parts { get; set; } = new Dictionary<int, List<PartInformation>>();
 
-    public int GetExpectedSize()
-    {
-        var charCount = FrameMappings.Select(i => (i.Key.Item1, i.Value)).Distinct().Count();
-        var animCount = FrameMappings.Select(i => (i.Key.Item1, i.Key.Item2, i.Value)).Distinct().Count();
-        var dirCount = FrameMappings.Select(i => (i.Key.Item1, i.Key.Item2, i.Key.Item3, i.Value)).Distinct().Count();
-        var frameCount = PartMappings.Select(i => (i.Key.Item1, i.Key.Item2, i.Key.Item3, i.Key.Item4, i.Value))
-            .Distinct().Count();
-
-        var pointerSegmentSize = charCount * 8 + 2 + animCount * 4 + 2 + dirCount * 2 + frameCount * 2;
-        var dataSegmentSize = Frames.Select(i => i.Value.Count).Sum() * 10 + 2 +
-                              Parts.Select(i => i.Value.Count).Sum() * 6;
-
-        return pointerSegmentSize + dataSegmentSize;
-    }
-    
     public byte[] Bytes { get; set; }
 }
