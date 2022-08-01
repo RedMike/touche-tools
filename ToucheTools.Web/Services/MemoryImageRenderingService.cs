@@ -42,7 +42,7 @@ public class MemoryImageRenderingService : IImageRenderingService
                     var x = (int)Math.Floor(((float)j/width) * colsPerLine);
                     var y = (int)Math.Floor(((float)i/height) * lines);
                     var idx = y * colsPerLine + x;
-                    if (idx > palette.Count)
+                    if (idx >= palette.Count)
                     {
                         continue;
                     }

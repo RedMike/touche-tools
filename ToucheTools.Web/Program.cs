@@ -6,8 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IModelStorageService, ModelStorageService>();
+builder.Services.AddSingleton<IImagePackageStorageService, ImagePackageStorageService>();
+
 builder.Services.AddSingleton<IFileProcessingService, FileProcessingService>();
 builder.Services.AddSingleton<IImageRenderingService, MemoryImageRenderingService>();
+builder.Services.AddSingleton<IImagePackageProcessingService, ImagePackageProcessingService>();
 
 var app = builder.Build();
 
