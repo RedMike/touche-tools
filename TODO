@@ -9,7 +9,7 @@
 [x] Correctly turn jump offsets to labels in opcode parsing (at least added offsets)
 [x] Export sequence data correctly
 
-[ ] Basic tooling to turn room images/icon images/sprites into palette and processed images
+[x] Basic tooling to turn room images/icon images/sprites into palette and processed images
 [ ] Identify absolute minimal data-set
 [ ] Set up bare-bones sample game 'export' with current features
 [ ] Update repository information
