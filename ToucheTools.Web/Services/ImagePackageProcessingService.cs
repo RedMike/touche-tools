@@ -6,7 +6,7 @@ namespace ToucheTools.Web.Services;
 public interface IImagePackageProcessingService
 {
     Dictionary<int, Rgb24> CalculatePalette(Dictionary<string, Image<Rgb24>> gameImages, Image<Rgb24> background);
-    Dictionary<string, Image<Rgb24>> ProcessImages(Dictionary<int, Rgb24> palette, Dictionary<string, Image<Rgb24>> images);
+    (Dictionary<string, Image<Rgb24>>, Image<Rgb24>) ProcessImages(Dictionary<int, Rgb24> palette, Image<Rgb24> bgImage, Dictionary<string, Image<Rgb24>> images, Dictionary<string, (int, int)> spriteSizes);
 }
 
 public class ImagePackageProcessingService : IImagePackageProcessingService
@@ -29,8 +29,8 @@ public class ImagePackageProcessingService : IImagePackageProcessingService
     public Dictionary<int, Rgb24> CalculatePalette(Dictionary<string, Image<Rgb24>> gameImages, Image<Rgb24> background)
     {
         var palette = new Dictionary<int, Rgb24>();
-        palette[0] = new Rgb24(0, 0, 0);
-        palette[64] = new Rgb24(50, 50, 50);
+        palette[0] = new Rgb24(255, 0, 255);
+        palette[64] = new Rgb24(250, 50, 250);
         palette[255] = new Rgb24(100, 100, 100);
 
         //get the colours in the background
@@ -83,8 +83,37 @@ public class ImagePackageProcessingService : IImagePackageProcessingService
             }
             else
             {
-                //otherwise try both background and game colours
-                throw new NotImplementedException();
+                //otherwise try game colours
+                _logger.Log(LogLevel.Information, "Too many game colours: {}", gameCols.Count);
+                var closeColours = new Dictionary<Rgb24, int>();
+                foreach (var col1 in gameCols)
+                {
+                    foreach (var col2 in gameCols.Where(c => c != col1))
+                    {
+                        var diff = ColourDifference(col1, col2);
+                        if (diff == null || diff == 0)
+                        {
+                            continue;
+                        }
+
+                        if (!closeColours.ContainsKey(col1) || closeColours[col1] > diff)
+                        {
+                            closeColours[col1] = diff.Value;
+                        }
+
+                        if (closeColours[col1] < 5)
+                        {
+                            break; //don't need to get too specific when it's such a close value, saves time
+                        }
+                    }
+
+                    if (closeColours.Count(p => p.Value < 5) > 4)
+                    {
+                        break; //don't need to get too specific when there's so many values, saves time
+                    }
+                }
+
+                closeColoursAndWeight = closeColours.Select(c => (c.Key, c.Value)).OrderBy(c => c.Value).ToList();
             }
 
             do
@@ -111,7 +140,7 @@ public class ImagePackageProcessingService : IImagePackageProcessingService
                 {
                     foreach (var gameImg in gameImages)
                     {
-                        if (!ValidateColourWithPaletteInTolerances(gameImg.Value, tempPalette))
+                        if (!ValidateColourWithPaletteInTolerances(gameImg.Value, gameCols))
                         {
                             missingCol = true;
                             break;
@@ -151,7 +180,7 @@ public class ImagePackageProcessingService : IImagePackageProcessingService
                 col = gameCols[i];
             }
 
-            palette[193 + i] = col;
+            palette[194 + i] = col;
         }
 
         var curColIdx = 0;
@@ -174,15 +203,32 @@ public class ImagePackageProcessingService : IImagePackageProcessingService
         return palette;
     }
 
-    public Dictionary<string, Image<Rgb24>> ProcessImages(Dictionary<int, Rgb24> palette, Dictionary<string, Image<Rgb24>> images)
+    public (Dictionary<string, Image<Rgb24>>, Image<Rgb24>) ProcessImages(Dictionary<int, Rgb24> palette, Image<Rgb24> bgImage, Dictionary<string, Image<Rgb24>> images, Dictionary<string, (int, int)> spriteSizes)
     {
+        var processedBg = ProcessImageWithPalette(bgImage, palette, (0, 0));
+        
         var processedImages = new Dictionary<string, Image<Rgb24>>();
+        var gamePalette = new Dictionary<int, Rgb24>();
+        gamePalette[0] = palette[0];
+        gamePalette[64] = palette[64];
+        foreach (var pair in palette)
+        {
+            if (pair.Key > 193)
+            {
+                gamePalette[pair.Key] = pair.Value;
+            }
+        }
         foreach (var pair in images)
         {
-            processedImages[pair.Key] = ProcessImageWithPalette(pair.Value, palette);
+            var spriteSize = (0, 0);
+            if (spriteSizes.ContainsKey(pair.Key))
+            {
+                spriteSize = spriteSizes[pair.Key];
+            }
+            processedImages[pair.Key] = ProcessImageWithPalette(pair.Value, gamePalette, spriteSize);
         }
 
-        return processedImages;
+        return (processedImages, processedBg);
     }
 
     private int? ColourDifference(Rgb24 a, Rgb24 b)
@@ -206,31 +252,44 @@ public class ImagePackageProcessingService : IImagePackageProcessingService
         return Math.Max(dr, Math.Max(dg, db));
     }
 
-    private Image<Rgb24> ProcessImageWithPalette(Image<Rgb24> image, Dictionary<int, Rgb24> palette)
+    private Image<Rgb24> ProcessImageWithPalette(Image<Rgb24> image, Dictionary<int, Rgb24> palette, (int, int) spriteSize)
     {
         var clonedImage = image.Clone();
         var w = image.Width;
         var h = image.Height;
-        Rgb24 transparentCol = new Rgb24(0, 0, 0);
+        Rgb24 transparentCol = palette[0];
+        Rgb24 transparentLimitCol = palette[64];
         clonedImage.ProcessPixelRows(pixelAccessor =>
         {
             for (var i = 0; i < h; i++)
             {
                 var row = pixelAccessor.GetRowSpan(i);
-                if (i == 0)
-                {
-                    transparentCol = row[0];
-                }
                 for (var j = 0; j < w; j++)
                 {
                     var col = row[j];
-                    if (col == transparentCol)
+
+                    if (col == transparentCol || col == transparentLimitCol)
                     {
-                        row[j] = palette[0];
+                        if (spriteSize.Item1 != 0 && spriteSize.Item2 != 0)
+                        {
+                            if ((i % spriteSize.Item2 == 0 && (i != 0 || j % spriteSize.Item1 == 0)) ||
+                                (j % spriteSize.Item1 == 0 && (j != 0 || i % spriteSize.Item2 == 0)))
+                            {
+                                row[j] = new Rgb24(64, 64, 64);
+                                continue;
+                            }
+                        }
+                        
+                        row[j] = new Rgb24(0, 0, 0);
                         continue;
                     }
-                    var closestCol = palette.Select(c => (c.Key, ColourDifference(c.Value, col))).Where(c => c.Item2 != null).MinBy(c => c.Item2);
-                    row[j] = new Rgb24((byte)closestCol.Key, (byte)closestCol.Key, (byte)closestCol.Key);
+                    var closestCol = palette.Where(p => p.Key != 0 && p.Key != 64).Select(c => (c.Key, ColourDifference(c.Value, col))).Where(c => c.Item2 != null).MinBy(c => c.Item2);
+                    var colIdx = (byte)closestCol.Key;
+                    if (spriteSize.Item1 != 0 && colIdx != 0 && colIdx != 64 && colIdx < 193)
+                    {
+                        colIdx = 0;
+                    }
+                    row[j] = new Rgb24(colIdx, colIdx, colIdx);
                 }
             }
         });

@@ -31,6 +31,7 @@
         <h1 class="display-4">Potential Palette</h1>
         <p>This is the palette as currently planned. TODO: info about palette</p>
         <img src="@Url.Action("GetPalette", routeData)" alt="palette"/>
+        <a href="@Url.Action("DownloadPalette", routeData)">Download Palette</a>
     </div>
 }
 
@@ -78,6 +79,16 @@
         }
     }
     <form asp-area="" asp-controller="ImagePackage" asp-action="UploadGameImage" asp-all-route-data="routeData" enctype="multipart/form-data" method="post">
+        <div class="row mb-1">
+            <div class="col-6">
+                <input class="form-control" type="text" id="spriteWidth" name="spriteWidth" placeholder="Sprite width (empty if not sprite)">
+                <span class="text-danger"></span>
+            </div>
+            <div class="col-6">
+                <input class="form-control" type="text" id="spriteHeight" name="spriteHeight" placeholder="Sprite height (empty if not sprite)">
+                <span class="text-danger"></span>
+            </div>
+        </div>
         <div class="row mb-3">
             <div class="col-8">
                 <input class="form-control" type="file" id="gameFile" name="file">

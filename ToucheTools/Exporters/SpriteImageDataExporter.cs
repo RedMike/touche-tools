@@ -39,7 +39,6 @@ public class SpriteImageDataExporter
                 {
                     if (i < sprite.SpriteHeight && color == 64)
                     {
-                        throw new Exception("Got color 64 outside of separator H");
                         color = 0;
                     }
                 }
@@ -53,7 +52,6 @@ public class SpriteImageDataExporter
                 {
                     if (j < sprite.SpriteWidth && color == 64)
                     {
-                        throw new Exception("Got color 64 outside of separator W");
                         color = 0;
                     }
                 }

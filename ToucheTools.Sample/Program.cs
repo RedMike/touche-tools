@@ -2,11 +2,13 @@
 
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using ToucheTools.Constants;
 using ToucheTools.Exporters;
+using ToucheTools.Loaders;
 using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
 
@@ -14,27 +16,29 @@ var log = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLo
 
 //load sequences
 var sequenceBytes1 = File.ReadAllBytes("data/sequence_0.bytes");
-var sequenceBytes2 = File.ReadAllBytes("data/sequence_14.bytes");
 //load palette
-var palette = File.ReadAllLines("data/palette_1.csv").Select(l =>
+var paletteJson = File.ReadAllText("data/palette.json");
+
+var paletteRaw = JsonConvert.DeserializeObject<Dictionary<string, string>>(paletteJson);
+var palette = paletteRaw.ToDictionary(p => int.Parse(p.Key), p =>
 {
-    var c = l.Split(',').Select(byte.Parse).ToList();
-    return new Rgb24(c[0], c[1], c[2]);
-}).ToList();
+    var s = p.Value.Split(",");
+    return new Rgb24(byte.Parse(s[0]), byte.Parse(s[1]), byte.Parse(s[2]));
+});
 //load images
-var spriteBytes = File.ReadAllBytes("data/sprite.png");
+var spriteBytes = File.ReadAllBytes("data/game1.png");
 var spriteImg = Image.Load<Rgb24>(spriteBytes, new PngDecoder());
 if (spriteImg == null)
 {
     throw new Exception("Can't decode sprite");
 }
-var spriteBytes2 = File.ReadAllBytes("data/sprite2.png");
+var spriteBytes2 = File.ReadAllBytes("data/game2.png");
 var spriteImg2 = Image.Load<Rgb24>(spriteBytes2, new PngDecoder());
 if (spriteImg2 == null)
 {
     throw new Exception("Can't decode sprite");
 }
-var roomBytes = File.ReadAllBytes("data/room.png");
+var roomBytes = File.ReadAllBytes("data/room1.png");
 var roomImage = Image.Load<Rgb24>(roomBytes, new PngDecoder());
 if (roomImage == null)
 {
@@ -61,7 +65,6 @@ var spriteColours = new HashSet<byte>();
                     throw new Exception($"Invalid input image: {pixel.R} {pixel.G} {pixel.B}");
                 }
 
-                var col = palette[pixel.R];
                 if (!foundH && (pixel.R == 64 || pixel.R == 255) && j == 0)
                 {
                     foundH = true;
@@ -74,8 +77,22 @@ var spriteColours = new HashSet<byte>();
                     spriteW = j;
                 }
 
-                spriteColours.Add(pixel.R);
-                spriteIndexedBytes[i, j] = pixel.R;
+                var col = pixel.R;
+                if (col != 0 && col != 64 && col < 193)
+                {
+                    col = 0;
+                }
+
+                if (col > 192)
+                {
+                    col = (byte)(col - 194);
+                    if (col == 0)
+                    {
+                        col = 1;
+                    }
+                }
+                spriteColours.Add(col);
+                spriteIndexedBytes[i, j] = col;
             }
         }
     });
@@ -99,7 +116,6 @@ var spriteH2 = spriteImg.Height;
                     throw new Exception($"Invalid input image: {pixel.R} {pixel.G} {pixel.B}");
                 }
 
-                var col = palette[pixel.R];
                 if (!foundH && (pixel.R == 64 || pixel.R == 255) && j == 0)
                 {
                     foundH = true;
@@ -111,9 +127,23 @@ var spriteH2 = spriteImg.Height;
                     foundW = true;
                     spriteW2 = j;
                 }
+                
+                var col = pixel.R;
+                if (col != 0 && col != 64 && col < 193)
+                {
+                    col = 0;
+                }
 
-                spriteColours.Add(pixel.R);
-                spriteIndexedBytes2[i, j] = pixel.R;
+                if (col > 192)
+                {
+                    col = (byte)(col - 194);
+                    if (col == 0)
+                    {
+                        col = 1;
+                    }
+                }
+                spriteColours.Add(col);
+                spriteIndexedBytes2[i, j] = col;
             }
         }
     });
@@ -126,32 +156,14 @@ roomImage.ProcessPixelRows(pixelAccessor => {
         for (var j = 0; j < pixelAccessor.Width; j++)
         {
             var pixel = row[j];
-            var col = palette.FindIndex(p => p.R == pixel.R && p.G == pixel.G && p.B == pixel.B);
-            if (col == -1)
+            
+            if (pixel.R != pixel.G || pixel.G != pixel.B || pixel.R != pixel.B)
             {
-                var found = false;
-                //try to replace an unused colour in the palette
-                for (var q = 0; q < 255; q++)
-                {
-                    if (!spriteColours.Contains((byte)q))
-                    {
-                        found = true;
-                        spriteColours.Add((byte)q);
-                        palette[q] = new Rgb24(pixel.R, pixel.G, pixel.B);
-                        col = q;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    //closest approximation
-                    col = palette.Min(p =>
-                        Math.Abs(p.R - pixel.R) * 3 + Math.Abs(p.G - pixel.G) + Math.Abs(p.B - pixel.B) * 2);
-                }
+                throw new Exception($"Invalid input image: {pixel.R} {pixel.G} {pixel.B}");
             }
+            var col = palette[pixel.R];
 
-            roomIndexedBytes[i, j] = (byte)col;
+            roomIndexedBytes[i, j] = pixel.R;
         }
     }
 });
@@ -211,11 +223,11 @@ var roomImg = new RoomImageDataModel()
 };
 var paletteModel = new PaletteDataModel()
 {
-    Colors = palette.Select(p => new PaletteDataModel.Rgb()
+    Colors = palette.OrderBy(p => p.Key).Select(p => new PaletteDataModel.Rgb()
     {
-        R = p.R,
-        G = p.G,
-        B = p.B
+        R = p.Value.R,
+        G = p.Value.G,
+        B = p.Value.B
     }).ToList()
 };
 
@@ -244,25 +256,20 @@ db.Sprites = new Dictionary<int, Lazy<SpriteImageDataModel>>()
     { 18, new Lazy<SpriteImageDataModel>(menu) }, //menu
     { 19, new Lazy<SpriteImageDataModel>(conv) } //conversation
 };
+var model = new SequenceDataModel()
+{
+    Bytes = sequenceBytes1
+};
+new SequenceDataLoader(new MemoryStream(), new ResourceDataLoader(new MemoryStream())).Read(model);
 db.Sequences = new Dictionary<int, SequenceDataModel>()
 {
     {
-        0, new SequenceDataModel()
-        {
-            Bytes = sequenceBytes1
-        }
-    },
-    {
-        1, new SequenceDataModel()
-        {
-            Bytes = sequenceBytes2
-        }
+        0, model
     }
 };
 db.RoomImages = new Dictionary<int, Lazy<RoomImageDataModel>>()
 {
-    { 1, new Lazy<RoomImageDataModel>(roomImg) },
-    { 2, new Lazy<RoomImageDataModel>(roomImg) }
+    { 1, new Lazy<RoomImageDataModel>(roomImg) }
 };
 db.Rooms = new Dictionary<int, RoomInfoDataModel>()
 {
@@ -271,18 +278,11 @@ db.Rooms = new Dictionary<int, RoomInfoDataModel>()
         {
             RoomImageNum = 1
         }
-    },
-    {
-        2, new RoomInfoDataModel()
-        {
-            RoomImageNum = 2
-        }
     }
 };
 db.Palettes = new Dictionary<int, PaletteDataModel>()
 {
-    { 1, paletteModel },
-    { 2, paletteModel }
+    { 1, paletteModel }
 };
 
 var rawInstructions = new List<BaseInstruction>()
@@ -350,12 +350,12 @@ var rawInstructions = new List<BaseInstruction>()
     new LoadSpriteInstruction()
     {
         Index = 1,
-        Num = 1
+        Num = 0
     },
     new LoadSequenceInstruction()
     {
         Num = 1,
-        Index = 1
+        Index = 0
     },
     new InitCharScriptInstruction()
     {

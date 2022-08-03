@@ -6,9 +6,10 @@ namespace ToucheTools.Web.Services;
 public class ImagePackage
 {
     public DateTime CreateDate { get; set; }
-    public List<Rgb24> PotentialPalette { get; set; }
+    public Dictionary<int, Rgb24> PotentialPalette { get; set; } = new Dictionary<int, Rgb24>();
     public Image<Rgb24>? BackgroundImage { get; set; }
     public Image<Rgb24>? ProcessedBackgroundImage { get; set; }
+    public Dictionary<string, (int, int)> GameImageSpriteSize { get; set; } = new Dictionary<string, (int, int)>(); //null if not sprite
     public Dictionary<string, Image<Rgb24>> OriginalGameImages { get; set; } = new Dictionary<string, Image<Rgb24>>();
     public Dictionary<string, Image<Rgb24>> ProcessedGameImages { get; set; } = new Dictionary<string, Image<Rgb24>>();
 }

@@ -1,4 +1,7 @@
+using System.Text;
+using System.Text.Unicode;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
@@ -46,13 +49,32 @@ namespace ToucheTools.Web.Controllers
                 return NotFound();
             }
 
-            var img = _renderingService.RenderPalette(pkg.PotentialPalette.Select(p => new PaletteDataModel.Rgb()
+            var img = _renderingService.RenderPalette(pkg.PotentialPalette.OrderBy(p => p.Key).Select(p => new PaletteDataModel.Rgb()
             {
-                R = p.R,
-                G = p.G,
-                B = p.B
+                R = p.Value.R,
+                G = p.Value.G,
+                B = p.Value.B
             }).ToList());
             return File(img, "image/png");
+        }
+        
+        [HttpGet("palette/download")]
+        public IActionResult DownloadPalette([FromQuery] string package)
+        {
+            if (!_storageService.TryGetPackage(package, out var pkg))
+            {
+                return BadRequest();
+            }
+
+            if (pkg?.PotentialPalette == null || pkg.PotentialPalette.Count == 0)
+            {
+                return NotFound();
+            }
+
+            var json = JsonConvert.SerializeObject(pkg.PotentialPalette
+                .ToDictionary(p => p.Key, 
+                    p => $"{p.Value.R},{p.Value.G},{p.Value.B}"));
+            return File(Encoding.UTF8.GetBytes(json), "application/json", $"{package}_palette.json");
         }
 
         [HttpPost("bg")]
@@ -131,7 +153,7 @@ namespace ToucheTools.Web.Controllers
         
         [HttpPost("game")]
         [RequestSizeLimit(100 * 1000 * 1000)]
-        public IActionResult UploadGameImage(IFormFile file, [FromQuery] string package)
+        public IActionResult UploadGameImage(int? spriteWidth, int? spriteHeight, IFormFile file, [FromQuery] string package)
         {
             var pkg = new ImagePackage();
             if (!string.IsNullOrEmpty(package))
@@ -165,6 +187,10 @@ namespace ToucheTools.Web.Controllers
             });
             var processedImage = Image.Load<Rgb24>(exportStream.ToArray());
             pkg.OriginalGameImages[fileName] = processedImage;
+            if (spriteWidth != null || spriteHeight != null)
+            {
+                pkg.GameImageSpriteSize[fileName] = (spriteWidth.Value, spriteHeight.Value);
+            }
             _storageService.UpdatePackage(package, pkg);
             UpdatePackage(pkg);
             return RedirectToAction("Index", new { package = package });
@@ -212,20 +238,16 @@ namespace ToucheTools.Web.Controllers
         {
             if (pkg.BackgroundImage == null)
             {
-                pkg.PotentialPalette = new List<Rgb24>();
+                pkg.PotentialPalette = new Dictionary<int, Rgb24>();
                 pkg.ProcessedBackgroundImage = null;
                 pkg.ProcessedGameImages = new Dictionary<string, Image<Rgb24>>();
                 return; //can't do anything until we have that
             }
 
-            var palette = _processingService.CalculatePalette(pkg.OriginalGameImages, pkg.BackgroundImage);
-            pkg.PotentialPalette = palette.OrderBy(p => p.Key).Select(p => p.Value).ToList();
+            pkg.PotentialPalette = _processingService.CalculatePalette(pkg.OriginalGameImages, pkg.BackgroundImage);
 
-            var images = new Dictionary<string, Image<Rgb24>>(pkg.OriginalGameImages);
-            images.Add("background", pkg.BackgroundImage);
-            var processedImages = _processingService.ProcessImages(palette, images);
-            pkg.ProcessedBackgroundImage = processedImages["background"];
-            processedImages.Remove("background");
+            (var processedImages, var processedBg) = _processingService.ProcessImages(pkg.PotentialPalette, pkg.BackgroundImage, pkg.OriginalGameImages, pkg.GameImageSpriteSize);
+            pkg.ProcessedBackgroundImage = processedBg;
             pkg.ProcessedGameImages = processedImages;
         }
     }
