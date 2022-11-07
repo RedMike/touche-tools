@@ -2,8 +2,6 @@
 
 Tools for working with TOUCHE.DAT files/game data for adventure game Touché: The Adventures of the Fifth Musketeer. Does not include any game data or assets, you are expected to provide your own TOUCHE.DAT and similar files.
 
-[Try for free in your browser (with your own TOUCHE.DAT file).](https://touche.mikeroibu.com)
-
 ## Why?
 
 The game itself was obscure due to issues around the game's release, but it was actually decent. The game is actually supported by ScummVM, which means it is actually playable on modern machines, and through browsing the engine logic in ScummVM I realised that the technical setup of the engine is actually pretty interesting with the amount of flexibility built into it (and at the same time, the amount of rigidity once deadlines clearly started eating into development time).
