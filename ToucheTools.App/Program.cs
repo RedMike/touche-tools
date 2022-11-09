@@ -3,6 +3,7 @@ using ImGuiNET;
 using ToucheTools.App;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Loaders;
+using ToucheTools.Models;
 
 #region Load data
 var fileToLoad = "../../../../sample/TOUCHE.DAT";
@@ -18,14 +19,14 @@ mainLoader.Load(out var db);
 #endregion
 
 #region Render setup
-const int width = 800;
-const int height = 600;
+const int width = 1024;
+const int height = 900;
 Vector4 errorColour = new Vector4(0.9f, 0.1f, 0.2f, 1.0f);
 using var window = new RenderWindow("ToucheTools", width, height);
 #endregion
 
 #region Data setup
-var _activeData = new ActiveData(db);
+var activeData = new ActiveData(db);
 #endregion
 
 while (window.IsOpen())
@@ -66,9 +67,12 @@ while (window.IsOpen())
         db.Sprites.Count, db.Icons.Count);
     #endregion
     #region Active Objects
-    RenderActiveObjects(_activeData);
+    RenderActiveObjects(activeData);
     #endregion
-
+    #region Room View
+    RenderRoomView(activeData, db);
+    #endregion
+    
     #region Boilerplate
     window.Render();
     #endregion
@@ -127,8 +131,18 @@ void RenderActiveObjects(ActiveData viewModel)
     ImGui.Combo("Room", ref curRoomId, rooms.Select(k => k.ToString()).ToArray(), rooms.Length);
     if (curRoomId != originalRoomId)
     {
-        viewModel.SetActivePalette(palettes[curRoomId]);
+        viewModel.SetActiveRoom(rooms[curRoomId]);
     }
     
+    ImGui.End();
+}
+
+void RenderRoomView(ActiveData viewModel, DatabaseModel db)
+{
+    var w = 750.0f;
+    var ox = (width - w) / 2.0f;
+    ImGui.SetNextWindowPos(new Vector2(ox, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(w, 500.0f));
+    ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     ImGui.End();
 }
