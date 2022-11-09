@@ -12,8 +12,8 @@ if (!File.Exists(fileToLoad))
 {
     throw new Exception("File not found: " + fileToLoad);
 }
-var bytes = File.ReadAllBytes(fileToLoad);
-using var memStream = new MemoryStream(bytes);
+var fileBytes = File.ReadAllBytes(fileToLoad);
+using var memStream = new MemoryStream(fileBytes);
 var mainLoader = new MainLoader(memStream);
 mainLoader.Load(out var db);
 #endregion
@@ -117,7 +117,6 @@ void RenderActiveObjects(ActiveData viewModel)
     var curRoomId = originalRoomId;
     var rooms = viewModel.RoomKeys.ToArray();
     
-    
     ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(250.0f, 150.0f));
     ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
@@ -144,5 +143,11 @@ void RenderRoomView(ActiveData viewModel, DatabaseModel db)
     ImGui.SetNextWindowPos(new Vector2(ox, 150.0f));
     ImGui.SetNextWindowSize(new Vector2(w, 500.0f));
     ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+
+    var (viewId, roomWidth, roomHeight, bytes) = viewModel.RoomView;
+    
+    var roomTexture = window.RenderImage(viewId, roomWidth, roomHeight, bytes);
+    ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
+    
     ImGui.End();
 }

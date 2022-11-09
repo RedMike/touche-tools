@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.InteropServices;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -18,6 +19,8 @@ public class RenderWindow : IDisposable
     private GraphicsDevice _graphicsDevice = null!;
     private ImGuiController _controller = null!;
     private CommandList _commandList = null!;
+
+    private Dictionary<string, Texture> _textures = new Dictionary<string, Texture>();
     
     private DateTime _lastUpdate = DateTime.MinValue;
     
@@ -56,6 +59,47 @@ public class RenderWindow : IDisposable
         _commandList.End();
         _graphicsDevice.SubmitCommands(_commandList);
         _graphicsDevice.SwapBuffers(_graphicsDevice.MainSwapchain);
+    }
+
+    public IntPtr RenderImage(string id, int width, int height, byte[] rawPixels)
+    {
+        if (!_textures.ContainsKey(id))
+        {
+            var newTexture = _graphicsDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+                (uint)width,
+                (uint)height,
+                1,
+                1,
+                PixelFormat.R8_G8_B8_A8_UNorm,
+                TextureUsage.Sampled));
+            newTexture.Name = id;
+            _textures[id] = newTexture;
+        }
+        var texture = _textures[id];
+        
+        IntPtr pixels = Marshal.AllocHGlobal(rawPixels.Length);
+        Marshal.Copy(rawPixels, 0, pixels, rawPixels.Length);
+        try
+        {
+            _graphicsDevice.UpdateTexture(
+                texture,
+                pixels,
+                (uint)(4 * width * height),
+                0,
+                0,
+                0,
+                (uint)width,
+                (uint)height,
+                1,
+                0,
+                0);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(pixels);
+        }
+        
+        return _controller.GetOrCreateImGuiBinding(_graphicsDevice.ResourceFactory, texture);
     }
 
     private void CreateWindow()
@@ -127,4 +171,25 @@ public class RenderWindow : IDisposable
         }
     }
     #endregion
+    
+    private static uint GetDimension(uint largestLevelDimension, uint mipLevel)
+    {
+        uint ret = largestLevelDimension;
+        for (uint i = 0; i < mipLevel; i++)
+        {
+            ret /= 2;
+        }
+
+        return Math.Max(1, ret);
+    }
+    
+    private static uint GetFormatSize(PixelFormat format)
+    {
+        switch (format)
+        {
+            case PixelFormat.R8_G8_B8_A8_UNorm: return 4;
+            case PixelFormat.BC3_UNorm: return 1;
+            default: throw new NotImplementedException();
+        }
+    }
 }
