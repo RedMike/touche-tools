@@ -26,6 +26,7 @@ using var window = new RenderWindow("ToucheTools", width, height);
 #endregion
 
 #region Data setup
+var windowSettings = new WindowSettings();
 var activeData = new ActiveData(db);
 #endregion
 
@@ -66,11 +67,17 @@ while (window.IsOpen())
     RenderFileInfo(filename, db.Programs.Count, db.Palettes.Count, db.Rooms.Count, db.RoomImages.Count, 
         db.Sprites.Count, db.Icons.Count);
     #endregion
+    #region Window Settings
+    RenderWindowSettings(windowSettings);
+    #endregion
     #region Active Objects
     RenderActiveObjects(activeData);
     #endregion
-    #region Room View
-    RenderRoomView(activeData);
+    #region Windows
+    if (windowSettings.RoomViewOpen)
+    {
+        RenderRoomView(activeData);
+    }
     #endregion
     
     #region Boilerplate
@@ -107,6 +114,22 @@ void RenderFileInfo(string fileName, int programCount, int paletteCount, int roo
     ImGui.End();
 }
 
+void RenderWindowSettings(WindowSettings settings)
+{
+    bool origRoomViewShown = settings.RoomViewOpen;
+    bool roomViewShown = origRoomViewShown;
+    
+    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
+    ImGui.SetNextWindowSize(new Vector2(150.0f, 150.0f));
+    ImGui.Begin("Windows", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+    ImGui.Checkbox("Room View", ref roomViewShown);
+    if (roomViewShown != origRoomViewShown)
+    {
+        settings.RoomViewOpen = roomViewShown;
+    }
+    ImGui.End();
+}
+
 void RenderActiveObjects(ActiveData viewModel)
 {
     var originalPaletteId = viewModel.PaletteKeys.FindIndex(k => k == viewModel.ActivePalette); 
@@ -117,7 +140,7 @@ void RenderActiveObjects(ActiveData viewModel)
     var curRoomId = originalRoomId;
     var rooms = viewModel.RoomKeys.ToArray();
     
-    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
+    ImGui.SetNextWindowPos(new Vector2(300.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(250.0f, 150.0f));
     ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     
