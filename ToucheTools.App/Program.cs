@@ -27,6 +27,7 @@ using var window = new RenderWindow("ToucheTools", width, height);
 #region Data setup
 var windowSettings = new WindowSettings();
 var spriteViewSettings = new SpriteViewSettings(db);
+var programViewSettings = new ProgramViewSettings(db);
 var activeData = new ActiveData(db);
 #endregion
 
@@ -84,7 +85,7 @@ while (window.IsOpen())
     }
     if (windowSettings.ProgramViewOpen)
     {
-        RenderProgramView(activeData);
+        RenderProgramView(activeData, programViewSettings);
     }
     #endregion
     
@@ -371,7 +372,18 @@ void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSetti
     ImGui.End();
 }
 
-void RenderProgramView(ActiveData viewModel)
+void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
 {
+    var viewW = width-350.0f;
+    var viewH = 200.0f;
+    ImGui.SetNextWindowPos(new Vector2(350.0f, 0.0f));
+    ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
+    ImGui.Begin("Program View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
+
+    foreach (var instruction in viewSettings.InstructionsView)
+    {
+        ImGui.Text(instruction);
+    }
     
+    ImGui.End();
 }
