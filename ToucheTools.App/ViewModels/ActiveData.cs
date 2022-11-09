@@ -14,6 +14,7 @@ class ActiveData
     public int ActiveSprite { get; private set; }
     
     public (string, int, int, byte[]) RoomView { get; private set; }
+    public (string, int, int, int, int, byte[]) SpriteView { get; private set; }
 
     public ActiveData(DatabaseModel model)
     {
@@ -27,6 +28,7 @@ class ActiveData
         ActiveRoom = RoomKeys.First();
         ActiveSprite = SpriteKeys.First();
         GenerateRoomView();
+        GenerateSpriteView();
     }
 
     public void SetActivePalette(int palette)
@@ -38,6 +40,7 @@ class ActiveData
 
         ActivePalette = palette;
         GenerateRoomView();
+        GenerateSpriteView();
     }
     
     public void SetActiveRoom(int room)
@@ -88,5 +91,33 @@ class ActiveData
         }
 
         RoomView = (viewId, roomImage.Width, roomImage.Height, bytes);
+    }
+    
+    private void GenerateSpriteView()
+    {
+        var sprite = _databaseModel.Sprites[ActiveSprite].Value;
+        var palette = _databaseModel.Palettes[ActivePalette];
+        var viewId = $"{ActiveSprite}_{ActivePalette}";
+
+        if (SpriteView.Item1 == viewId)
+        {
+            return;
+        }
+        
+        var bytes = new byte[sprite.Width * sprite.Height * 4];
+        for (var i = 0; i < sprite.Width; i++)
+        {
+            for (var j = 0; j < sprite.Height; j++)
+            {
+                var rawCol = sprite.DecodedData[j, i];
+                var col = palette.Colors[rawCol];
+                bytes[(j * sprite.Width + i) * 4 + 0] = col.R;
+                bytes[(j * sprite.Width + i) * 4 + 1] = col.G;
+                bytes[(j * sprite.Width + i) * 4 + 2] = col.B;
+                bytes[(j * sprite.Width + i) * 4 + 3] = 255;
+            }
+        }
+
+        SpriteView = (viewId, sprite.Width, sprite.Height, sprite.SpriteWidth, sprite.SpriteHeight, bytes);
     }
 }
