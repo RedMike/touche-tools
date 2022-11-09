@@ -10,6 +10,8 @@ class ActiveData
     public int ActivePalette { get; private set; }
     public List<int> RoomKeys { get; }
     public int ActiveRoom { get; private set; }
+    public List<int> SpriteKeys { get; }
+    public int ActiveSprite { get; private set; }
     
     public (string, int, int, byte[]) RoomView { get; private set; }
 
@@ -19,9 +21,11 @@ class ActiveData
         
         PaletteKeys = model.Palettes.Keys.ToList();
         RoomKeys = model.Rooms.Keys.ToList();
+        SpriteKeys = model.Sprites.Keys.ToList();
 
         ActivePalette = PaletteKeys.First();
         ActiveRoom = RoomKeys.First();
+        ActiveSprite = SpriteKeys.First();
         GenerateRoomView();
     }
 
@@ -45,6 +49,16 @@ class ActiveData
 
         ActiveRoom = room;
         GenerateRoomView();
+    }
+    
+    public void SetActiveSprite(int sprite)
+    {
+        if (!SpriteKeys.Contains(sprite))
+        {
+            throw new Exception("Unknown sprite: " + sprite);
+        }
+
+        ActiveSprite = sprite;
     }
 
     private void GenerateRoomView()

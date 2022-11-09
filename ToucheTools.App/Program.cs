@@ -78,6 +78,10 @@ while (window.IsOpen())
     {
         RenderRoomView(activeData);
     }
+    if (windowSettings.SpriteViewOpen)
+    {
+        RenderSpriteView(activeData);
+    }
     #endregion
     
     #region Boilerplate
@@ -167,9 +171,13 @@ void RenderActiveObjects(ActiveData viewModel)
     var originalRoomId = viewModel.RoomKeys.FindIndex(k => k == viewModel.ActiveRoom);
     var curRoomId = originalRoomId;
     var rooms = viewModel.RoomKeys.ToArray();
+
+    var originalSpriteId = viewModel.SpriteKeys.FindIndex(k => k == viewModel.ActiveSprite);
+    var curSpriteId = originalSpriteId;
+    var sprites = viewModel.SpriteKeys.ToArray();
     
     ImGui.SetNextWindowPos(new Vector2(300.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(250.0f, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(200.0f, 150.0f));
     ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     
     ImGui.Combo("Palette", ref curPaletteId, palettes.Select(k => k.ToString()).ToArray(), palettes.Length);
@@ -182,6 +190,12 @@ void RenderActiveObjects(ActiveData viewModel)
     if (curRoomId != originalRoomId)
     {
         viewModel.SetActiveRoom(rooms[curRoomId]);
+    }
+    
+    ImGui.Combo("Sprite", ref curSpriteId, sprites.Select(k => k.ToString()).ToArray(), sprites.Length);
+    if (curSpriteId != originalSpriteId)
+    {
+        viewModel.SetActiveSprite(sprites[curSpriteId]);
     }
     
     ImGui.End();
@@ -197,6 +211,20 @@ void RenderRoomView(ActiveData viewModel)
     
     var roomTexture = window.RenderImage(viewId, roomWidth, roomHeight, bytes);
     ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
+    
+    ImGui.End();
+}
+
+void RenderSpriteView(ActiveData viewModel)
+{
+    ImGui.SetNextWindowPos(new Vector2(0.0f, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(width, 600.0f));
+    ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
+
+    // var (viewId, roomWidth, roomHeight, bytes) = viewModel.RoomView;
+    //
+    // var roomTexture = window.RenderImage(viewId, roomWidth, roomHeight, bytes);
+    // ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
     
     ImGui.End();
 }
