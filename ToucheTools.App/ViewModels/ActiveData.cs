@@ -65,6 +65,7 @@ class ActiveData
         GenerateSpriteView();
     }
 
+
     private void GenerateRoomView()
     {
         var roomImageId = _databaseModel.Rooms[ActiveRoom].RoomImageNum;

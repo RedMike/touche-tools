@@ -26,7 +26,7 @@ using var window = new RenderWindow("ToucheTools", width, height);
 
 #region Data setup
 var windowSettings = new WindowSettings();
-var spriteViewSettings = new SpriteViewSettings();
+var spriteViewSettings = new SpriteViewSettings(db);
 var activeData = new ActiveData(db);
 #endregion
 
@@ -176,7 +176,7 @@ void RenderActiveObjects(ActiveData viewModel)
     var originalSpriteId = viewModel.SpriteKeys.FindIndex(k => k == viewModel.ActiveSprite);
     var curSpriteId = originalSpriteId;
     var sprites = viewModel.SpriteKeys.ToArray();
-    
+
     ImGui.SetNextWindowPos(new Vector2(300.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(200.0f, 150.0f));
     ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
@@ -224,8 +224,9 @@ void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
-    var cursorPos = new Vector2(viewW / 2.0f, viewH / 2.0f);
+    var centerCursorPos = new Vector2(viewW / 2.0f, viewH / 2.0f);
     
+    #region Room background
     if (viewSettings.ShowRoom)
     {
         var ox = viewSettings.RoomOffsetX;
@@ -238,14 +239,31 @@ void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
         ImGui.SetCursorPos(new Vector2(0.0f, 0.0f));
         ImGui.Image(roomTexture, new Vector2(viewW, viewH), uv1, uv2);
     }
+    #endregion
     
     var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = viewModel.SpriteView;
-
     var spriteTexture = window.RenderImage(spriteViewId, spriteWidth, spriteHeight, spriteBytes);
-    var spriteUv1 = new Vector2(0.0f, 0.0f);
-    var spriteUv2 = new Vector2((float)spriteTileWidth / spriteWidth, (float)spriteTileHeight / spriteHeight);
-    ImGui.SetCursorPos(cursorPos);
-    ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);
+
+    foreach (var (frameIndex, destX, destY, hFlip, vFlip) in viewSettings.PartsView)
+    {
+        var tileWidthRatio = (float)spriteTileWidth / spriteWidth;
+        var tileHeightRatio = (float)spriteTileHeight / spriteHeight;
+        var tilesPerRow = (int)Math.Floor((float)spriteWidth / spriteTileWidth);
+        var tileX = frameIndex % tilesPerRow;
+        var tileY = (int)Math.Floor((float)frameIndex / tilesPerRow);
+        var spriteUv1 = new Vector2(tileX * tileWidthRatio, tileY * tileHeightRatio);
+        var spriteUv2 = new Vector2((tileX + 1) * tileWidthRatio, (tileY + 1) * tileHeightRatio);
+        if (hFlip)
+        {
+            (spriteUv1.X, spriteUv2.X) = (spriteUv2.X, spriteUv1.X);
+        }
+        if (vFlip)
+        {
+            (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
+        }
+        ImGui.SetCursorPos(centerCursorPos + new Vector2(destX, destY));
+        ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);   
+    }
     
     ImGui.End();
 }
@@ -255,10 +273,67 @@ void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSett
     var origShowRoom = viewSettings.ShowRoom;
     var showRoom = origShowRoom;
     
+    var originalSequenceId = viewSettings.SequenceKeys.FindIndex(k => k == viewSettings.ActiveSequence);
+    var curSequenceId = originalSequenceId;
+    var sequences = viewSettings.SequenceKeys.ToArray();
+    
+    var originalCharacterId = viewSettings.Characters.FindIndex(k => k == viewSettings.ActiveCharacter);
+    var curCharacterId = originalCharacterId;
+    var characters = viewSettings.Characters.ToArray();
+    
+    var originalAnimationId = viewSettings.Animations.FindIndex(k => k == viewSettings.ActiveAnimation);
+    var curAnimationId = originalAnimationId;
+    var animations = viewSettings.Animations.ToArray();
+    
+    var originalDirectionId = viewSettings.Directions.FindIndex(k => k == viewSettings.ActiveDirection);
+    var curDirectionId = originalDirectionId;
+    var directions = viewSettings.Directions.ToArray();
+    
+    var originalFrameId = viewSettings.Frames.FindIndex(k => k == viewSettings.ActiveFrame);
+    var curFrameId = originalFrameId;
+    var frames = viewSettings.Frames.ToArray();
+    
     ImGui.SetNextWindowPos(new Vector2(500.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(width-500.0f, 150.0f));
     ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
+    ImGui.Combo("Sequence", ref curSequenceId, sequences.Select(k => k.ToString()).ToArray(), sequences.Length);
+    if (curSequenceId != originalSequenceId)
+    {
+        viewSettings.SetActiveSequence(sequences[curSequenceId]);
+    }
+    
+    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.Combo("Character", ref curCharacterId, characters.Select(k => k.ToString()).ToArray(), characters.Length);
+    if (curCharacterId != originalCharacterId)
+    {
+        viewSettings.SelectCharacter(characters[curCharacterId]);
+    }
+
+    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.SameLine();
+    ImGui.Combo("Animation", ref curAnimationId, animations.Select(k => k.ToString()).ToArray(), animations.Length);
+    if (curAnimationId != originalAnimationId)
+    {
+        viewSettings.SelectAnimation(animations[curAnimationId]);
+    }
+    
+    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.Combo("Direction", ref curDirectionId, directions.Select(k => k.ToString()).ToArray(), directions.Length);
+    if (curDirectionId != originalDirectionId)
+    {
+        viewSettings.SelectDirection(directions[curDirectionId]);
+    }
+    
+    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.SameLine();
+    ImGui.Combo("Frame", ref curFrameId, frames.Select(k => k.ToString()).ToArray(), frames.Length);
+    if (curFrameId != originalFrameId)
+    {
+        viewSettings.SelectFrame(frames[curFrameId]);
+    }
+    
+    
     ImGui.Checkbox("Room background", ref showRoom);
     if (showRoom != origShowRoom)
     {
