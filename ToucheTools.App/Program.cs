@@ -3,7 +3,6 @@ using ImGuiNET;
 using ToucheTools.App;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Loaders;
-using ToucheTools.Models;
 
 #region Load data
 var fileToLoad = "../../../../sample/TOUCHE.DAT";
@@ -27,6 +26,7 @@ using var window = new RenderWindow("ToucheTools", width, height);
 
 #region Data setup
 var windowSettings = new WindowSettings();
+var spriteViewSettings = new SpriteViewSettings();
 var activeData = new ActiveData(db);
 #endregion
 
@@ -80,7 +80,8 @@ while (window.IsOpen())
     }
     if (windowSettings.SpriteViewOpen)
     {
-        RenderSpriteView(activeData);
+        RenderSpriteViewSettings(activeData, spriteViewSettings);
+        RenderSpriteView(activeData, spriteViewSettings);
     }
     #endregion
     
@@ -215,7 +216,7 @@ void RenderRoomView(ActiveData viewModel)
     ImGui.End();
 }
 
-void RenderSpriteView(ActiveData viewModel)
+void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
 {
     ImGui.SetNextWindowPos(new Vector2(0.0f, 150.0f));
     ImGui.SetNextWindowSize(new Vector2(width, 600.0f));
@@ -225,6 +226,53 @@ void RenderSpriteView(ActiveData viewModel)
     //
     // var roomTexture = window.RenderImage(viewId, roomWidth, roomHeight, bytes);
     // ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
+    
+    ImGui.End();
+}
+
+void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSettings)
+{
+    var origShowRoom = viewSettings.ShowRoom;
+    var showRoom = origShowRoom;
+    
+    ImGui.SetNextWindowPos(new Vector2(500.0f, 0.0f));
+    ImGui.SetNextWindowSize(new Vector2(width-500.0f, 150.0f));
+    ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+
+    ImGui.Checkbox("Room background", ref showRoom);
+    if (showRoom != origShowRoom)
+    {
+        viewSettings.ShowRoom = showRoom;
+    }
+
+    if (showRoom)
+    {
+        var (_, roomW, roomH, _) = activeData.RoomView;
+        
+        var origRoomX = viewSettings.RoomOffsetX;
+        if (origRoomX > roomW)
+        {
+            origRoomX = roomW;
+        }
+        var roomX = origRoomX;
+        ImGui.SliderInt("X offset", ref roomX, 0, roomW);
+        if (roomX != origRoomX)
+        {
+            viewSettings.RoomOffsetX = roomX;
+        }
+
+        var origRoomY = viewSettings.RoomOffsetY;
+        if (origRoomY > roomH)
+        {
+            origRoomY = roomH;
+        }
+        var roomY = origRoomY;
+        ImGui.SliderInt("Y offset", ref roomY, 0, roomH);
+        if (roomY != origRoomY)
+        {
+            viewSettings.RoomOffsetY = roomY;
+        }
+    }
     
     ImGui.End();
 }
