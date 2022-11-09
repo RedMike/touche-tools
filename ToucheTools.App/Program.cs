@@ -71,7 +71,10 @@ while (window.IsOpen())
     RenderWindowSettings(windowSettings);
     #endregion
     #region Active Objects
-    RenderActiveObjects(activeData);
+    if (windowSettings.RoomViewOpen || windowSettings.SpriteViewOpen)
+    {
+        RenderActiveObjects(activeData);
+    }
     #endregion
     #region Windows
     if (windowSettings.RoomViewOpen)
