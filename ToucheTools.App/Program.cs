@@ -107,7 +107,7 @@ void RenderErrors(List<string> errors)
 void RenderFileInfo(string fileName, int programCount, int paletteCount, int roomCount, int roomImageCount, int spriteCount, int iconCount)
 {
     ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(150.0f, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(150.0f, 200.0f));
     ImGui.Begin("File Info", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs);
     ImGui.Text($"File: {fileName}");
     ImGui.Text($"# Programs:    {programCount}");
@@ -131,7 +131,7 @@ void RenderWindowSettings(WindowSettings settings)
     bool programViewShown = origProgramViewShown;
     
     ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(150.0f, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(150.0f, 200.0f));
     ImGui.Begin("Windows", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     ImGui.Checkbox("Room View", ref roomViewShown);
     if (roomViewShown != origRoomViewShown)
@@ -178,7 +178,7 @@ void RenderActiveObjects(ActiveData viewModel)
     var sprites = viewModel.SpriteKeys.ToArray();
 
     ImGui.SetNextWindowPos(new Vector2(300.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(200.0f, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(200.0f, 200.0f));
     ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     
     ImGui.Combo("Palette", ref curPaletteId, palettes.Select(k => k.ToString()).ToArray(), palettes.Length);
@@ -204,7 +204,7 @@ void RenderActiveObjects(ActiveData viewModel)
 
 void RenderRoomView(ActiveData viewModel)
 {
-    ImGui.SetNextWindowPos(new Vector2(0.0f, 150.0f));
+    ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
     ImGui.SetNextWindowSize(new Vector2(width, 600.0f));
     ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
@@ -220,7 +220,7 @@ void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
 {
     var viewW = width;
     var viewH = 600.0f;
-    ImGui.SetNextWindowPos(new Vector2(0.0f, 150.0f));
+    ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
@@ -270,8 +270,13 @@ void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
 
 void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSettings)
 {
+    viewSettings.Tick(); //TODO: move
+    
     var origShowRoom = viewSettings.ShowRoom;
     var showRoom = origShowRoom;
+
+    var origAutoStep = viewSettings.AutoStepFrame;
+    var autoStep = origAutoStep;
     
     var originalSequenceId = viewSettings.SequenceKeys.FindIndex(k => k == viewSettings.ActiveSequence);
     var curSequenceId = originalSequenceId;
@@ -294,7 +299,7 @@ void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSett
     var frames = viewSettings.Frames.ToArray();
     
     ImGui.SetNextWindowPos(new Vector2(500.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(width-500.0f, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(width-500.0f, 200.0f));
     ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
     ImGui.Combo("Sequence", ref curSequenceId, sequences.Select(k => k.ToString()).ToArray(), sequences.Length);
@@ -331,6 +336,12 @@ void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSett
     if (curFrameId != originalFrameId)
     {
         viewSettings.SelectFrame(frames[curFrameId]);
+    }
+    
+    ImGui.Checkbox("Auto step", ref autoStep);
+    if (autoStep != origAutoStep)
+    {
+        viewSettings.AutoStepFrame = autoStep;
     }
     
     

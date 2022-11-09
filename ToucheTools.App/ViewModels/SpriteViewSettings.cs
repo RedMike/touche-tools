@@ -4,6 +4,7 @@ namespace ToucheTools.App.ViewModels;
 
 public class SpriteViewSettings
 {
+    private const long MinimumFrameStepInMillis = 100;
     private readonly DatabaseModel _databaseModel;
 
     public bool ShowRoom { get; set; }
@@ -13,17 +14,20 @@ public class SpriteViewSettings
     public List<int> SequenceKeys { get; }
     public int ActiveSequence { get; private set; }
     
-    public List<int> Characters { get; private set; }
-    public List<int> Animations { get; private set; }
-    public List<int> Directions { get; private set; }
-    public List<int> Frames { get; private set; }
+    public List<int> Characters { get; private set; } = null!;
+    public List<int> Animations { get; private set; } = null!;
+    public List<int> Directions { get; private set; } = null!;
+    public List<int> Frames { get; private set; } = null!;
     public int ActiveCharacter { get; private set; }
     public int ActiveAnimation { get; private set; }
     public int ActiveDirection { get; private set; }
     public int ActiveFrame { get; private set; }
     
-    public List<(int, int, int, bool, bool)> PartsView { get; private set; }
+    public bool AutoStepFrame { get; set; }
+    public DateTime LastStep { get; set; }
     
+    public List<(int, int, int, bool, bool)> PartsView { get; private set; } = null!;
+
     public SpriteViewSettings(DatabaseModel model)
     {
         _databaseModel = model;
@@ -31,7 +35,42 @@ public class SpriteViewSettings
         SequenceKeys = model.Sequences.Keys.ToList();
         ActiveSequence = SequenceKeys.First();
 
+        LastStep = DateTime.UtcNow;
+
         SetActiveSequence(ActiveSequence);
+    }
+
+    public void Tick()
+    {
+        if (!AutoStepFrame)
+        {
+            return;
+        }
+
+        var curTime = DateTime.UtcNow;
+        var frames = _databaseModel.Sequences[ActiveSequence]
+            .Characters[ActiveCharacter]
+            .Animations[ActiveAnimation]
+            .Directions[ActiveDirection]
+            .Frames;
+        var curFrame = frames[ActiveFrame];
+        var nextFrameId = ActiveFrame + 1;
+        if (!Frames.Contains(nextFrameId))
+        {
+            nextFrameId = 0;
+        }
+
+        var delay = MinimumFrameStepInMillis;
+        if (curFrame.Delay != 0)
+        {
+            delay = curFrame.Delay * 100;
+        }
+
+        if ((curTime - LastStep).TotalMilliseconds > delay)
+        {
+            LastStep = curTime;
+            SelectFrame(nextFrameId);
+        }
     }
 
     public void SetActiveSequence(int sequence)
