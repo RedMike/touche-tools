@@ -218,14 +218,25 @@ void RenderRoomView(ActiveData viewModel)
 
 void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
 {
+    var viewW = width;
+    var viewH = 600.0f;
     ImGui.SetNextWindowPos(new Vector2(0.0f, 150.0f));
-    ImGui.SetNextWindowSize(new Vector2(width, 600.0f));
+    ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
-    // var (viewId, roomWidth, roomHeight, bytes) = viewModel.RoomView;
-    //
-    // var roomTexture = window.RenderImage(viewId, roomWidth, roomHeight, bytes);
-    // ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
+    if (viewSettings.ShowRoom)
+    {
+        var ox = viewSettings.RoomOffsetX;
+        var oy = viewSettings.RoomOffsetY;
+        var (viewId, roomWidth, roomHeight, bytes) = viewModel.RoomView;
+    
+        var roomTexture = window.RenderImage(viewId, roomWidth, roomHeight, bytes);
+        var uv1 = new Vector2(ox / (float)roomWidth, oy / (float)roomHeight);
+        var uv2 = new Vector2((ox+viewW) / (float)roomWidth, (oy+viewH) / (float)roomHeight);
+        ImGui.Image(roomTexture, new Vector2(viewW, viewH), uv1, uv2);
+    }
+    
+    
     
     ImGui.End();
 }
