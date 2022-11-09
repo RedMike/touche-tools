@@ -86,6 +86,10 @@ while (window.IsOpen())
         RenderSpriteViewSettings(activeData, spriteViewSettings);
         RenderSpriteView(activeData, spriteViewSettings);
     }
+    if (windowSettings.ProgramViewOpen)
+    {
+        RenderProgramView(activeData);
+    }
     #endregion
     
     #region Boilerplate
@@ -271,7 +275,7 @@ void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
     ImGui.End();
 }
 
-void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSettings)
+void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSettings)
 {
     viewSettings.Tick(); //TODO: move
     
@@ -356,7 +360,7 @@ void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSett
 
     if (showRoom)
     {
-        var (_, roomW, roomH, _) = activeData.RoomView;
+        var (_, roomW, roomH, _) = viewModel.RoomView;
         
         var origRoomX = viewSettings.RoomOffsetX;
         if (origRoomX > roomW)
@@ -384,4 +388,9 @@ void RenderSpriteViewSettings(ActiveData activeData, SpriteViewSettings viewSett
     }
     
     ImGui.End();
+}
+
+void RenderProgramView(ActiveData viewModel)
+{
+    
 }
