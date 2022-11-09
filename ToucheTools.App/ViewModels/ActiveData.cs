@@ -62,6 +62,7 @@ class ActiveData
         }
 
         ActiveSprite = sprite;
+        GenerateSpriteView();
     }
 
     private void GenerateRoomView()
@@ -110,11 +111,23 @@ class ActiveData
             for (var j = 0; j < sprite.Height; j++)
             {
                 var rawCol = sprite.DecodedData[j, i];
-                var col = palette.Colors[rawCol];
-                bytes[(j * sprite.Width + i) * 4 + 0] = col.R;
-                bytes[(j * sprite.Width + i) * 4 + 1] = col.G;
-                bytes[(j * sprite.Width + i) * 4 + 2] = col.B;
-                bytes[(j * sprite.Width + i) * 4 + 3] = 255;
+                if (rawCol == 0 || rawCol == 64)
+                {
+                    //transparent
+                    bytes[(j * sprite.Width + i) * 4 + 0] = 0;
+                    bytes[(j * sprite.Width + i) * 4 + 1] = 0;
+                    bytes[(j * sprite.Width + i) * 4 + 2] = 0;
+                    bytes[(j * sprite.Width + i) * 4 + 3] = 0;
+                }
+                else
+                {
+                    //actual colour
+                    var col = palette.Colors[rawCol];
+                    bytes[(j * sprite.Width + i) * 4 + 0] = col.R;
+                    bytes[(j * sprite.Width + i) * 4 + 1] = col.G;
+                    bytes[(j * sprite.Width + i) * 4 + 2] = col.B;
+                    bytes[(j * sprite.Width + i) * 4 + 3] = 255;
+                }
             }
         }
 
