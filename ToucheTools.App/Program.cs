@@ -70,7 +70,7 @@ while (window.IsOpen())
     RenderActiveObjects(activeData);
     #endregion
     #region Room View
-    RenderRoomView(activeData, db);
+    RenderRoomView(activeData);
     #endregion
     
     #region Boilerplate
@@ -136,13 +136,11 @@ void RenderActiveObjects(ActiveData viewModel)
     ImGui.End();
 }
 
-void RenderRoomView(ActiveData viewModel, DatabaseModel db)
+void RenderRoomView(ActiveData viewModel)
 {
-    var w = 750.0f;
-    var ox = (width - w) / 2.0f;
-    ImGui.SetNextWindowPos(new Vector2(ox, 150.0f));
-    ImGui.SetNextWindowSize(new Vector2(w, 500.0f));
-    ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+    ImGui.SetNextWindowPos(new Vector2(0.0f, 150.0f));
+    ImGui.SetNextWindowSize(new Vector2(width, 600.0f));
+    ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
     var (viewId, roomWidth, roomHeight, bytes) = viewModel.RoomView;
     
