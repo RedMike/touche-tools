@@ -63,10 +63,6 @@ while (window.IsOpen())
     }
     RenderErrors(errors);
     #endregion
-    #region File info
-    RenderFileInfo(filename, db.Programs.Count, db.Palettes.Count, db.Rooms.Count, db.RoomImages.Count, 
-        db.Sprites.Count, db.Icons.Count);
-    #endregion
     #region Window Settings
     RenderWindowSettings(windowSettings);
     #endregion
@@ -111,21 +107,6 @@ void RenderErrors(List<string> errors)
     ImGui.End();
 }
 
-void RenderFileInfo(string fileName, int programCount, int paletteCount, int roomCount, int roomImageCount, int spriteCount, int iconCount)
-{
-    ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(150.0f, 200.0f));
-    ImGui.Begin("File Info", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs);
-    ImGui.Text($"File: {fileName}");
-    ImGui.Text($"# Programs:    {programCount}");
-    ImGui.Text($"# Palettes:    {paletteCount}");
-    ImGui.Text($"# Rooms:       {roomCount}");
-    ImGui.Text($"# Room images: {roomImageCount}");
-    ImGui.Text($"# Sprites:     {spriteCount}");
-    ImGui.Text($"# Icons:       {iconCount}");
-    ImGui.End();
-}
-
 void RenderWindowSettings(WindowSettings settings)
 {
     bool origRoomViewShown = settings.RoomViewOpen;
@@ -137,7 +118,7 @@ void RenderWindowSettings(WindowSettings settings)
     bool origProgramViewShown = settings.ProgramViewOpen;
     bool programViewShown = origProgramViewShown;
     
-    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
+    ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(150.0f, 200.0f));
     ImGui.Begin("Windows", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     ImGui.Checkbox("Room View", ref roomViewShown);
@@ -184,7 +165,7 @@ void RenderActiveObjects(ActiveData viewModel)
     var curSpriteId = originalSpriteId;
     var sprites = viewModel.SpriteKeys.ToArray();
 
-    ImGui.SetNextWindowPos(new Vector2(300.0f, 0.0f));
+    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(200.0f, 200.0f));
     ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     
@@ -305,7 +286,7 @@ void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSetti
     var curFrameId = originalFrameId;
     var frames = viewSettings.Frames.ToArray();
     
-    ImGui.SetNextWindowPos(new Vector2(500.0f, 0.0f));
+    ImGui.SetNextWindowPos(new Vector2(350.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(width-500.0f, 200.0f));
     ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
