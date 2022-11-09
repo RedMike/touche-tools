@@ -118,6 +118,12 @@ void RenderWindowSettings(WindowSettings settings)
 {
     bool origRoomViewShown = settings.RoomViewOpen;
     bool roomViewShown = origRoomViewShown;
+
+    bool origSpriteViewShown = settings.SpriteViewOpen;
+    bool spriteViewShown = origSpriteViewShown;
+
+    bool origProgramViewShown = settings.ProgramViewOpen;
+    bool programViewShown = origProgramViewShown;
     
     ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(150.0f, 150.0f));
@@ -125,7 +131,29 @@ void RenderWindowSettings(WindowSettings settings)
     ImGui.Checkbox("Room View", ref roomViewShown);
     if (roomViewShown != origRoomViewShown)
     {
-        settings.RoomViewOpen = roomViewShown;
+        settings.CloseAllViews();
+        if (roomViewShown)
+        {
+            settings.OpenRoomView();
+        }
+    }
+    ImGui.Checkbox("Sprite View", ref spriteViewShown);
+    if (spriteViewShown != origSpriteViewShown)
+    {
+        settings.CloseAllViews();
+        if (spriteViewShown)
+        {
+            settings.OpenSpriteView();
+        }
+    }
+    ImGui.Checkbox("Program View", ref programViewShown);
+    if (programViewShown != origProgramViewShown)
+    {
+        settings.CloseAllViews();
+        if (programViewShown)
+        {
+            settings.OpenProgramView();
+        }
     }
     ImGui.End();
 }
