@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App;
+using ToucheTools.App.ViewModels;
 using ToucheTools.Loaders;
 
 #region Load data
@@ -16,21 +17,27 @@ var mainLoader = new MainLoader(memStream);
 mainLoader.Load(out var db);
 #endregion
 
+#region Render setup
 const int width = 800;
 const int height = 600;
 Vector4 errorColour = new Vector4(0.9f, 0.1f, 0.2f, 1.0f);
-
 using var window = new RenderWindow("ToucheTools", width, height);
+#endregion
+
+#region Data setup
+var _activeData = new ActiveData(db);
+#endregion
 
 while (window.IsOpen())
 {
+    #region Boilerplate
     window.ProcessInput();
     if (!window.IsOpen())
     {
         break;
     }
+    #endregion
     
-    //render IMGUI components
     #region Errors
     var errors = new List<string>();
     if (db.FailedPrograms.Any())
@@ -58,8 +65,13 @@ while (window.IsOpen())
     RenderFileInfo(filename, db.Programs.Count, db.Palettes.Count, db.Rooms.Count, db.RoomImages.Count, 
         db.Sprites.Count, db.Icons.Count);
     #endregion
+    #region Active Objects
+    RenderActiveObjects(_activeData);
+    #endregion
 
+    #region Boilerplate
     window.Render();
+    #endregion
 }
 
 void RenderErrors(List<string> errors)
@@ -80,7 +92,7 @@ void RenderFileInfo(string fileName, int programCount, int paletteCount, int roo
 {
     ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
     ImGui.SetNextWindowSize(new Vector2(150.0f, 150.0f));
-    ImGui.Begin("File Info", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+    ImGui.Begin("File Info", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs);
     ImGui.Text($"File: {fileName}");
     ImGui.Text($"# Programs:    {programCount}");
     ImGui.Text($"# Palettes:    {paletteCount}");
@@ -88,5 +100,35 @@ void RenderFileInfo(string fileName, int programCount, int paletteCount, int roo
     ImGui.Text($"# Room images: {roomImageCount}");
     ImGui.Text($"# Sprites:     {spriteCount}");
     ImGui.Text($"# Icons:       {iconCount}");
+    ImGui.End();
+}
+
+void RenderActiveObjects(ActiveData viewModel)
+{
+    var originalPaletteId = viewModel.PaletteKeys.FindIndex(k => k == viewModel.ActivePalette); 
+    var curPaletteId = originalPaletteId;
+    var palettes = viewModel.PaletteKeys.ToArray();
+
+    var originalRoomId = viewModel.RoomKeys.FindIndex(k => k == viewModel.ActiveRoom);
+    var curRoomId = originalRoomId;
+    var rooms = viewModel.RoomKeys.ToArray();
+    
+    
+    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
+    ImGui.SetNextWindowSize(new Vector2(250.0f, 150.0f));
+    ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+    
+    ImGui.Combo("Palette", ref curPaletteId, palettes.Select(k => k.ToString()).ToArray(), palettes.Length);
+    if (curPaletteId != originalPaletteId)
+    {
+        viewModel.SetActivePalette(palettes[curPaletteId]);
+    }
+    
+    ImGui.Combo("Room", ref curRoomId, rooms.Select(k => k.ToString()).ToArray(), rooms.Length);
+    if (curRoomId != originalRoomId)
+    {
+        viewModel.SetActivePalette(palettes[curRoomId]);
+    }
+    
     ImGui.End();
 }
