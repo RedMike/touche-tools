@@ -441,6 +441,22 @@ void RenderProgramReferenceView(ProgramViewSettings viewSettings)
             //TODO: navigate to room view
         }
     }
+    ImGui.Separator();
+    ImGui.Text("Sprites (Sequence, Character, Animation):");
+    foreach (var pair in viewSettings.ReferencedSpritesView.OrderBy(p => p.Key))
+    {
+        if (ImGui.TreeNodeEx(pair.Key.ToString(), ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            foreach (var (seqId, charId, animId) in pair.Value)
+            {
+                if (ImGui.Button($"({seqId}, {charId}, {animId})"))
+                {
+                    //TODO: navigate to sprite view
+                }
+            }
+            ImGui.TreePop();
+        }
+    }
     
     ImGui.End();
 }
