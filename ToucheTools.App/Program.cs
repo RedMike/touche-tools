@@ -85,6 +85,7 @@ while (window.IsOpen())
     }
     if (windowSettings.ProgramViewOpen)
     {
+        RenderProgramViewSettings(activeData, programViewSettings);
         RenderProgramView(activeData, programViewSettings);
     }
     #endregion
@@ -372,17 +373,51 @@ void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSetti
     ImGui.End();
 }
 
+void RenderProgramViewSettings(ActiveData viewModel, ProgramViewSettings viewSettings)
+{
+    var originalProgramId = viewSettings.Programs.FindIndex(k => k == viewSettings.ActiveProgram);
+    var curProgramId = originalProgramId;
+    var programs = viewSettings.Programs.ToArray();
+    
+    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
+    ImGui.SetNextWindowSize(new Vector2(300.0f, 200.0f));
+    ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+
+    ImGui.Combo("Program", ref curProgramId, programs.Select(k => k.ToString()).ToArray(), programs.Length);
+    if (curProgramId != originalProgramId)
+    {
+        viewSettings.SetActiveProgram(programs[curProgramId]);
+    }
+    
+    ImGui.End();
+}
+
 void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
 {
-    var viewW = width-350.0f;
-    var viewH = 200.0f;
-    ImGui.SetNextWindowPos(new Vector2(350.0f, 0.0f));
+    var viewW = 300.0f;
+    var viewH = 600.0f;
+    ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Program View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
+    var idx = 0;
     foreach (var instruction in viewSettings.InstructionsView)
     {
-        ImGui.Text(instruction);
+        var evaluatedAlready = idx <= viewSettings.EvaluateUntil;
+        if (evaluatedAlready)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));
+        }
+        if (ImGui.Button(instruction))
+        {
+            viewSettings.SetEvaluateUntil(idx);
+        }
+        if (evaluatedAlready)
+        {
+            ImGui.PopStyleColor();
+        }
+
+        idx++;
     }
     
     ImGui.End();

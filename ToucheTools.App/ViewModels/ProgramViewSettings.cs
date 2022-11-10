@@ -10,13 +10,15 @@ public class ProgramViewSettings
     public List<int> Programs { get; private set; }
     
     
-    public List<string> InstructionsView { get; private set; }
+    public List<string> InstructionsView { get; private set; } = null!;
+    public int EvaluateUntil { get; private set; }
 
     public ProgramViewSettings(DatabaseModel model)
     {
         _databaseModel = model;
         Programs = _databaseModel.Programs.Keys.ToList();
         ActiveProgram = Programs.First();
+        EvaluateUntil = -1;
         
         GenerateView();
     }
@@ -29,12 +31,18 @@ public class ProgramViewSettings
         }
 
         ActiveProgram = program;
+        EvaluateUntil = -1;
         GenerateView();
+    }
+
+    public void SetEvaluateUntil(int index)
+    {
+        EvaluateUntil = index;
     }
 
     private void GenerateView()
     {
-        var program = _databaseModel.Programs[Programs[ActiveProgram]];
-        InstructionsView = program.Instructions.Select(pair => pair.Value.ToString()).ToList();
+        var program = _databaseModel.Programs[ActiveProgram];
+        InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => pair.Value.ToString()).ToList();
     }
 }
