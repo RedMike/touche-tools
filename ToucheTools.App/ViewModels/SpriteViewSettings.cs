@@ -48,12 +48,12 @@ public class SpriteViewSettings
         }
 
         var curTime = DateTime.UtcNow;
-        var frames = _databaseModel.Sequences[SequenceKeys[ActiveSequence]]
-            .Characters[Characters[ActiveCharacter]]
-            .Animations[Animations[ActiveAnimation]]
-            .Directions[Directions[ActiveDirection]]
+        var frames = _databaseModel.Sequences[ActiveSequence]
+            .Characters[ActiveCharacter]
+            .Animations[ActiveAnimation]
+            .Directions[ActiveDirection]
             .Frames;
-        var curFrame = frames[Frames[ActiveFrame]];
+        var curFrame = frames[ActiveFrame];
         var nextFrameId = ActiveFrame + 1;
         if (!Frames.Contains(nextFrameId))
         {
@@ -81,26 +81,26 @@ public class SpriteViewSettings
         }
 
         ActiveSequence = sequence;
-        Characters = _databaseModel.Sequences[SequenceKeys[ActiveSequence]].Characters.Keys.ToList();
+        Characters = _databaseModel.Sequences[ActiveSequence].Characters.Keys.ToList();
         if (!Characters.Contains(ActiveCharacter))
         {
             ActiveCharacter = Characters.First();
         }
-        var character = _databaseModel.Sequences[SequenceKeys[ActiveSequence]].Characters[Characters[ActiveCharacter]];
+        var character = _databaseModel.Sequences[ActiveSequence].Characters[ActiveCharacter];
 
         Animations = character.Animations.Keys.ToList();
         if (!Animations.Contains(ActiveAnimation))
         {
             ActiveAnimation = Animations.First();
         }
-        var animation = character.Animations[Animations[ActiveAnimation]];
+        var animation = character.Animations[ActiveAnimation];
 
         Directions = animation.Directions.Keys.ToList();
         if (!Directions.Contains(ActiveDirection))
         {
             ActiveDirection = Directions.First();
         }
-        var direction = animation.Directions[Directions[ActiveDirection]];
+        var direction = animation.Directions[ActiveDirection];
 
         Frames = direction.Frames.Select((_, idx) => idx).ToList();
         if (!Frames.Contains(ActiveFrame))
@@ -143,11 +143,11 @@ public class SpriteViewSettings
 
     private void GenerateSequenceView()
     {
-        var frame = _databaseModel.Sequences[SequenceKeys[ActiveSequence]]
-            .Characters[Characters[ActiveCharacter]]
-            .Animations[Animations[ActiveAnimation]]
-            .Directions[Directions[ActiveDirection]]
-            .Frames[Frames[ActiveFrame]];
+        var frame = _databaseModel.Sequences[ActiveSequence]
+            .Characters[ActiveCharacter]
+            .Animations[ActiveAnimation]
+            .Directions[ActiveDirection]
+            .Frames[ActiveFrame];
 
         PartsView = frame.Parts.Select(p => ((int)p.FrameIndex, p.DestX, p.DestY, p.HFlipped, p.VFlipped))
             .ToList();

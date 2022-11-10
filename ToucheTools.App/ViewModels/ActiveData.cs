@@ -68,9 +68,9 @@ class ActiveData
 
     private void GenerateRoomView()
     {
-        var roomImageId = _databaseModel.Rooms[RoomKeys[ActiveRoom]].RoomImageNum;
+        var roomImageId = _databaseModel.Rooms[ActiveRoom].RoomImageNum;
         var roomImage = _databaseModel.RoomImages[roomImageId].Value;
-        var palette = _databaseModel.Palettes[PaletteKeys[ActivePalette]];
+        var palette = _databaseModel.Palettes[ActivePalette];
         var viewId = $"{roomImageId}_{ActivePalette}";
 
         if (RoomView.Item1 == viewId)
@@ -97,8 +97,8 @@ class ActiveData
     
     private void GenerateSpriteView()
     {
-        var sprite = _databaseModel.Sprites[SpriteKeys[ActiveSprite]].Value;
-        var palette = _databaseModel.Palettes[PaletteKeys[ActivePalette]];
+        var sprite = _databaseModel.Sprites[ActiveSprite].Value;
+        var palette = _databaseModel.Palettes[ActivePalette];
         var viewId = $"{ActiveSprite}_{ActivePalette}";
 
         if (SpriteView.Item1 == viewId)
