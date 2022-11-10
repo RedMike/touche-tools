@@ -1,4 +1,5 @@
 ﻿using ToucheTools.Models;
+using ToucheTools.Models.Instructions;
 
 namespace ToucheTools.App.ViewModels;
 
@@ -13,11 +14,13 @@ public class ProgramViewSettings
     public List<string> InstructionsView { get; private set; } = null!;
     public int EvaluateUntil { get; private set; }
 
+    public List<int> ReferencedRoomsView { get; private set; } = null!;
+
     public ProgramViewSettings(DatabaseModel model)
     {
         _databaseModel = model;
         Programs = _databaseModel.Programs.Keys.ToList();
-        ActiveProgram = Programs.First();
+        ActiveProgram = Programs.Contains(90) ? 90 : Programs.First();
         EvaluateUntil = -1;
         
         GenerateView();
@@ -44,5 +47,11 @@ public class ProgramViewSettings
     {
         var program = _databaseModel.Programs[ActiveProgram];
         InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => pair.Value.ToString()).ToList();
+        ReferencedRoomsView = program.Instructions
+            .Where(pair => pair.Value is LoadRoomInstruction)
+            .Select(pair => (int)(((LoadRoomInstruction)pair.Value).Num))
+            .Distinct()
+            .OrderBy(k => k)
+            .ToList();
     }
 }

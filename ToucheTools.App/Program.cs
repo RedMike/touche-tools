@@ -86,6 +86,7 @@ while (window.IsOpen())
     if (windowSettings.ProgramViewOpen)
     {
         RenderProgramViewSettings(activeData, programViewSettings);
+        RenderProgramReferenceView(programViewSettings);
         RenderProgramView(activeData, programViewSettings);
     }
     #endregion
@@ -418,6 +419,27 @@ void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
         }
 
         idx++;
+    }
+    
+    ImGui.End();
+}
+
+void RenderProgramReferenceView(ProgramViewSettings viewSettings)
+{
+    var viewW = 300.0f;
+    var viewH = 600.0f;
+    ImGui.SetNextWindowPos(new Vector2(300.0f, 200.0f));
+    ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
+    ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
+
+    ImGui.LabelText("Rooms:", "");
+    foreach (var room in viewSettings.ReferencedRoomsView)
+    {
+        if (ImGui.Button($"{room}"))
+        {
+            //TODO: navigate to room view
+        }
+        ImGui.SameLine();
     }
     
     ImGui.End();
