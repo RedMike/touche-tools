@@ -432,14 +432,14 @@ void RenderProgramReferenceView(ProgramViewSettings viewSettings)
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
-    ImGui.LabelText("Rooms:", "");
+    ImGui.Text("Rooms:");
     foreach (var room in viewSettings.ReferencedRoomsView)
     {
+        ImGui.SameLine();
         if (ImGui.Button($"{room}"))
         {
             //TODO: navigate to room view
         }
-        ImGui.SameLine();
     }
     
     ImGui.End();
