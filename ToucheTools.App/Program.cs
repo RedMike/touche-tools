@@ -43,6 +43,8 @@ var spriteViewSettingsWindow = new SpriteViewSettingsWindow(windowSettings, acti
 var spriteViewWindow = new SpriteViewWindow(window, windowSettings, activeData, spriteViewSettings);
 var programViewSettingsWindow = new ProgramViewSettingsWindow(windowSettings, activeData, programViewSettings);
 var programViewWindow = new ProgramViewWindow(windowSettings, activeData, programViewSettings, programViewState);
+var programReferenceViewWindow = new ProgramReferenceViewWindow(windowSettings, activeData, spriteViewSettings,
+    programViewSettings, programViewState);
 
 var windows = new IWindow[]
 {
@@ -51,7 +53,8 @@ var windows = new IWindow[]
     spriteViewSettingsWindow,
     spriteViewWindow,
     programViewSettingsWindow,
-    programViewWindow
+    programViewWindow,
+    programReferenceViewWindow
 };
 #endregion
 
@@ -97,12 +100,6 @@ while (window.IsOpen())
     if (windowSettings.RoomViewOpen || windowSettings.SpriteViewOpen)
     {
         RenderActiveObjects(activeData);
-    }
-    #endregion
-    #region Windows
-    if (windowSettings.ProgramViewOpen)
-    {
-        RenderProgramReferenceView(windowSettings, activeData, spriteViewSettings, programViewSettings, programViewState);
     }
     #endregion
     
@@ -159,75 +156,6 @@ void RenderActiveObjects(ActiveData viewModel)
     if (curSpriteId != originalSpriteId)
     {
         viewModel.SetActiveSprite(sprites[curSpriteId]);
-    }
-    
-    ImGui.End();
-}
-
-void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, SpriteViewSettings spriteView, ProgramViewSettings viewSettings, ProgramViewState state)
-{
-    var viewW = 350.0f;
-    var viewH = 600.0f;
-    ImGui.SetNextWindowPos(new Vector2(400.0f, 200.0f));
-    ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
-    ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
-
-    ImGui.Text("Rooms:");
-    foreach (var room in viewSettings.ReferencedRoomsView)
-    {
-        ImGui.SameLine();
-        if (ImGui.Button($"{room}"))
-        {
-            active.SetActiveRoom(room);
-            active.SetActivePalette(room);
-            winSettings.OpenRoomView();
-        }
-    }
-    ImGui.Separator();
-    ImGui.Text("Sprites (Sequence, Character, Animation):");
-    foreach (var pair in viewSettings.ReferencedSpritesView.OrderBy(p => p.Key))
-    {
-        if (ImGui.TreeNodeEx(pair.Key.ToString(), ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            foreach (var (seqId, charId, animId) in pair.Value)
-            {
-                if (ImGui.Button($"({seqId}, {charId}, {animId})"))
-                {
-                    active.SetActiveSprite(pair.Key);
-                    spriteView.SetActiveSequence(seqId);
-                    spriteView.SelectCharacter(charId);
-                    spriteView.SelectAnimation(animId);
-                    winSettings.OpenSpriteView();
-                }
-            }
-            ImGui.TreePop();
-        }
-    }
-    
-    ImGui.Separator();
-    ImGui.Text("Character Script Offsets:");
-    foreach (var pair in viewSettings.CharacterScriptOffsetView.OrderBy(p => p.Key))
-    {
-        if (ImGui.Button($"{pair.Key} - {pair.Value:D5}"))
-        {
-            state.QueueScrollToOffset(pair.Value);
-            programViewSettings.SetEvaluateUntil(state.OffsetToIndex[pair.Value]);
-        }
-    }
-        
-    ImGui.Separator();
-    ImGui.Text("Action Script Offsets (Action, Obj1, Obj2):");
-    foreach (var pair in viewSettings.ActionScriptOffsetView
-                 .OrderBy(p => p.Key.Item1)
-                 .ThenBy(p => p.Key.Item2)
-                 .ThenBy(p => p.Key.Item3)
-             )
-    {
-        if (ImGui.Button($"({pair.Key.Item1}, {pair.Key.Item2}, {pair.Key.Item3}) - {pair.Value:D5}"))
-        {
-            state.QueueScrollToOffset(pair.Value);
-            programViewSettings.SetEvaluateUntil(state.OffsetToIndex[pair.Value]);
-        }
     }
     
     ImGui.End();
