@@ -22,6 +22,8 @@ container.AddLogging(o => o
 container.AddSingleton<LogData>();
 
 container.AddSingleton<ActivePalette>();
+container.AddSingleton<ActiveRoom>();
+
 container.AddSingleton<WindowSettings>();
 container.AddSingleton<SpriteViewSettings>();
 container.AddSingleton<ProgramViewSettings>();

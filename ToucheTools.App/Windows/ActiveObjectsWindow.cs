@@ -10,12 +10,14 @@ public class ActiveObjectsWindow : BaseWindow
     private readonly WindowSettings _windowSettings;
     private readonly ActiveData _activeData;
     private readonly ActivePalette _palette;
+    private readonly ActiveRoom _room;
 
-    public ActiveObjectsWindow(WindowSettings windowSettings, ActiveData activeData, ActivePalette palette)
+    public ActiveObjectsWindow(WindowSettings windowSettings, ActiveData activeData, ActivePalette palette, ActiveRoom room)
     {
         _windowSettings = windowSettings;
         _activeData = activeData;
         _palette = palette;
+        _room = room;
     }
 
     public override void Render()
@@ -24,10 +26,6 @@ public class ActiveObjectsWindow : BaseWindow
         {
             return;
         }
-
-        var originalRoomId = _activeData.RoomKeys.FindIndex(k => k == _activeData.ActiveRoom);
-        var curRoomId = originalRoomId;
-        var rooms = _activeData.RoomKeys.ToArray();
 
         var originalSpriteId = _activeData.SpriteKeys.FindIndex(k => k == _activeData.ActiveSprite);
         var curSpriteId = originalSpriteId;
@@ -38,12 +36,7 @@ public class ActiveObjectsWindow : BaseWindow
         ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
         ObservableCombo("Palette", _palette);
-    
-        ImGui.Combo("Room", ref curRoomId, rooms.Select(k => k.ToString()).ToArray(), rooms.Length);
-        if (curRoomId != originalRoomId)
-        {
-            _activeData.SetActiveRoom(rooms[curRoomId]);
-        }
+        ObservableCombo("Room", _room);
     
         ImGui.Combo("Sprite", ref curSpriteId, sprites.Select(k => k.ToString()).ToArray(), sprites.Length);
         if (curSpriteId != originalSpriteId)

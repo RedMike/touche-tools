@@ -7,38 +7,25 @@ public class ActiveData
 {
     private readonly DatabaseModel _databaseModel;
     private readonly ActivePalette _palette;
+    private readonly ActiveRoom _room;
     
-    public List<int> RoomKeys { get; }
-    public int ActiveRoom { get; private set; }
     public List<int> SpriteKeys { get; }
     public int ActiveSprite { get; private set; }
     
     public (string, int, int, byte[]) RoomView { get; private set; }
     public (string, int, int, int, int, byte[]) SpriteView { get; private set; }
 
-    public ActiveData(DatabaseModel model, ActivePalette palette)
+    public ActiveData(DatabaseModel model, ActivePalette palette, ActiveRoom room)
     {
         _databaseModel = model;
         _palette = palette;
         _palette.ObserveActive(GenerateViews);
+        _room = room;
+        _room.ObserveActive(GenerateViews);
 
-        RoomKeys = model.Rooms.Keys.ToList();
         SpriteKeys = model.Sprites.Keys.ToList();
-
-        ActiveRoom = RoomKeys.First();
         ActiveSprite = SpriteKeys.First();
         GenerateViews();
-    }
-    
-    public void SetActiveRoom(int room)
-    {
-        if (!RoomKeys.Contains(room))
-        {
-            throw new Exception("Unknown room: " + room);
-        }
-
-        ActiveRoom = room;
-        GenerateRoomView();
     }
     
     public void SetActiveSprite(int sprite)
@@ -60,7 +47,7 @@ public class ActiveData
 
     private void GenerateRoomView()
     {
-        var roomImageId = _databaseModel.Rooms[ActiveRoom].RoomImageNum;
+        var roomImageId = _databaseModel.Rooms[_room.Active].RoomImageNum;
         var roomImage = _databaseModel.RoomImages[roomImageId].Value;
         var palette = _databaseModel.Palettes[_palette.Active];
         var viewId = $"{roomImageId}_{_palette.Active}";
