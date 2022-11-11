@@ -90,20 +90,16 @@ logData.Info($"Finished loading {filename}, {db.Programs.Count} programs, {db.Ro
 
 while (window.IsOpen())
 {
-    #region Boilerplate
     window.ProcessInput();
     if (!window.IsOpen())
     {
         break;
     }
-    #endregion
     
     foreach (var win in windows)
     {
         win.Render();
     }
     
-    #region Boilerplate
     window.Render();
-    #endregion
 }
