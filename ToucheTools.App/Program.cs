@@ -3,6 +3,7 @@ using ImGuiNET;
 using ToucheTools.App;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
+using ToucheTools.App.Windows;
 using ToucheTools.Loaders;
 
 #region Load data
@@ -34,6 +35,16 @@ var activeData = new ActiveData(db);
 
 #region State setup
 var programViewState = new ProgramViewState();
+#endregion
+
+#region Windows
+
+var settingsWindow = new SettingsWindow(windowSettings);
+
+var windows = new[]
+{
+    settingsWindow
+};
 #endregion
 
 while (window.IsOpen())
@@ -69,9 +80,11 @@ while (window.IsOpen())
     }
     RenderErrors(errors);
     #endregion
-    #region Window Settings
-    RenderWindowSettings(windowSettings);
-    #endregion
+
+    foreach (var win in windows)
+    {
+        win.Render();
+    }
     #region Active Objects
     if (windowSettings.RoomViewOpen || windowSettings.SpriteViewOpen)
     {
@@ -112,50 +125,6 @@ void RenderErrors(List<string> errors)
         ImGui.TextWrapped(error);
     }
     ImGui.PopStyleColor();
-    ImGui.End();
-}
-
-void RenderWindowSettings(WindowSettings settings)
-{
-    bool origRoomViewShown = settings.RoomViewOpen;
-    bool roomViewShown = origRoomViewShown;
-
-    bool origSpriteViewShown = settings.SpriteViewOpen;
-    bool spriteViewShown = origSpriteViewShown;
-
-    bool origProgramViewShown = settings.ProgramViewOpen;
-    bool programViewShown = origProgramViewShown;
-    
-    ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(150.0f, 200.0f));
-    ImGui.Begin("Windows", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
-    ImGui.Checkbox("Room View", ref roomViewShown);
-    if (roomViewShown != origRoomViewShown)
-    {
-        settings.CloseAllViews();
-        if (roomViewShown)
-        {
-            settings.OpenRoomView();
-        }
-    }
-    ImGui.Checkbox("Sprite View", ref spriteViewShown);
-    if (spriteViewShown != origSpriteViewShown)
-    {
-        settings.CloseAllViews();
-        if (spriteViewShown)
-        {
-            settings.OpenSpriteView();
-        }
-    }
-    ImGui.Checkbox("Program View", ref programViewShown);
-    if (programViewShown != origProgramViewShown)
-    {
-        settings.CloseAllViews();
-        if (programViewShown)
-        {
-            settings.OpenProgramView();
-        }
-    }
     ImGui.End();
 }
 
