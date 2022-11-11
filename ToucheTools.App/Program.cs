@@ -28,6 +28,7 @@ container.AddSingleton<ActiveProgram>();
 container.AddSingleton<ActiveSequence>();
 container.AddSingleton<ActiveCharacter>();
 container.AddSingleton<ActiveAnimation>();
+container.AddSingleton<ActiveDirection>();
 container.AddSingleton<ActiveProgram>();
 
 container.AddSingleton<WindowSettings>();

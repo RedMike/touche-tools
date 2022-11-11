@@ -13,8 +13,9 @@ public class SpriteViewSettingsWindow : BaseWindow
     private readonly ActiveSequence _sequence;
     private readonly ActiveCharacter _character;
     private readonly ActiveAnimation _animation;
+    private readonly ActiveDirection _direction;
 
-    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation)
+    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
@@ -22,6 +23,7 @@ public class SpriteViewSettingsWindow : BaseWindow
         _sequence = sequence;
         _character = character;
         _animation = animation;
+        _direction = direction;
     }
 
     public override void Render()
@@ -37,10 +39,6 @@ public class SpriteViewSettingsWindow : BaseWindow
 
         var origAutoStep = _viewSettings.AutoStepFrame;
         var autoStep = origAutoStep;
-        
-        var originalDirectionId = _viewSettings.Directions.FindIndex(k => k == _viewSettings.ActiveDirection);
-        var curDirectionId = originalDirectionId;
-        var directions = _viewSettings.Directions.ToArray();
         
         var originalFrameId = _viewSettings.Frames.FindIndex(k => k == _viewSettings.ActiveFrame);
         var curFrameId = originalFrameId;
@@ -60,11 +58,7 @@ public class SpriteViewSettingsWindow : BaseWindow
         ObservableCombo("Animation", _animation);
         
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
-        ImGui.Combo("Direction", ref curDirectionId, directions.Select(k => k.ToString()).ToArray(), directions.Length);
-        if (curDirectionId != originalDirectionId)
-        {
-            _viewSettings.SelectDirection(directions[curDirectionId]);
-        }
+        ObservableCombo("Direction", _direction);
         
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
         ImGui.SameLine();

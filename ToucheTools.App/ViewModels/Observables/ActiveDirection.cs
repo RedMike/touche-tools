@@ -2,19 +2,20 @@
 
 namespace ToucheTools.App.ViewModels.Observables;
 
-public class ActiveAnimation : ActiveObservable<int>
+public class ActiveDirection : ActiveObservable<int>
 {
     private readonly DatabaseModel _model;
     private readonly ActiveSequence _sequence;
     private readonly ActiveCharacter _character;
+    private readonly ActiveAnimation _animation;
     
-    public ActiveAnimation(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character)
+    public ActiveDirection(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation)
     {
         _model = model;
         _sequence = sequence;
-        _sequence.ObserveActive(Update);
         _character = character;
-        _character.ObserveActive(Update);
+        _animation = animation;
+        _sequence.ObserveActive(Update);
         Update();
     }
 
@@ -23,7 +24,8 @@ public class ActiveAnimation : ActiveObservable<int>
         SetElements(_model
             .Sequences[_sequence.Active]
             .Characters[_character.Active]
-            .Animations.Keys.ToList());
+            .Animations[_animation.Active]
+            .Directions.Keys.ToList());
         if (!Elements.Contains(Active))
         {
             SetActive(Elements.First());
