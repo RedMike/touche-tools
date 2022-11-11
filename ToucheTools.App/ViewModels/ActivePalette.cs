@@ -6,7 +6,7 @@ public class ActivePalette : ActiveObservable<int>
 {
     public ActivePalette(DatabaseModel model)
     {
-        Elements = model.Palettes.Keys.ToList();
-        Active = Elements.First();
+        SetElements(model.Palettes.Keys.ToList());
+        SetActive(Elements.First());
     }
 }

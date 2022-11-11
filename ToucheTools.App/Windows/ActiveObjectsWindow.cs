@@ -23,9 +23,6 @@ public class ActiveObjectsWindow : IWindow
         {
             return;
         }
-        var originalPaletteId = _palette.Elements.FindIndex(k => k == _palette.Active); 
-        var curPaletteId = originalPaletteId;
-        var palettes = _palette.Elements.ToArray();
 
         var originalRoomId = _activeData.RoomKeys.FindIndex(k => k == _activeData.ActiveRoom);
         var curRoomId = originalRoomId;
@@ -39,10 +36,12 @@ public class ActiveObjectsWindow : IWindow
         ImGui.SetNextWindowSize(new Vector2(200.0f, 200.0f));
         ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     
-        ImGui.Combo("Palette", ref curPaletteId, palettes.Select(k => k.ToString()).ToArray(), palettes.Length);
+        var originalPaletteId = _palette.ActiveElementAsIndex; 
+        var curPaletteId = originalPaletteId;
+        ImGui.Combo("Palette", ref curPaletteId, _palette.ElementsAsArray, _palette.ElementCount);
         if (curPaletteId != originalPaletteId)
         {
-            _palette.SetActive(palettes[curPaletteId]);
+            _palette.SetActive(_palette.Elements[curPaletteId]);
         }
     
         ImGui.Combo("Room", ref curRoomId, rooms.Select(k => k.ToString()).ToArray(), rooms.Length);
