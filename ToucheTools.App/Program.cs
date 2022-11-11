@@ -20,10 +20,8 @@ mainLoader.Load(out var db);
 #endregion
 
 #region Render setup
-const int width = 1024;
-const int height = 900;
 Vector4 errorColour = new Vector4(0.9f, 0.1f, 0.2f, 1.0f);
-using var window = new RenderWindow("ToucheTools", width, height);
+using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
 #endregion
 
 #region Data setup
@@ -40,10 +38,12 @@ var programViewState = new ProgramViewState();
 #region Windows
 
 var settingsWindow = new SettingsWindow(windowSettings);
+var roomViewWindow = new RoomViewWindow(window, windowSettings, activeData);
 
-var windows = new[]
+var windows = new IWindow[]
 {
-    settingsWindow
+    settingsWindow,
+    roomViewWindow
 };
 #endregion
 
@@ -92,10 +92,6 @@ while (window.IsOpen())
     }
     #endregion
     #region Windows
-    if (windowSettings.RoomViewOpen)
-    {
-        RenderRoomView(activeData);
-    }
     if (windowSettings.SpriteViewOpen)
     {
         RenderSpriteViewSettings(activeData, spriteViewSettings);
@@ -116,8 +112,8 @@ while (window.IsOpen())
 
 void RenderErrors(List<string> errors)
 {
-    ImGui.SetNextWindowPos(new Vector2(0.0f, height-100.0f));
-    ImGui.SetNextWindowSize(new Vector2(width, 100.0f));
+    ImGui.SetNextWindowPos(new Vector2(0.0f, Constants.MainWindowHeight-100.0f));
+    ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth, 100.0f));
     ImGui.Begin("Errors", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
     ImGui.PushStyleColor(ImGuiCol.Text, errorColour);
     foreach (var error in errors)
@@ -167,23 +163,9 @@ void RenderActiveObjects(ActiveData viewModel)
     ImGui.End();
 }
 
-void RenderRoomView(ActiveData viewModel)
-{
-    ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
-    ImGui.SetNextWindowSize(new Vector2(width, 600.0f));
-    ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
-
-    var (viewId, roomWidth, roomHeight, bytes) = viewModel.RoomView;
-    
-    var roomTexture = window.RenderImage(viewId, roomWidth, roomHeight, bytes);
-    ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
-    
-    ImGui.End();
-}
-
 void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
 {
-    var viewW = width;
+    var viewW = Constants.MainWindowWidth;
     var viewH = 600.0f;
     ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
@@ -264,7 +246,7 @@ void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSetti
     var frames = viewSettings.Frames.ToArray();
     
     ImGui.SetNextWindowPos(new Vector2(350.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(width-500.0f, 200.0f));
+    ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth-500.0f, 200.0f));
     ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
     ImGui.Combo("Sequence", ref curSequenceId, sequences.Select(k => k.ToString()).ToArray(), sequences.Length);
@@ -273,14 +255,14 @@ void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSetti
         viewSettings.SetActiveSequence(sequences[curSequenceId]);
     }
     
-    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
     ImGui.Combo("Character", ref curCharacterId, characters.Select(k => k.ToString()).ToArray(), characters.Length);
     if (curCharacterId != originalCharacterId)
     {
         viewSettings.SelectCharacter(characters[curCharacterId]);
     }
 
-    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
     ImGui.SameLine();
     ImGui.Combo("Animation", ref curAnimationId, animations.Select(k => k.ToString()).ToArray(), animations.Length);
     if (curAnimationId != originalAnimationId)
@@ -288,14 +270,14 @@ void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSetti
         viewSettings.SelectAnimation(animations[curAnimationId]);
     }
     
-    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
     ImGui.Combo("Direction", ref curDirectionId, directions.Select(k => k.ToString()).ToArray(), directions.Length);
     if (curDirectionId != originalDirectionId)
     {
         viewSettings.SelectDirection(directions[curDirectionId]);
     }
     
-    ImGui.SetNextItemWidth((width-500.0f)/4.0f);
+    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
     ImGui.SameLine();
     ImGui.Combo("Frame", ref curFrameId, frames.Select(k => k.ToString()).ToArray(), frames.Length);
     if (curFrameId != originalFrameId)

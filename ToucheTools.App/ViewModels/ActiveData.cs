@@ -2,7 +2,7 @@
 
 namespace ToucheTools.App.ViewModels;
 
-class ActiveData
+public class ActiveData
 {
     private readonly DatabaseModel _databaseModel;
     
