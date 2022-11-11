@@ -41,7 +41,7 @@ public class SpriteViewWindow : IWindow
             var oy = _viewSettings.RoomOffsetY;
             var (viewId, roomWidth, roomHeight, bytes) = _activeData.RoomView;
         
-            var roomTexture = _render.RenderImage(viewId, roomWidth, roomHeight, bytes);
+            var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
             var uv1 = new Vector2(ox / (float)roomWidth, oy / (float)roomHeight);
             var uv2 = new Vector2((ox+viewW) / (float)roomWidth, (oy+viewH) / (float)roomHeight);
             ImGui.SetCursorPos(new Vector2(0.0f, 0.0f));
@@ -50,7 +50,7 @@ public class SpriteViewWindow : IWindow
         #endregion
         
         var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _activeData.SpriteView;
-        var spriteTexture = _render.RenderImage(spriteViewId, spriteWidth, spriteHeight, spriteBytes);
+        var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, spriteViewId, spriteWidth, spriteHeight, spriteBytes);
 
         foreach (var (frameIndex, destX, destY, hFlip, vFlip) in _viewSettings.PartsView)
         {

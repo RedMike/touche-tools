@@ -8,7 +8,13 @@ namespace ToucheTools.App;
 
 public class RenderWindow : IDisposable
 {
-    public static readonly Vector3 ClearColor = new Vector3(0.3f, 0.45f, 0.7f);
+    public enum RenderType
+    {
+        Unknown = 0,
+        Room = 1,
+        Sprite = 2
+    }
+    private static readonly Vector3 ClearColor = new Vector3(0.3f, 0.45f, 0.7f);
 
     private readonly string _title;
     private readonly int _w;
@@ -61,8 +67,9 @@ public class RenderWindow : IDisposable
         _graphicsDevice.SwapBuffers(_graphicsDevice.MainSwapchain);
     }
 
-    public IntPtr RenderImage(string id, int width, int height, byte[] rawPixels)
+    public IntPtr RenderImage(RenderType type, string id, int width, int height, byte[] rawPixels)
     {
+        id = $"{type:G}_{id}";
         if (!_textures.ContainsKey(id))
         {
             var newTexture = _graphicsDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
@@ -171,25 +178,4 @@ public class RenderWindow : IDisposable
         }
     }
     #endregion
-    
-    private static uint GetDimension(uint largestLevelDimension, uint mipLevel)
-    {
-        uint ret = largestLevelDimension;
-        for (uint i = 0; i < mipLevel; i++)
-        {
-            ret /= 2;
-        }
-
-        return Math.Max(1, ret);
-    }
-    
-    private static uint GetFormatSize(PixelFormat format)
-    {
-        switch (format)
-        {
-            case PixelFormat.R8_G8_B8_A8_UNorm: return 4;
-            case PixelFormat.BC3_UNorm: return 1;
-            default: throw new NotImplementedException();
-        }
-    }
 }

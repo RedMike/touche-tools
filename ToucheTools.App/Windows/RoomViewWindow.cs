@@ -30,7 +30,7 @@ public class RoomViewWindow : IWindow
 
         var (viewId, roomWidth, roomHeight, bytes) = _activeData.RoomView;
     
-        var roomTexture = _render.RenderImage(viewId, roomWidth, roomHeight, bytes);
+        var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
         ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
     
         ImGui.End();
