@@ -23,9 +23,9 @@ public class ActiveObjectsWindow : IWindow
         {
             return;
         }
-        var originalPaletteId = _palette.PaletteKeys.FindIndex(k => k == _palette.Active); 
+        var originalPaletteId = _palette.Elements.FindIndex(k => k == _palette.Active); 
         var curPaletteId = originalPaletteId;
-        var palettes = _palette.PaletteKeys.ToArray();
+        var palettes = _palette.Elements.ToArray();
 
         var originalRoomId = _activeData.RoomKeys.FindIndex(k => k == _activeData.ActiveRoom);
         var curRoomId = originalRoomId;
