@@ -1,4 +1,5 @@
-﻿using ToucheTools.Models;
+﻿using ToucheTools.App.ViewModels.Observables;
+using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
 
 namespace ToucheTools.App.ViewModels;
@@ -6,10 +7,7 @@ namespace ToucheTools.App.ViewModels;
 public class ProgramViewSettings
 {
     private readonly DatabaseModel _databaseModel;
-    
-    public int ActiveProgram { get; private set; }
-    public List<int> Programs { get; private set; }
-    
+    private readonly ActiveProgram _program;
     
     public List<(int, string)> InstructionsView { get; private set; } = null!;
     public int EvaluateUntil { get; private set; }
@@ -23,25 +21,14 @@ public class ProgramViewSettings
     //for each (action, obj1, obj2), offset
     public Dictionary<(int, int, int), int> ActionScriptOffsetView { get; private set; } = null!;
 
-    public ProgramViewSettings(DatabaseModel model)
+    public ProgramViewSettings(DatabaseModel model, ActiveProgram program)
     {
         _databaseModel = model;
-        Programs = _databaseModel.Programs.Keys.ToList();
-        ActiveProgram = Programs.Contains(90) ? 90 : Programs.First();
+        
+        _program = program;
+        _program.ObserveActive(GenerateView);
         EvaluateUntil = -1;
         
-        GenerateView();
-    }
-
-    public void SetActiveProgram(int program)
-    {
-        if (!Programs.Contains(program))
-        {
-            throw new Exception("Unknown program: " + program);
-        }
-
-        ActiveProgram = program;
-        EvaluateUntil = -1;
         GenerateView();
     }
 
@@ -52,7 +39,7 @@ public class ProgramViewSettings
 
     private void GenerateView()
     {
-        var program = _databaseModel.Programs[ActiveProgram];
+        var program = _databaseModel.Programs[_program.Active];
         InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => (pair.Key, pair.Value.ToString())).ToList();
         ReferencedRoomsView = program.Instructions
             .Where(pair => pair.Value is LoadRoomInstruction)
