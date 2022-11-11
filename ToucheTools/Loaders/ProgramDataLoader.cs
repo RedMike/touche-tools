@@ -7,7 +7,7 @@ namespace ToucheTools.Loaders;
 
 public class ProgramDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(ProgramDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(ProgramDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;
@@ -117,7 +117,7 @@ public class ProgramDataLoader
                     W = w,
                     H = h
                 });
-                _logger.Log(LogLevel.Information, "Rect: {}x{} {}x{}", x, y, w, h);
+                _logger.Log(LogLevel.Debug, "Rect: {}x{} {}x{}", x, y, w, h);
             }
 
             _logger.Log(LogLevel.Debug, "Rects found: {}", program.Rects.Count);
@@ -150,7 +150,7 @@ public class ProgramDataLoader
                 _logger.Log(LogLevel.Debug, "Point: {}x{}x{} {}", x, y, z, order);
             }
 
-            _logger.Log(LogLevel.Information, "Points found: {}", program.Points.Count);
+            _logger.Log(LogLevel.Debug, "Points found: {}", program.Points.Count);
         }
 
         //walks
@@ -193,7 +193,7 @@ public class ProgramDataLoader
                 _logger.Log(LogLevel.Debug, "Walk: {}->{} clip {} areas {} {}", point1, point2, clipRect, area1, area2);
             }
 
-            _logger.Log(LogLevel.Information, "Walks found: {}", program.Walks.Count);
+            _logger.Log(LogLevel.Debug, "Walks found: {}", program.Walks.Count);
         }
 
         //areas
@@ -243,7 +243,7 @@ public class ProgramDataLoader
                     animCount, animNext);
             }
 
-            _logger.Log(LogLevel.Information, "Areas found: {}", program.Areas.Count);
+            _logger.Log(LogLevel.Debug, "Areas found: {}", program.Areas.Count);
         }
 
         //backgrounds
@@ -293,7 +293,7 @@ public class ProgramDataLoader
                     bgOffset, scaleMul, scaleDiv);
             }
 
-            _logger.Log(LogLevel.Information, "Backgrounds found: {}", program.Backgrounds.Count);
+            _logger.Log(LogLevel.Debug, "Backgrounds found: {}", program.Backgrounds.Count);
         }
         
         //hitboxes
@@ -376,7 +376,7 @@ public class ProgramDataLoader
                 _logger.Log(LogLevel.Debug, "Hitbox: {} {}x{}x{}x{} {}x{}x{}x{}", item, x1, y1, w1, h1, x2, y2, w2, h2);
             }
 
-            _logger.Log(LogLevel.Information, "Hitboxes found: {}", program.Hitboxes.Count);
+            _logger.Log(LogLevel.Debug, "Hitboxes found: {}", program.Hitboxes.Count);
         }
         
         //action script offsets
@@ -427,7 +427,7 @@ public class ProgramDataLoader
                 _logger.Log(LogLevel.Debug, "Action script offsets: {} does {} to {} offset {}", object1, action, object2, offs);
             }
 
-            _logger.Log(LogLevel.Information, "Action script offsets found: {}", program.ActionScriptOffsets.Count);
+            _logger.Log(LogLevel.Debug, "Action script offsets found: {}", program.ActionScriptOffsets.Count);
         }
         
         //conversations
@@ -455,7 +455,7 @@ public class ProgramDataLoader
                 _logger.Log(LogLevel.Debug, "Conversations: {} {} {}", num, offs, msg);
             }
 
-            _logger.Log(LogLevel.Information, "Conversations found: {}", program.Conversations.Count);
+            _logger.Log(LogLevel.Debug, "Conversations found: {}", program.Conversations.Count);
         }
         
         //char script offset
@@ -482,7 +482,7 @@ public class ProgramDataLoader
                 _logger.Log(LogLevel.Debug, "Char script offsets: {} {}", ch, offs);
             }
 
-            _logger.Log(LogLevel.Information, "Char script offsets found: {}", program.CharScriptOffsets.Count);
+            _logger.Log(LogLevel.Debug, "Char script offsets found: {}", program.CharScriptOffsets.Count);
         }
 
         //operations

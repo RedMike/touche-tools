@@ -8,7 +8,7 @@ namespace ToucheTools.Loaders;
 
 public class MusicDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(MusicDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(MusicDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;

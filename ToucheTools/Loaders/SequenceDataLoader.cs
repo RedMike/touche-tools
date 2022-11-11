@@ -7,7 +7,7 @@ namespace ToucheTools.Loaders;
 
 public class SequenceDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(SequenceDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(SequenceDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;

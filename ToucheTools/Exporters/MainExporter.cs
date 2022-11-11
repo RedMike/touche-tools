@@ -7,7 +7,7 @@ namespace ToucheTools.Exporters;
 
 public class MainExporter
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(MainExporter));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(MainExporter));
     private const int GapBetweenOffsetBlockAndDataBlock = 128; //how many bytes to leave between offsets and data block
     private static readonly int StartOfDataBlockOffset; //where the data can live
     private int _currentNextEntityOffset = 0; //where the data will currently be inserted

@@ -1,10 +1,21 @@
-﻿using System.Numerics;
-using ImGuiNET;
+﻿using Microsoft.Extensions.Logging;
+using ToucheTools;
 using ToucheTools.App;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.App.Windows;
 using ToucheTools.Loaders;
+
+#region Setup
+var logData = new LogData();
+var loggerFactory = LoggerFactory.Create(c => c
+    .ClearProviders()
+    .SetMinimumLevel(LogLevel.Information)
+    .AddProvider(new LoggerProvider(LogLevel.Information, logData))
+    .AddConsole()
+);
+Logging.SetUp(loggerFactory);
+#endregion
 
 #region Load data
 var fileToLoad = "../../../../sample/TOUCHE.DAT";
@@ -24,7 +35,6 @@ using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Co
 #endregion
 
 #region Data setup
-var logData = new LogData();
 var windowSettings = new WindowSettings();
 var spriteViewSettings = new SpriteViewSettings(db);
 var programViewSettings = new ProgramViewSettings(db);

@@ -7,7 +7,7 @@ namespace ToucheTools.Loaders;
 
 public class ResourceDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(ResourceDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(ResourceDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     
@@ -31,7 +31,7 @@ public class ResourceDataLoader
         }
 
         offset = (int)rawOffset;
-        _logger.Log(LogLevel.Information, "Resource {} {}: offset {}", resource.ToString("G"), number, offset);
+        _logger.Log(LogLevel.Debug, "Resource {} {}: offset {}", resource.ToString("G"), number, offset);
         
         if (!includeSize)
         {
@@ -45,7 +45,7 @@ public class ResourceDataLoader
             {
                 throw new UnknownResourceException();
             }
-            _logger.Log(LogLevel.Information, "Resource {} {}: size {}", resource.ToString("G"), number, size);
+            _logger.Log(LogLevel.Debug, "Resource {} {}: size {}", resource.ToString("G"), number, size);
         }
     }
 }

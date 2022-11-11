@@ -7,7 +7,7 @@ namespace ToucheTools.Loaders;
 
 public class RoomInfoDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(RoomInfoDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(RoomInfoDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;
