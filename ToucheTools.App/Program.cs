@@ -86,7 +86,7 @@ while (window.IsOpen())
     if (windowSettings.ProgramViewOpen)
     {
         RenderProgramViewSettings(activeData, programViewSettings);
-        RenderProgramReferenceView(programViewSettings);
+        RenderProgramReferenceView(windowSettings, activeData, spriteViewSettings, programViewSettings);
         RenderProgramView(activeData, programViewSettings);
     }
     #endregion
@@ -427,7 +427,7 @@ void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
     ImGui.End();
 }
 
-void RenderProgramReferenceView(ProgramViewSettings viewSettings)
+void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, SpriteViewSettings spriteView, ProgramViewSettings viewSettings)
 {
     var viewW = 300.0f;
     var viewH = 600.0f;
@@ -441,7 +441,9 @@ void RenderProgramReferenceView(ProgramViewSettings viewSettings)
         ImGui.SameLine();
         if (ImGui.Button($"{room}"))
         {
-            //TODO: navigate to room view
+            active.SetActiveRoom(room);
+            active.SetActivePalette(room);
+            winSettings.OpenRoomView();
         }
     }
     ImGui.Separator();
@@ -454,7 +456,11 @@ void RenderProgramReferenceView(ProgramViewSettings viewSettings)
             {
                 if (ImGui.Button($"({seqId}, {charId}, {animId})"))
                 {
-                    //TODO: navigate to sprite view
+                    active.SetActiveSprite(pair.Key);
+                    spriteView.SetActiveSequence(seqId);
+                    spriteView.SelectCharacter(charId);
+                    spriteView.SelectAnimation(animId);
+                    winSettings.OpenSpriteView();
                 }
             }
             ImGui.TreePop();
