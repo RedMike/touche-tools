@@ -7,13 +7,11 @@ namespace ToucheTools.App.Windows;
 public class ProgramViewSettingsWindow : IWindow
 {
     private readonly WindowSettings _windowSettings;
-    private readonly ActiveData _activeData;
     private readonly ProgramViewSettings _viewSettings;
 
-    public ProgramViewSettingsWindow(WindowSettings windowSettings, ActiveData activeData, ProgramViewSettings viewSettings)
+    public ProgramViewSettingsWindow(WindowSettings windowSettings, ProgramViewSettings viewSettings)
     {
         _windowSettings = windowSettings;
-        _activeData = activeData;
         _viewSettings = viewSettings;
     }
 

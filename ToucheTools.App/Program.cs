@@ -27,7 +27,6 @@ container.AddSingleton<ActiveSprite>();
 container.AddSingleton<WindowSettings>();
 container.AddSingleton<SpriteViewSettings>();
 container.AddSingleton<ProgramViewSettings>();
-container.AddSingleton<ActiveData>();
 
 container.AddSingleton<ProgramViewState>();
 #endregion

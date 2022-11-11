@@ -9,17 +9,17 @@ public class SpriteViewWindow : IWindow
 {
     private readonly RenderWindow _render;
     private readonly WindowSettings _windowSettings;
-    private readonly ActiveData _activeData;
     private readonly SpriteViewSettings _viewSettings;
     private readonly ActiveRoom _room;
+    private readonly ActiveSprite _sprite;
 
-    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveData activeData, SpriteViewSettings viewSettings, ActiveRoom room)
+    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite)
     {
         _render = render;
         _windowSettings = windowSettings;
-        _activeData = activeData;
         _viewSettings = viewSettings;
         _room = room;
+        _sprite = sprite;
     }
 
     public void Render()
@@ -52,7 +52,7 @@ public class SpriteViewWindow : IWindow
         }
         #endregion
         
-        var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _activeData.SpriteView;
+        var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _sprite.SpriteView;
         var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, spriteViewId, spriteWidth, spriteHeight, spriteBytes);
 
         foreach (var (frameIndex, destX, destY, hFlip, vFlip) in _viewSettings.PartsView)
