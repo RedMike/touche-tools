@@ -395,24 +395,27 @@ void RenderProgramViewSettings(ActiveData viewModel, ProgramViewSettings viewSet
 
 void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
 {
-    var viewW = 300.0f;
+    var viewW = 400.0f;
     var viewH = 600.0f;
     ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Program View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
     var idx = 0;
-    foreach (var instruction in viewSettings.InstructionsView)
+    foreach (var (offset, instruction) in viewSettings.InstructionsView)
     {
         var evaluatedAlready = idx <= viewSettings.EvaluateUntil;
         if (evaluatedAlready)
         {
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));
         }
-        if (ImGui.Button(instruction))
+
+        if (ImGui.Button($"{offset:D5}"))
         {
             viewSettings.SetEvaluateUntil(idx);
         }
+        ImGui.SameLine();
+        ImGui.Text($" - {instruction}");
         if (evaluatedAlready)
         {
             ImGui.PopStyleColor();
@@ -428,7 +431,7 @@ void RenderProgramReferenceView(ProgramViewSettings viewSettings)
 {
     var viewW = 300.0f;
     var viewH = 600.0f;
-    ImGui.SetNextWindowPos(new Vector2(300.0f, 200.0f));
+    ImGui.SetNextWindowPos(new Vector2(400.0f, 200.0f));
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 

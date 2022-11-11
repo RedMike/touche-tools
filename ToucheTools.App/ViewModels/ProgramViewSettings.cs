@@ -11,7 +11,7 @@ public class ProgramViewSettings
     public List<int> Programs { get; private set; }
     
     
-    public List<string> InstructionsView { get; private set; } = null!;
+    public List<(int, string)> InstructionsView { get; private set; } = null!;
     public int EvaluateUntil { get; private set; }
 
     public List<int> ReferencedRoomsView { get; private set; } = null!;
@@ -48,7 +48,7 @@ public class ProgramViewSettings
     private void GenerateView()
     {
         var program = _databaseModel.Programs[ActiveProgram];
-        InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => pair.Value.ToString()).ToList();
+        InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => (pair.Key, pair.Value.ToString())).ToList();
         ReferencedRoomsView = program.Instructions
             .Where(pair => pair.Value is LoadRoomInstruction)
             .Select(pair => (int)(((LoadRoomInstruction)pair.Value).Num))
