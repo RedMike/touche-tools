@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.ViewModels;
+using ToucheTools.App.ViewModels.Observables;
 
 namespace ToucheTools.App.Windows;
 
@@ -10,13 +11,15 @@ public class SpriteViewWindow : IWindow
     private readonly WindowSettings _windowSettings;
     private readonly ActiveData _activeData;
     private readonly SpriteViewSettings _viewSettings;
+    private readonly ActiveRoom _room;
 
-    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveData activeData, SpriteViewSettings viewSettings)
+    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveData activeData, SpriteViewSettings viewSettings, ActiveRoom room)
     {
         _render = render;
         _windowSettings = windowSettings;
         _activeData = activeData;
         _viewSettings = viewSettings;
+        _room = room;
     }
 
     public void Render()
@@ -39,7 +42,7 @@ public class SpriteViewWindow : IWindow
         {
             var ox = _viewSettings.RoomOffsetX;
             var oy = _viewSettings.RoomOffsetY;
-            var (viewId, roomWidth, roomHeight, bytes) = _activeData.RoomView;
+            var (viewId, roomWidth, roomHeight, bytes) = _room.RoomView;
         
             var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
             var uv1 = new Vector2(ox / (float)roomWidth, oy / (float)roomHeight);

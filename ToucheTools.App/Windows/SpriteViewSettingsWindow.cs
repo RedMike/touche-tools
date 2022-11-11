@@ -1,20 +1,21 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.ViewModels;
+using ToucheTools.App.ViewModels.Observables;
 
 namespace ToucheTools.App.Windows;
 
 public class SpriteViewSettingsWindow : IWindow
 {
     private readonly WindowSettings _windowSettings;
-    private readonly ActiveData _activeData;
     private readonly SpriteViewSettings _viewSettings;
+    private readonly ActiveRoom _room;
 
-    public SpriteViewSettingsWindow(WindowSettings windowSettings, ActiveData activeData, SpriteViewSettings viewSettings)
+    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room)
     {
         _windowSettings = windowSettings;
-        _activeData = activeData;
         _viewSettings = viewSettings;
+        _room = room;
     }
 
     public void Render()
@@ -106,7 +107,7 @@ public class SpriteViewSettingsWindow : IWindow
 
         if (showRoom)
         {
-            var (_, roomW, roomH, _) = _activeData.RoomView;
+            var (_, roomW, roomH, _) = _room.RoomView;
             
             var origRoomX = _viewSettings.RoomOffsetX;
             if (origRoomX > roomW)
