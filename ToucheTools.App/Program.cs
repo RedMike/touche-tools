@@ -429,7 +429,7 @@ void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
 
 void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, SpriteViewSettings spriteView, ProgramViewSettings viewSettings)
 {
-    var viewW = 300.0f;
+    var viewW = 350.0f;
     var viewH = 600.0f;
     ImGui.SetNextWindowPos(new Vector2(400.0f, 200.0f));
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
@@ -471,7 +471,21 @@ void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, S
     ImGui.Text("Character Script Offsets:");
     foreach (var pair in viewSettings.CharacterScriptOffsetView.OrderBy(p => p.Key))
     {
-        if (ImGui.Button($"{pair.Key} - {pair.Value}"))
+        if (ImGui.Button($"{pair.Key} - {pair.Value:D5}"))
+        {
+            //TODO: scroll to offset
+        }
+    }
+        
+    ImGui.Separator();
+    ImGui.Text("Action Script Offsets (Action, Obj1, Obj2):");
+    foreach (var pair in viewSettings.ActionScriptOffsetView
+                 .OrderBy(p => p.Key.Item1)
+                 .ThenBy(p => p.Key.Item2)
+                 .ThenBy(p => p.Key.Item3)
+             )
+    {
+        if (ImGui.Button($"({pair.Key.Item1}, {pair.Key.Item2}, {pair.Key.Item3}) - {pair.Value:D5}"))
         {
             //TODO: scroll to offset
         }

@@ -20,6 +20,8 @@ public class ProgramViewSettings
 
     //for each sprite, the offset
     public Dictionary<int, int> CharacterScriptOffsetView { get; private set; } = null!;
+    //for each (action, obj1, obj2), offset
+    public Dictionary<(int, int, int), int> ActionScriptOffsetView { get; private set; } = null!;
 
     public ProgramViewSettings(DatabaseModel model)
     {
@@ -109,5 +111,6 @@ public class ProgramViewSettings
         ReferencedSpritesView = spriteView;
 
         CharacterScriptOffsetView = program.CharScriptOffsets.ToDictionary(c => c.Character, c => c.Offs);
+        ActionScriptOffsetView = program.ActionScriptOffsets.ToDictionary(a => (a.Action, a.Object1, a.Object2), a => a.Offset);
     }
 }
