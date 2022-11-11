@@ -6,42 +6,20 @@ using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.App.Windows;
 using ToucheTools.Loaders;
+using ToucheTools.Models;
 
 #region Setup
 IServiceCollection container = new ServiceCollection();
-var logData = new LogData();
-var loggerFactory = LoggerFactory.Create(c => c
+container.AddLogging(o => o
     .ClearProviders()
     .SetMinimumLevel(LogLevel.Information)
-    .AddProvider(new LoggerProvider(LogLevel.Information, logData))
     .AddConsole()
 );
-Logging.SetUp(loggerFactory);
-
-container.AddSingleton(logData);
-container.AddSingleton(loggerFactory);
-#endregion
-
-#region Load data
-var fileToLoad = "../../../../sample/TOUCHE.DAT";
-var filename = Path.GetFileName(fileToLoad);
-if (!File.Exists(fileToLoad))
-{
-    throw new Exception("File not found: " + fileToLoad);
-}
-var fileBytes = File.ReadAllBytes(fileToLoad);
-using var memStream = new MemoryStream(fileBytes);
-var mainLoader = new MainLoader(memStream);
-mainLoader.Load(out var db);
-container.AddSingleton(db);
-#endregion
-
-#region Render setup
-using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
-container.AddSingleton(window);
 #endregion
 
 #region Data setup
+container.AddSingleton<LogData>();
+
 container.AddSingleton<WindowSettings>();
 container.AddSingleton<SpriteViewSettings>();
 container.AddSingleton<ProgramViewSettings>();
@@ -62,13 +40,36 @@ container.AddSingleton<ProgramViewWindow>();
 container.AddSingleton<ProgramReferenceViewWindow>();
 #endregion
 
+#region Load data
+container.AddSingleton<DatabaseModel>(provider =>
+{
+    var fileToLoad = "../../../../sample/TOUCHE.DAT";
+    if (!File.Exists(fileToLoad))
+    {
+        throw new Exception("File not found: " + fileToLoad);
+    }
+    var fileBytes = File.ReadAllBytes(fileToLoad);
+    var memStream = new MemoryStream(fileBytes); //not disposed
+    
+    Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
+    var mainLoader = new MainLoader(memStream);
+    mainLoader.Load(out var db);
+    return db;
+});
+#endregion
+
+#region Render setup
+using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
+container.AddSingleton(window);
+#endregion
+
 var serviceProvider = container.BuildServiceProvider();
 var windows = container
     .Where(s => typeof(IWindow).IsAssignableFrom(s.ServiceType))
     .Select(s => (IWindow)(serviceProvider.GetService(s.ServiceType) ?? throw new Exception("Null service")))
     .ToList();
-
 var errors = new List<string>();
+var db = serviceProvider.GetService<DatabaseModel>() ?? throw new InvalidOperationException();
 if (db.FailedPrograms.Any())
 {
     errors.AddRange(db.FailedPrograms.Select(pair => $"Program {pair.Key} - {pair.Value}"));
@@ -89,11 +90,12 @@ if (db.FailedIcons.Any())
     errors.AddRange(db.FailedIcons.Select(pair => $"Icon {pair.Key} - {pair.Value}"));
 }
 
+var logData = serviceProvider.GetService<LogData>() ?? throw new InvalidOperationException();
 foreach (var err in errors)
 {
     logData.Error(err);
 }
-logData.Info($"Finished loading {filename}, {db.Programs.Count} programs, {db.Rooms.Count} rooms, {db.Sprites.Count} sprites.");
+logData.Info($"Finished loading {db.Programs.Count} programs, {db.Rooms.Count} rooms, {db.Sprites.Count} sprites.");
 
 while (window.IsOpen())
 {
