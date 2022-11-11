@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ToucheTools;
 using ToucheTools.App;
 using ToucheTools.App.State;
@@ -7,6 +8,7 @@ using ToucheTools.App.Windows;
 using ToucheTools.Loaders;
 
 #region Setup
+IServiceCollection container = new ServiceCollection();
 var logData = new LogData();
 var loggerFactory = LoggerFactory.Create(c => c
     .ClearProviders()
@@ -15,6 +17,9 @@ var loggerFactory = LoggerFactory.Create(c => c
     .AddConsole()
 );
 Logging.SetUp(loggerFactory);
+
+container.AddSingleton(logData);
+container.AddSingleton(loggerFactory);
 #endregion
 
 #region Load data
@@ -28,48 +33,40 @@ var fileBytes = File.ReadAllBytes(fileToLoad);
 using var memStream = new MemoryStream(fileBytes);
 var mainLoader = new MainLoader(memStream);
 mainLoader.Load(out var db);
+container.AddSingleton(db);
 #endregion
 
 #region Render setup
 using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
+container.AddSingleton(window);
 #endregion
 
 #region Data setup
-var windowSettings = new WindowSettings();
-var spriteViewSettings = new SpriteViewSettings(db);
-var programViewSettings = new ProgramViewSettings(db);
-var activeData = new ActiveData(db);
-#endregion
+container.AddSingleton<WindowSettings>();
+container.AddSingleton<SpriteViewSettings>();
+container.AddSingleton<ProgramViewSettings>();
+container.AddSingleton<ActiveData>();
 
-#region State setup
-var programViewState = new ProgramViewState();
+container.AddSingleton<ProgramViewState>();
 #endregion
 
 #region Windows
-var logWindow = new LogWindow(logData);
-var settingsWindow = new SettingsWindow(windowSettings);
-var activeObjectsWindow = new ActiveObjectsWindow(windowSettings, activeData);
-var roomViewWindow = new RoomViewWindow(window, windowSettings, activeData);
-var spriteViewSettingsWindow = new SpriteViewSettingsWindow(windowSettings, activeData, spriteViewSettings);
-var spriteViewWindow = new SpriteViewWindow(window, windowSettings, activeData, spriteViewSettings);
-var programViewSettingsWindow = new ProgramViewSettingsWindow(windowSettings, activeData, programViewSettings);
-var programViewWindow = new ProgramViewWindow(windowSettings, activeData, programViewSettings, programViewState);
-var programReferenceViewWindow = new ProgramReferenceViewWindow(windowSettings, activeData, spriteViewSettings,
-    programViewSettings, programViewState);
-
-var windows = new IWindow[]
-{
-    logWindow,
-    settingsWindow,
-    activeObjectsWindow,
-    roomViewWindow,
-    spriteViewSettingsWindow,
-    spriteViewWindow,
-    programViewSettingsWindow,
-    programViewWindow,
-    programReferenceViewWindow
-};
+container.AddSingleton<LogWindow>();
+container.AddSingleton<SettingsWindow>();
+container.AddSingleton<ActiveObjectsWindow>();
+container.AddSingleton<RoomViewWindow>();
+container.AddSingleton<SpriteViewSettingsWindow>();
+container.AddSingleton<SpriteViewWindow>();
+container.AddSingleton<ProgramViewSettingsWindow>();
+container.AddSingleton<ProgramViewWindow>();
+container.AddSingleton<ProgramReferenceViewWindow>();
 #endregion
+
+var serviceProvider = container.BuildServiceProvider();
+var windows = container
+    .Where(s => typeof(IWindow).IsAssignableFrom(s.ServiceType))
+    .Select(s => (IWindow)(serviceProvider.GetService(s.ServiceType) ?? throw new Exception("Null service")))
+    .ToList();
 
 var errors = new List<string>();
 if (db.FailedPrograms.Any())
