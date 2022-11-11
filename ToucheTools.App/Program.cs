@@ -25,6 +25,7 @@ container.AddSingleton<ActivePalette>();
 container.AddSingleton<ActiveRoom>();
 container.AddSingleton<ActiveSprite>();
 container.AddSingleton<ActiveProgram>();
+container.AddSingleton<ActiveSequence>();
 
 container.AddSingleton<WindowSettings>();
 container.AddSingleton<SpriteViewSettings>();

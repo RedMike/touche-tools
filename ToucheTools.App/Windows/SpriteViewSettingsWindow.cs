@@ -5,20 +5,22 @@ using ToucheTools.App.ViewModels.Observables;
 
 namespace ToucheTools.App.Windows;
 
-public class SpriteViewSettingsWindow : IWindow
+public class SpriteViewSettingsWindow : BaseWindow
 {
     private readonly WindowSettings _windowSettings;
     private readonly SpriteViewSettings _viewSettings;
     private readonly ActiveRoom _room;
+    private readonly ActiveSequence _sequence;
 
-    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room)
+    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _room = room;
+        _sequence = sequence;
     }
 
-    public void Render()
+    public override void Render()
     {
         if (!_windowSettings.SpriteViewOpen)
         {
@@ -31,10 +33,6 @@ public class SpriteViewSettingsWindow : IWindow
 
         var origAutoStep = _viewSettings.AutoStepFrame;
         var autoStep = origAutoStep;
-        
-        var originalSequenceId = _viewSettings.SequenceKeys.FindIndex(k => k == _viewSettings.ActiveSequence);
-        var curSequenceId = originalSequenceId;
-        var sequences = _viewSettings.SequenceKeys.ToArray();
         
         var originalCharacterId = _viewSettings.Characters.FindIndex(k => k == _viewSettings.ActiveCharacter);
         var curCharacterId = originalCharacterId;
@@ -56,11 +54,7 @@ public class SpriteViewSettingsWindow : IWindow
         ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth-500.0f, 200.0f));
         ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
-        ImGui.Combo("Sequence", ref curSequenceId, sequences.Select(k => k.ToString()).ToArray(), sequences.Length);
-        if (curSequenceId != originalSequenceId)
-        {
-            _viewSettings.SetActiveSequence(sequences[curSequenceId]);
-        }
+        ObservableCombo("Sequence", _sequence);
         
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
         ImGui.Combo("Character", ref curCharacterId, characters.Select(k => k.ToString()).ToArray(), characters.Length);

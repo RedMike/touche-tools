@@ -1,4 +1,5 @@
-﻿using ToucheTools.Models;
+﻿using ToucheTools.App.ViewModels.Observables;
+using ToucheTools.Models;
 
 namespace ToucheTools.App.ViewModels;
 
@@ -6,13 +7,11 @@ public class SpriteViewSettings
 {
     private const long MinimumFrameStepInMillis = 100;
     private readonly DatabaseModel _databaseModel;
+    private readonly ActiveSequence _sequence;
 
     public bool ShowRoom { get; set; }
     public int RoomOffsetX { get; set; }
     public int RoomOffsetY { get; set; }
-    
-    public List<int> SequenceKeys { get; }
-    public int ActiveSequence { get; private set; }
     
     public List<int> Characters { get; private set; } = null!;
     public List<int> Animations { get; private set; } = null!;
@@ -28,16 +27,15 @@ public class SpriteViewSettings
     
     public List<(int, int, int, bool, bool)> PartsView { get; private set; } = null!;
 
-    public SpriteViewSettings(DatabaseModel model)
+    public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence)
     {
         _databaseModel = model;
-        
-        SequenceKeys = model.Sequences.Keys.ToList();
-        ActiveSequence = SequenceKeys.First();
+        _sequence = sequence;
 
         LastStep = DateTime.UtcNow;
 
-        SetActiveSequence(ActiveSequence);
+        sequence.ObserveActive(GenerateSequenceView);
+        GenerateSequenceView();
     }
 
     public void Tick()
@@ -48,7 +46,7 @@ public class SpriteViewSettings
         }
 
         var curTime = DateTime.UtcNow;
-        var frames = _databaseModel.Sequences[ActiveSequence]
+        var frames = _databaseModel.Sequences[_sequence.Active]
             .Characters[ActiveCharacter]
             .Animations[ActiveAnimation]
             .Directions[ActiveDirection]
@@ -73,20 +71,44 @@ public class SpriteViewSettings
         }
     }
 
-    public void SetActiveSequence(int sequence)
+    public void SelectCharacter(int character)
     {
-        if (!SequenceKeys.Contains(sequence))
-        {
-            throw new Exception("Unknown sequence: " + sequence);
-        }
+        ActiveCharacter = character;
+        ActiveAnimation = -1;
+        ActiveDirection = -1;
+        ActiveFrame = -1;
+        GenerateSequenceView();
+    }
 
-        ActiveSequence = sequence;
-        Characters = _databaseModel.Sequences[ActiveSequence].Characters.Keys.ToList();
+    public void SelectAnimation(int animation)
+    {
+        ActiveAnimation = animation;
+        ActiveDirection = -1;
+        ActiveFrame = -1;
+        GenerateSequenceView();
+    }
+
+    public void SelectDirection(int direction)
+    {
+        ActiveDirection = direction;
+        ActiveFrame = -1;
+        GenerateSequenceView();
+    }
+
+    public void SelectFrame(int frame)
+    {
+        ActiveFrame = frame;
+        GenerateSequenceView();
+    }
+
+    private void GenerateSequenceView()
+    {
+        Characters = _databaseModel.Sequences[_sequence.Active].Characters.Keys.ToList();
         if (!Characters.Contains(ActiveCharacter))
         {
             ActiveCharacter = Characters.First();
         }
-        var character = _databaseModel.Sequences[ActiveSequence].Characters[ActiveCharacter];
+        var character = _databaseModel.Sequences[_sequence.Active].Characters[ActiveCharacter];
 
         Animations = character.Animations.Keys.ToList();
         if (!Animations.Contains(ActiveAnimation))
@@ -108,42 +130,7 @@ public class SpriteViewSettings
             ActiveFrame = Frames.First();
         }
         
-        GenerateSequenceView();
-    }
-
-    public void SelectCharacter(int character)
-    {
-        ActiveCharacter = character;
-        ActiveAnimation = -1;
-        ActiveDirection = -1;
-        ActiveFrame = -1;
-        SetActiveSequence(ActiveSequence);
-    }
-
-    public void SelectAnimation(int animation)
-    {
-        ActiveAnimation = animation;
-        ActiveDirection = -1;
-        ActiveFrame = -1;
-        SetActiveSequence(ActiveSequence);
-    }
-
-    public void SelectDirection(int direction)
-    {
-        ActiveDirection = direction;
-        ActiveFrame = -1;
-        SetActiveSequence(ActiveSequence);
-    }
-
-    public void SelectFrame(int frame)
-    {
-        ActiveFrame = frame;
-        SetActiveSequence(ActiveSequence);
-    }
-
-    private void GenerateSequenceView()
-    {
-        var frame = _databaseModel.Sequences[ActiveSequence]
+        var frame = _databaseModel.Sequences[_sequence.Active]
             .Characters[ActiveCharacter]
             .Animations[ActiveAnimation]
             .Directions[ActiveDirection]
