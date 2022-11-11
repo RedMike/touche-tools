@@ -16,7 +16,10 @@ public class ProgramViewSettings
 
     public List<int> ReferencedRoomsView { get; private set; } = null!;
     //for each sprite, (sequence, char, animation)
-    public Dictionary<int, List<(int, int, int)>> ReferencedSpritesView { get; private set; } = null!; 
+    public Dictionary<int, List<(int, int, int)>> ReferencedSpritesView { get; private set; } = null!;
+
+    //for each sprite, the offset
+    public Dictionary<int, int> CharacterScriptOffsetView { get; private set; } = null!;
 
     public ProgramViewSettings(DatabaseModel model)
     {
@@ -104,5 +107,7 @@ public class ProgramViewSettings
         }
 
         ReferencedSpritesView = spriteView;
+
+        CharacterScriptOffsetView = program.CharScriptOffsets.ToDictionary(c => c.Character, c => c.Offs);
     }
 }

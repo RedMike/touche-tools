@@ -467,5 +467,15 @@ void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, S
         }
     }
     
+    ImGui.Separator();
+    ImGui.Text("Character Script Offsets:");
+    foreach (var pair in viewSettings.CharacterScriptOffsetView.OrderBy(p => p.Key))
+    {
+        if (ImGui.Button($"{pair.Key} - {pair.Value}"))
+        {
+            //TODO: scroll to offset
+        }
+    }
+    
     ImGui.End();
 }
