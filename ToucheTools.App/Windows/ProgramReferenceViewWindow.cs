@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
+using ToucheTools.App.ViewModels.Observables;
 
 namespace ToucheTools.App.Windows;
 

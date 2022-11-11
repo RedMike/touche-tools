@@ -4,6 +4,7 @@ using ToucheTools;
 using ToucheTools.App;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
+using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.App.Windows;
 using ToucheTools.Loaders;
 using ToucheTools.Models;

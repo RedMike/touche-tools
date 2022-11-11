@@ -1,6 +1,6 @@
 ﻿using ToucheTools.Models;
 
-namespace ToucheTools.App.ViewModels;
+namespace ToucheTools.App.ViewModels.Observables;
 
 public class ActivePalette : ActiveObservable<int>
 {

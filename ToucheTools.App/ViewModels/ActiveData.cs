@@ -1,4 +1,5 @@
-﻿using ToucheTools.Models;
+﻿using ToucheTools.App.ViewModels.Observables;
+using ToucheTools.Models;
 
 namespace ToucheTools.App.ViewModels;
 

@@ -1,4 +1,4 @@
-﻿namespace ToucheTools.App.ViewModels;
+﻿namespace ToucheTools.App.ViewModels.Observables;
 
 public abstract class ActiveObservable<T>
 {

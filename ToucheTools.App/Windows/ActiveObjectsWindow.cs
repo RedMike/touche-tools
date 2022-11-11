@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.ViewModels;
+using ToucheTools.App.ViewModels.Observables;
 
 namespace ToucheTools.App.Windows;
 
