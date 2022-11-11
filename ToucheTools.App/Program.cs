@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App;
+using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Loaders;
 
@@ -29,6 +30,10 @@ var windowSettings = new WindowSettings();
 var spriteViewSettings = new SpriteViewSettings(db);
 var programViewSettings = new ProgramViewSettings(db);
 var activeData = new ActiveData(db);
+#endregion
+
+#region State setup
+var programViewState = new ProgramViewState();
 #endregion
 
 while (window.IsOpen())
@@ -86,8 +91,8 @@ while (window.IsOpen())
     if (windowSettings.ProgramViewOpen)
     {
         RenderProgramViewSettings(activeData, programViewSettings);
-        RenderProgramReferenceView(windowSettings, activeData, spriteViewSettings, programViewSettings);
-        RenderProgramView(activeData, programViewSettings);
+        RenderProgramView(activeData, programViewSettings, programViewState);
+        RenderProgramReferenceView(windowSettings, activeData, spriteViewSettings, programViewSettings, programViewState);
     }
     #endregion
     
@@ -393,7 +398,7 @@ void RenderProgramViewSettings(ActiveData viewModel, ProgramViewSettings viewSet
     ImGui.End();
 }
 
-void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
+void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings, ProgramViewState state)
 {
     var viewW = 400.0f;
     var viewH = 600.0f;
@@ -401,6 +406,8 @@ void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
     ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
     ImGui.Begin("Program View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
+    state.OffsetToIndex = new Dictionary<int, int>();
+    state.OffsetYPos = new Dictionary<int, float>();
     var idx = 0;
     foreach (var (offset, instruction) in viewSettings.InstructionsView)
     {
@@ -410,6 +417,8 @@ void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));
         }
 
+        state.OffsetYPos[offset] = ImGui.GetCursorPosY();
+        state.OffsetToIndex[offset] = idx;
         if (ImGui.Button($"{offset:D5}"))
         {
             viewSettings.SetEvaluateUntil(idx);
@@ -423,11 +432,18 @@ void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings)
 
         idx++;
     }
+
+    var scrollTo = state.GetQueuedScroll();
+    if (scrollTo != null)
+    {
+        var scrollBack = ImGui.GetWindowHeight() / 2.0f;
+        ImGui.SetScrollY(scrollTo.Value - scrollBack);
+    }
     
     ImGui.End();
 }
 
-void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, SpriteViewSettings spriteView, ProgramViewSettings viewSettings)
+void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, SpriteViewSettings spriteView, ProgramViewSettings viewSettings, ProgramViewState state)
 {
     var viewW = 350.0f;
     var viewH = 600.0f;
@@ -473,7 +489,8 @@ void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, S
     {
         if (ImGui.Button($"{pair.Key} - {pair.Value:D5}"))
         {
-            //TODO: scroll to offset
+            state.QueueScrollToOffset(pair.Value);
+            programViewSettings.SetEvaluateUntil(state.OffsetToIndex[pair.Value]);
         }
     }
         
@@ -487,7 +504,8 @@ void RenderProgramReferenceView(WindowSettings winSettings, ActiveData active, S
     {
         if (ImGui.Button($"({pair.Key.Item1}, {pair.Key.Item2}, {pair.Key.Item3}) - {pair.Value:D5}"))
         {
-            //TODO: scroll to offset
+            state.QueueScrollToOffset(pair.Value);
+            programViewSettings.SetEvaluateUntil(state.OffsetToIndex[pair.Value]);
         }
     }
     
