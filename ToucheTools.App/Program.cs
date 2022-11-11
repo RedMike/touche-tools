@@ -41,13 +41,15 @@ var settingsWindow = new SettingsWindow(windowSettings);
 var roomViewWindow = new RoomViewWindow(window, windowSettings, activeData);
 var spriteViewSettingsWindow = new SpriteViewSettingsWindow(windowSettings, activeData, spriteViewSettings);
 var spriteViewWindow = new SpriteViewWindow(window, windowSettings, activeData, spriteViewSettings);
+var programViewSettingsWindow = new ProgramViewSettingsWindow(windowSettings, activeData, programViewSettings);
 
 var windows = new IWindow[]
 {
     settingsWindow,
     roomViewWindow,
     spriteViewSettingsWindow,
-    spriteViewWindow
+    spriteViewWindow,
+    programViewSettingsWindow
 };
 #endregion
 
@@ -98,7 +100,6 @@ while (window.IsOpen())
     #region Windows
     if (windowSettings.ProgramViewOpen)
     {
-        RenderProgramViewSettings(activeData, programViewSettings);
         RenderProgramView(activeData, programViewSettings, programViewState);
         RenderProgramReferenceView(windowSettings, activeData, spriteViewSettings, programViewSettings, programViewState);
     }
@@ -157,25 +158,6 @@ void RenderActiveObjects(ActiveData viewModel)
     if (curSpriteId != originalSpriteId)
     {
         viewModel.SetActiveSprite(sprites[curSpriteId]);
-    }
-    
-    ImGui.End();
-}
-
-void RenderProgramViewSettings(ActiveData viewModel, ProgramViewSettings viewSettings)
-{
-    var originalProgramId = viewSettings.Programs.FindIndex(k => k == viewSettings.ActiveProgram);
-    var curProgramId = originalProgramId;
-    var programs = viewSettings.Programs.ToArray();
-    
-    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(300.0f, 200.0f));
-    ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
-
-    ImGui.Combo("Program", ref curProgramId, programs.Select(k => k.ToString()).ToArray(), programs.Length);
-    if (curProgramId != originalProgramId)
-    {
-        viewSettings.SetActiveProgram(programs[curProgramId]);
     }
     
     ImGui.End();
