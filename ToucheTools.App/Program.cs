@@ -38,6 +38,7 @@ var programViewState = new ProgramViewState();
 #region Windows
 
 var settingsWindow = new SettingsWindow(windowSettings);
+var activeObjectsWindow = new ActiveObjectsWindow(windowSettings, activeData);
 var roomViewWindow = new RoomViewWindow(window, windowSettings, activeData);
 var spriteViewSettingsWindow = new SpriteViewSettingsWindow(windowSettings, activeData, spriteViewSettings);
 var spriteViewWindow = new SpriteViewWindow(window, windowSettings, activeData, spriteViewSettings);
@@ -49,6 +50,7 @@ var programReferenceViewWindow = new ProgramReferenceViewWindow(windowSettings, 
 var windows = new IWindow[]
 {
     settingsWindow,
+    activeObjectsWindow,
     roomViewWindow,
     spriteViewSettingsWindow,
     spriteViewWindow,
@@ -96,12 +98,6 @@ while (window.IsOpen())
     {
         win.Render();
     }
-    #region Active Objects
-    if (windowSettings.RoomViewOpen || windowSettings.SpriteViewOpen)
-    {
-        RenderActiveObjects(activeData);
-    }
-    #endregion
     
     #region Boilerplate
     window.Render();
@@ -119,44 +115,5 @@ void RenderErrors(List<string> errors)
         ImGui.TextWrapped(error);
     }
     ImGui.PopStyleColor();
-    ImGui.End();
-}
-
-void RenderActiveObjects(ActiveData viewModel)
-{
-    var originalPaletteId = viewModel.PaletteKeys.FindIndex(k => k == viewModel.ActivePalette); 
-    var curPaletteId = originalPaletteId;
-    var palettes = viewModel.PaletteKeys.ToArray();
-
-    var originalRoomId = viewModel.RoomKeys.FindIndex(k => k == viewModel.ActiveRoom);
-    var curRoomId = originalRoomId;
-    var rooms = viewModel.RoomKeys.ToArray();
-
-    var originalSpriteId = viewModel.SpriteKeys.FindIndex(k => k == viewModel.ActiveSprite);
-    var curSpriteId = originalSpriteId;
-    var sprites = viewModel.SpriteKeys.ToArray();
-
-    ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(200.0f, 200.0f));
-    ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
-    
-    ImGui.Combo("Palette", ref curPaletteId, palettes.Select(k => k.ToString()).ToArray(), palettes.Length);
-    if (curPaletteId != originalPaletteId)
-    {
-        viewModel.SetActivePalette(palettes[curPaletteId]);
-    }
-    
-    ImGui.Combo("Room", ref curRoomId, rooms.Select(k => k.ToString()).ToArray(), rooms.Length);
-    if (curRoomId != originalRoomId)
-    {
-        viewModel.SetActiveRoom(rooms[curRoomId]);
-    }
-    
-    ImGui.Combo("Sprite", ref curSpriteId, sprites.Select(k => k.ToString()).ToArray(), sprites.Length);
-    if (curSpriteId != originalSpriteId)
-    {
-        viewModel.SetActiveSprite(sprites[curSpriteId]);
-    }
-    
     ImGui.End();
 }
