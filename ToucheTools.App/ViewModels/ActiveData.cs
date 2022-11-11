@@ -5,9 +5,8 @@ namespace ToucheTools.App.ViewModels;
 public class ActiveData
 {
     private readonly DatabaseModel _databaseModel;
+    private readonly ActivePalette _palette;
     
-    public List<int> PaletteKeys { get; }
-    public int ActivePalette { get; private set; }
     public List<int> RoomKeys { get; }
     public int ActiveRoom { get; private set; }
     public List<int> SpriteKeys { get; }
@@ -16,31 +15,18 @@ public class ActiveData
     public (string, int, int, byte[]) RoomView { get; private set; }
     public (string, int, int, int, int, byte[]) SpriteView { get; private set; }
 
-    public ActiveData(DatabaseModel model)
+    public ActiveData(DatabaseModel model, ActivePalette palette)
     {
         _databaseModel = model;
-        
-        PaletteKeys = model.Palettes.Keys.ToList();
+        _palette = palette;
+        _palette.ObserveActive(GenerateViews);
+
         RoomKeys = model.Rooms.Keys.ToList();
         SpriteKeys = model.Sprites.Keys.ToList();
 
-        ActivePalette = PaletteKeys.First();
         ActiveRoom = RoomKeys.First();
         ActiveSprite = SpriteKeys.First();
-        GenerateRoomView();
-        GenerateSpriteView();
-    }
-
-    public void SetActivePalette(int palette)
-    {
-        if (!PaletteKeys.Contains(palette))
-        {
-            throw new Exception("Unknown palette: " + palette);
-        }
-
-        ActivePalette = palette;
-        GenerateRoomView();
-        GenerateSpriteView();
+        GenerateViews();
     }
     
     public void SetActiveRoom(int room)
@@ -65,13 +51,18 @@ public class ActiveData
         GenerateSpriteView();
     }
 
+    private void GenerateViews()
+    {
+        GenerateRoomView();
+        GenerateSpriteView();
+    }
 
     private void GenerateRoomView()
     {
         var roomImageId = _databaseModel.Rooms[ActiveRoom].RoomImageNum;
         var roomImage = _databaseModel.RoomImages[roomImageId].Value;
-        var palette = _databaseModel.Palettes[ActivePalette];
-        var viewId = $"{roomImageId}_{ActivePalette}";
+        var palette = _databaseModel.Palettes[_palette.Active];
+        var viewId = $"{roomImageId}_{_palette.Active}";
 
         if (RoomView.Item1 == viewId)
         {
@@ -98,8 +89,8 @@ public class ActiveData
     private void GenerateSpriteView()
     {
         var sprite = _databaseModel.Sprites[ActiveSprite].Value;
-        var palette = _databaseModel.Palettes[ActivePalette];
-        var viewId = $"{ActiveSprite}_{ActivePalette}";
+        var palette = _databaseModel.Palettes[_palette.Active];
+        var viewId = $"{ActiveSprite}_{_palette.Active}";
 
         if (SpriteView.Item1 == viewId)
         {

@@ -12,14 +12,16 @@ public class ProgramReferenceViewWindow : IWindow
     private readonly SpriteViewSettings _spriteViewSettings;
     private readonly ProgramViewSettings _programViewSettings;
     private readonly ProgramViewState _programViewState;
+    private readonly ActivePalette _palette;
 
-    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveData activeData, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState)
+    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveData activeData, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette)
     {
         _windowSettings = windowSettings;
         _activeData = activeData;
         _spriteViewSettings = spriteViewSettings;
         _programViewSettings = programViewSettings;
         _programViewState = programViewState;
+        _palette = palette;
     }
 
     public void Render()
@@ -42,7 +44,7 @@ public class ProgramReferenceViewWindow : IWindow
             if (ImGui.Button($"{room}"))
             {
                 _activeData.SetActiveRoom(room);
-                _activeData.SetActivePalette(room);
+                _palette.SetActive(room);
                 _windowSettings.OpenRoomView();
             }
         }

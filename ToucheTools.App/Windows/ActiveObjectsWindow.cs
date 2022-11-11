@@ -8,11 +8,13 @@ public class ActiveObjectsWindow : IWindow
 {
     private readonly WindowSettings _windowSettings;
     private readonly ActiveData _activeData;
+    private readonly ActivePalette _palette;
 
-    public ActiveObjectsWindow(WindowSettings windowSettings, ActiveData activeData)
+    public ActiveObjectsWindow(WindowSettings windowSettings, ActiveData activeData, ActivePalette palette)
     {
         _windowSettings = windowSettings;
         _activeData = activeData;
+        _palette = palette;
     }
 
     public void Render()
@@ -21,9 +23,9 @@ public class ActiveObjectsWindow : IWindow
         {
             return;
         }
-        var originalPaletteId = _activeData.PaletteKeys.FindIndex(k => k == _activeData.ActivePalette); 
+        var originalPaletteId = _palette.PaletteKeys.FindIndex(k => k == _palette.Active); 
         var curPaletteId = originalPaletteId;
-        var palettes = _activeData.PaletteKeys.ToArray();
+        var palettes = _palette.PaletteKeys.ToArray();
 
         var originalRoomId = _activeData.RoomKeys.FindIndex(k => k == _activeData.ActiveRoom);
         var curRoomId = originalRoomId;
@@ -40,7 +42,7 @@ public class ActiveObjectsWindow : IWindow
         ImGui.Combo("Palette", ref curPaletteId, palettes.Select(k => k.ToString()).ToArray(), palettes.Length);
         if (curPaletteId != originalPaletteId)
         {
-            _activeData.SetActivePalette(palettes[curPaletteId]);
+            _palette.SetActive(palettes[curPaletteId]);
         }
     
         ImGui.Combo("Room", ref curRoomId, rooms.Select(k => k.ToString()).ToArray(), rooms.Length);

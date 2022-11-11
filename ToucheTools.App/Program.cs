@@ -20,6 +20,7 @@ container.AddLogging(o => o
 #region Data setup
 container.AddSingleton<LogData>();
 
+container.AddSingleton<ActivePalette>();
 container.AddSingleton<WindowSettings>();
 container.AddSingleton<SpriteViewSettings>();
 container.AddSingleton<ProgramViewSettings>();
