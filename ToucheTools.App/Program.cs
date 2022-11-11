@@ -29,15 +29,19 @@ container.AddSingleton<ProgramViewState>();
 #endregion
 
 #region Windows
-container.AddSingleton<LogWindow>();
-container.AddSingleton<SettingsWindow>();
-container.AddSingleton<ActiveObjectsWindow>();
-container.AddSingleton<RoomViewWindow>();
-container.AddSingleton<SpriteViewSettingsWindow>();
-container.AddSingleton<SpriteViewWindow>();
-container.AddSingleton<ProgramViewSettingsWindow>();
-container.AddSingleton<ProgramViewWindow>();
-container.AddSingleton<ProgramReferenceViewWindow>();
+var windowTypes = AppDomain.CurrentDomain
+    .GetAssemblies().SelectMany(a => 
+        a.GetTypes().Where(t => 
+            t.IsClass &&
+            !t.IsAbstract &&
+            !t.ContainsGenericParameters &&
+            typeof(IWindow).IsAssignableFrom(t)
+        )
+    );
+foreach (var type in windowTypes)
+{
+    container.AddSingleton(type);
+}
 #endregion
 
 #region Load data
