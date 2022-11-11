@@ -4,7 +4,7 @@ using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;
 
-public class ActiveObjectsWindow : IWindow
+public class ActiveObjectsWindow : BaseWindow
 {
     private readonly WindowSettings _windowSettings;
     private readonly ActiveData _activeData;
@@ -17,7 +17,7 @@ public class ActiveObjectsWindow : IWindow
         _palette = palette;
     }
 
-    public void Render()
+    public override void Render()
     {
         if (!_windowSettings.RoomViewOpen && !_windowSettings.SpriteViewOpen)
         {
@@ -35,14 +35,8 @@ public class ActiveObjectsWindow : IWindow
         ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
         ImGui.SetNextWindowSize(new Vector2(200.0f, 200.0f));
         ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
-    
-        var originalPaletteId = _palette.ActiveElementAsIndex; 
-        var curPaletteId = originalPaletteId;
-        ImGui.Combo("Palette", ref curPaletteId, _palette.ElementsAsArray, _palette.ElementCount);
-        if (curPaletteId != originalPaletteId)
-        {
-            _palette.SetActive(_palette.Elements[curPaletteId]);
-        }
+
+        ObservableCombo("Palette", _palette);
     
         ImGui.Combo("Room", ref curRoomId, rooms.Select(k => k.ToString()).ToArray(), rooms.Length);
         if (curRoomId != originalRoomId)
