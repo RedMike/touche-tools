@@ -9,22 +9,22 @@ namespace ToucheTools.App.Windows;
 public class ProgramReferenceViewWindow : IWindow
 {
     private readonly WindowSettings _windowSettings;
-    private readonly ActiveData _activeData;
     private readonly SpriteViewSettings _spriteViewSettings;
     private readonly ProgramViewSettings _programViewSettings;
     private readonly ProgramViewState _programViewState;
     private readonly ActivePalette _palette;
     private readonly ActiveRoom _room;
+    private readonly ActiveSprite _sprite;
 
-    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveData activeData, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette, ActiveRoom room)
+    public ProgramReferenceViewWindow(WindowSettings windowSettings, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette, ActiveRoom room, ActiveSprite sprite)
     {
         _windowSettings = windowSettings;
-        _activeData = activeData;
         _spriteViewSettings = spriteViewSettings;
         _programViewSettings = programViewSettings;
         _programViewState = programViewState;
         _palette = palette;
         _room = room;
+        _sprite = sprite;
     }
 
     public void Render()
@@ -61,7 +61,7 @@ public class ProgramReferenceViewWindow : IWindow
                 {
                     if (ImGui.Button($"({seqId}, {charId}, {animId})"))
                     {
-                        _activeData.SetActiveSprite(pair.Key);
+                        _sprite.SetActive(pair.Key);
                         _spriteViewSettings.SetActiveSequence(seqId);
                         _spriteViewSettings.SelectCharacter(charId);
                         _spriteViewSettings.SelectAnimation(animId);
