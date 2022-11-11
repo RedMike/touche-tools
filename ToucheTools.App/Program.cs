@@ -42,6 +42,7 @@ var roomViewWindow = new RoomViewWindow(window, windowSettings, activeData);
 var spriteViewSettingsWindow = new SpriteViewSettingsWindow(windowSettings, activeData, spriteViewSettings);
 var spriteViewWindow = new SpriteViewWindow(window, windowSettings, activeData, spriteViewSettings);
 var programViewSettingsWindow = new ProgramViewSettingsWindow(windowSettings, activeData, programViewSettings);
+var programViewWindow = new ProgramViewWindow(windowSettings, activeData, programViewSettings, programViewState);
 
 var windows = new IWindow[]
 {
@@ -49,7 +50,8 @@ var windows = new IWindow[]
     roomViewWindow,
     spriteViewSettingsWindow,
     spriteViewWindow,
-    programViewSettingsWindow
+    programViewSettingsWindow,
+    programViewWindow
 };
 #endregion
 
@@ -100,7 +102,6 @@ while (window.IsOpen())
     #region Windows
     if (windowSettings.ProgramViewOpen)
     {
-        RenderProgramView(activeData, programViewSettings, programViewState);
         RenderProgramReferenceView(windowSettings, activeData, spriteViewSettings, programViewSettings, programViewState);
     }
     #endregion
@@ -158,51 +159,6 @@ void RenderActiveObjects(ActiveData viewModel)
     if (curSpriteId != originalSpriteId)
     {
         viewModel.SetActiveSprite(sprites[curSpriteId]);
-    }
-    
-    ImGui.End();
-}
-
-void RenderProgramView(ActiveData viewModel, ProgramViewSettings viewSettings, ProgramViewState state)
-{
-    var viewW = 400.0f;
-    var viewH = 600.0f;
-    ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
-    ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
-    ImGui.Begin("Program View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
-
-    state.OffsetToIndex = new Dictionary<int, int>();
-    state.OffsetYPos = new Dictionary<int, float>();
-    var idx = 0;
-    foreach (var (offset, instruction) in viewSettings.InstructionsView)
-    {
-        var evaluatedAlready = idx <= viewSettings.EvaluateUntil;
-        if (evaluatedAlready)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));
-        }
-
-        state.OffsetYPos[offset] = ImGui.GetCursorPosY();
-        state.OffsetToIndex[offset] = idx;
-        if (ImGui.Button($"{offset:D5}"))
-        {
-            viewSettings.SetEvaluateUntil(idx);
-        }
-        ImGui.SameLine();
-        ImGui.Text($" - {instruction}");
-        if (evaluatedAlready)
-        {
-            ImGui.PopStyleColor();
-        }
-
-        idx++;
-    }
-
-    var scrollTo = state.GetQueuedScroll();
-    if (scrollTo != null)
-    {
-        var scrollBack = ImGui.GetWindowHeight() / 2.0f;
-        ImGui.SetScrollY(scrollTo.Value - scrollBack);
     }
     
     ImGui.End();
