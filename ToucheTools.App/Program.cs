@@ -39,11 +39,13 @@ var programViewState = new ProgramViewState();
 
 var settingsWindow = new SettingsWindow(windowSettings);
 var roomViewWindow = new RoomViewWindow(window, windowSettings, activeData);
+var spriteViewSettingsWindow = new SpriteViewSettingsWindow(windowSettings, activeData, spriteViewSettings);
 
 var windows = new IWindow[]
 {
     settingsWindow,
-    roomViewWindow
+    roomViewWindow,
+    spriteViewSettingsWindow
 };
 #endregion
 
@@ -94,7 +96,6 @@ while (window.IsOpen())
     #region Windows
     if (windowSettings.SpriteViewOpen)
     {
-        RenderSpriteViewSettings(activeData, spriteViewSettings);
         RenderSpriteView(activeData, spriteViewSettings);
     }
     if (windowSettings.ProgramViewOpen)
@@ -210,121 +211,6 @@ void RenderSpriteView(ActiveData viewModel, SpriteViewSettings viewSettings)
         }
         ImGui.SetCursorPos(centerCursorPos + new Vector2(destX, destY));
         ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);   
-    }
-    
-    ImGui.End();
-}
-
-void RenderSpriteViewSettings(ActiveData viewModel, SpriteViewSettings viewSettings)
-{
-    viewSettings.Tick(); //TODO: move
-    
-    var origShowRoom = viewSettings.ShowRoom;
-    var showRoom = origShowRoom;
-
-    var origAutoStep = viewSettings.AutoStepFrame;
-    var autoStep = origAutoStep;
-    
-    var originalSequenceId = viewSettings.SequenceKeys.FindIndex(k => k == viewSettings.ActiveSequence);
-    var curSequenceId = originalSequenceId;
-    var sequences = viewSettings.SequenceKeys.ToArray();
-    
-    var originalCharacterId = viewSettings.Characters.FindIndex(k => k == viewSettings.ActiveCharacter);
-    var curCharacterId = originalCharacterId;
-    var characters = viewSettings.Characters.ToArray();
-    
-    var originalAnimationId = viewSettings.Animations.FindIndex(k => k == viewSettings.ActiveAnimation);
-    var curAnimationId = originalAnimationId;
-    var animations = viewSettings.Animations.ToArray();
-    
-    var originalDirectionId = viewSettings.Directions.FindIndex(k => k == viewSettings.ActiveDirection);
-    var curDirectionId = originalDirectionId;
-    var directions = viewSettings.Directions.ToArray();
-    
-    var originalFrameId = viewSettings.Frames.FindIndex(k => k == viewSettings.ActiveFrame);
-    var curFrameId = originalFrameId;
-    var frames = viewSettings.Frames.ToArray();
-    
-    ImGui.SetNextWindowPos(new Vector2(350.0f, 0.0f));
-    ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth-500.0f, 200.0f));
-    ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
-
-    ImGui.Combo("Sequence", ref curSequenceId, sequences.Select(k => k.ToString()).ToArray(), sequences.Length);
-    if (curSequenceId != originalSequenceId)
-    {
-        viewSettings.SetActiveSequence(sequences[curSequenceId]);
-    }
-    
-    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
-    ImGui.Combo("Character", ref curCharacterId, characters.Select(k => k.ToString()).ToArray(), characters.Length);
-    if (curCharacterId != originalCharacterId)
-    {
-        viewSettings.SelectCharacter(characters[curCharacterId]);
-    }
-
-    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
-    ImGui.SameLine();
-    ImGui.Combo("Animation", ref curAnimationId, animations.Select(k => k.ToString()).ToArray(), animations.Length);
-    if (curAnimationId != originalAnimationId)
-    {
-        viewSettings.SelectAnimation(animations[curAnimationId]);
-    }
-    
-    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
-    ImGui.Combo("Direction", ref curDirectionId, directions.Select(k => k.ToString()).ToArray(), directions.Length);
-    if (curDirectionId != originalDirectionId)
-    {
-        viewSettings.SelectDirection(directions[curDirectionId]);
-    }
-    
-    ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
-    ImGui.SameLine();
-    ImGui.Combo("Frame", ref curFrameId, frames.Select(k => k.ToString()).ToArray(), frames.Length);
-    if (curFrameId != originalFrameId)
-    {
-        viewSettings.SelectFrame(frames[curFrameId]);
-    }
-    
-    ImGui.Checkbox("Auto step", ref autoStep);
-    if (autoStep != origAutoStep)
-    {
-        viewSettings.AutoStepFrame = autoStep;
-    }
-    
-    
-    ImGui.Checkbox("Room background", ref showRoom);
-    if (showRoom != origShowRoom)
-    {
-        viewSettings.ShowRoom = showRoom;
-    }
-
-    if (showRoom)
-    {
-        var (_, roomW, roomH, _) = viewModel.RoomView;
-        
-        var origRoomX = viewSettings.RoomOffsetX;
-        if (origRoomX > roomW)
-        {
-            origRoomX = roomW;
-        }
-        var roomX = origRoomX;
-        ImGui.SliderInt("X offset", ref roomX, 0, roomW);
-        if (roomX != origRoomX)
-        {
-            viewSettings.RoomOffsetX = roomX;
-        }
-
-        var origRoomY = viewSettings.RoomOffsetY;
-        if (origRoomY > roomH)
-        {
-            origRoomY = roomH;
-        }
-        var roomY = origRoomY;
-        ImGui.SliderInt("Y offset", ref roomY, 0, roomH);
-        if (roomY != origRoomY)
-        {
-            viewSettings.RoomOffsetY = roomY;
-        }
     }
     
     ImGui.End();
