@@ -21,11 +21,13 @@ container.AddLogging(o => o
 #region Data setup
 container.AddSingleton<LogData>();
 
+container.AddSingleton<ActiveCharacter>();
 container.AddSingleton<ActivePalette>();
 container.AddSingleton<ActiveRoom>();
 container.AddSingleton<ActiveSprite>();
 container.AddSingleton<ActiveProgram>();
 container.AddSingleton<ActiveSequence>();
+container.AddSingleton<ActiveProgram>();
 
 container.AddSingleton<WindowSettings>();
 container.AddSingleton<SpriteViewSettings>();

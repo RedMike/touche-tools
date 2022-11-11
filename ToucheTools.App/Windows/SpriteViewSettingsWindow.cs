@@ -11,13 +11,15 @@ public class SpriteViewSettingsWindow : BaseWindow
     private readonly SpriteViewSettings _viewSettings;
     private readonly ActiveRoom _room;
     private readonly ActiveSequence _sequence;
+    private readonly ActiveCharacter _character;
 
-    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence)
+    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence, ActiveCharacter character)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _room = room;
         _sequence = sequence;
+        _character = character;
     }
 
     public override void Render()
@@ -34,9 +36,6 @@ public class SpriteViewSettingsWindow : BaseWindow
         var origAutoStep = _viewSettings.AutoStepFrame;
         var autoStep = origAutoStep;
         
-        var originalCharacterId = _viewSettings.Characters.FindIndex(k => k == _viewSettings.ActiveCharacter);
-        var curCharacterId = originalCharacterId;
-        var characters = _viewSettings.Characters.ToArray();
         
         var originalAnimationId = _viewSettings.Animations.FindIndex(k => k == _viewSettings.ActiveAnimation);
         var curAnimationId = originalAnimationId;
@@ -57,11 +56,7 @@ public class SpriteViewSettingsWindow : BaseWindow
         ObservableCombo("Sequence", _sequence);
         
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
-        ImGui.Combo("Character", ref curCharacterId, characters.Select(k => k.ToString()).ToArray(), characters.Length);
-        if (curCharacterId != originalCharacterId)
-        {
-            _viewSettings.SelectCharacter(characters[curCharacterId]);
-        }
+        ObservableCombo("Character", _character);
 
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
         ImGui.SameLine();

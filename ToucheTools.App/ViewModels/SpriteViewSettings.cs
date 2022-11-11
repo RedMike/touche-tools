@@ -8,16 +8,15 @@ public class SpriteViewSettings
     private const long MinimumFrameStepInMillis = 100;
     private readonly DatabaseModel _databaseModel;
     private readonly ActiveSequence _sequence;
+    private readonly ActiveCharacter _character;
 
     public bool ShowRoom { get; set; }
     public int RoomOffsetX { get; set; }
     public int RoomOffsetY { get; set; }
     
-    public List<int> Characters { get; private set; } = null!;
     public List<int> Animations { get; private set; } = null!;
     public List<int> Directions { get; private set; } = null!;
     public List<int> Frames { get; private set; } = null!;
-    public int ActiveCharacter { get; private set; }
     public int ActiveAnimation { get; private set; }
     public int ActiveDirection { get; private set; }
     public int ActiveFrame { get; private set; }
@@ -27,14 +26,16 @@ public class SpriteViewSettings
     
     public List<(int, int, int, bool, bool)> PartsView { get; private set; } = null!;
 
-    public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence)
+    public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character)
     {
         _databaseModel = model;
         _sequence = sequence;
+        _sequence.ObserveActive(GenerateSequenceView);
+        _character = character;
+        _character.ObserveActive(GenerateSequenceView);
 
         LastStep = DateTime.UtcNow;
 
-        sequence.ObserveActive(GenerateSequenceView);
         GenerateSequenceView();
     }
 
@@ -47,7 +48,7 @@ public class SpriteViewSettings
 
         var curTime = DateTime.UtcNow;
         var frames = _databaseModel.Sequences[_sequence.Active]
-            .Characters[ActiveCharacter]
+            .Characters[_character.Active]
             .Animations[ActiveAnimation]
             .Directions[ActiveDirection]
             .Frames;
@@ -69,15 +70,6 @@ public class SpriteViewSettings
             LastStep = curTime;
             SelectFrame(nextFrameId);
         }
-    }
-
-    public void SelectCharacter(int character)
-    {
-        ActiveCharacter = character;
-        ActiveAnimation = -1;
-        ActiveDirection = -1;
-        ActiveFrame = -1;
-        GenerateSequenceView();
     }
 
     public void SelectAnimation(int animation)
@@ -103,12 +95,7 @@ public class SpriteViewSettings
 
     private void GenerateSequenceView()
     {
-        Characters = _databaseModel.Sequences[_sequence.Active].Characters.Keys.ToList();
-        if (!Characters.Contains(ActiveCharacter))
-        {
-            ActiveCharacter = Characters.First();
-        }
-        var character = _databaseModel.Sequences[_sequence.Active].Characters[ActiveCharacter];
+        var character = _databaseModel.Sequences[_sequence.Active].Characters[_character.Active];
 
         Animations = character.Animations.Keys.ToList();
         if (!Animations.Contains(ActiveAnimation))
@@ -131,7 +118,7 @@ public class SpriteViewSettings
         }
         
         var frame = _databaseModel.Sequences[_sequence.Active]
-            .Characters[ActiveCharacter]
+            .Characters[_character.Active]
             .Animations[ActiveAnimation]
             .Directions[ActiveDirection]
             .Frames[ActiveFrame];

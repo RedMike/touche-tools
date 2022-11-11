@@ -16,8 +16,9 @@ public class ProgramReferenceViewWindow : IWindow
     private readonly ActiveRoom _room;
     private readonly ActiveSprite _sprite;
     private readonly ActiveSequence _sequence;
+    private readonly ActiveCharacter _character;
 
-    public ProgramReferenceViewWindow(WindowSettings windowSettings, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette, ActiveRoom room, ActiveSprite sprite, ActiveSequence sequence)
+    public ProgramReferenceViewWindow(WindowSettings windowSettings, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette, ActiveRoom room, ActiveSprite sprite, ActiveSequence sequence, ActiveCharacter character)
     {
         _windowSettings = windowSettings;
         _spriteViewSettings = spriteViewSettings;
@@ -27,6 +28,7 @@ public class ProgramReferenceViewWindow : IWindow
         _room = room;
         _sprite = sprite;
         _sequence = sequence;
+        _character = character;
     }
 
     public void Render()
@@ -65,7 +67,7 @@ public class ProgramReferenceViewWindow : IWindow
                     {
                         _sprite.SetActive(pair.Key);
                         _sequence.SetActive(seqId);
-                        _spriteViewSettings.SelectCharacter(charId);
+                        _character.SetActive(charId);
                         _spriteViewSettings.SelectAnimation(animId);
                         _windowSettings.OpenSpriteView();
                     }
