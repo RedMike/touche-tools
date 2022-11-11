@@ -12,14 +12,16 @@ public class SpriteViewSettingsWindow : BaseWindow
     private readonly ActiveRoom _room;
     private readonly ActiveSequence _sequence;
     private readonly ActiveCharacter _character;
+    private readonly ActiveAnimation _animation;
 
-    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence, ActiveCharacter character)
+    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _room = room;
         _sequence = sequence;
         _character = character;
+        _animation = animation;
     }
 
     public override void Render()
@@ -35,11 +37,6 @@ public class SpriteViewSettingsWindow : BaseWindow
 
         var origAutoStep = _viewSettings.AutoStepFrame;
         var autoStep = origAutoStep;
-        
-        
-        var originalAnimationId = _viewSettings.Animations.FindIndex(k => k == _viewSettings.ActiveAnimation);
-        var curAnimationId = originalAnimationId;
-        var animations = _viewSettings.Animations.ToArray();
         
         var originalDirectionId = _viewSettings.Directions.FindIndex(k => k == _viewSettings.ActiveDirection);
         var curDirectionId = originalDirectionId;
@@ -60,11 +57,7 @@ public class SpriteViewSettingsWindow : BaseWindow
 
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
         ImGui.SameLine();
-        ImGui.Combo("Animation", ref curAnimationId, animations.Select(k => k.ToString()).ToArray(), animations.Length);
-        if (curAnimationId != originalAnimationId)
-        {
-            _viewSettings.SelectAnimation(animations[curAnimationId]);
-        }
+        ObservableCombo("Animation", _animation);
         
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
         ImGui.Combo("Direction", ref curDirectionId, directions.Select(k => k.ToString()).ToArray(), directions.Length);
