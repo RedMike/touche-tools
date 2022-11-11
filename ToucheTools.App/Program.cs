@@ -20,11 +20,11 @@ mainLoader.Load(out var db);
 #endregion
 
 #region Render setup
-Vector4 errorColour = new Vector4(0.9f, 0.1f, 0.2f, 1.0f);
 using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
 #endregion
 
 #region Data setup
+var logData = new LogData();
 var windowSettings = new WindowSettings();
 var spriteViewSettings = new SpriteViewSettings(db);
 var programViewSettings = new ProgramViewSettings(db);
@@ -36,7 +36,7 @@ var programViewState = new ProgramViewState();
 #endregion
 
 #region Windows
-
+var logWindow = new LogWindow(logData);
 var settingsWindow = new SettingsWindow(windowSettings);
 var activeObjectsWindow = new ActiveObjectsWindow(windowSettings, activeData);
 var roomViewWindow = new RoomViewWindow(window, windowSettings, activeData);
@@ -49,6 +49,7 @@ var programReferenceViewWindow = new ProgramReferenceViewWindow(windowSettings, 
 
 var windows = new IWindow[]
 {
+    logWindow,
     settingsWindow,
     activeObjectsWindow,
     roomViewWindow,
@@ -60,6 +61,33 @@ var windows = new IWindow[]
 };
 #endregion
 
+var errors = new List<string>();
+if (db.FailedPrograms.Any())
+{
+    errors.AddRange(db.FailedPrograms.Select(pair => $"Program {pair.Key} - {pair.Value}"));
+}
+
+if (db.FailedRooms.Any())
+{
+    errors.AddRange(db.FailedRooms.Select(pair => $"Room {pair.Key} - {pair.Value}"));
+}
+
+if (db.FailedSprites.Any())
+{
+    errors.AddRange(db.FailedSprites.Select(pair => $"Sprite {pair.Key} - {pair.Value}"));
+}
+
+if (db.FailedIcons.Any())
+{
+    errors.AddRange(db.FailedIcons.Select(pair => $"Icon {pair.Key} - {pair.Value}"));
+}
+
+foreach (var err in errors)
+{
+    logData.Error(err);
+}
+logData.Info($"Finished loading {filename}, {db.Programs.Count} programs, {db.Rooms.Count} rooms, {db.Sprites.Count} sprites.");
+
 while (window.IsOpen())
 {
     #region Boilerplate
@@ -70,30 +98,6 @@ while (window.IsOpen())
     }
     #endregion
     
-    #region Errors
-    var errors = new List<string>();
-    if (db.FailedPrograms.Any())
-    {
-        errors.AddRange(db.FailedPrograms.Select(pair => $"Program {pair.Key} - {pair.Value}"));
-    }
-
-    if (db.FailedRooms.Any())
-    {
-        errors.AddRange(db.FailedRooms.Select(pair => $"Room {pair.Key} - {pair.Value}"));
-    }
-
-    if (db.FailedSprites.Any())
-    {
-        errors.AddRange(db.FailedSprites.Select(pair => $"Sprite {pair.Key} - {pair.Value}"));
-    }
-
-    if (db.FailedIcons.Any())
-    {
-        errors.AddRange(db.FailedIcons.Select(pair => $"Icon {pair.Key} - {pair.Value}"));
-    }
-    RenderErrors(errors);
-    #endregion
-
     foreach (var win in windows)
     {
         win.Render();
@@ -102,18 +106,4 @@ while (window.IsOpen())
     #region Boilerplate
     window.Render();
     #endregion
-}
-
-void RenderErrors(List<string> errors)
-{
-    ImGui.SetNextWindowPos(new Vector2(0.0f, Constants.MainWindowHeight-100.0f));
-    ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth, 100.0f));
-    ImGui.Begin("Errors", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
-    ImGui.PushStyleColor(ImGuiCol.Text, errorColour);
-    foreach (var error in errors)
-    {
-        ImGui.TextWrapped(error);
-    }
-    ImGui.PopStyleColor();
-    ImGui.End();
 }
