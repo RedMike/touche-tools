@@ -14,8 +14,9 @@ public class SpriteViewSettingsWindow : BaseWindow
     private readonly ActiveCharacter _character;
     private readonly ActiveAnimation _animation;
     private readonly ActiveDirection _direction;
+    private readonly ActiveFrame _frame;
 
-    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction)
+    public SpriteViewSettingsWindow(WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, ActiveFrame frame)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
@@ -24,6 +25,7 @@ public class SpriteViewSettingsWindow : BaseWindow
         _character = character;
         _animation = animation;
         _direction = direction;
+        _frame = frame;
     }
 
     public override void Render()
@@ -39,10 +41,6 @@ public class SpriteViewSettingsWindow : BaseWindow
 
         var origAutoStep = _viewSettings.AutoStepFrame;
         var autoStep = origAutoStep;
-        
-        var originalFrameId = _viewSettings.Frames.FindIndex(k => k == _viewSettings.ActiveFrame);
-        var curFrameId = originalFrameId;
-        var frames = _viewSettings.Frames.ToArray();
         
         ImGui.SetNextWindowPos(new Vector2(350.0f, 0.0f));
         ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth-500.0f, 200.0f));
@@ -62,11 +60,7 @@ public class SpriteViewSettingsWindow : BaseWindow
         
         ImGui.SetNextItemWidth((Constants.MainWindowWidth-500.0f)/4.0f);
         ImGui.SameLine();
-        ImGui.Combo("Frame", ref curFrameId, frames.Select(k => k.ToString()).ToArray(), frames.Length);
-        if (curFrameId != originalFrameId)
-        {
-            _viewSettings.SelectFrame(frames[curFrameId]);
-        }
+        ObservableCombo("Frame", _frame);
         
         ImGui.Checkbox("Auto step", ref autoStep);
         if (autoStep != origAutoStep)
