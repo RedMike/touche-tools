@@ -12,7 +12,8 @@ public class RenderWindow : IDisposable
     {
         Unknown = 0,
         Room = 1,
-        Sprite = 2
+        Sprite = 2,
+        Primitive = 3,
     }
     private static readonly Vector3 ClearColor = new Vector3(0.3f, 0.45f, 0.7f);
 
@@ -67,10 +68,27 @@ public class RenderWindow : IDisposable
         _graphicsDevice.SwapBuffers(_graphicsDevice.MainSwapchain);
     }
 
+    private bool DoesTextureExist(RenderType type, string id)
+    {
+        var fullId = $"{type:G}_{id}";
+        return _textures.ContainsKey(fullId);
+    }
+
+    private void SaveTexture(RenderType type, string id, Texture texture)
+    {
+        var fullId = $"{type:G}_{id}";
+        _textures.Add(fullId, texture);
+    }
+
+    private Texture GetTexture(RenderType type, string id)
+    {
+        var fullId = $"{type:G}_{id}";
+        return _textures[fullId];
+    }
+
     public IntPtr RenderImage(RenderType type, string id, int width, int height, byte[] rawPixels)
     {
-        id = $"{type:G}_{id}";
-        if (!_textures.ContainsKey(id))
+        if (!DoesTextureExist(type, id))
         {
             var newTexture = _graphicsDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
                 (uint)width,
@@ -80,9 +98,10 @@ public class RenderWindow : IDisposable
                 PixelFormat.R8_G8_B8_A8_UNorm,
                 TextureUsage.Sampled));
             newTexture.Name = id;
-            _textures[id] = newTexture;
+            SaveTexture(type, id, newTexture);
         }
-        var texture = _textures[id];
+
+        var texture = GetTexture(type, id);
         
         IntPtr pixels = Marshal.AllocHGlobal(rawPixels.Length);
         Marshal.Copy(rawPixels, 0, pixels, rawPixels.Length);
@@ -107,6 +126,37 @@ public class RenderWindow : IDisposable
         }
         
         return _controller.GetOrCreateImGuiBinding(_graphicsDevice.ResourceFactory, texture);
+    }
+
+    public IntPtr RenderRectangle(int borderWidth, int w, int h, (byte, byte, byte, byte) fillCol, (byte, byte, byte, byte) borderCol)
+    {
+        var fillColId = $"{fillCol.Item1}-{fillCol.Item2}-{fillCol.Item3}-{fillCol.Item4}";
+        var borderColId = $"{borderCol.Item1}-{borderCol.Item2}-{borderCol.Item3}-{borderCol.Item4}";
+        var id = $"rect_{borderWidth}_{w}_{h}_{fillColId}_{borderColId}";
+        if (DoesTextureExist(RenderType.Primitive, id))
+        {
+            var texture = GetTexture(RenderType.Primitive, id);
+            return _controller.GetOrCreateImGuiBinding(_graphicsDevice.ResourceFactory, texture);
+        }
+        var bytes = new byte[w * h * 4];
+        for (var i = 0; i < w; i++)
+        {
+            for (var j = 0; j < h; j++)
+            {
+                var (r, g, b, a) = fillCol;
+                if (i < borderWidth || i > (w - 1 - borderWidth) ||
+                    j < borderWidth || j > (h - 1 - borderWidth))
+                {
+                    (r, g, b, a) = borderCol;
+                }
+                bytes[(j * w + i) * 4 + 0] = r;
+                bytes[(j * w + i) * 4 + 1] = g;
+                bytes[(j * w + i) * 4 + 2] = b;
+                bytes[(j * w + i) * 4 + 3] = a;
+            }
+        }
+
+        return RenderImage(RenderType.Primitive, id, w, h, bytes);
     }
 
     private void CreateWindow()

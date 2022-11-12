@@ -33,6 +33,7 @@ container.AddSingleton<ActiveFrame>();
 container.AddSingleton<ActiveProgram>();
 
 container.AddSingleton<WindowSettings>();
+container.AddSingleton<RoomViewSettings>();
 container.AddSingleton<SpriteViewSettings>();
 container.AddSingleton<ProgramViewSettings>();
 

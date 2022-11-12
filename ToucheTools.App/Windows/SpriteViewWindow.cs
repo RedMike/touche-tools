@@ -37,7 +37,8 @@ public class SpriteViewWindow : IWindow
         ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
         ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
-        var centerCursorPos = new Vector2(viewW / 2.0f, viewH / 2.0f);
+        var contentRegion = ImGui.GetWindowContentRegionMin();
+        var centerCursorPos = contentRegion + new Vector2(viewW / 2.0f, viewH / 2.0f);
         
         #region Room background
         if (_viewSettings.ShowRoom)
@@ -49,7 +50,8 @@ public class SpriteViewWindow : IWindow
             var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
             var uv1 = new Vector2(ox / (float)roomWidth, oy / (float)roomHeight);
             var uv2 = new Vector2((ox+viewW) / (float)roomWidth, (oy+viewH) / (float)roomHeight);
-            ImGui.SetCursorPos(new Vector2(0.0f, 0.0f));
+            //TODO: clip rect
+            ImGui.SetCursorPos(contentRegion);
             ImGui.Image(roomTexture, new Vector2(viewW, viewH), uv1, uv2);
         }
         #endregion
