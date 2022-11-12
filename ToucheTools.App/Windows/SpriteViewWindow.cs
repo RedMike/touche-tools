@@ -35,10 +35,10 @@ public class SpriteViewWindow : IWindow
         var viewH = 600.0f;
         ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
         ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
-        ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
+        ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         var contentRegion = ImGui.GetWindowContentRegionMin();
-        var centerCursorPos = contentRegion + new Vector2(viewW / 2.0f, viewH / 2.0f);
+        var spritePosition = contentRegion + new Vector2(viewW / 2.0f, 3 * viewH / 4.0f);
         
         #region Room background
         if (_viewSettings.ShowRoom)
@@ -50,9 +50,11 @@ public class SpriteViewWindow : IWindow
             var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
             var uv1 = new Vector2(ox / (float)roomWidth, oy / (float)roomHeight);
             var uv2 = new Vector2((ox+viewW) / (float)roomWidth, (oy+viewH) / (float)roomHeight);
-            //TODO: clip rect
             ImGui.SetCursorPos(contentRegion);
+            var windowOffset = ImGui.GetWindowPos();
+            ImGui.PushClipRect(windowOffset+contentRegion, windowOffset+contentRegion + new Vector2(roomWidth-ox, roomHeight-oy), false); 
             ImGui.Image(roomTexture, new Vector2(viewW, viewH), uv1, uv2);
+            ImGui.PopClipRect();
         }
         #endregion
         
@@ -76,7 +78,7 @@ public class SpriteViewWindow : IWindow
             {
                 (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
             }
-            ImGui.SetCursorPos(centerCursorPos + new Vector2(destX, destY));
+            ImGui.SetCursorPos(spritePosition + new Vector2(destX, destY));
             ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);   
         }
         
