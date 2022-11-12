@@ -1,4 +1,5 @@
-﻿using ToucheTools.App.ViewModels.Observables;
+﻿using ToucheTools.App.State;
+using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.Models;
 
 namespace ToucheTools.App.ViewModels;
@@ -12,14 +13,14 @@ public class SpriteViewSettings
     private readonly ActiveAnimation _animation;
     private readonly ActiveDirection _direction;
     private readonly ActiveFrame _frame;
+    private readonly SpriteViewState _state;
 
     public bool ShowRoom { get; set; }
     public int RoomOffsetX { get; set; }
     public int RoomOffsetY { get; set; }
     public bool AutoStepFrame { get; set; }
-    public DateTime LastStep { get; set; }
     
-    public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, ActiveFrame frame)
+    public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, ActiveFrame frame, SpriteViewState state)
     {
         _databaseModel = model;
         _sequence = sequence;
@@ -27,8 +28,7 @@ public class SpriteViewSettings
         _animation = animation;
         _direction = direction;
         _frame = frame;
-
-        LastStep = DateTime.UtcNow;
+        _state = state;
     }
 
     public void Tick()
@@ -39,6 +39,7 @@ public class SpriteViewSettings
         }
 
         var curTime = DateTime.UtcNow;
+        var lastTime = _state.LastStep;
         var frames = _databaseModel.Sequences[_sequence.Active]
             .Characters[_character.Active]
             .Animations[_animation.Active]
@@ -57,9 +58,9 @@ public class SpriteViewSettings
             delay = curFrame.Delay * 100;
         }
 
-        if ((curTime - LastStep).TotalMilliseconds > delay)
+        if ((curTime - lastTime).TotalMilliseconds > delay)
         {
-            LastStep = curTime;
+            _state.LastStep = curTime;
             _frame.SetActive(nextFrameId);
         }
     }
