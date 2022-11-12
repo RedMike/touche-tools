@@ -19,8 +19,6 @@ public class SpriteViewSettings
     public bool AutoStepFrame { get; set; }
     public DateTime LastStep { get; set; }
     
-    public List<(int, int, int, bool, bool)> PartsView { get; private set; } = null!;
-
     public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, ActiveFrame frame)
     {
         _databaseModel = model;
@@ -29,15 +27,8 @@ public class SpriteViewSettings
         _animation = animation;
         _direction = direction;
         _frame = frame;
-        _sequence.ObserveActive(GenerateSequenceView);
-        _character.ObserveActive(GenerateSequenceView);
-        _animation.ObserveActive(GenerateSequenceView);
-        _direction.ObserveActive(GenerateSequenceView);
-        _frame.ObserveActive(GenerateSequenceView);
 
         LastStep = DateTime.UtcNow;
-
-        GenerateSequenceView();
     }
 
     public void Tick()
@@ -71,17 +62,5 @@ public class SpriteViewSettings
             LastStep = curTime;
             _frame.SetActive(nextFrameId);
         }
-    }
-
-    private void GenerateSequenceView()
-    {
-        var frame = _databaseModel.Sequences[_sequence.Active]
-            .Characters[_character.Active]
-            .Animations[_animation.Active]
-            .Directions[_direction.Active]
-            .Frames[_frame.Active];
-
-        PartsView = frame.Parts.Select(p => ((int)p.FrameIndex, p.DestX, p.DestY, p.HFlipped, p.VFlipped))
-            .ToList();
     }
 }

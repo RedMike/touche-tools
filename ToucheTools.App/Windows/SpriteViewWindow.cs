@@ -12,14 +12,16 @@ public class SpriteViewWindow : IWindow
     private readonly SpriteViewSettings _viewSettings;
     private readonly ActiveRoom _room;
     private readonly ActiveSprite _sprite;
+    private readonly ActiveFrame _frame;
 
-    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite)
+    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite, ActiveFrame frame)
     {
         _render = render;
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _room = room;
         _sprite = sprite;
+        _frame = frame;
     }
 
     public void Render()
@@ -55,7 +57,7 @@ public class SpriteViewWindow : IWindow
         var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _sprite.SpriteView;
         var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, spriteViewId, spriteWidth, spriteHeight, spriteBytes);
 
-        foreach (var (frameIndex, destX, destY, hFlip, vFlip) in _viewSettings.PartsView)
+        foreach (var (frameIndex, destX, destY, hFlip, vFlip) in _frame.PartsView)
         {
             var tileWidthRatio = (float)spriteTileWidth / spriteWidth;
             var tileHeightRatio = (float)spriteTileHeight / spriteHeight;

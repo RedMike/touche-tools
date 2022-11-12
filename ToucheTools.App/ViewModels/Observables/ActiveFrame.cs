@@ -10,6 +10,8 @@ public class ActiveFrame : ActiveObservable<int>
     private readonly ActiveAnimation _animation;
     private readonly ActiveDirection _direction;
 
+    public List<(int, int, int, bool, bool)> PartsView { get; private set; } = null!;
+
     public ActiveFrame(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction)
     {
         _model = model;
@@ -21,21 +23,28 @@ public class ActiveFrame : ActiveObservable<int>
         _character.ObserveActive(Update);
         _animation.ObserveActive(Update);
         _direction.ObserveActive(Update);
+        ObserveActive(Update);
         Update();
     }
 
     private void Update()
     {
-        var count = _model
+        var frames = _model
             .Sequences[_sequence.Active]
             .Characters[_character.Active]
             .Animations[_animation.Active]
             .Directions[_direction.Active]
-            .Frames.Count;
+            .Frames;
+        var count = frames.Count;
         SetElements(Enumerable.Range(0, count).ToList());
         if (!Elements.Contains(Active))
         {
             SetActive(Elements.First());
         }
+        
+        PartsView = frames[Active].Parts.Select(p => 
+                ((int)p.FrameIndex, p.DestX, p.DestY, p.HFlipped, p.VFlipped)
+            )
+            .ToList();
     }
 }
