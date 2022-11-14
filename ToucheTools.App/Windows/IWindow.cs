@@ -29,4 +29,31 @@ public abstract class BaseWindow : IWindow
             changedCb(curActive);
         }
     }
+
+    protected void ObservableCheckboxList<T>(string label, MultiActiveObservable<T> observable)
+    {
+        CheckboxList(label, observable.ElementsAsDict, observable.ElementsAsArray, (name, state) =>
+        {
+            var key = observable.ElementMapping[name];
+            observable.SetElement(key, state);
+        });
+    }
+
+    protected void CheckboxList(string label, Dictionary<string, bool> activeElements, string[] displayElements, Action<string, bool> changedCb)
+    {
+        if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            foreach (var (name, on) in activeElements)
+            {
+                var curValue = on;
+                ImGui.Checkbox(name, ref curValue);
+                //TODO: wrapping
+                if (curValue != on)
+                {
+                    changedCb(name, curValue);
+                }
+            }
+            ImGui.TreePop();
+        }
+    }
 }

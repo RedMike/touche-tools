@@ -8,14 +8,12 @@ public abstract class ActiveObservable<T>
     #region Display methods
     public string[] ElementsAsArray { get; private set; } = Array.Empty<string>();
     public int ActiveElementAsIndex { get; private set; } = default!;
-    public int ElementCount { get; private set; } = 0;
     #endregion
 
     protected void SetElements(List<T> elements)
     {
         Elements = elements;
         ElementsAsArray = elements.Select(ConvertElementToString).ToArray();
-        ElementCount = elements.Count;
     }
     
     public void SetActive(T active)

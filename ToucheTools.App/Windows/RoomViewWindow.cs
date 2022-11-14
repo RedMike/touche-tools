@@ -29,13 +29,15 @@ public class RoomViewWindow : IWindow
     private readonly WindowSettings _windowSettings;
     private readonly ActiveRoom _room;
     private readonly RoomViewSettings _viewSettings;
+    private readonly MultiActiveRects _rects;
 
-    public RoomViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveRoom room, RoomViewSettings viewSettings)
+    public RoomViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveRoom room, RoomViewSettings viewSettings, MultiActiveRects rects)
     {
         _render = render;
         _windowSettings = windowSettings;
         _room = room;
         _viewSettings = viewSettings;
+        _rects = rects;
     }
 
     public void Render()
@@ -58,14 +60,14 @@ public class RoomViewWindow : IWindow
 
         if (_viewSettings.ShowRects)
         {
-            if (_viewSettings.RectsView.Count > _rectColours.Count)
+            if (_rects.RectsView.Count > _rectColours.Count)
             {
-                throw new Exception($"Not enough colours defined in code for number of rectangles, need {_viewSettings.RectsView.Count}");
+                throw new Exception($"Not enough colours defined in code for number of rectangles, need {_rects.RectsView.Count}");
             }
 
             var idx = 0;
             //TODO: hide rects based on checkboxes
-            foreach (var (rectX, rectY, rectW, rectH) in _viewSettings.RectsView)
+            foreach (var (rectX, rectY, rectW, rectH) in _rects.RectsView)
             {
                 var (rectR, rectG, rectB) = _rectColours[idx];
                 var borderR = (byte)Math.Min(255, rectR * 2.5f + 150);
@@ -77,7 +79,7 @@ public class RoomViewWindow : IWindow
                 ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX, contentRegion.Y + rectY));
                 ImGui.Image(rectTexture, new Vector2(rectW, rectH));
 
-                var text = $"Rect {idx} ({rectX}x{rectY}, {rectW}x{rectH})";
+                var text = $"Rect {idx} ({rectX},{rectY} x {rectW},{rectH})";
                 var textSize = ImGui.CalcTextSize(text);
                 ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX + rectW - textSize.X - borderWidth, contentRegion.Y + rectY + rectH - textSize.Y - borderWidth));
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(borderR/255.0f, borderG/255.0f, borderB/255.0f, 1.0f));

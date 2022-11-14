@@ -31,6 +31,7 @@ container.AddSingleton<ActiveAnimation>();
 container.AddSingleton<ActiveDirection>();
 container.AddSingleton<ActiveFrame>();
 container.AddSingleton<ActiveProgram>();
+container.AddSingleton<MultiActiveRects>();
 
 container.AddSingleton<WindowSettings>();
 container.AddSingleton<RoomViewSettings>();
