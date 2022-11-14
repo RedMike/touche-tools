@@ -39,6 +39,15 @@ public class ProgramViewSettings
         public Dictionary<int, (int, int)> BackgroundOffset { get; set; } = new Dictionary<int, (int, int)>(); //background num to area offset
         
         public Dictionary<int, int> Flags { get; set; } = new Dictionary<int, int>();
+
+        public int StackPointerLocation { get; set; }
+        
+        public Dictionary<int, int> KnownStackValues = new Dictionary<int, int>();
+
+        public int? StackPointerValue => KnownStackValues.ContainsKey(StackPointerLocation)
+            ? KnownStackValues[StackPointerLocation]
+            : null;
+        
         public ProgramState Clone()
         {
             //deep copy
@@ -51,6 +60,8 @@ public class ProgramViewSettings
                 LoadedKeyChars =
                     LoadedKeyChars.ToDictionary(p => p.Key, p => (p.Value.Item1, p.Value.Item2, p.Value.Item3)),
                 Flags = Flags.ToDictionary(p => p.Key, p => p.Value),
+                StackPointerLocation = StackPointerLocation,
+                KnownStackValues = KnownStackValues.ToDictionary(p => p.Key, p => p.Value),
             };
         }
     }
@@ -93,8 +104,10 @@ public class ProgramViewSettings
                 //forcibly clear the state
                 //TODO: jumps
                 state = new ProgramState();
-            } else
-            if (pair.Value is LoadRoomInstruction loadRoom)
+            } else if (pair.Value is FetchScriptWordInstruction fetchScriptWord)
+            {
+                state.KnownStackValues[state.StackPointerLocation] = fetchScriptWord.Val;
+            } else if (pair.Value is LoadRoomInstruction loadRoom)
             {
                 state.LoadedRoom = loadRoom.Num;
                 if (!programData.LoadedRooms.Contains(loadRoom.Num))
@@ -154,20 +167,27 @@ public class ProgramViewSettings
                 }
             } else if (pair.Value is SetFlagInstruction setFlag)
             {
-                var val = -1; //TODO: loaded from STK
-                state.Flags[setFlag.Flag] = val;
+                if (state.StackPointerValue == null)
+                {
+                    _log.Error($"Unknown value in STK when loading flag {setFlag.Flag}");
+                }
+                else
+                {
+                    var val = state.StackPointerValue;
+                    state.Flags[setFlag.Flag] = val.Value;
 
-                if (setFlag.Flag == 104)
-                {
-                    //TODO: selects current keychar
-                } else if (setFlag.Flag == 611 && val != 0)
-                {
-                    //TODO: quits game
-                } else if (setFlag.Flag == 612)
-                {
-                    var newVal = -2; //TODO: randomly generate
-                    state.Flags[613] = newVal;
-                } //TODO: more
+                    if (setFlag.Flag == 104)
+                    {
+                        //TODO: selects current keychar
+                    } else if (setFlag.Flag == 611 && val != 0)
+                    {
+                        //TODO: quits game
+                    } else if (setFlag.Flag == 612)
+                    {
+                        var newVal = -2; //TODO: randomly generate
+                        state.Flags[613] = newVal;
+                    } //TODO: more
+                }
             } else if (pair.Value is AddRoomAreaInstruction addRoomArea)
             {
                 int flag = addRoomArea.Flag;

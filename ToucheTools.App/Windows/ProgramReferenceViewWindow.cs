@@ -54,6 +54,8 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.Text("State:");
             var stateAtEvaluate = _programViewSettings.StateByInstruction[_programViewSettings.EvaluateUntil];
 
+            ImGui.Text($"STK pointer: {stateAtEvaluate.StackPointerLocation:D5} value '{stateAtEvaluate.StackPointerValue}'");
+            
             if (stateAtEvaluate.LoadedRoom != null)
             {
                 ImGui.Text($"Currently in room:");
