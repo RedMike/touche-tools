@@ -76,7 +76,7 @@ public class ProgramReferenceViewWindow : IWindow
                     ImGui.TableSetupColumn("Flag");
                     ImGui.TableSetupColumn("Value");
                     ImGui.TableHeadersRow();
-                    foreach (var pair in stateAtEvaluate.Flags)
+                    foreach (var pair in stateAtEvaluate.Flags.OrderBy(p => p.Key))
                     {
                         ImGui.TableNextColumn();
                         ImGui.Text(pair.Key.ToString());
@@ -92,7 +92,7 @@ public class ProgramReferenceViewWindow : IWindow
             if (stateAtEvaluate.InventoryValuesByKeyChar.Count > 0)
             {
                 ImGui.Text("Inventory:");
-                foreach (var pair in stateAtEvaluate.InventoryValuesByKeyChar)
+                foreach (var pair in stateAtEvaluate.InventoryValuesByKeyChar.OrderBy(p => p.Key))
                 {
                     if (ImGui.CollapsingHeader($"KeyChar {pair.Key}"))
                     {
@@ -100,7 +100,7 @@ public class ProgramReferenceViewWindow : IWindow
                         ImGui.TableSetupColumn("Item");
                         ImGui.TableSetupColumn("Amount");
                         ImGui.TableHeadersRow();
-                        foreach (var itemPair in pair.Value)
+                        foreach (var itemPair in pair.Value.OrderBy(p => p.Key))
                         {
                             ImGui.TableNextColumn();
                             ImGui.Text(itemPair.Key.ToString());

@@ -104,6 +104,24 @@ public class ProgramViewSettings
         foreach (var pair in program.Instructions.OrderBy(pair => pair.Key))
         {
             var state = prevState.Clone();
+            
+            if (pair.Key == 0)
+            {
+                //start of an episode
+                for (var i = 200; i < 300; i++)
+                {
+                    if (state.Flags.ContainsKey(i))
+                    {
+                        state.Flags[i] = 0;
+                    }
+                }
+
+                state.Flags[291] = 240;
+                state.Flags[292] = 16;
+                state.Flags[293] = 0;
+                state.Flags[294] = 1;
+            }
+            
             if (pair.Value is StopScriptInstruction)
             {
                 //forcibly clear the state
@@ -203,24 +221,11 @@ public class ProgramViewSettings
                 }
             } else if (pair.Value is StartEpisodeInstruction startEpisode)
             {
-                state.Flags[0] = startEpisode.Flag;
-                
-                for (var i = 200; i < 300; i++)
-                {
-                    if (state.Flags.ContainsKey(i))
-                    {
-                        state.Flags[i] = 0;
-                    }
-                }
-
-                state.Flags[291] = 240;
-                state.Flags[292] = 16;
-                state.Flags[293] = 0;
-                state.Flags[294] = 1;
                 if (!programData.OtherPrograms.Contains(startEpisode.Num))
                 {
                     programData.OtherPrograms.Add(startEpisode.Num);
                 }
+                state.Flags[0] = startEpisode.Flag;
             } else if (pair.Value is SetFlagInstruction setFlag)
             {
                 if (state.StackPointerValue == null)
