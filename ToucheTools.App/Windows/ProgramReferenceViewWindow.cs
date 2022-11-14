@@ -52,7 +52,7 @@ public class ProgramReferenceViewWindow : IWindow
         if (_programViewSettings.EvaluateUntil >= 0)
         {
             ImGui.Text("State:");
-            var stateAtEvaluate = _programViewSettings.StateByInstruction[_programViewSettings.EvaluateUntil];
+            var stateAtEvaluate = _programViewSettings.StateByInstruction[_programViewSettings.InstructionsView[_programViewSettings.EvaluateUntil].Item1];
 
             ImGui.Text($"STK pointer: {stateAtEvaluate.StackPointerLocation:D5} value '{stateAtEvaluate.StackPointerValue}'");
             

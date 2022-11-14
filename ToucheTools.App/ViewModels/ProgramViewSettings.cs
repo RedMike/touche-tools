@@ -72,7 +72,7 @@ public class ProgramViewSettings
     }
     //for each instruction, the apparent state after running it; StopScript resets the state (so jumps don't work)
     //TODO: make jumps correctly pass state
-    public List<ProgramState> StateByInstruction { get; set; } = null!;
+    public Dictionary<int, ProgramState> StateByInstruction { get; set; } = null!;
     public ProgramData Data { get; set; } = null!;
     
 
@@ -99,10 +99,18 @@ public class ProgramViewSettings
         InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => (pair.Key, pair.Value.ToString())).ToList();
 
         var programData = new ProgramData();
-        var stateByInstruction = new List<ProgramState>();
+        var stateByInstruction = new Dictionary<int, ProgramState>();
         var prevState = new ProgramState();
+        //start recursing from the first instruction
+        //  when hitting a jump instruction recurse through the jump and continue too
+        //  also recurse from CSOs/ASOs
+        //    if something runs from multiple branches, store an identifier and store as a list?
         foreach (var pair in program.Instructions.OrderBy(pair => pair.Key))
         {
+            if (stateByInstruction.ContainsKey(pair.Key))
+            {
+                throw new Exception("Processed same instruction twice");
+            }
             var state = prevState.Clone();
             
             if (pair.Key == 0)
@@ -126,7 +134,7 @@ public class ProgramViewSettings
             {
                 //forcibly clear the state
                 //TODO: jumps
-                state = new ProgramState();
+                break;
             } else if (pair.Value is FetchScriptWordInstruction fetchScriptWord)
             {
                 state.KnownStackValues[state.StackPointerLocation] = fetchScriptWord.Val;
@@ -270,7 +278,7 @@ public class ProgramViewSettings
                 }
             }
 
-            stateByInstruction.Add(state);
+            stateByInstruction.Add(pair.Key, state);
             prevState = state;
         }
         StateByInstruction = stateByInstruction;
