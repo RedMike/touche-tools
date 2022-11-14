@@ -32,16 +32,16 @@ public abstract class BaseWindow : IWindow
 
     protected void ObservableCheckboxList<T>(string label, MultiActiveObservable<T> observable)
     {
-        CheckboxList(label, observable.ElementsAsDict, observable.ElementsAsArray, (name, state) =>
+        CheckboxList(label, observable.ElementsAsDict, (name, state) =>
         {
             var key = observable.ElementMapping[name];
             observable.SetElement(key, state);
         });
     }
 
-    protected void CheckboxList(string label, Dictionary<string, bool> activeElements, string[] displayElements, Action<string, bool> changedCb)
+    protected void CheckboxList(string label, Dictionary<string, bool> activeElements, Action<string, bool> changedCb, bool initialState=false)
     {
-        if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.DefaultOpen))
+        if (ImGui.TreeNodeEx(label, initialState ? ImGuiTreeNodeFlags.DefaultOpen : ImGuiTreeNodeFlags.None))
         {
             foreach (var (name, on) in activeElements)
             {

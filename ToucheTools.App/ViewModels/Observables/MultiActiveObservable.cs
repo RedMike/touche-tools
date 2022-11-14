@@ -8,14 +8,12 @@ public class MultiActiveObservable<T> where T : notnull
 
     public Dictionary<string, T> ElementMapping { get; private set; } = default!;
     public Dictionary<string, bool> ElementsAsDict { get; private set; } = default!;
-    public string[] ElementsAsArray { get; private set; } = Array.Empty<string>();
     
     #endregion
     
     protected void SetElements(List<T> elements, bool defaultState = false)
     {
         Elements = elements.ToDictionary(e => e, _ => defaultState);
-        ElementsAsArray = Elements.Keys.OrderBy(o => o).Select(ConvertElementToString).ToArray();
         ElementsAsDict = Elements.ToDictionary(pair => ConvertElementToString(pair.Key), pair => pair.Value);
         ElementMapping = Elements.ToDictionary(pair => ConvertElementToString(pair.Key), pair => pair.Key);
     }
