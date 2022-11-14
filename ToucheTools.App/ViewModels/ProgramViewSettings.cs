@@ -184,6 +184,7 @@ public class ProgramViewSettings
             prevState = state;
         }
         StateByInstruction = stateByInstruction;
+        Data = programData;
         
         ReferencedRoomsView = program.Instructions
             .Where(pair => pair.Value is LoadRoomInstruction)

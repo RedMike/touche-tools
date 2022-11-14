@@ -68,9 +68,8 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
 
         ImGui.Text("Data:");
-        
         ImGui.Text("Rooms:");
-        foreach (var room in _programViewSettings.ReferencedRoomsView)
+        foreach (var room in _programViewSettings.Data.LoadedRooms.OrderBy(x => x))
         {
             ImGui.SameLine();
             if (ImGui.Button($"{room}"))
@@ -81,19 +80,20 @@ public class ProgramReferenceViewWindow : IWindow
             }
         }
         ImGui.Separator();
-        ImGui.Text("Sprites (Sequence, Character, Animation):");
-        foreach (var pair in _programViewSettings.ReferencedSpritesView.OrderBy(p => p.Key))
+        ImGui.Text("Sprites (Sequence, Character):");
+        foreach (var group in _programViewSettings.Data.SpriteSequenceCharacterCombinations
+                     .OrderBy(x => x.Item1)
+                     .GroupBy(x => x.Item1))
         {
-            if (ImGui.TreeNodeEx(pair.Key.ToString(), ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.TreeNodeEx(group.Key.ToString(), ImGuiTreeNodeFlags.DefaultOpen))
             {
-                foreach (var (seqId, charId, animId) in pair.Value)
+                foreach (var (_, seqId, charId) in group)
                 {
-                    if (ImGui.Button($"({seqId}, {charId}, {animId})"))
+                    if (ImGui.Button($"({seqId}, {charId})"))
                     {
-                        _sprite.SetActive(pair.Key);
+                        _sprite.SetActive(group.Key);
                         _sequence.SetActive(seqId);
                         _character.SetActive(charId);
-                        _animation.SetActive(animId);
                         _windowSettings.OpenSpriteView();
                     }
                 }
