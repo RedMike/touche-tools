@@ -46,6 +46,29 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
         ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
+
+        ImGui.Text("State:");
+        if (_programViewSettings.EvaluateUntil >= 0)
+        {
+            var stateAtEvaluate = _programViewSettings.StateByInstruction[_programViewSettings.EvaluateUntil];
+
+            if (stateAtEvaluate.LoadedRoom != null)
+            {
+                ImGui.Text($"Currently in room:");
+                ImGui.SameLine();
+                if (ImGui.Button($"{stateAtEvaluate.LoadedRoom}"))
+                {
+                    _room.SetActive(stateAtEvaluate.LoadedRoom.Value);
+                    _palette.SetActive(stateAtEvaluate.LoadedRoom.Value);
+                    _windowSettings.OpenRoomView();
+                }
+            }
+        }
+
+        ImGui.Separator();
+
+        ImGui.Text("Data:");
+        
         ImGui.Text("Rooms:");
         foreach (var room in _programViewSettings.ReferencedRoomsView)
         {
