@@ -1,4 +1,5 @@
-﻿using ToucheTools.App.ViewModels.Observables;
+﻿using Microsoft.Extensions.Logging;
+using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
 
@@ -8,6 +9,7 @@ public class ProgramViewSettings
 {
     private readonly DatabaseModel _databaseModel;
     private readonly ActiveProgram _program;
+    private readonly LogData _log;
     
     public List<(int, string)> InstructionsView { get; private set; } = null!;
     public int EvaluateUntil { get; private set; }
@@ -58,11 +60,12 @@ public class ProgramViewSettings
     public ProgramData Data { get; set; } = null!;
     
 
-    public ProgramViewSettings(DatabaseModel model, ActiveProgram program)
+    public ProgramViewSettings(DatabaseModel model, ActiveProgram program, LogData log)
     {
         _databaseModel = model;
         
         _program = program;
+        _log = log;
         _program.ObserveActive(GenerateView);
         EvaluateUntil = -1;
         
@@ -114,16 +117,20 @@ public class ProgramViewSettings
                 }
             } else if (pair.Value is InitCharScriptInstruction initCharScript)
             {
-                var spriteNum = state.LoadedSprites[initCharScript.SpriteIndex];
-                var seqNum = state.LoadedSequences[initCharScript.SequenceIndex];
-                state.SpriteToSequence[spriteNum] = seqNum;
-                state.LoadedKeyChars[initCharScript.Character] =
-                    (spriteNum, seqNum, initCharScript.SequenceCharacterId);
-                if (!programData.SpriteSequenceCharacterCombinations.Contains((spriteNum, seqNum,
-                        initCharScript.SequenceCharacterId)))
+                if (state.LoadedSprites.ContainsKey(initCharScript.SpriteIndex) &&
+                    state.LoadedSequences.ContainsKey(initCharScript.SequenceIndex))
                 {
-                    programData.SpriteSequenceCharacterCombinations.Add((spriteNum, seqNum,
-                        initCharScript.SequenceCharacterId));
+                    var spriteNum = state.LoadedSprites[initCharScript.SpriteIndex];
+                    var seqNum = state.LoadedSequences[initCharScript.SequenceIndex];
+                    state.SpriteToSequence[spriteNum] = seqNum;
+                    state.LoadedKeyChars[initCharScript.Character] =
+                        (spriteNum, seqNum, initCharScript.SequenceCharacterId);
+                    if (!programData.SpriteSequenceCharacterCombinations.Contains((spriteNum, seqNum,
+                            initCharScript.SequenceCharacterId)))
+                    {
+                        programData.SpriteSequenceCharacterCombinations.Add((spriteNum, seqNum,
+                            initCharScript.SequenceCharacterId));
+                    }
                 }
             } else if (pair.Value is StartEpisodeInstruction startEpisode)
             {
@@ -141,9 +148,9 @@ public class ProgramViewSettings
                 state.Flags[292] = 16;
                 state.Flags[293] = 0;
                 state.Flags[294] = 1;
-                if (!programData.OtherPrograms.Contains(startEpisode.Flag))
+                if (!programData.OtherPrograms.Contains(startEpisode.Num))
                 {
-                    programData.OtherPrograms.Add(startEpisode.Flag);
+                    programData.OtherPrograms.Add(startEpisode.Num);
                 }
             } else if (pair.Value is SetFlagInstruction setFlag)
             {
@@ -163,17 +170,23 @@ public class ProgramViewSettings
                 } //TODO: more
             } else if (pair.Value is AddRoomAreaInstruction addRoomArea)
             {
+                int flag = addRoomArea.Flag;
                 if (!state.Flags.ContainsKey(addRoomArea.Flag))
                 {
-                    throw new Exception($"Tried to find flag {addRoomArea.Flag} but not set");
+                    flag = -1;
+                    _log.Error($"Tried to find flag {addRoomArea.Flag} but not set");
                 }
 
                 if (!state.Flags.ContainsKey(addRoomArea.Flag + 1))
                 {
-                    throw new Exception($"Tried to find second flag {(addRoomArea.Flag + 1)} but not set");
+                    flag = -1;
+                    _log.Error($"Tried to find flag {(addRoomArea.Flag + 1)} but not set");
                 }
 
-                state.BackgroundOffset[addRoomArea.Num] = (state.Flags[addRoomArea.Flag], state.Flags[addRoomArea.Flag + 1]);
+                if (flag >= 0)
+                {
+                    state.BackgroundOffset[addRoomArea.Num] = (state.Flags[addRoomArea.Flag], state.Flags[addRoomArea.Flag + 1]);
+                }
             }
 
             stateByInstruction.Add(state);

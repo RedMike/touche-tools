@@ -18,8 +18,9 @@ public class ProgramReferenceViewWindow : IWindow
     private readonly ActiveSequence _sequence;
     private readonly ActiveCharacter _character;
     private readonly ActiveAnimation _animation;
+    private readonly ActiveProgram _program;
 
-    public ProgramReferenceViewWindow(WindowSettings windowSettings, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette, ActiveRoom room, ActiveSprite sprite, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation)
+    public ProgramReferenceViewWindow(WindowSettings windowSettings, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette, ActiveRoom room, ActiveSprite sprite, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveProgram program)
     {
         _windowSettings = windowSettings;
         _spriteViewSettings = spriteViewSettings;
@@ -31,6 +32,7 @@ public class ProgramReferenceViewWindow : IWindow
         _sequence = sequence;
         _character = character;
         _animation = animation;
+        _program = program;
     }
 
     public void Render()
@@ -68,6 +70,16 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
 
         ImGui.Text("Data:");
+        ImGui.Text("Other programs:");
+        foreach (var program in _programViewSettings.Data.OtherPrograms.OrderBy(x => x))
+        {
+            ImGui.SameLine();
+            if (ImGui.Button($"{program}"))
+            {
+                _program.SetActive(program);
+            }
+        }
+        
         ImGui.Text("Rooms:");
         foreach (var room in _programViewSettings.Data.LoadedRooms.OrderBy(x => x))
         {
