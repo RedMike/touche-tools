@@ -11,14 +11,16 @@ public class RoomViewSettingsWindow : BaseWindow
     private readonly RoomViewSettings _viewSettings;
     private readonly MultiActiveRects _rects;
     private readonly MultiActiveBackgrounds _backgrounds;
+    private readonly ActiveRoom _room;
 
 
-    public RoomViewSettingsWindow(WindowSettings windowSettings, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds)
+    public RoomViewSettingsWindow(WindowSettings windowSettings, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, ActiveRoom room)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _rects = rects;
         _backgrounds = backgrounds;
+        _room = room;
     }
 
     public override void Render()
@@ -32,6 +34,31 @@ public class RoomViewSettingsWindow : BaseWindow
         ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth - 350.0f, 200.0f));
         ImGui.Begin("View Settings", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
+        var (_, roomW, roomH, _) = _room.RoomView;
+        var origAreaOffsetX = _viewSettings.AreaOffsetX;
+        if (origAreaOffsetX > roomW)
+        {
+            origAreaOffsetX = roomW;
+        }
+        var areaOffsetX = origAreaOffsetX;
+        ImGui.SliderInt("Area X offset", ref areaOffsetX, -roomW, roomW);
+        if (areaOffsetX != origAreaOffsetX)
+        {
+            _viewSettings.AreaOffsetX = areaOffsetX;
+        }
+        
+        var origAreaOffsetY = _viewSettings.AreaOffsetY;
+        if (origAreaOffsetY > roomH)
+        {
+            origAreaOffsetY = roomH;
+        }
+        var areaOffsetY = origAreaOffsetY;
+        ImGui.SliderInt("Area Y offset", ref areaOffsetY, -roomH, roomH);
+        if (areaOffsetY != origAreaOffsetY)
+        {
+            _viewSettings.AreaOffsetX = areaOffsetY;
+        }
+        
         ObservableCheckboxList("Rects", _rects);
         ObservableCheckboxList("Backgrounds", _backgrounds);
         

@@ -72,6 +72,8 @@ public class RoomViewWindow : IWindow
         ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
         var (viewId, roomWidth, roomHeight, bytes) = _room.RoomView;
+        var areaOffsetX = _viewSettings.AreaOffsetX;
+        var areaOffsetY = _viewSettings.AreaOffsetY;
     
         var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
         var contentRegion = ImGui.GetWindowContentRegionMin();
@@ -95,12 +97,12 @@ public class RoomViewWindow : IWindow
                 var borderWidth = 1;
                 var rectTexture = _render.RenderRectangle(borderWidth, rectW, rectH, (rectR, rectG, rectB, 150), (borderR, borderG, borderB, 255));
                 
-                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX, contentRegion.Y + rectY));
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX + areaOffsetX, contentRegion.Y + rectY + areaOffsetY));
                 ImGui.Image(rectTexture, new Vector2(rectW, rectH));
 
                 var text = $"Rect {idx} ({rectX},{rectY} x {rectW},{rectH})";
                 var textSize = ImGui.CalcTextSize(text);
-                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX + rectW - textSize.X - borderWidth, contentRegion.Y + rectY + rectH - textSize.Y - borderWidth));
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX + areaOffsetX + rectW - textSize.X - borderWidth, contentRegion.Y + rectY + areaOffsetY + rectH - textSize.Y - borderWidth));
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(borderR/255.0f, borderG/255.0f, borderB/255.0f, 1.0f));
                 ImGui.Text(text);
                 ImGui.PopStyleColor();
@@ -127,22 +129,22 @@ public class RoomViewWindow : IWindow
                 
                 var rectTexture = _render.RenderRectangle(borderWidth, rectW, rectH, (rectR, rectG, rectB, 150), (borderR, borderG, borderB, 255));
                 
-                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX, contentRegion.Y + rectY));
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX + areaOffsetX, contentRegion.Y + rectY + areaOffsetY));
                 ImGui.Image(rectTexture, new Vector2(rectW, rectH));
 
                 var text = $"Background {idx} destination ({rectX},{rectY} x {rectW},{rectH})";
                 var textSize = ImGui.CalcTextSize(text);
-                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX + rectW - textSize.X - borderWidth, contentRegion.Y + rectY + rectH - textSize.Y - borderWidth));
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + rectX + areaOffsetX + rectW - textSize.X - borderWidth, contentRegion.Y + rectY + areaOffsetY + rectH - textSize.Y - borderWidth));
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(borderR/255.0f, borderG/255.0f, borderB/255.0f, 1.0f));
                 ImGui.Text(text);
                 ImGui.PopStyleColor();
                 
-                ImGui.SetCursorPos(new Vector2(contentRegion.X + srcX, contentRegion.Y + srcY));
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + srcX + areaOffsetX, contentRegion.Y + srcY + areaOffsetY));
                 ImGui.Image(rectTexture, new Vector2(rectW, rectH));
 
                 var text2 = $"Background {idx} source ({srcX},{srcY} x {rectW},{rectH})";
                 var textSize2 = ImGui.CalcTextSize(text2);
-                ImGui.SetCursorPos(new Vector2(contentRegion.X + srcX + rectW - textSize2.X - borderWidth, contentRegion.Y + srcY + rectH - textSize2.Y - borderWidth));
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + srcX + areaOffsetX + rectW - textSize2.X - borderWidth, contentRegion.Y + srcY + areaOffsetY + rectH - textSize2.Y - borderWidth));
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(borderR/255.0f, borderG/255.0f, borderB/255.0f, 1.0f));
                 ImGui.Text(text2);
                 ImGui.PopStyleColor();
