@@ -25,6 +25,6 @@ public class GetInventoryItemInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} move STK position to {(CurrentCharacter ? "current" : Character)}'s {(MoneyItem ? "money" : Item)}";
+        return $"{Opcode:G} load {(CurrentCharacter ? "current" : Character)}'s {(MoneyItem ? "money" : Item)} into STK value";
     }
 }

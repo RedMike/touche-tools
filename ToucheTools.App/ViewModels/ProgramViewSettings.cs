@@ -44,6 +44,9 @@ public class ProgramViewSettings
         
         public Dictionary<int, int> KnownStackValues = new Dictionary<int, int>();
 
+        public Dictionary<int, Dictionary<int, int>> InventoryValuesByKeyChar =
+            new Dictionary<int, Dictionary<int, int>>();
+
         public int? StackPointerValue => KnownStackValues.ContainsKey(StackPointerLocation)
             ? KnownStackValues[StackPointerLocation]
             : null;
@@ -62,6 +65,8 @@ public class ProgramViewSettings
                 Flags = Flags.ToDictionary(p => p.Key, p => p.Value),
                 StackPointerLocation = StackPointerLocation,
                 KnownStackValues = KnownStackValues.ToDictionary(p => p.Key, p => p.Value),
+                InventoryValuesByKeyChar = InventoryValuesByKeyChar.ToDictionary(p => p.Key, p => p.Value
+                    .ToDictionary(p2 => p2.Key, p2 => p2.Value)),
             };
         }
     }
@@ -107,6 +112,57 @@ public class ProgramViewSettings
             } else if (pair.Value is FetchScriptWordInstruction fetchScriptWord)
             {
                 state.KnownStackValues[state.StackPointerLocation] = fetchScriptWord.Val;
+            } else if (pair.Value is GetInventoryItemInstruction getInventoryItem)
+            {
+                var val = 0;
+                if (state.InventoryValuesByKeyChar.ContainsKey(getInventoryItem.Character) && state
+                        .InventoryValuesByKeyChar[getInventoryItem.Character].ContainsKey(getInventoryItem.Item))
+                {
+                    val = state.InventoryValuesByKeyChar[getInventoryItem.Character][getInventoryItem.Item];
+                }
+                state.KnownStackValues[state.StackPointerLocation] = val;
+            } else if (pair.Value is SetInventoryItemInstruction setInventoryItem)
+            {
+                if (state.StackPointerValue == null)
+                {
+                    _log.Error("Unknown STK value when setting inventory");
+                }
+                else
+                {
+                    if (!state.InventoryValuesByKeyChar.ContainsKey(setInventoryItem.Character))
+                    {
+                        state.InventoryValuesByKeyChar[setInventoryItem.Character] = new Dictionary<int, int>();
+                    }
+
+                    state.InventoryValuesByKeyChar[setInventoryItem.Character][setInventoryItem.Item] =
+                        state.StackPointerValue.Value;
+                }
+            } else if (pair.Value is AddItemToInventoryAndRedrawInstruction addInventoryItem)
+            {
+                if (state.StackPointerValue == null)
+                {
+                    _log.Error("Unknown STK value when adding to inventory");
+                }
+                else
+                {
+                    if (!state.InventoryValuesByKeyChar.ContainsKey(addInventoryItem.Character))
+                    {
+                        state.InventoryValuesByKeyChar[addInventoryItem.Character] = new Dictionary<int, int>();
+                    }
+
+                    state.InventoryValuesByKeyChar[addInventoryItem.Character][state.StackPointerValue.Value] = 1;
+                }
+            }
+            else if (pair.Value is PushInstruction push)
+            {
+                state.StackPointerLocation--;
+                state.KnownStackValues[state.StackPointerLocation] = 0;
+            } else if (pair.Value is AddInstruction add)
+            {
+                var val = state.StackPointerValue ?? 0;
+                state.StackPointerLocation++;
+                var otherVal = state.StackPointerValue ?? 0;
+                state.KnownStackValues[state.StackPointerLocation] = val + otherVal;
             } else if (pair.Value is LoadRoomInstruction loadRoom)
             {
                 state.LoadedRoom = loadRoom.Num;

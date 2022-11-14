@@ -88,6 +88,31 @@ public class ProgramReferenceViewWindow : IWindow
                     ImGui.EndTable();
                 }
             }
+
+            if (stateAtEvaluate.InventoryValuesByKeyChar.Count > 0)
+            {
+                ImGui.Text("Inventory:");
+                foreach (var pair in stateAtEvaluate.InventoryValuesByKeyChar)
+                {
+                    if (ImGui.CollapsingHeader($"KeyChar {pair.Key}"))
+                    {
+                        ImGui.BeginTable($"items_{pair.Key}", 2);
+                        ImGui.TableSetupColumn("Item");
+                        ImGui.TableSetupColumn("Amount");
+                        ImGui.TableHeadersRow();
+                        foreach (var itemPair in pair.Value)
+                        {
+                            ImGui.TableNextColumn();
+                            ImGui.Text(itemPair.Key.ToString());
+                            ImGui.TableNextColumn();
+                            ImGui.Text(itemPair.Value.ToString());
+                            ImGui.TableNextRow();
+                        }
+
+                        ImGui.EndTable();
+                    }
+                }
+            }
         }
 
         ImGui.Separator();
