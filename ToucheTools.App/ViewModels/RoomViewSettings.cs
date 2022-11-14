@@ -10,6 +10,7 @@ public class RoomViewSettings
     private readonly ActiveProgram _program;
 
     public bool ShowRects { get; set; } = true;
+    public bool ShowBackgrounds { get; set; } = true;
 
     public RoomViewSettings(DatabaseModel model, ActiveRoom room, ActiveProgram program)
     {

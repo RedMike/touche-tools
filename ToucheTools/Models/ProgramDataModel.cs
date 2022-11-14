@@ -49,6 +49,15 @@ public class ProgramDataModel
         public int Offset { get; set; }
         public int ScaleMul { get; set; }
         public int ScaleDiv { get; set; }
+
+        /// <summary>
+        /// If not drawable then only used via adding room area?
+        /// </summary>
+        public bool IsDrawable => Rect.Y != 20000;
+        /// <summary>
+        /// Influenced by ScaleMul/ScaleDiv and Offset
+        /// </summary>
+        public bool IsScaled => IsDrawable && Type == 4;
     }
 
     public class Hitbox
