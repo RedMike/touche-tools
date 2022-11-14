@@ -97,7 +97,9 @@ public class ProgramViewSettings
 
         ReferencedSpritesView = spriteView;
 
+        //TODO: this can collide
         CharacterScriptOffsetView = program.CharScriptOffsets.ToDictionary(c => c.Character, c => c.Offs);
+        //TODO: this can collide
         ActionScriptOffsetView = program.ActionScriptOffsets.ToDictionary(a => (a.Action, a.Object1, a.Object2), a => a.Offset);
     }
 }
