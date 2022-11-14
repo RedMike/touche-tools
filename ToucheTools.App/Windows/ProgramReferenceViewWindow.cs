@@ -49,9 +49,9 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
 
-        ImGui.Text("State:");
         if (_programViewSettings.EvaluateUntil >= 0)
         {
+            ImGui.Text("State:");
             var stateAtEvaluate = _programViewSettings.StateByInstruction[_programViewSettings.EvaluateUntil];
 
             if (stateAtEvaluate.LoadedRoom != null)
@@ -63,6 +63,27 @@ public class ProgramReferenceViewWindow : IWindow
                     _room.SetActive(stateAtEvaluate.LoadedRoom.Value);
                     _palette.SetActive(stateAtEvaluate.LoadedRoom.Value);
                     _windowSettings.OpenRoomView();
+                }
+            }
+
+            if (stateAtEvaluate.Flags.Count > 0)
+            {
+                if (ImGui.CollapsingHeader("Flags", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    ImGui.BeginTable("flags", 2);
+                    ImGui.TableSetupColumn("Flag");
+                    ImGui.TableSetupColumn("Value");
+                    ImGui.TableHeadersRow();
+                    foreach (var pair in stateAtEvaluate.Flags)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.Text(pair.Key.ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.Text(pair.Value.ToString());
+                        ImGui.TableNextRow();
+                    }
+
+                    ImGui.EndTable();
                 }
             }
         }
@@ -91,6 +112,7 @@ public class ProgramReferenceViewWindow : IWindow
                 _windowSettings.OpenRoomView();
             }
         }
+       
         ImGui.Separator();
         ImGui.Text("Sprites (Sequence, Character):");
         foreach (var group in _programViewSettings.Data.SpriteSequenceCharacterCombinations
