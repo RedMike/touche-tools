@@ -46,6 +46,14 @@ public class ProgramReferenceViewWindow : IWindow
             LabelAndButton("In a branch, will return to offset: ", $"{state.JumpOffset.Value:D5}");
         }
         ImGui.Text($"STK at: {state.StackPointer:D4} value: {state.Stack[state.StackPointer]}");
+        if (state.LoadedRoom == null)
+        {
+            ImGui.Text($"Not in a room yet");
+        }
+        else
+        {
+            LabelAndButton("In room: ", $"{state.LoadedRoom}");
+        }
         #endregion
         
         ImGui.Separator();

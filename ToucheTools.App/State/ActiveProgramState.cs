@@ -26,6 +26,7 @@ public class ActiveProgramState
         public ushort StackPointer { get; set; } = 0;
         public ushort[] Stack { get; set; } = new ushort[500];
 
+        public int? LoadedRoom { get; set; } = null;
         public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
@@ -120,6 +121,9 @@ public class ActiveProgramState
                 SequenceIndex = initCharScript.SequenceIndex,
                 Character = initCharScript.SequenceCharacterId
             };
+        } else if (instruction is LoadRoomInstruction loadRoom)
+        {
+            CurrentState.LoadedRoom = loadRoom.Num;
         }
 
         else

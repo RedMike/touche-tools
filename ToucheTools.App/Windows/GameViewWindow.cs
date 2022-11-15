@@ -47,12 +47,12 @@ public class GameViewWindow : BaseWindow
 
     private void RenderRoom(Vector2 offset)
     {
-        if (_activeProgramState.CurrentState == null || _activeProgramState.CurrentState == null)
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
 
-        var activeRoom = 55;
+        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
         var offsetX = 0;
         var offsetY = 0;
         var w = Constants.GameScreenWidth;
