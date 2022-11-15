@@ -9,12 +9,26 @@ public class ActiveProgramState
 {
     public class ProgramState
     {
+        public class KeyChar
+        {
+            public int? SpriteIndex { get; set; }
+            public int? SequenceIndex { get; set; }
+            public int? Character { get; set; } //within sequence
+            public int? Animation { get; set; } //within sequence
+            public int? PositionX { get; set; }
+            public int? PositionY { get; set; }
+        }
+        
         public int CurrentProgram { get; set; } = 0;
         public int CurrentOffset { get; set; } = 0;
         public int? JumpOffset { get; set; } = null;
         
         public ushort StackPointer { get; set; } = 0;
         public ushort[] Stack { get; set; } = new ushort[500];
+
+        public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
+        public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
+        public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
     }
 
     private readonly DatabaseModel _model;
@@ -70,6 +84,42 @@ public class ActiveProgramState
         } else if (instruction is FetchScriptWordInstruction fetchScriptWord)
         {
             CurrentState.Stack[CurrentState.StackPointer] = fetchScriptWord.Val;
+        } else if (instruction is LoadSpriteInstruction loadSprite)
+        {
+            if (CurrentState.SpriteIndexToNum.ContainsKey(loadSprite.Index))
+            {
+                throw new Exception("Reloaded same sprite: " + loadSprite.Index);
+            }
+            CurrentState.SpriteIndexToNum[loadSprite.Index] = loadSprite.Num;
+        } else if (instruction is LoadSequenceInstruction loadSequence)
+        {
+            if (CurrentState.SequenceIndexToNum.ContainsKey(loadSequence.Index))
+            {
+                throw new Exception("Reloaded same sequence: " + loadSequence.Index);
+            }
+            CurrentState.SequenceIndexToNum[loadSequence.Index] = loadSequence.Num;
+        } else if (instruction is InitCharScriptInstruction initCharScript)
+        {
+            if (!CurrentState.SpriteIndexToNum.ContainsKey(initCharScript.SpriteIndex))
+            {
+                throw new Exception("Sprite not loaded yet: " + initCharScript.SpriteIndex);
+            }
+            if (!CurrentState.SequenceIndexToNum.ContainsKey(initCharScript.SequenceIndex))
+            {
+                throw new Exception("Sequence not loaded yet: " + initCharScript.SequenceIndex);
+            }
+
+            if (CurrentState.KeyChars.ContainsKey(initCharScript.Character))
+            {
+                throw new Exception("Reinitialised same keychar: " + initCharScript.Character);
+            }
+
+            CurrentState.KeyChars[initCharScript.Character] = new ProgramState.KeyChar()
+            {
+                SpriteIndex = initCharScript.SpriteIndex,
+                SequenceIndex = initCharScript.SequenceIndex,
+                Character = initCharScript.SequenceCharacterId
+            };
         }
 
         else

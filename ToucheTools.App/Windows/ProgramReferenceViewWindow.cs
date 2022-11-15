@@ -9,31 +9,11 @@ namespace ToucheTools.App.Windows;
 public class ProgramReferenceViewWindow : IWindow
 {
     private readonly WindowSettings _windowSettings;
-    private readonly SpriteViewSettings _spriteViewSettings;
-    private readonly ProgramViewSettings _programViewSettings;
-    private readonly ProgramViewState _programViewState;
-    private readonly ActivePalette _palette;
-    private readonly ActiveRoom _room;
-    private readonly ActiveSprite _sprite;
-    private readonly ActiveSequence _sequence;
-    private readonly ActiveCharacter _character;
-    private readonly ActiveAnimation _animation;
-    private readonly ActiveProgram _program;
     private readonly ActiveProgramState _activeProgramState;
 
-    public ProgramReferenceViewWindow(WindowSettings windowSettings, SpriteViewSettings spriteViewSettings, ProgramViewSettings programViewSettings, ProgramViewState programViewState, ActivePalette palette, ActiveRoom room, ActiveSprite sprite, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveProgram program, ActiveProgramState activeProgramState)
+    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveProgramState activeProgramState)
     {
         _windowSettings = windowSettings;
-        _spriteViewSettings = spriteViewSettings;
-        _programViewSettings = programViewSettings;
-        _programViewState = programViewState;
-        _palette = palette;
-        _room = room;
-        _sprite = sprite;
-        _sequence = sequence;
-        _character = character;
-        _animation = animation;
-        _program = program;
         _activeProgramState = activeProgramState;
     }
 
@@ -59,14 +39,93 @@ public class ProgramReferenceViewWindow : IWindow
         
         var state = _activeProgramState.CurrentState;
 
+        #region Offsets
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
-        
         if (state.JumpOffset != null)
         {
             LabelAndButton("In a branch, will return to offset: ", $"{state.JumpOffset.Value:D5}");
         }
-        
         ImGui.Text($"STK at: {state.StackPointer:D4} value: {state.Stack[state.StackPointer]}");
+        #endregion
+        
+        ImGui.Separator();
+        
+        #region Characters
+        if (state.KeyChars.Count > 0)
+        {
+            if (ImGui.CollapsingHeader("Key Character Graphics", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                ImGui.BeginTable("key_char_graphics", 6);
+                ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("Sprite");
+                ImGui.TableSetupColumn("Seq");
+                ImGui.TableSetupColumn("Char");
+                ImGui.TableSetupColumn("Anim");
+                ImGui.TableSetupColumn("Link");
+                ImGui.TableHeadersRow();
+                foreach (var (keyCharId, keyChar) in state.KeyChars)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    if (keyChar.SpriteIndex != null)
+                    {
+                        ImGui.Text($"{state.SpriteIndexToNum[keyChar.SpriteIndex.Value]}");
+                    }
+                    ImGui.TableNextColumn();
+                    if (keyChar.SequenceIndex != null)
+                    {
+                        ImGui.Text($"{state.SequenceIndexToNum[keyChar.SequenceIndex.Value]}");
+                    }
+                    ImGui.TableNextColumn();
+                    if (keyChar.Character != null)
+                    {
+                        ImGui.Text($"{keyChar.Character.Value}");
+                    }
+                    ImGui.TableNextColumn();
+                    if (keyChar.Animation != null)
+                    {
+                        ImGui.Text($"{keyChar.Animation.Value}");
+                    }
+                    ImGui.TableNextColumn();
+                    if (ImGui.Button("Go to"))
+                    {
+                        //TODO: link to sprite view
+                    }
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
+            
+            if (ImGui.CollapsingHeader("Key Character Position", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                ImGui.BeginTable("key_char_position", 3);
+                ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("X");
+                ImGui.TableSetupColumn("Y");
+                ImGui.TableHeadersRow();
+                foreach (var (keyCharId, keyChar) in state.KeyChars)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    if (keyChar.PositionX != null)
+                    {
+                        ImGui.Text($"{keyChar.PositionX}");
+                    }
+                    ImGui.TableNextColumn();
+                    if (keyChar.PositionY != null)
+                    {
+                        ImGui.Text($"{keyChar.PositionY}");
+                    }
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
+        }
+        #endregion
 
         // if (_programViewSettings.EvaluateUntil >= 0)
         // {
