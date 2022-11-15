@@ -1,4 +1,5 @@
-﻿using ToucheTools.Models;
+﻿using ToucheTools.App.Services;
+using ToucheTools.Models;
 
 namespace ToucheTools.App.ViewModels.Observables;
 
@@ -6,10 +7,11 @@ public class ActiveRoom : ActiveObservable<int>
 {
     private readonly DatabaseModel _databaseModel;
     private readonly ActivePalette _palette;
+    private readonly RoomImageRenderer _renderer;
     
     public (string, int, int, byte[]) RoomView { get; private set; }
     
-    public ActiveRoom(DatabaseModel model, ActivePalette palette)
+    public ActiveRoom(DatabaseModel model, ActivePalette palette, RoomImageRenderer renderer)
     {
         _databaseModel = model;
         SetElements(model.Rooms.Keys.ToList());
@@ -17,6 +19,7 @@ public class ActiveRoom : ActiveObservable<int>
         ObserveActive(GenerateRoomView);
         
         _palette = palette;
+        _renderer = renderer;
         _palette.ObserveActive(GenerateRoomView);
         
         GenerateRoomView();
@@ -33,20 +36,8 @@ public class ActiveRoom : ActiveObservable<int>
         {
             return;
         }
-        
-        var bytes = new byte[roomImage.Width * roomImage.Height * 4];
-        for (var i = 0; i < roomImage.Width; i++)
-        {
-            for (var j = 0; j < roomImage.Height; j++)
-            {
-                var rawCol = roomImage.RawData[j, i];
-                var col = palette.Colors[rawCol];
-                bytes[(j * roomImage.Width + i) * 4 + 0] = col.R;
-                bytes[(j * roomImage.Width + i) * 4 + 1] = col.G;
-                bytes[(j * roomImage.Width + i) * 4 + 2] = col.B;
-                bytes[(j * roomImage.Width + i) * 4 + 3] = 255;
-            }
-        }
+
+        var bytes = _renderer.RenderRoomImage(roomImage.Width, roomImage.Height, palette.Colors, roomImage.RawData);
 
         RoomView = (viewId, roomImage.Width, roomImage.Height, bytes);
     }

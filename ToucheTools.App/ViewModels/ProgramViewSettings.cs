@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ToucheTools.App.State;
 using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
@@ -10,6 +11,7 @@ public class ProgramViewSettings
     private readonly DatabaseModel _databaseModel;
     private readonly ActiveProgram _program;
     private readonly LogData _log;
+    private readonly ActiveProgramState _activeProgramState;
     
     public List<(int, string)> InstructionsView { get; private set; } = null!;
     public int EvaluateUntil { get; private set; }
@@ -76,12 +78,13 @@ public class ProgramViewSettings
     public ProgramData Data { get; set; } = null!;
     
 
-    public ProgramViewSettings(DatabaseModel model, ActiveProgram program, LogData log)
+    public ProgramViewSettings(DatabaseModel model, ActiveProgram program, LogData log, ActiveProgramState activeProgramState)
     {
         _databaseModel = model;
         
         _program = program;
         _log = log;
+        _activeProgramState = activeProgramState;
         _program.ObserveActive(GenerateView);
         EvaluateUntil = -1;
         
@@ -91,6 +94,7 @@ public class ProgramViewSettings
     public void SetEvaluateUntil(int index)
     {
         EvaluateUntil = index;
+        _activeProgramState.CurrentState = StateByInstruction[InstructionsView[EvaluateUntil].Item1];
     }
 
     private void GenerateView()

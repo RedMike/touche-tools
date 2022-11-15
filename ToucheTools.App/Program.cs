@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ToucheTools;
 using ToucheTools.App;
+using ToucheTools.App.Services;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.App.ViewModels.Observables;
@@ -43,6 +44,8 @@ container.AddSingleton<ProgramViewSettings>();
 container.AddSingleton<ProgramViewState>();
 container.AddSingleton<SpriteViewState>();
 container.AddSingleton<ActiveProgramState>();
+
+container.AddSingleton<RoomImageRenderer>();
 #endregion
 
 #region Windows
