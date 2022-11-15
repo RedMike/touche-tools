@@ -46,6 +46,7 @@ container.AddSingleton<SpriteViewState>();
 container.AddSingleton<ActiveProgramState>();
 
 container.AddSingleton<RoomImageRenderer>();
+container.AddSingleton<SpriteSheetRenderer>();
 #endregion
 
 #region Windows
