@@ -101,6 +101,7 @@ public class ProgramViewSettings
         var programData = new ProgramData();
         var stateByInstruction = new Dictionary<int, ProgramState>();
         var prevState = new ProgramState();
+        //TODO: recursing debug stuff
         //start recursing from the first instruction
         //  when hitting a jump instruction recurse through the jump and continue too
         //  also recurse from CSOs/ASOs
