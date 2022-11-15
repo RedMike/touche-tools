@@ -43,6 +43,15 @@ public class ActiveProgramState
         public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
+
+        public Dictionary<ushort, ushort> Flags { get; set; } = new Dictionary<ushort, ushort>()
+        {
+            //values set from game code
+            { 291, 240 },
+            { 292, 16 },
+            { 293, 0 },
+            { 294, 1 },
+        };
     }
 
     private readonly DatabaseModel _model;
@@ -68,6 +77,7 @@ public class ActiveProgramState
             {
                 CurrentProgram = _program.Active
             };
+            CurrentState.Flags[0] = (ushort)_program.Active;
         }
     }
     
@@ -164,6 +174,25 @@ public class ActiveProgramState
             {
                 throw new Exception("Unknown transition type: " + setCharFrame.TransitionType);
             }
+        } else if (instruction is EnableInputInstruction)
+        {
+            
+        } else if (instruction is SetFlagInstruction setFlag)
+        {
+            var val = CurrentState.Stack[CurrentState.StackPointer];
+            CurrentState.Flags[setFlag.Flag] = val;
+            
+            if (setFlag.Flag == 104)
+            {
+                //TODO: selects current keychar
+            } else if (setFlag.Flag == 611 && val != 0)
+            {
+                //TODO: quits game
+            } else if (setFlag.Flag == 612)
+            {
+                var newVal = 999; //TODO: randomly generate
+                CurrentState.Flags[613] = (ushort)newVal;
+            } //TODO: more
         }
 
         else

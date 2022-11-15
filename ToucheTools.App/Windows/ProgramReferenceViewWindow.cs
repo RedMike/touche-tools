@@ -46,6 +46,33 @@ public class ProgramReferenceViewWindow : IWindow
             LabelAndButton("In a branch, will return to offset: ", $"{state.JumpOffset.Value:D5}");
         }
         ImGui.Text($"STK at: {state.StackPointer:D4} value: {state.Stack[state.StackPointer]}");
+        #endregion
+        
+        ImGui.Separator();
+        
+        #region Flags
+        if (ImGui.CollapsingHeader("Flags", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ImGui.BeginTable("flags", 2);
+            ImGui.TableSetupColumn("Flag");
+            ImGui.TableSetupColumn("Value");
+            ImGui.TableHeadersRow();
+            foreach (var (flagId, flagValue) in state.Flags.OrderBy(p => p.Key))
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text($"{flagId}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{flagValue}");
+                ImGui.TableNextRow();
+            }
+            
+            ImGui.EndTable();
+        }
+        #endregion
+        
+        ImGui.Separator();
+        
+        #region Location
         if (state.LoadedRoom == null)
         {
             ImGui.Text($"Not in a room yet");
@@ -53,6 +80,63 @@ public class ProgramReferenceViewWindow : IWindow
         else
         {
             LabelAndButton("In room: ", $"{state.LoadedRoom}");
+        }
+        #endregion
+        
+        ImGui.Separator();
+        
+        #region Loaded data
+        if (state.SpriteIndexToNum.Count > 0)
+        {
+            if (ImGui.CollapsingHeader($"Loaded Sprites ({state.SpriteIndexToNum.Count})"))
+            {
+                ImGui.BeginTable("sprites", 3);
+                ImGui.TableSetupColumn("Index");
+                ImGui.TableSetupColumn("Sprite");
+                ImGui.TableSetupColumn("Link");
+                ImGui.TableHeadersRow();
+                foreach (var (spriteIndex, spriteNum) in state.SpriteIndexToNum.OrderBy(p => p.Key))
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{spriteIndex}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{spriteNum}");
+                    ImGui.TableNextColumn();
+                    if (ImGui.Button("Go to"))
+                    {
+                        //TODO: link to sprite view
+                    }
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
+        }
+        if (state.SequenceIndexToNum.Count > 0)
+        {
+            if (ImGui.CollapsingHeader($"Loaded Sequences ({state.SequenceIndexToNum.Count})"))
+            {
+                ImGui.BeginTable("sequences", 3);
+                ImGui.TableSetupColumn("Index");
+                ImGui.TableSetupColumn("Seq");
+                ImGui.TableSetupColumn("Link");
+                ImGui.TableHeadersRow();
+                foreach (var (seqIndex, seqNum) in state.SequenceIndexToNum.OrderBy(p => p.Key))
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{seqIndex}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{seqNum}");
+                    ImGui.TableNextColumn();
+                    if (ImGui.Button("Go to"))
+                    {
+                        //TODO: link to sequence view
+                    }
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
         }
         #endregion
         
@@ -70,7 +154,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Char");
                 ImGui.TableSetupColumn("Link");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars)
+                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -111,7 +195,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("A3 Start");
                 ImGui.TableSetupColumn("A3 Count");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars)
+                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -140,7 +224,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("X");
                 ImGui.TableSetupColumn("Y");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars)
+                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
