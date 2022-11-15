@@ -37,7 +37,7 @@ public class ActiveRoom : ActiveObservable<int>
             return;
         }
 
-        var bytes = _renderer.RenderRoomImage(roomImage.Width, roomImage.Height, palette.Colors, roomImage.RawData);
+        var bytes = _renderer.RenderRoomImage(roomImageId, roomImage, _palette.Active, palette);
 
         RoomView = (viewId, roomImage.Width, roomImage.Height, bytes);
     }

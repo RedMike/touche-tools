@@ -63,9 +63,7 @@ public class GameViewWindow : BaseWindow
         var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
         var viewId = $"{roomImageId}_{activeRoom}_{offsetX}_{offsetY}_{w}_{h}";
 
-        var bytes = _roomImageRenderer.RenderPartialRoomImage(roomImage.Width, roomImage.Height,
-            palette.Colors,
-            roomImage.RawData, offsetX, offsetY, w, h);
+        var bytes = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, offsetX, offsetY, w, h);
 
         var roomFullTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, w, h, bytes);
 
