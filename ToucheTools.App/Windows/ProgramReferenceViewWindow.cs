@@ -51,7 +51,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         #region Flags
-        if (ImGui.CollapsingHeader("Flags", ImGuiTreeNodeFlags.DefaultOpen))
+        if (ImGui.CollapsingHeader("Flags"))
         {
             ImGui.BeginTable("flags", 2);
             ImGui.TableSetupColumn("Flag");
@@ -184,7 +184,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.EndTable();
             }
             
-            if (ImGui.CollapsingHeader("Key Character Animations", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Key Character Animations"))
             {
                 ImGui.BeginTable("key_char_anims", 7);
                 ImGui.TableSetupColumn("ID");
@@ -219,10 +219,12 @@ public class ProgramReferenceViewWindow : IWindow
             
             if (ImGui.CollapsingHeader("Key Character Position", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.BeginTable("key_char_position", 3);
+                ImGui.BeginTable("key_char_position", 5);
                 ImGui.TableSetupColumn("ID");
                 ImGui.TableSetupColumn("X");
                 ImGui.TableSetupColumn("Y");
+                ImGui.TableSetupColumn("Z");
+                ImGui.TableSetupColumn("Point");
                 ImGui.TableHeadersRow();
                 foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
                 {
@@ -237,6 +239,17 @@ public class ProgramReferenceViewWindow : IWindow
                     if (keyChar.PositionY != null)
                     {
                         ImGui.Text($"{keyChar.PositionY}");
+                    }
+
+                    ImGui.TableNextColumn();
+                    if (keyChar.PositionZ != null)
+                    {
+                        ImGui.Text($"{keyChar.PositionZ}");
+                    }
+                    ImGui.TableNextColumn();
+                    if (keyChar.LastProgramPoint != null)
+                    {
+                        ImGui.Text($"{keyChar.LastProgramPoint}");
                     }
                     ImGui.TableNextRow();
                 }

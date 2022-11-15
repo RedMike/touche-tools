@@ -27,8 +27,10 @@ public class ActiveProgramState
             #endregion
             
             #region Position
+            public ushort? LastProgramPoint { get; set; }
             public int? PositionX { get; set; }
             public int? PositionY { get; set; }
+            public int? PositionZ { get; set; }
             #endregion
         }
         
@@ -133,17 +135,14 @@ public class ActiveProgramState
                 throw new Exception("Sequence not loaded yet: " + initCharScript.SequenceIndex);
             }
 
-            if (CurrentState.KeyChars.ContainsKey(initCharScript.Character))
+            if (!CurrentState.KeyChars.ContainsKey(initCharScript.Character))
             {
-                throw new Exception("Reinitialised same keychar: " + initCharScript.Character);
+                CurrentState.KeyChars[initCharScript.Character] = new ProgramState.KeyChar();
             }
-
-            CurrentState.KeyChars[initCharScript.Character] = new ProgramState.KeyChar()
-            {
-                SpriteIndex = initCharScript.SpriteIndex,
-                SequenceIndex = initCharScript.SequenceIndex,
-                Character = initCharScript.SequenceCharacterId
-            };
+            var keyChar = CurrentState.KeyChars[initCharScript.Character];
+            keyChar.SpriteIndex = initCharScript.SpriteIndex;
+            keyChar.SequenceIndex = initCharScript.SequenceIndex;
+            keyChar.Character = initCharScript.SequenceCharacterId;
         } else if (instruction is LoadRoomInstruction loadRoom)
         {
             CurrentState.LoadedRoom = loadRoom.Num;
@@ -151,10 +150,10 @@ public class ActiveProgramState
         {
             if (!CurrentState.KeyChars.ContainsKey(setCharFrame.Character))
             {
-                throw new Exception("Unknown keychar: " + setCharFrame.Character);
+                CurrentState.KeyChars[setCharFrame.Character] = new ProgramState.KeyChar();
             }
-
             var keyChar = CurrentState.KeyChars[setCharFrame.Character];
+            
             if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Loop) // 0
             {
                 keyChar.Anim2Start = setCharFrame.Val2;
@@ -193,6 +192,18 @@ public class ActiveProgramState
                 var newVal = 999; //TODO: randomly generate
                 CurrentState.Flags[613] = (ushort)newVal;
             } //TODO: more
+        } else if (instruction is SetCharBoxInstruction setCharBox)
+        {
+            if (!CurrentState.KeyChars.ContainsKey(setCharBox.Character))
+            {
+                CurrentState.KeyChars[setCharBox.Character] = new ProgramState.KeyChar();
+            }
+            var keyChar = CurrentState.KeyChars[setCharBox.Character];
+            var point = program.Points[setCharBox.Num];
+            keyChar.PositionX = point.X;
+            keyChar.PositionY = point.Y;
+            keyChar.PositionZ = point.Z;
+            keyChar.LastProgramPoint = setCharBox.Num;
         }
 
         else
