@@ -10,12 +10,14 @@ public class ProgramViewWindow : IWindow
     private readonly WindowSettings _windowSettings;
     private readonly ProgramViewSettings _viewSettings;
     private readonly ProgramViewState _viewState;
+    private readonly ActiveProgramState _activeProgramState;
 
-    public ProgramViewWindow(WindowSettings windowSettings, ProgramViewSettings viewSettings, ProgramViewState viewState)
+    public ProgramViewWindow(WindowSettings windowSettings, ProgramViewSettings viewSettings, ProgramViewState viewState, ActiveProgramState activeProgramState)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _viewState = viewState;
+        _activeProgramState = activeProgramState;
     }
 
     public void Render()
@@ -36,21 +38,18 @@ public class ProgramViewWindow : IWindow
         var idx = 0;
         foreach (var (offset, instruction) in _viewSettings.InstructionsView)
         {
-            var evaluatedAlready = idx <= _viewSettings.EvaluateUntil;
-            if (evaluatedAlready)
+            var currentInstruction = (_activeProgramState.CurrentState?.CurrentOffset ?? 0) == offset;
+            if (currentInstruction)
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));
             }
 
             _viewState.OffsetYPos[offset] = ImGui.GetCursorPosY();
             _viewState.OffsetToIndex[offset] = idx;
-            if (ImGui.Button($"{offset:D5}"))
-            {
-                _viewSettings.SetEvaluateUntil(idx);
-            }
+            ImGui.Button($"{offset:D5}");
             ImGui.SameLine();
             ImGui.Text($" - {instruction}");
-            if (evaluatedAlready)
+            if (currentInstruction)
             {
                 ImGui.PopStyleColor();
             }

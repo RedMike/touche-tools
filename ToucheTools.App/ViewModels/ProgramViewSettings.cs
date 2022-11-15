@@ -32,6 +32,9 @@ public class ProgramViewSettings
 
     public class ProgramState
     {
+        public int CurrentProgram { get; set; } = 0;
+        public int CurrentOffset { get; set; } = 0;
+        public int? JumpOffset { get; set; } = null;
         public int? LoadedRoom { get; set; } = null;
         public Dictionary<int, int> LoadedSprites { get; set; } = new Dictionary<int, int>(); //index to sprite num
         public Dictionary<int, int> LoadedSequences { get; set; } = new Dictionary<int, int>(); //index to seq num
@@ -58,6 +61,7 @@ public class ProgramViewSettings
             //deep copy
             return new ProgramState()
             {
+                CurrentOffset = CurrentOffset,
                 LoadedRoom = LoadedRoom,
                 LoadedSprites = LoadedSprites.ToDictionary(p => p.Key, p => p.Value),
                 LoadedSequences = LoadedSequences.ToDictionary(p => p.Key, p => p.Value),
@@ -94,7 +98,6 @@ public class ProgramViewSettings
     public void SetEvaluateUntil(int index)
     {
         EvaluateUntil = index;
-        _activeProgramState.CurrentState = StateByInstruction[InstructionsView[EvaluateUntil].Item1];
     }
 
     private void GenerateView()
