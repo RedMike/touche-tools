@@ -42,6 +42,7 @@ container.AddSingleton<ProgramViewSettings>();
 
 container.AddSingleton<ProgramViewState>();
 container.AddSingleton<SpriteViewState>();
+container.AddSingleton<ActiveProgramState>();
 #endregion
 
 #region Windows
