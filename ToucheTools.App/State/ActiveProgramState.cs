@@ -11,6 +11,8 @@ public class ActiveProgramState
     {
         public class KeyChar
         {
+            public bool Initialised { get; set; } = false;
+            
             #region Graphics
             public int? SpriteIndex { get; set; }
             public int? SequenceIndex { get; set; }
@@ -31,6 +33,7 @@ public class ActiveProgramState
             public int? PositionX { get; set; }
             public int? PositionY { get; set; }
             public int? PositionZ { get; set; }
+            public int Direction { get; set; }
             #endregion
         }
         
@@ -160,11 +163,20 @@ public class ActiveProgramState
                 keyChar.Anim2Count = setCharFrame.Val3;
                 keyChar.Anim3Start = setCharFrame.Val2;
                 keyChar.Anim3Count = setCharFrame.Val3;
-            } else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.TalkFrames) //2
+            } else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.RandomCountThenStop) //1
+            {
+                _log.Error("Unknown transition type " + setCharFrame.TransitionType.ToString("G"));
+            }
+            else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.TalkFrames) //2
             {
                 keyChar.Anim1Start = setCharFrame.Val2;
                 keyChar.Anim1Count = setCharFrame.Val3;
-            } else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Todo4) //4
+            } 
+            else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.StartPaused) //3
+            {
+                _log.Error("Unknown transition type " + setCharFrame.TransitionType.ToString("G"));
+            }
+            else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Todo4) //4
             {
                 keyChar.Anim3Start = setCharFrame.Val2;
                 keyChar.Anim3Count = setCharFrame.Val3;
@@ -204,6 +216,21 @@ public class ActiveProgramState
             keyChar.PositionY = point.Y;
             keyChar.PositionZ = point.Z;
             keyChar.LastProgramPoint = setCharBox.Num;
+        } else if (instruction is InitCharInstruction initChar)
+        {
+            if (!CurrentState.KeyChars.ContainsKey(initChar.Character))
+            {
+                CurrentState.KeyChars[initChar.Character] = new ProgramState.KeyChar();
+            }
+            var keyChar = CurrentState.KeyChars[initChar.Character];
+            keyChar.Anim1Start = 0;
+            keyChar.Anim1Count = 1;
+            keyChar.Anim2Start = 0;
+            keyChar.Anim2Count = 1;
+            keyChar.Anim3Start = 0;
+            keyChar.Anim3Count = 1;
+            keyChar.Direction = 0;
+            keyChar.Initialised = true;
         }
 
         else
