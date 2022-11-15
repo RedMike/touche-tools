@@ -22,6 +22,6 @@ public class AddRoomAreaInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} background {Num} position from flags {Flag}, {Flag+1}";
+        return $"{Opcode:G} background {Num} offset flags {Flag}, {Flag+1}";
     }
 }

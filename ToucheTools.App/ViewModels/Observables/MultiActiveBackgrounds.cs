@@ -31,20 +31,17 @@ public class MultiActiveBackgrounds : MultiActiveObservable<int>
         var backgroundsView = new List<((int, int, int, int), (int, int), int, int, int, int)>();
         for (var idx = 0; idx < program.Backgrounds.Count; idx++)
         {
-            if (program.Backgrounds[idx].IsDrawable)
+            if (Elements[idx])
             {
-                if (Elements[idx])
-                {
-                    backgroundsView.Add(
-                        (
-                            (program.Backgrounds[idx].Rect.X, program.Backgrounds[idx].Rect.Y,
-                                program.Backgrounds[idx].Rect.W, program.Backgrounds[idx].Rect.H),
-                            (program.Backgrounds[idx].SrcX, program.Backgrounds[idx].SrcY),
-                            program.Backgrounds[idx].Type, program.Backgrounds[idx].Offset,
-                            program.Backgrounds[idx].ScaleMul, program.Backgrounds[idx].ScaleDiv
-                        )
-                    );
-                }
+                backgroundsView.Add(
+                    (
+                        (program.Backgrounds[idx].Rect.X, program.Backgrounds[idx].Rect.Y,
+                            program.Backgrounds[idx].Rect.W, program.Backgrounds[idx].Rect.H),
+                        (program.Backgrounds[idx].SrcX, program.Backgrounds[idx].SrcY),
+                        program.Backgrounds[idx].Type, program.Backgrounds[idx].Offset,
+                        program.Backgrounds[idx].ScaleMul, program.Backgrounds[idx].ScaleDiv
+                    )
+                );
             }
         }
 
@@ -57,7 +54,7 @@ public class MultiActiveBackgrounds : MultiActiveObservable<int>
         var back = program.Backgrounds[element];
         if (!back.IsDrawable)
         {
-            return $"{element} not drawable";
+            return $"{element} need offset ({back.Rect.X},{back.Rect.Y} x {back.Rect.W},{back.Rect.H} src {back.SrcX}, {back.SrcY})";
         }
 
         if (back.IsScaled)

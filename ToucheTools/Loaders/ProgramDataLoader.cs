@@ -233,7 +233,7 @@ public class ProgramDataLoader
                     SrcX = srcX,
                     SrcY = srcY,
                     Id = id,
-                    State = state,
+                    InitialState = state,
                     AnimationCount = animCount,
                     AnimationNext = animNext
                 };

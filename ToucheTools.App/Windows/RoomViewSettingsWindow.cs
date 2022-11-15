@@ -12,15 +12,17 @@ public class RoomViewSettingsWindow : BaseWindow
     private readonly MultiActiveRects _rects;
     private readonly MultiActiveBackgrounds _backgrounds;
     private readonly ActiveRoom _room;
+    private readonly MultiActiveAreas _areas;
 
 
-    public RoomViewSettingsWindow(WindowSettings windowSettings, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, ActiveRoom room)
+    public RoomViewSettingsWindow(WindowSettings windowSettings, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, ActiveRoom room, MultiActiveAreas areas)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _rects = rects;
         _backgrounds = backgrounds;
         _room = room;
+        _areas = areas;
     }
 
     public override void Render()
@@ -61,6 +63,7 @@ public class RoomViewSettingsWindow : BaseWindow
         
         ObservableCheckboxList("Rects", _rects);
         ObservableCheckboxList("Backgrounds", _backgrounds);
+        ObservableCheckboxList("Areas", _areas);
         
         ImGui.End();
     }

@@ -35,7 +35,7 @@ public class ProgramDataModel
         public int SrcX { get; set; }
         public int SrcY { get; set; }
         public int Id { get; set; }
-        public int State { get; set; }
+        public int InitialState { get; set; }
         public int AnimationCount { get; set; }
         public int AnimationNext { get; set; }
     }
