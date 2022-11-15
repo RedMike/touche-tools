@@ -61,16 +61,13 @@ public class GameViewWindow : BaseWindow
         var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
         var roomImage = _model.RoomImages[roomImageId].Value;
         var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
-        var viewId = $"{roomImageId}_{activeRoom}_{offsetX}_{offsetY}_{w}_{h}";
 
-        var bytes = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, offsetX, offsetY, w, h);
+        var (viewId, bytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, offsetX, offsetY, w, h);
 
         var roomFullTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, w, h, bytes);
 
         ImGui.SetCursorPos(offset);
-        //ImGui.PushClipRect(Vector2.Zero, new Vector2(w, h), false);
         ImGui.Image(roomFullTexture, new Vector2(w, h));
-        //ImGui.PopClipRect();
     }
 
     private void RenderSprites(Vector2 offset)

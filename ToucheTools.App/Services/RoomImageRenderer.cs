@@ -6,7 +6,7 @@ public class RoomImageRenderer
 {
     private readonly Dictionary<string, byte[]> _cache = new Dictionary<string, byte[]>();
     
-    public byte[] RenderRoomImage(int roomImageId, RoomImageDataModel roomImage, int paletteId, PaletteDataModel palette, int offsetX = 0,
+    public (string, byte[]) RenderRoomImage(int roomImageId, RoomImageDataModel roomImage, int paletteId, PaletteDataModel palette, int offsetX = 0,
         int offsetY = 0, int? width = null, int? height = null)
     {
         width ??= roomImage.Width;
@@ -14,13 +14,13 @@ public class RoomImageRenderer
         var id = GetId(roomImageId, paletteId, offsetX, offsetY, width.Value, height.Value);
         if (_cache.ContainsKey(id))
         {
-            return _cache[id];
+            return (id, _cache[id]);
         }
 
         var bytes = RenderPartialRoomImage(roomImage.Width, roomImage.Height, palette.Colors, roomImage.RawData,
             offsetX, offsetY, width.Value, height.Value);
         _cache[id] = bytes;
-        return bytes;
+        return (id, bytes);
     }
 
     private static string GetId(int roomImageId, int paletteId, int offsetX, int offsetY, int width, int height)
