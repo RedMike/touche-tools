@@ -11,12 +11,25 @@ public class ActiveProgramState
     {
         public class KeyChar
         {
+            #region Graphics
             public int? SpriteIndex { get; set; }
             public int? SequenceIndex { get; set; }
             public int? Character { get; set; } //within sequence
-            public int? Animation { get; set; } //within sequence
+            #endregion
+            
+            #region Animation
+            public int Anim1Start { get; set; }
+            public int Anim1Count { get; set; }
+            public int Anim2Start { get; set; }
+            public int Anim2Count { get; set; }
+            public int Anim3Start { get; set; }
+            public int Anim3Count { get; set; }
+            #endregion
+            
+            #region Position
             public int? PositionX { get; set; }
             public int? PositionY { get; set; }
+            #endregion
         }
         
         public int CurrentProgram { get; set; } = 0;
@@ -124,6 +137,33 @@ public class ActiveProgramState
         } else if (instruction is LoadRoomInstruction loadRoom)
         {
             CurrentState.LoadedRoom = loadRoom.Num;
+        } else if (instruction is SetCharFrameInstruction setCharFrame)
+        {
+            if (!CurrentState.KeyChars.ContainsKey(setCharFrame.Character))
+            {
+                throw new Exception("Unknown keychar: " + setCharFrame.Character);
+            }
+
+            var keyChar = CurrentState.KeyChars[setCharFrame.Character];
+            if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Loop) // 0
+            {
+                keyChar.Anim2Start = setCharFrame.Val2;
+                keyChar.Anim2Count = setCharFrame.Val3;
+                keyChar.Anim3Start = setCharFrame.Val2;
+                keyChar.Anim3Count = setCharFrame.Val3;
+            } else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.TalkFrames) //2
+            {
+                keyChar.Anim1Start = setCharFrame.Val2;
+                keyChar.Anim1Count = setCharFrame.Val3;
+            } else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Todo4) //4
+            {
+                keyChar.Anim3Start = setCharFrame.Val2;
+                keyChar.Anim3Count = setCharFrame.Val3;
+            }
+            else
+            {
+                throw new Exception("Unknown transition type: " + setCharFrame.TransitionType);
+            }
         }
 
         else

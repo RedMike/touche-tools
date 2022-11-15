@@ -63,12 +63,11 @@ public class ProgramReferenceViewWindow : IWindow
         {
             if (ImGui.CollapsingHeader("Key Character Graphics", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.BeginTable("key_char_graphics", 6);
+                ImGui.BeginTable("key_char_graphics", 5);
                 ImGui.TableSetupColumn("ID");
                 ImGui.TableSetupColumn("Sprite");
                 ImGui.TableSetupColumn("Seq");
                 ImGui.TableSetupColumn("Char");
-                ImGui.TableSetupColumn("Anim");
                 ImGui.TableSetupColumn("Link");
                 ImGui.TableHeadersRow();
                 foreach (var (keyCharId, keyChar) in state.KeyChars)
@@ -91,15 +90,43 @@ public class ProgramReferenceViewWindow : IWindow
                         ImGui.Text($"{keyChar.Character.Value}");
                     }
                     ImGui.TableNextColumn();
-                    if (keyChar.Animation != null)
-                    {
-                        ImGui.Text($"{keyChar.Animation.Value}");
-                    }
-                    ImGui.TableNextColumn();
                     if (ImGui.Button("Go to"))
                     {
                         //TODO: link to sprite view
                     }
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
+            
+            if (ImGui.CollapsingHeader("Key Character Animations", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                ImGui.BeginTable("key_char_anims", 7);
+                ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("A1 Start");
+                ImGui.TableSetupColumn("A1 Count");
+                ImGui.TableSetupColumn("A2 Start");
+                ImGui.TableSetupColumn("A2 Count");
+                ImGui.TableSetupColumn("A3 Start");
+                ImGui.TableSetupColumn("A3 Count");
+                ImGui.TableHeadersRow();
+                foreach (var (keyCharId, keyChar) in state.KeyChars)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.Anim1Start}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.Anim1Count}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.Anim2Start}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.Anim2Count}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.Anim3Start}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.Anim3Count}");
                     ImGui.TableNextRow();
                 }
             
