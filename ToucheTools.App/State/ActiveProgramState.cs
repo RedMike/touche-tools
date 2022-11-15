@@ -143,6 +143,7 @@ public class ActiveProgramState
                 CurrentState.KeyChars[initCharScript.Character] = new ProgramState.KeyChar();
             }
             var keyChar = CurrentState.KeyChars[initCharScript.Character];
+            keyChar.Initialised = true;
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
@@ -230,9 +231,25 @@ public class ActiveProgramState
             keyChar.Anim3Start = 0;
             keyChar.Anim3Count = 1;
             keyChar.Direction = 0;
-            keyChar.Initialised = true;
-        }
+        } else if (instruction is MoveCharToPosInstruction moveCharToPos)
+        {
+            if (!CurrentState.KeyChars.ContainsKey(moveCharToPos.Character))
+            {
+                CurrentState.KeyChars[moveCharToPos.Character] = new ProgramState.KeyChar();
+            }
+            var keyChar = CurrentState.KeyChars[moveCharToPos.Character];
 
+            if (moveCharToPos.TargetingAnotherCharacter)
+            {
+                throw new Exception("Targeting another character, not implemented");
+            }
+
+            var point = program.Points[moveCharToPos.Num];
+            keyChar.PositionX = point.X;
+            keyChar.PositionY = point.Y;
+            keyChar.PositionZ = point.Z;
+            keyChar.LastProgramPoint = moveCharToPos.Num;
+        }
         else
         {
             _log.Error($"Unhandled instruction type: {instruction.Opcode:G}");

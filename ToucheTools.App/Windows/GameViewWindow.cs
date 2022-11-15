@@ -96,10 +96,10 @@ public class GameViewWindow : BaseWindow
         var colIdx = 0;
         foreach (var (keyCharId, keyChar) in _activeProgramState.CurrentState.KeyChars)
         {
-            // if (!keyChar.Initialised)
-            // {
-            //     continue;
-            // }
+            if (!keyChar.Initialised)
+            {
+                continue;
+            }
             var (colR, colG, colB) = _colours[colIdx];
             colIdx++;
             colIdx = colIdx % _colours.Count;
@@ -207,7 +207,7 @@ public class GameViewWindow : BaseWindow
             ImGui.SetCursorPos(offset + new Vector2(ox , oy));
             ImGui.Image(rectTexture, new Vector2(width, height));
 
-            var text = $"KeyChar {keyCharId}";
+            var text = $"{keyCharId}";
             var textSize = ImGui.CalcTextSize(text);
             ImGui.SetCursorPos(offset + new Vector2(ox + width - textSize.X - 2, oy + height - textSize.Y - 2));
             ImGui.Text(text);
