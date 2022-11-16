@@ -269,8 +269,9 @@ public class ProgramReferenceViewWindow : IWindow
         {
             if (ImGui.CollapsingHeader("Background Areas", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.BeginTable("background_areas", 7);
+                ImGui.BeginTable("background_areas", 8);
                 ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("Draw");
                 ImGui.TableSetupColumn("DX");
                 ImGui.TableSetupColumn("DY");
                 ImGui.TableSetupColumn("W");
@@ -294,6 +295,8 @@ public class ProgramReferenceViewWindow : IWindow
 
                     ImGui.TableNextColumn();
                     ImGui.Text($"{idx}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{(destY != 20000 ? "Y" : "N")}");
                     ImGui.TableNextColumn();
                     ImGui.Text($"{destX}");
                     ImGui.TableNextColumn();
