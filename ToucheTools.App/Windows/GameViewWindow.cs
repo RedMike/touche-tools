@@ -73,15 +73,12 @@ public class GameViewWindow : BaseWindow
             return;
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-        var offsetX = 0;
-        if (_activeProgramState.CurrentState.Flags.ContainsKey(Flags.ScreenOffsetX))
+        var offsetX = _activeProgramState.CurrentState.GetFlag(Flags.Known.RoomScrollX);
+        var offsetY = _activeProgramState.CurrentState.GetFlag(Flags.Known.RoomScrollY);
+        if (_activeProgramState.CurrentState.GetFlag(Flags.Known.DisableRoomScroll) != 0)
         {
-            offsetX = _activeProgramState.CurrentState.Flags[Flags.ScreenOffsetX];
-        }
-        var offsetY = 0;
-        if (_activeProgramState.CurrentState.Flags.ContainsKey(Flags.ScreenOffsetY))
-        {
-            offsetY = _activeProgramState.CurrentState.Flags[Flags.ScreenOffsetY];
+            offsetX = 0;
+            offsetY = 0;
         }
         var w = Constants.GameScreenWidth;
         var h = Constants.RoomHeight;

@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
+using ToucheTools.Constants;
 using ToucheTools.Models;
 
 namespace ToucheTools.App.Windows;
@@ -46,7 +47,7 @@ public class ProgramReferenceViewWindow : IWindow
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
         if (state.IsInAJump())
         {
-            if (ImGui.CollapsingHeader("Jump Frames"))
+            if (ImGui.CollapsingHeader($"Jump Frames ({state.JumpFrames.Count})"))
             {
                 ImGui.BeginTable("jumps", 2);
                 ImGui.TableSetupColumn("Reason");
@@ -72,14 +73,18 @@ public class ProgramReferenceViewWindow : IWindow
         #region Flags
         if (ImGui.CollapsingHeader("Flags"))
         {
-            ImGui.BeginTable("flags", 2);
-            ImGui.TableSetupColumn("Flag");
+            ImGui.BeginTable("flags", 3);
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("Value");
             ImGui.TableHeadersRow();
             foreach (var (flagId, flagValue) in state.Flags.OrderBy(p => p.Key))
             {
+                var flagName = Flags.GetFlagText(flagId);
                 ImGui.TableNextColumn();
                 ImGui.Text($"{flagId}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{flagName}");
                 ImGui.TableNextColumn();
                 ImGui.Text($"{flagValue}");
                 ImGui.TableNextRow();

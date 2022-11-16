@@ -1,5 +1,6 @@
 ﻿using ToucheTools.App.ViewModels;
 using ToucheTools.App.ViewModels.Observables;
+using ToucheTools.Constants;
 using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
 
@@ -102,7 +103,7 @@ public class ActiveProgramState
         public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
 
-        public Dictionary<ushort, ushort> Flags { get; set; } = new Dictionary<ushort, ushort>()
+        public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>()
         {
             //values set from game code
             { 291, 240 },
@@ -110,6 +111,20 @@ public class ActiveProgramState
             { 293, 0 },
             { 294, 1 },
         };
+
+        public short GetFlag(ushort flag)
+        {
+            if (!Flags.ContainsKey(flag))
+            {
+                return 0;
+            }
+            return Flags[flag];
+        }
+
+        public short GetFlag(Flags.Known known)
+        {
+            return GetFlag((ushort)known);
+        }
 
         public Dictionary<ushort, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<ushort, (int, int)>();
     }
@@ -137,7 +152,7 @@ public class ActiveProgramState
             {
                 CurrentProgram = _program.Active
             };
-            CurrentState.Flags[0] = (ushort)_program.Active;
+            CurrentState.Flags[0] = (short)_program.Active;
         }
     }
     
@@ -265,7 +280,7 @@ public class ActiveProgramState
         } else if (instruction is SetFlagInstruction setFlag)
         {
             var val = CurrentState.Stack[CurrentState.StackPointer];
-            CurrentState.Flags[setFlag.Flag] = (ushort)val;
+            CurrentState.Flags[setFlag.Flag] = (short)val;
             
             if (setFlag.Flag == 104)
             {
@@ -276,7 +291,7 @@ public class ActiveProgramState
             } else if (setFlag.Flag == 612)
             {
                 var newVal = 999; //TODO: randomly generate
-                CurrentState.Flags[613] = (ushort)newVal;
+                CurrentState.Flags[613] = (short)newVal;
             } //TODO: more
         } else if (instruction is SetCharBoxInstruction setCharBox)
         {
