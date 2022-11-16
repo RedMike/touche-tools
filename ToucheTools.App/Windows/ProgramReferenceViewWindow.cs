@@ -122,7 +122,7 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.TableSetupColumn("Flag");
             ImGui.TableSetupColumn("Value");
             ImGui.TableHeadersRow();
-            foreach (var (flagId, flagValue) in state.Flags.OrderBy(p => p.Key))
+            foreach (var (flagId, flagValue) in _activeProgramState.Flags.OrderBy(p => p.Key))
             {
                 var flagName = Flags.GetFlagText(flagId);
                 ImGui.TableNextColumn();
@@ -209,8 +209,8 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         #region Characters
-        ImGui.Text($"Current key character: {state.CurrentKeyChar}");
-        if (state.KeyChars.Count > 0)
+        ImGui.Text($"Current key character: {_activeProgramState.CurrentKeyChar}");
+        if (_activeProgramState.KeyChars.Count > 0)
         {
             if (ImGui.CollapsingHeader("Key Character Flags"))
             {
@@ -222,7 +222,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Selectable");
                 ImGui.TableSetupColumn("Offscreen");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -251,7 +251,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Char");
                 ImGui.TableSetupColumn("Link");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -292,7 +292,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("A3 Start");
                 ImGui.TableSetupColumn("A3 Count");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -323,7 +323,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Z");
                 ImGui.TableSetupColumn("Point");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -364,7 +364,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Item3");
                 ImGui.TableSetupColumn("Item4");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");

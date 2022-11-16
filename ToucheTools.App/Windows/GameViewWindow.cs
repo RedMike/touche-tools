@@ -73,16 +73,16 @@ public class GameViewWindow : BaseWindow
             return;
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-        var offsetX = _activeProgramState.CurrentState.GetFlag(Flags.Known.RoomScrollX);
-        var offsetY = _activeProgramState.CurrentState.GetFlag(Flags.Known.RoomScrollY);
-        if (_activeProgramState.CurrentState.GetFlag(Flags.Known.DisableRoomScroll) != 0)
+        var offsetX = _activeProgramState.GetFlag(Flags.Known.RoomScrollX);
+        var offsetY = _activeProgramState.GetFlag(Flags.Known.RoomScrollY);
+        if (_activeProgramState.GetFlag(Flags.Known.DisableRoomScroll) != 0)
         {
             offsetX = 0;
             offsetY = 0;
         }
         var w = Constants.GameScreenWidth;
         var h = Constants.RoomHeight;
-        if (_activeProgramState.CurrentState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
+        if (_activeProgramState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
         {
             h = Constants.GameScreenHeight;
         }
@@ -112,7 +112,7 @@ public class GameViewWindow : BaseWindow
             {
                 if (background.IsScaled)
                 {
-                    var dx = background.Offset - Constants.GameScreenWidth / 2 - _activeProgramState.CurrentState.GetFlag(Flags.Known.RoomScrollX);
+                    var dx = background.Offset - Constants.GameScreenWidth / 2 - _activeProgramState.GetFlag(Flags.Known.RoomScrollX);
                     dx *= background.ScaleMul;
                     dx /= background.ScaleDiv;
                     ox += dx;
@@ -145,7 +145,7 @@ public class GameViewWindow : BaseWindow
     private void RenderKeyChars(Vector2 offset)
     {
         var colIdx = 0;
-        foreach (var (keyCharId, keyChar) in _activeProgramState.CurrentState.KeyChars)
+        foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
         {
             if (!keyChar.Initialised)
             {
@@ -184,7 +184,11 @@ public class GameViewWindow : BaseWindow
             var width = 70;
             var height = 100;
 
-            if (keyChar.SpriteIndex != null && keyChar.SequenceIndex != null && keyChar.Character != null && _activeProgramState.CurrentState.LoadedRoom != null)
+            if (keyChar.SpriteIndex != null && keyChar.SequenceIndex != null && keyChar.Character != null && _activeProgramState.CurrentState.LoadedRoom != null
+                && _activeProgramState.CurrentState.SequenceIndexToNum.ContainsKey(keyChar.SequenceIndex.Value) && 
+                _model.Sequences.ContainsKey(_activeProgramState.CurrentState.SequenceIndexToNum[keyChar.SequenceIndex.Value]) &&
+                _model.Sequences[_activeProgramState.CurrentState.SequenceIndexToNum[keyChar.SequenceIndex.Value]].Characters.ContainsKey(keyChar.Character.Value)
+                )
             {
                 var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
                 var spriteNum = _activeProgramState.CurrentState.SpriteIndexToNum[keyChar.SpriteIndex.Value];

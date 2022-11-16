@@ -37,6 +37,28 @@ public class ActiveProgramState
         {
             public bool Initialised { get; set; } = false;
 
+            public void Init()
+            {
+                Initialised = false;
+                Direction = 0;
+                Anim1Count = 0;
+                Anim1Start = 0;
+                Anim2Count = 0;
+                Anim2Start = 0;
+                Anim3Count = 0;
+                Anim3Start = 0;
+                ScriptPaused = false;
+                ScriptStopped = false;
+                LastProgramPoint = null;
+                IsFollowing = false;
+                IsSelectable = false;
+                OffScreen = false;
+                PositionX = 10;
+                SpriteIndex = null;
+                SequenceIndex = null;
+                Character = null;
+            }
+
             public bool ScriptPaused { get; set; } = false;
             public bool ScriptStopped { get; set; } = false;
             public bool IsSelectable { get; set; } = false; //unsure?
@@ -157,62 +179,8 @@ public class ActiveProgramState
         public int? LoadedRoom { get; set; } = null;
         public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
-        
-        #region KeyChars
-        public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
-        public short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
-
-        public KeyChar GetKeyChar(int id)
-        {
-            if (id == 256 && CurrentKeyChar != 256)
-            {
-                return GetKeyChar(CurrentKeyChar);
-            }
-
-            if (!KeyChars.ContainsKey(id))
-            {
-                KeyChars[id] = new KeyChar()
-                {
-                };
-            }
-
-            return KeyChars[id];
-        }
-        #endregion
-        
-        #region Flags
-        public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>();
-
-        public short GetFlag(ushort flag)
-        {
-            if (!Flags.ContainsKey(flag))
-            {
-                return 0;
-            }
-            return Flags[flag];
-        }
-
-        public short GetFlag(Flags.Known known)
-        {
-            return GetFlag((ushort)known);
-        }
-
-        public void SetFlag(Flags.Known known, short val)
-        {
-            Flags[(ushort)known] = val;
-        }
-        #endregion
 
         public Dictionary<ushort, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<ushort, (int, int)>();
-
-        public ProgramState()
-        {
-            //values set from game code
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColour, 240);
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
-        }
     }
 
     private readonly DatabaseModel _model;
@@ -263,9 +231,62 @@ public class ActiveProgramState
     }
 
     public ProgramState CurrentState { get; set; } = new ProgramState();
+    
+    #region Inventory
     public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
-    public short GlobalMoney { get; set; }
+    public short GlobalMoney { get; set; } = 0;
+    #endregion
+    
+    #region Flags
+    public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>();
 
+    public short GetFlag(ushort flag)
+    {
+        if (!Flags.ContainsKey(flag))
+        {
+            return 0;
+        }
+        return Flags[flag];
+    }
+
+    public short GetFlag(Flags.Known known)
+    {
+        return GetFlag((ushort)known);
+    }
+
+    public void SetFlag(ushort flag, short val)
+    {
+        Flags[flag] = val;
+    }
+
+    public void SetFlag(Flags.Known known, short val)
+    {
+        SetFlag((ushort)known, val);
+    }
+    #endregion
+
+    #region KeyChars
+    public Dictionary<int, ProgramState.KeyChar> KeyChars { get; set; } = new Dictionary<int, ProgramState.KeyChar>();
+    public short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
+
+    public ProgramState.KeyChar GetKeyChar(int id)
+    {
+        if (id == 256 && CurrentKeyChar != 256)
+        {
+            return GetKeyChar(CurrentKeyChar);
+        }
+
+        if (!KeyChars.ContainsKey(id))
+        {
+            KeyChars[id] = new ProgramState.KeyChar()
+            {
+            };
+        }
+
+        return KeyChars[id];
+    }
+    #endregion
+    
     private void Update()
     {
         if (CurrentState.CurrentProgram != _program.Active)
@@ -274,7 +295,23 @@ public class ActiveProgramState
             {
                 CurrentProgram = _program.Active
             };
-            CurrentState.Flags[0] = (short)_program.Active;
+            Flags[0] = (short)_program.Active;
+            //values set from game code
+            for (ushort i = 200; i < 300; i++)
+            {
+                if (GetFlag(i) != 0)
+                {
+                    SetFlag(i, 0);
+                }
+            }
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColour, 240);
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
+            foreach (var (keyCharId, keyChar) in KeyChars)
+            {
+                keyChar.Init();
+            }
         }
     }
 
@@ -357,7 +394,7 @@ public class ActiveProgramState
                 throw new Exception("Sequence not loaded yet: " + initCharScript.SequenceIndex);
             }
 
-            var keyChar = CurrentState.GetKeyChar(initCharScript.Character);
+            var keyChar = GetKeyChar(initCharScript.Character);
             keyChar.Initialised = true;
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
@@ -377,7 +414,7 @@ public class ActiveProgramState
             CurrentState.LoadedRoom = loadRoom.Num;
         } else if (instruction is SetCharFrameInstruction setCharFrame)
         {
-            var keyChar = CurrentState.GetKeyChar(setCharFrame.Character);
+            var keyChar = GetKeyChar(setCharFrame.Character);
             
             if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Loop) // 0
             {
@@ -413,7 +450,7 @@ public class ActiveProgramState
         } else if (instruction is SetFlagInstruction setFlag)
         {
             var val = CurrentState.StackValue;
-            CurrentState.Flags[setFlag.Flag] = (short)val;
+            SetFlag(setFlag.Flag, val);
             
             if (setFlag.Flag == 611 && val != 0)
             {
@@ -421,11 +458,11 @@ public class ActiveProgramState
             } else if (setFlag.Flag == 612)
             {
                 var newVal = 999; //TODO: randomly generate
-                CurrentState.Flags[613] = (short)newVal;
+                SetFlag(setFlag.Flag, (short)newVal);
             } //TODO: more
         } else if (instruction is SetCharBoxInstruction setCharBox)
         {
-            var keyChar = CurrentState.GetKeyChar(setCharBox.Character);
+            var keyChar = GetKeyChar(setCharBox.Character);
             var point = program.Points[setCharBox.Num];
             keyChar.PositionX = point.X;
             keyChar.PositionY = point.Y;
@@ -433,7 +470,9 @@ public class ActiveProgramState
             keyChar.LastProgramPoint = setCharBox.Num;
         } else if (instruction is InitCharInstruction initChar)
         {
-            var keyChar = CurrentState.GetKeyChar(initChar.Character);
+            var keyChar = GetKeyChar(initChar.Character);
+            keyChar.Init();
+            keyChar.Initialised = true;
             keyChar.Anim1Start = 0;
             keyChar.Anim1Count = 1;
             keyChar.Anim2Start = 0;
@@ -443,11 +482,11 @@ public class ActiveProgramState
             keyChar.Direction = 0;
         } else if (instruction is MoveCharToPosInstruction moveCharToPos)
         {
-            if (!CurrentState.KeyChars.ContainsKey(moveCharToPos.Character))
+            if (!KeyChars.ContainsKey(moveCharToPos.Character))
             {
-                CurrentState.KeyChars[moveCharToPos.Character] = new ProgramState.KeyChar();
+                KeyChars[moveCharToPos.Character] = new ProgramState.KeyChar();
             }
-            var keyChar = CurrentState.KeyChars[moveCharToPos.Character];
+            var keyChar = KeyChars[moveCharToPos.Character];
 
             if (moveCharToPos.TargetingAnotherCharacter)
             {
@@ -463,25 +502,21 @@ public class ActiveProgramState
             programPaused = true;
         } else if (instruction is AddRoomAreaInstruction addRoomArea)
         {
-            if (!CurrentState.Flags.ContainsKey(addRoomArea.Flag))
+            if (!Flags.ContainsKey(addRoomArea.Flag))
             {
                 _log.Error($"Flag {addRoomArea.Flag} value required but not known");
             }
-            if (!CurrentState.Flags.ContainsKey((ushort)(addRoomArea.Flag + 1)))
+            if (!Flags.ContainsKey((ushort)(addRoomArea.Flag + 1)))
             {
                 _log.Error($"Flag {(addRoomArea.Flag + 1)} value required but not known");
             }
 
-            var x = CurrentState.Flags[addRoomArea.Flag];
-            var y = CurrentState.Flags[(ushort)(addRoomArea.Flag + 1)];
+            var x = GetFlag(addRoomArea.Flag);
+            var y = GetFlag((ushort)(addRoomArea.Flag + 1));
             CurrentState.BackgroundOffsets[addRoomArea.Num] = (x, y);
         } else if (instruction is GetFlagInstruction getFlag)
         {
-            var flagVal = 0;
-            if (CurrentState.Flags.ContainsKey(getFlag.Flag))
-            {
-                flagVal = CurrentState.Flags[getFlag.Flag];
-            }
+            var flagVal = GetFlag(getFlag.Flag);
             CurrentState.SetStackValue((short)flagVal);
         } else if (instruction is PushInstruction)
         {
@@ -511,7 +546,7 @@ public class ActiveProgramState
             }
         } else if (instruction is GetInventoryItemInstruction getInventoryItem)
         {
-            var keyChar = CurrentState.GetKeyChar(getInventoryItem.Character);
+            var keyChar = GetKeyChar(getInventoryItem.Character);
             var val = keyChar.Money;
             if (!getInventoryItem.MoneyItem)
             {
@@ -520,12 +555,12 @@ public class ActiveProgramState
             CurrentState.SetStackValue(val);
         } else if (instruction is SetInventoryItemInstruction setInventoryItem)
         {
-            var keyChar = CurrentState.GetKeyChar(setInventoryItem.Character);
+            var keyChar = GetKeyChar(setInventoryItem.Character);
             var val = CurrentState.StackValue;
             if (setInventoryItem.MoneyItem)
             {
                 //first, dump any 'global' money into the current keychar
-                var currentKeyChar = CurrentState.GetKeyChar(CurrentState.CurrentKeyChar);
+                var currentKeyChar = GetKeyChar(CurrentKeyChar);
                 currentKeyChar.Money = GlobalMoney;
                 GlobalMoney = 0;
                 
@@ -545,7 +580,7 @@ public class ActiveProgramState
             } else if (item == 1)
             {
                 //it's really about money
-                GlobalMoney += CurrentState.GetFlag(Flags.Known.CurrentMoney);
+                GlobalMoney += GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
             }
             else
             {
@@ -567,7 +602,7 @@ public class ActiveProgramState
             CurrentState.QueuedProgram = startEpisode.Num;
         } else if (instruction is SetCharFlagsInstruction setCharFlags)
         {
-            var keyChar = CurrentState.GetKeyChar(setCharFlags.Character);
+            var keyChar = GetKeyChar(setCharFlags.Character);
             keyChar.ScriptStopped |= (setCharFlags.Flags & 0x01) != 0;
             keyChar.ScriptPaused |= (setCharFlags.Flags & 0x02) != 0;
             keyChar.IsFollowing |= (setCharFlags.Flags & 0x10) != 0;
@@ -575,7 +610,7 @@ public class ActiveProgramState
             keyChar.OffScreen |= (setCharFlags.Flags & 0x8000) != 0;
         } else if (instruction is UnsetCharFlagsInstruction unsetCharFlags)
         {
-            var keyChar = CurrentState.GetKeyChar(unsetCharFlags.Character);
+            var keyChar = GetKeyChar(unsetCharFlags.Character);
             keyChar.ScriptStopped &= (unsetCharFlags.Flags & 0x01) == 0;
             keyChar.ScriptPaused &= (unsetCharFlags.Flags & 0x02) == 0;
             keyChar.IsFollowing &= (unsetCharFlags.Flags & 0x10) == 0;
@@ -606,7 +641,7 @@ public class ActiveProgramState
         {
             if (programPaused)
             {
-                if (CurrentState.GetFlag(Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
+                if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
                 {
                     //center to current keychar
                     var roomImageNum = _model.Rooms[CurrentState.LoadedRoom.Value].RoomImageNum;
@@ -614,7 +649,7 @@ public class ActiveProgramState
                     var roomImageWidth = roomImage.RoomWidth;
                     var roomImageHeight = roomImage.Height;
                     
-                    var keyChar = CurrentState.GetKeyChar(CurrentState.CurrentKeyChar);
+                    var keyChar = GetKeyChar(CurrentKeyChar);
                     var (x, y) = (keyChar.PositionX ?? 0, keyChar.PositionY ?? 0);
 
                     //center to keychar
@@ -628,13 +663,13 @@ public class ActiveProgramState
                     {
                         fy = roomImageHeight - Constants.RoomHeight;
                     }
-                    CurrentState.SetFlag(Flags.Known.RoomScrollX, (short)fx);
-                    CurrentState.SetFlag(Flags.Known.RoomScrollY, (short)fy);
+                    SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX, (short)fx);
+                    SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY, (short)fy);
 
                     //scroll room y
                     fy = y + 32 - Constants.GameScreenHeight / 2;
                     var roomHeight = Constants.RoomHeight;
-                    if (CurrentState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
+                    if (GetFlag(ToucheTools.Constants.Flags.Known.DisableInventoryDraw) != 0)
                     {
                         roomHeight = Constants.GameScreenHeight;
                     }
@@ -646,10 +681,10 @@ public class ActiveProgramState
                     {
                         fy = roomImageHeight - roomHeight;
                     }
-                    CurrentState.SetFlag(Flags.Known.RoomScrollY, (short)fy);
+                    SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY, (short)fy);
                     
                     //scroll room x
-                    var prevDx = (int)CurrentState.GetFlag(Flags.Known.RoomScrollX);
+                    var prevDx = (int)GetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX);
                     if (x > prevDx + Constants.GameScreenWidth - 160)
                     {
                         var dx = x - (prevDx + Constants.GameScreenWidth - 160);
@@ -673,7 +708,7 @@ public class ActiveProgramState
                         prevDx = roomImageWidth - Constants.GameScreenWidth;
                     }
                     
-                    CurrentState.SetFlag(Flags.Known.RoomScrollX, (short)(prevDx));
+                    SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX, (short)(prevDx));
                 }
             }
             if (!justJumped)
