@@ -113,7 +113,7 @@ public class ActiveProgramState
         public int CurrentKeyCharScript { get; set; } = -1;
         
         public int CurrentProgram { get; set; } = 0;
-        public int CurrentOffset { get; set; } = 0;
+        public int CurrentOffset { get; set; } = 0; //TODO: one per character script
 
         public int? QueuedProgram { get; set; } = null;
         

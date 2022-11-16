@@ -51,6 +51,11 @@ public class ProgramReferenceViewWindow : IWindow
         
 
         ImGui.Text($"Current run mode: {state.CurrentRunMode:G}");
+        if (state.CurrentRunMode == ActiveProgramState.ProgramState.RunMode.CharacterScript)
+        {
+            ImGui.Text($"Current character script: {state.CurrentKeyCharScript}");
+        }
+
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
         
         ImGui.Separator();
