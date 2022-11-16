@@ -308,6 +308,7 @@ public class ActiveProgramState
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
+            SetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar, 0);
             foreach (var (keyCharId, keyChar) in KeyChars)
             {
                 keyChar.Init();
