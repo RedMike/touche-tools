@@ -212,6 +212,36 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Text($"Current key character: {state.CurrentKeyChar}");
         if (state.KeyChars.Count > 0)
         {
+            if (ImGui.CollapsingHeader("Key Character Flags"))
+            {
+                ImGui.BeginTable("key_char_flags", 6);
+                ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("Stopped");
+                ImGui.TableSetupColumn("Paused");
+                ImGui.TableSetupColumn("Following");
+                ImGui.TableSetupColumn("Selectable");
+                ImGui.TableSetupColumn("Offscreen");
+                ImGui.TableHeadersRow();
+                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.ScriptStopped}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.ScriptPaused}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.IsFollowing}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.IsSelectable}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.OffScreen}");
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
+            
             if (ImGui.CollapsingHeader("Key Character Graphics"))
             {
                 ImGui.BeginTable("key_char_graphics", 5);

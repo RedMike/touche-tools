@@ -151,6 +151,10 @@ public class GameViewWindow : BaseWindow
             {
                 continue;
             }
+            if (keyChar.OffScreen)
+            {
+                continue;
+            }
             var (colR, colG, colB) = _colours[colIdx];
             colIdx++;
             colIdx = colIdx % _colours.Count;

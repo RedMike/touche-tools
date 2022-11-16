@@ -13,6 +13,12 @@ public class ActiveProgramState
         public class KeyChar
         {
             public bool Initialised { get; set; } = false;
+
+            public bool ScriptPaused { get; set; } = false;
+            public bool ScriptStopped { get; set; } = false;
+            public bool IsSelectable { get; set; } = false; //unsure?
+            public bool OffScreen { get; set; } = false; //unsure?
+            public bool IsFollowing { get; set; } = false;
             
             #region Graphics
             public int? SpriteIndex { get; set; }
@@ -37,6 +43,7 @@ public class ActiveProgramState
             public int Direction { get; set; }
             #endregion
             
+            //TODO: items shold not be in the program-based state
             #region Items
             public short Money { get; set; }
             /// <summary>
@@ -449,6 +456,7 @@ public class ActiveProgramState
             keyChar.PositionY = point.Y;
             keyChar.PositionZ = point.Z;
             keyChar.LastProgramPoint = moveCharToPos.Num;
+            keyChar.IsFollowing = false;
             programPaused = true;
         } else if (instruction is AddRoomAreaInstruction addRoomArea)
         {
@@ -549,6 +557,22 @@ public class ActiveProgramState
                 throw new Exception("Trying to start episode that's already queued");
             }
             CurrentState.QueuedProgram = startEpisode.Num;
+        } else if (instruction is SetCharFlagsInstruction setCharFlags)
+        {
+            var keyChar = CurrentState.GetKeyChar(setCharFlags.Character);
+            keyChar.ScriptStopped |= (setCharFlags.Flags & 0x01) != 0;
+            keyChar.ScriptPaused |= (setCharFlags.Flags & 0x02) != 0;
+            keyChar.IsFollowing |= (setCharFlags.Flags & 0x10) != 0;
+            keyChar.IsSelectable |= (setCharFlags.Flags & 0x4000) != 0;
+            keyChar.OffScreen |= (setCharFlags.Flags & 0x8000) != 0;
+        } else if (instruction is UnsetCharFlagsInstruction unsetCharFlags)
+        {
+            var keyChar = CurrentState.GetKeyChar(unsetCharFlags.Character);
+            keyChar.ScriptStopped &= (unsetCharFlags.Flags & 0x01) == 0;
+            keyChar.ScriptPaused &= (unsetCharFlags.Flags & 0x02) == 0;
+            keyChar.IsFollowing &= (unsetCharFlags.Flags & 0x10) == 0;
+            keyChar.IsSelectable &= (unsetCharFlags.Flags & 0x4000) == 0;
+            keyChar.OffScreen &= (unsetCharFlags.Flags & 0x8000) == 0;
         }
         else
         {
