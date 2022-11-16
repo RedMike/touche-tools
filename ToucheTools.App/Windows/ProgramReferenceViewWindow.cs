@@ -2,19 +2,21 @@
 using ImGuiNET;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
-using ToucheTools.App.ViewModels.Observables;
+using ToucheTools.Models;
 
 namespace ToucheTools.App.Windows;
 
 public class ProgramReferenceViewWindow : IWindow
 {
+    public readonly DatabaseModel _model;
     private readonly WindowSettings _windowSettings;
     private readonly ActiveProgramState _activeProgramState;
 
-    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveProgramState activeProgramState)
+    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveProgramState activeProgramState, DatabaseModel model)
     {
         _windowSettings = windowSettings;
         _activeProgramState = activeProgramState;
+        _model = model;
     }
 
     public void Render()
@@ -38,6 +40,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         var state = _activeProgramState.CurrentState;
+        var program = _model.Programs[state.CurrentProgram];
 
         #region Offsets
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
@@ -145,7 +148,7 @@ public class ProgramReferenceViewWindow : IWindow
         #region Characters
         if (state.KeyChars.Count > 0)
         {
-            if (ImGui.CollapsingHeader("Key Character Graphics", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Key Character Graphics"))
             {
                 ImGui.BeginTable("key_char_graphics", 5);
                 ImGui.TableSetupColumn("ID");
@@ -217,7 +220,7 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.EndTable();
             }
             
-            if (ImGui.CollapsingHeader("Key Character Position", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Key Character Position"))
             {
                 ImGui.BeginTable("key_char_position", 5);
                 ImGui.TableSetupColumn("ID");
@@ -259,6 +262,59 @@ public class ProgramReferenceViewWindow : IWindow
         }
         #endregion
 
+        ImGui.Separator();
+        
+        #region Backgrounds
+        if (program.Backgrounds.Count > 0)
+        {
+            if (ImGui.CollapsingHeader("Background Areas", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                ImGui.BeginTable("background_areas", 7);
+                ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("DX");
+                ImGui.TableSetupColumn("DY");
+                ImGui.TableSetupColumn("W");
+                ImGui.TableSetupColumn("H");
+                ImGui.TableSetupColumn("SX");
+                ImGui.TableSetupColumn("SY");
+                ImGui.TableHeadersRow();
+                ushort idx = 0;
+                foreach (var background in program.Backgrounds)
+                {
+                    var destX = background.Rect.X;
+                    if (state.BackgroundOffsets.ContainsKey(idx))
+                    {
+                        destX = state.BackgroundOffsets[idx].Item1;
+                    }
+                    var destY = background.Rect.Y;
+                    if (state.BackgroundOffsets.ContainsKey(idx))
+                    {
+                        destY = state.BackgroundOffsets[idx].Item2;
+                    }
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{idx}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{destX}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{destY}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{background.Rect.W}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{background.Rect.H}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{background.SrcX}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{background.SrcY}");
+                    ImGui.TableNextRow();
+                    idx++;
+                }
+            
+                ImGui.EndTable();
+            }
+        }
+        #endregion
+        
         // if (_programViewSettings.EvaluateUntil >= 0)
         // {
         //     ImGui.Text("State:");

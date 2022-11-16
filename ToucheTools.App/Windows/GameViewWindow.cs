@@ -72,23 +72,60 @@ public class GameViewWindow : BaseWindow
         {
             return;
         }
-
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
         var offsetX = 0;
+        if (_activeProgramState.CurrentState.Flags.ContainsKey(Flags.ScreenOffsetX))
+        {
+            offsetX = _activeProgramState.CurrentState.Flags[Flags.ScreenOffsetX];
+        }
         var offsetY = 0;
+        if (_activeProgramState.CurrentState.Flags.ContainsKey(Flags.ScreenOffsetY))
+        {
+            offsetY = _activeProgramState.CurrentState.Flags[Flags.ScreenOffsetY];
+        }
         var w = Constants.GameScreenWidth;
         var h = Constants.RoomHeight;
 
         var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
         var roomImage = _model.RoomImages[roomImageId].Value;
         var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
 
-        var (viewId, bytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, offsetX, offsetY, w, h);
+        var (viewId, bytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, -offsetX, -offsetY, w, h);
 
         var roomFullTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, w, h, bytes);
 
-        ImGui.SetCursorPos(offset);
+        ImGui.SetCursorPos(offset + new Vector2(-offsetX, -offsetY));
         ImGui.Image(roomFullTexture, new Vector2(w, h));
+
+        ushort idx = 0;
+        foreach (var background in program.Backgrounds)
+        {
+            var ox = background.Rect.X;
+            var oy = background.Rect.Y;
+            if (_activeProgramState.CurrentState.BackgroundOffsets.ContainsKey(idx))
+            {
+                (ox, oy) = _activeProgramState.CurrentState.BackgroundOffsets[idx];
+            }
+            if (oy != 20000)
+            {
+                var x = ox - offsetX;
+                var y = oy - offsetY;
+                if (background.IsScaled)
+                {
+                    //TODO: scaling
+                }
+
+                var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H);
+
+                var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, background.Rect.W, background.Rect.H, areaBytes);
+
+                ImGui.SetCursorPos(offset + new Vector2(x, y));
+                ImGui.Image(roomAreaTexture, new Vector2(background.Rect.W, background.Rect.H));
+            }
+
+            idx++;
+        }
     }
 
     private void RenderKeyChars(Vector2 offset)

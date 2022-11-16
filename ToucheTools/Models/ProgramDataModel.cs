@@ -53,11 +53,11 @@ public class ProgramDataModel
         /// <summary>
         /// If not drawable then only used via adding room area?
         /// </summary>
-        public bool IsDrawable => Rect.Y != 20000;
+        public bool IsInitiallyDrawable => Rect.Y != 20000;
         /// <summary>
         /// Influenced by ScaleMul/ScaleDiv and Offset
         /// </summary>
-        public bool IsScaled => IsDrawable && Type == 4;
+        public bool IsScaled => Type == 4;
     }
 
     public class Hitbox

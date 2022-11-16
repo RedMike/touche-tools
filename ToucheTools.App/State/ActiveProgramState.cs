@@ -57,6 +57,8 @@ public class ActiveProgramState
             { 293, 0 },
             { 294, 1 },
         };
+
+        public Dictionary<ushort, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<ushort, (int, int)>();
     }
 
     private readonly DatabaseModel _model;
@@ -249,6 +251,25 @@ public class ActiveProgramState
             keyChar.PositionY = point.Y;
             keyChar.PositionZ = point.Z;
             keyChar.LastProgramPoint = moveCharToPos.Num;
+        } else if (instruction is AddRoomAreaInstruction addRoomArea)
+        {
+            if (!CurrentState.Flags.ContainsKey(addRoomArea.Flag))
+            {
+                _log.Error($"Flag {addRoomArea.Flag} value required but not known");
+            }
+            if (!CurrentState.Flags.ContainsKey((ushort)(addRoomArea.Flag + 1)))
+            {
+                _log.Error($"Flag {(addRoomArea.Flag + 1)} value required but not known");
+            }
+
+            if (CurrentState.Flags[addRoomArea.Flag] == 20000)
+            {
+                //TODO: room scroll offset roll back
+            }
+
+            var x = CurrentState.Flags[addRoomArea.Flag];
+            var y = CurrentState.Flags[(ushort)(addRoomArea.Flag + 1)];
+            CurrentState.BackgroundOffsets[addRoomArea.Num] = (x, y);
         }
         else
         {

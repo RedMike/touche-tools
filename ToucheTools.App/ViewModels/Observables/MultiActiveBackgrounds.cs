@@ -52,7 +52,7 @@ public class MultiActiveBackgrounds : MultiActiveObservable<int>
     {
         var program = _model.Programs[_program.Active];
         var back = program.Backgrounds[element];
-        if (!back.IsDrawable)
+        if (!back.IsInitiallyDrawable)
         {
             return $"{element} need offset ({back.Rect.X},{back.Rect.Y} x {back.Rect.W},{back.Rect.H} src {back.SrcX}, {back.SrcY})";
         }
