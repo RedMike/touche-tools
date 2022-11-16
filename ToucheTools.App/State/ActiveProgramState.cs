@@ -102,13 +102,11 @@ public class ActiveProgramState
         public enum RunMode
         {
             Unknown = 0,
-            MainLoop = 1,
-            DoneMainLoop = 2,
-            DoneCharacterScript = 3,
-            CharacterScript = 4,
-            DoneActionScript = 5,
-            ActionScript = 6,
-            WaitingForPlayer = 7,
+            DoneCharacterScript = 1,
+            CharacterScript = 2,
+            DoneActionScript = 3,
+            ActionScript = 4,
+            WaitingForPlayer = 5,
         }
 
         public RunMode CurrentRunMode { get; set; } = RunMode.Unknown;
@@ -270,7 +268,8 @@ public class ActiveProgramState
             CurrentState = new ProgramState()
             {
                 CurrentProgram = _program.Active,
-                CurrentRunMode = ProgramState.RunMode.MainLoop
+                CurrentRunMode = ProgramState.RunMode.CharacterScript,
+                CurrentKeyCharScript = GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar),
             };
             Flags[0] = (short)_program.Active;
             //values set from game code
@@ -303,21 +302,20 @@ public class ActiveProgramState
 
     public bool Step()
     {
-        if (CurrentState.CurrentRunMode == ProgramState.RunMode.DoneMainLoop)
+        if (CurrentState.QueuedProgram != null)
         {
-            if (CurrentState.QueuedProgram != null)
-            {
-                //starting new episode
-                var newProgram = CurrentState.QueuedProgram.Value;
-                CurrentState.QueuedProgram = null;
-                _program.SetActive(newProgram);
-            }
-            else
-            {
-                //iterate over character scripts
-                CurrentState.CurrentOffset = -1;
-                CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
-            }
+            //starting new episode
+            var newProgram = CurrentState.QueuedProgram.Value;
+            CurrentState.QueuedProgram = null;
+            _program.SetActive(newProgram);
+            return true;
+        }
+        
+        if (CurrentState.CurrentRunMode == ProgramState.RunMode.DoneCharacterScript)
+        {
+            //iterate over character scripts
+            CurrentState.CurrentOffset = -1;
+            CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
         }
 
         if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
@@ -328,12 +326,13 @@ public class ActiveProgramState
                 var newOffset = -1;
                 var newKeyCharId = -1;
                 var program = _model.Programs[_program.Active];
+                
                 foreach (var (keyCharId, keyChar) in KeyChars.OrderBy(p => p.Key))
                 {
                     var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
                     if (cso != null)
                     {
-                        if (!keyChar.ScriptPaused && !keyChar.ScriptStopped)
+                        if (!keyChar.ScriptStopped)
                         {
                             newKeyCharId = keyCharId;
                             newOffset = cso.Offs;
@@ -341,7 +340,6 @@ public class ActiveProgramState
                     }
                     else
                     {
-                        keyChar.ScriptPaused = true;
                         keyChar.ScriptStopped = true;
                     }
                 }
@@ -368,11 +366,6 @@ public class ActiveProgramState
             }
         }
 
-        if (CurrentState.CurrentRunMode == ProgramState.RunMode.MainLoop)
-        {
-            return RunStep();
-        }
-        
         if (CurrentState.CurrentRunMode == ProgramState.RunMode.WaitingForPlayer)
         {
             //nothing to do
@@ -534,7 +527,20 @@ public class ActiveProgramState
             keyChar.LastProgramPoint = moveCharToPos.Num;
             keyChar.IsFollowing = false;
             programPaused = true;
-        } else if (instruction is AddRoomAreaInstruction addRoomArea)
+        } else if (instruction is StartTalkInstruction startTalk)
+        {
+            _log.Error("StartTalk not implemented yet"); //TODO:
+            programPaused = true;
+        } else if (instruction is SetCharDelayInstruction setCharDelay)
+        {
+            _log.Error("SetCharDelay not implemented yet"); //TODO:
+            programPaused = true;
+        } else if (instruction is SetupWaitingCharInstruction setupWaitingChar)
+        {
+            _log.Error("SetupWaitingChar not implemented yet"); //TODO:
+            programPaused = true;
+        }
+        else if (instruction is AddRoomAreaInstruction addRoomArea)
         {
             if (!Flags.ContainsKey(addRoomArea.Flag))
             {
@@ -659,10 +665,6 @@ public class ActiveProgramState
         if (programStopped)
         {
             _log.Info($"Finished running {CurrentState.CurrentRunMode:G}.");
-            if (CurrentState.CurrentRunMode == ProgramState.RunMode.MainLoop)
-            {
-                CurrentState.CurrentRunMode = ProgramState.RunMode.DoneMainLoop;
-            }
 
             if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
             {
@@ -671,18 +673,26 @@ public class ActiveProgramState
                     throw new Exception("Missing key char index");
                 }
                 var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
-                //TODO: pause/stopped discrepancy
-                keyChar.ScriptPaused = false;
+                
                 keyChar.ScriptStopped = true;
                 CurrentState.CurrentOffset = -1;
                 justJumped = true;
             }
-
-            programPaused = true;
         }
         
         if (programPaused)
         {
+            if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
+            {
+                if (CurrentState.CurrentKeyCharScript < 0)
+                {
+                    throw new Exception("Missing key char index");
+                }
+                var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
+                
+                keyChar.ScriptPaused = true;
+            }
+            
             if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
             {
                 //center to current keychar
@@ -759,6 +769,6 @@ public class ActiveProgramState
             CurrentState.CurrentOffset = instructionOffsets[idx];
         }   
 
-        return programPaused;
+        return programPaused || programStopped;
     }
 }
