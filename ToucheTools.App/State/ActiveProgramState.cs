@@ -459,6 +459,11 @@ public class ActiveProgramState
         {
             CurrentState.MoveStackPointerBackwards();
             CurrentState.SetStackValue(0);
+        } else if (instruction is AddInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            CurrentState.SetStackValue((short)(CurrentState.StackValue + val));
         } else if (instruction is TestEqualsInstruction)
         {
             var val = CurrentState.StackValue;
