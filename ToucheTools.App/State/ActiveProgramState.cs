@@ -3,6 +3,7 @@ using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.Constants;
 using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
+using Veldrid;
 
 namespace ToucheTools.App.State;
 
@@ -61,6 +62,7 @@ public class ActiveProgramState
 
             public bool ScriptPaused { get; set; } = false;
             public bool ScriptStopped { get; set; } = false;
+            public int ScriptOffset { get; set; } = -1;
             public bool IsSelectable { get; set; } = false; //unsure?
             public bool OffScreen { get; set; } = false; //unsure?
             public bool IsFollowing { get; set; } = false;
@@ -102,7 +104,7 @@ public class ActiveProgramState
         public enum RunMode
         {
             Unknown = 0,
-            DoneCharacterScript = 1,
+            Paused = 1,
             CharacterScript = 2,
             DoneActionScript = 3,
             ActionScript = 4,
@@ -252,9 +254,7 @@ public class ActiveProgramState
 
         if (!KeyChars.ContainsKey(id))
         {
-            KeyChars[id] = new ProgramState.KeyChar()
-            {
-            };
+            throw new Exception("Unknown keychar");
         }
 
         return KeyChars[id];
@@ -265,12 +265,21 @@ public class ActiveProgramState
     {
         if (CurrentState.CurrentProgram != _program.Active)
         {
+            for (var i = 0; i < 32; i++)
+            {
+                if (!KeyChars.ContainsKey(i))
+                {
+                    KeyChars[i] = new ProgramState.KeyChar();
+                }
+            }
+            var program = _model.Programs[_program.Active];
             CurrentState = new ProgramState()
             {
                 CurrentProgram = _program.Active,
                 CurrentRunMode = ProgramState.RunMode.CharacterScript,
-                CurrentKeyCharScript = GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar),
+                CurrentKeyCharScript = CurrentKeyChar,
             };
+            
             Flags[0] = (short)_program.Active;
             //values set from game code
             for (ushort i = 200; i < 300; i++)
@@ -288,6 +297,20 @@ public class ActiveProgramState
             foreach (var (keyCharId, keyChar) in KeyChars)
             {
                 keyChar.Init();
+                var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
+                if (cso != null)
+                {
+                    keyChar.ScriptOffset = cso.Offs;
+                }
+                else
+                {
+                    keyChar.ScriptOffset = 0;
+                    if (keyCharId != CurrentKeyChar)
+                    {
+                        keyChar.ScriptOffset = -1;
+                        keyChar.ScriptStopped = true;
+                    }
+                }
             }
         }
     }
@@ -311,59 +334,39 @@ public class ActiveProgramState
             return true;
         }
         
-        if (CurrentState.CurrentRunMode == ProgramState.RunMode.DoneCharacterScript)
+        if (CurrentState.CurrentRunMode == ProgramState.RunMode.Paused)
         {
-            //iterate over character scripts
-            CurrentState.CurrentOffset = -1;
-            CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
+            //find the next keychar's script to run
+            var newOffset = -1;
+            var newKeyCharId = -1;
+            
+            foreach (var (keyCharId, keyChar) in KeyChars
+                         .Where(p => !p.Value.ScriptStopped && p.Value.Initialised && p.Value.ScriptOffset >= 0)
+                         .OrderBy(p => p.Value.ScriptPaused)
+                         .ThenBy(p => p.Key)
+                    )
+            {
+                newKeyCharId = keyCharId;
+                newOffset = keyChar.ScriptOffset;
+                break;
+            }
+
+            if (newOffset == -1)
+            {
+                CurrentState.CurrentOffset = -1;
+                CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
+            }
+            else
+            {
+                CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
+                CurrentState.CurrentKeyCharScript = newKeyCharId;
+                CurrentState.CurrentOffset = newOffset;
+            }
         }
 
         if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
         {
-            if (CurrentState.CurrentOffset < 0)
-            {
-                //find the next keychar's script to run
-                var newOffset = -1;
-                var newKeyCharId = -1;
-                var program = _model.Programs[_program.Active];
-                
-                foreach (var (keyCharId, keyChar) in KeyChars.OrderBy(p => p.Key))
-                {
-                    var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
-                    if (cso != null)
-                    {
-                        if (!keyChar.ScriptStopped)
-                        {
-                            newKeyCharId = keyCharId;
-                            newOffset = cso.Offs;
-                        }
-                    }
-                    else
-                    {
-                        keyChar.ScriptStopped = true;
-                    }
-                }
-
-                if (newOffset == -1)
-                {
-                    CurrentState.CurrentOffset = -1;
-                    CurrentState.CurrentRunMode = ProgramState.RunMode.DoneCharacterScript;
-                }
-                else
-                {
-                    CurrentState.CurrentKeyCharScript = newKeyCharId;
-                    CurrentState.CurrentOffset = newOffset;
-                }
-            }
-            
-            if (CurrentState.CurrentRunMode == ProgramState.RunMode.DoneCharacterScript)
-            {
-                CurrentState.CurrentRunMode = ProgramState.RunMode.WaitingForPlayer;
-            }
-            else
-            {
-                return RunStep();
-            }
+            return RunStep();
         }
 
         if (CurrentState.CurrentRunMode == ProgramState.RunMode.WaitingForPlayer)
@@ -661,21 +664,22 @@ public class ActiveProgramState
         {
             _log.Error($"Unhandled instruction type: {instruction.Opcode:G}");
         }
-
+        
+        if (CurrentState.CurrentKeyCharScript < 0)
+        {
+            throw new Exception("Missing key char index");
+        }
+        
         if (programStopped)
         {
             _log.Info($"Finished running {CurrentState.CurrentRunMode:G}.");
 
             if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
             {
-                if (CurrentState.CurrentKeyCharScript < 0)
-                {
-                    throw new Exception("Missing key char index");
-                }
                 var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
                 
                 keyChar.ScriptStopped = true;
-                CurrentState.CurrentOffset = -1;
+                CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
                 justJumped = true;
             }
         }
@@ -689,8 +693,13 @@ public class ActiveProgramState
                     throw new Exception("Missing key char index");
                 }
                 var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
-                
-                keyChar.ScriptPaused = true;
+
+                if (!keyChar.ScriptStopped)
+                {
+                    keyChar.ScriptPaused = true;
+                }
+
+                CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
             }
             
             if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
@@ -768,6 +777,7 @@ public class ActiveProgramState
             idx += 1;
             CurrentState.CurrentOffset = instructionOffsets[idx];
         }   
+        GetKeyChar(CurrentState.CurrentKeyCharScript).ScriptOffset = CurrentState.CurrentOffset;
 
         return programPaused || programStopped;
     }

@@ -53,7 +53,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Text($"Current run mode: {state.CurrentRunMode:G}");
         if (state.CurrentRunMode == ActiveProgramState.ProgramState.RunMode.CharacterScript)
         {
-            ImGui.Text($"Current character script: {state.CurrentKeyCharScript}");
+            ImGui.Text($"Current keychar running: {state.CurrentKeyCharScript}");
         }
 
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
@@ -190,18 +190,26 @@ public class ProgramReferenceViewWindow : IWindow
         {
             if (ImGui.CollapsingHeader("Key Character Flags"))
             {
-                ImGui.BeginTable("key_char_flags", 6);
+                ImGui.BeginTable("key_char_flags", 7);
                 ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("Offset");
                 ImGui.TableSetupColumn("Stopped");
                 ImGui.TableSetupColumn("Paused");
                 ImGui.TableSetupColumn("Following");
                 ImGui.TableSetupColumn("Selectable");
                 ImGui.TableSetupColumn("Offscreen");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
+                             .Where(p => p.Value.Initialised)
+                             .OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    if (keyChar.ScriptOffset >= 0)
+                    {
+                        ImGui.Text($"{keyChar.ScriptOffset:D5}");
+                    }
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyChar.ScriptStopped}");
                     ImGui.TableNextColumn();
@@ -227,7 +235,9 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Char");
                 ImGui.TableSetupColumn("Link");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
+                             .Where(p => p.Value.Initialised)
+                             .OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -268,7 +278,9 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("A3 Start");
                 ImGui.TableSetupColumn("A3 Count");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
+                             .Where(p => p.Value.Initialised)
+                             .OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -299,7 +311,9 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Z");
                 ImGui.TableSetupColumn("Point");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
+                             .Where(p => p.Value.Initialised)
+                             .OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
@@ -340,7 +354,9 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableSetupColumn("Item3");
                 ImGui.TableSetupColumn("Item4");
                 ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.OrderBy(p => p.Key))
+                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
+                             .Where(p => p.Value.Initialised)
+                             .OrderBy(p => p.Key))
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyCharId}");
