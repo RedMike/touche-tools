@@ -44,9 +44,25 @@ public class ProgramReferenceViewWindow : IWindow
 
         #region Offsets
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
-        if (state.JumpOffset != null)
+        if (state.IsInAJump())
         {
-            LabelAndButton("In a branch, will return to offset: ", $"{state.JumpOffset.Value:D5}");
+            if (ImGui.CollapsingHeader("Jump Frames"))
+            {
+                ImGui.BeginTable("jumps", 2);
+                ImGui.TableSetupColumn("Reason");
+                ImGui.TableSetupColumn("Offset");
+                ImGui.TableHeadersRow();
+                foreach (var (reason, offset) in state.JumpFrames)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{reason:G}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{offset:D5}");
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
         }
         ImGui.Text($"STK at: {state.StackPointer:D4} value: {state.Stack[state.StackPointer]}");
         #endregion

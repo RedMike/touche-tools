@@ -36,10 +36,45 @@ public class ActiveProgramState
             public int Direction { get; set; }
             #endregion
         }
+
+        public enum JumpReason
+        {
+            Unknown = 0,
+            CharacterScript = 1,
+            ActionScript = 2
+        }
         
         public int CurrentProgram { get; set; } = 0;
         public int CurrentOffset { get; set; } = 0;
-        public int? JumpOffset { get; set; } = null;
+        public readonly List<(JumpReason, int)> JumpFrames = new List<(JumpReason, int)>();
+        
+        public bool IsInAJump()
+        {
+            return JumpFrames.Count != 0;
+        }
+
+        public void Jump(JumpReason reason, int offset)
+        {
+            var curOffset = CurrentOffset;
+            CurrentOffset = offset;
+            JumpFrames.Add((reason, curOffset));
+            if (JumpFrames.Count > 500)
+            {
+                throw new Exception("Recursion overflow");
+            }
+        }
+
+        public void JumpReturn()
+        {
+            if (!IsInAJump())
+            {
+                throw new Exception("Tried to return outside of a jump frame");
+            }
+
+            var (reason, offset) = JumpFrames.Last();
+            JumpFrames.RemoveAt(JumpFrames.Count-1);
+            CurrentOffset = offset;
+        }
         
         public ushort StackPointer { get; private set; } = 0;
 
@@ -128,13 +163,12 @@ public class ActiveProgramState
         var instruction = program.Instructions[curOffset];
         if (instruction is StopScriptInstruction)
         {
-            if (CurrentState.JumpOffset == null)
+            if (!CurrentState.IsInAJump())
             {
                 throw new Exception("Reached end of script");
             }
             
-            CurrentState.CurrentOffset = CurrentState.JumpOffset.Value;
-            CurrentState.JumpOffset = null;
+            CurrentState.JumpReturn();
             justJumped = true;
         } else if (instruction is NoopInstruction)
         {
@@ -180,13 +214,10 @@ public class ActiveProgramState
             var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == initCharScript.Character);
             if (cso != null)
             {
-                if (CurrentState.JumpOffset != null)
-                {
-                    throw new Exception("Recursion jumping");
-                }
-                var jumpOffset = instructionOffsets[idx + 1];
-                CurrentState.JumpOffset = jumpOffset;
-                CurrentState.CurrentOffset = cso.Offs;
+                var nextOffset = instructionOffsets[idx + 1];
+                CurrentState.CurrentOffset = nextOffset;
+                var jumpOffset = cso.Offs;
+                CurrentState.Jump(ProgramState.JumpReason.CharacterScript, jumpOffset);
                 justJumped = true;
             }
         } else if (instruction is LoadRoomInstruction loadRoom)
@@ -304,6 +335,7 @@ public class ActiveProgramState
 
             if (CurrentState.Flags[addRoomArea.Flag] == 20000)
             {
+                throw new Exception("Room scroll offset roll back");
                 //TODO: room scroll offset roll back
             }
 
@@ -336,12 +368,6 @@ public class ActiveProgramState
         {
             if (CurrentState.Stack[CurrentState.StackPointer] == 0)
             {
-                if (CurrentState.JumpOffset != null)
-                {
-                    throw new Exception("Recursion jumping");
-                }
-                var jumpOffset = instructionOffsets[idx + 1];
-                CurrentState.JumpOffset = jumpOffset;
                 CurrentState.CurrentOffset = jz.NewOffset;
                 justJumped = true;
             }
