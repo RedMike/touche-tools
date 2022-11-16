@@ -12,7 +12,7 @@ public class RoomImageRenderer
         width ??= roomImage.Width;
         height ??= roomImage.Height;
         var id = GetId(roomImageId, paletteId, offsetX, offsetY, width.Value, height.Value, transparency);
-        if (_cache.ContainsKey(id))
+        if (false && _cache.ContainsKey(id))
         {
             return (id, _cache[id]);
         }
@@ -37,16 +37,23 @@ public class RoomImageRenderer
             for (var j = 0; j < height; j++)
             {
                 var realX = fromX + i;
+                if (realX < 0)
+                {
+                    continue;
+                }
                 if (realX >= imageWidth)
                 {
                     continue;
                 }
                 var realY = fromY + j;
+                if (realY < 0)
+                {
+                    continue;
+                }
                 if (realY >= imageHeight)
                 {
                     continue;
                 }
-                
                 
                 var rawCol = rawData[realY, realX];
                 if (transparency && (rawCol == 0 || rawCol == 64))

@@ -37,6 +37,11 @@ public class ProgramReferenceViewWindow : IWindow
         {
             _activeProgramState.Step();
         }
+        ImGui.SameLine();
+        if (ImGui.Button("Step Until Paused"))
+        {
+            _activeProgramState.StepUntilPaused();
+        }
         
         ImGui.Separator();
         

@@ -92,11 +92,11 @@ public class GameViewWindow : BaseWindow
         var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
 
-        var (viewId, bytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, -offsetX, -offsetY, w, h, false);
+        var (viewId, bytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, offsetX, offsetY, w, h, false);
 
         var roomFullTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, w, h, bytes);
 
-        ImGui.SetCursorPos(offset + new Vector2(-offsetX, -offsetY));
+        ImGui.SetCursorPos(offset + new Vector2(0.0f, 0.0f));
         ImGui.Image(roomFullTexture, new Vector2(w, h));
 
         ushort idx = 0;
@@ -110,12 +110,15 @@ public class GameViewWindow : BaseWindow
             }
             if (oy != 20000)
             {
-                var x = ox - offsetX;
-                var y = oy - offsetY;
                 if (background.IsScaled)
                 {
-                    //TODO: scaling
+                    var dx = background.Offset - Constants.GameScreenWidth / 2 - _activeProgramState.CurrentState.GetFlag(Flags.Known.RoomScrollX);
+                    dx *= background.ScaleMul;
+                    dx /= background.ScaleDiv;
+                    ox += dx;
                 }
+                var x = ox - offsetX;
+                var y = oy - offsetY;
 
                 var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H);
 

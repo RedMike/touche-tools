@@ -266,8 +266,16 @@ public class ActiveProgramState
             CurrentState.Flags[0] = (short)_program.Active;
         }
     }
+
+    public void StepUntilPaused()
+    {
+        while (!Step())
+        {
+            
+        }
+    }
     
-    public void Step()
+    public bool Step()
     {
         var program = _model.Programs[_program.Active];
 
@@ -285,12 +293,14 @@ public class ActiveProgramState
             throw new Exception("Reached end of script");
         }
 
+        var programPaused = false;
         var programStopped = false;
         var justJumped = false;
 
         var instruction = program.Instructions[curOffset];
         if (instruction is StopScriptInstruction)
         {
+            programPaused = true;
             if (CurrentState.IsInAJump())
             {
                 CurrentState.JumpReturn();
@@ -383,7 +393,7 @@ public class ActiveProgramState
             }
         } else if (instruction is EnableInputInstruction)
         {
-            
+            programPaused = true;
         } else if (instruction is SetFlagInstruction setFlag)
         {
             var val = CurrentState.StackValue;
@@ -433,6 +443,7 @@ public class ActiveProgramState
             keyChar.PositionY = point.Y;
             keyChar.PositionZ = point.Z;
             keyChar.LastProgramPoint = moveCharToPos.Num;
+            programPaused = true;
         } else if (instruction is AddRoomAreaInstruction addRoomArea)
         {
             if (!CurrentState.Flags.ContainsKey(addRoomArea.Flag))
@@ -551,11 +562,85 @@ public class ActiveProgramState
         }
         else
         {
+            if (programPaused)
+            {
+                if (CurrentState.GetFlag(Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
+                {
+                    //center to current keychar
+                    var roomImageNum = _model.Rooms[CurrentState.LoadedRoom.Value].RoomImageNum;
+                    var roomImage = _model.RoomImages[roomImageNum].Value;
+                    var roomImageWidth = roomImage.RoomWidth;
+                    var roomImageHeight = roomImage.Height;
+                    
+                    var keyChar = CurrentState.GetKeyChar(CurrentState.CurrentKeyChar);
+                    var (x, y) = (keyChar.PositionX ?? 0, keyChar.PositionY ?? 0);
+
+                    //center to keychar
+                    var fx = x - Constants.GameScreenWidth / 2;
+                    var fy = y - Constants.GameScreenHeight / 2;
+                    if (fy < 0)
+                    {
+                        fy = 0;
+                    }
+                    if (fy > roomImageHeight - Constants.RoomHeight)
+                    {
+                        fy = roomImageHeight - Constants.RoomHeight;
+                    }
+                    CurrentState.SetFlag(Flags.Known.RoomScrollX, (short)fx);
+                    CurrentState.SetFlag(Flags.Known.RoomScrollY, (short)fy);
+
+                    //scroll room y
+                    fy = y + 32 - Constants.GameScreenHeight / 2;
+                    var roomHeight = Constants.RoomHeight;
+                    if (CurrentState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
+                    {
+                        roomHeight = Constants.GameScreenHeight;
+                    }
+                    if (fy < 0)
+                    {
+                        fy = 0;
+                    }
+                    if (fy > roomImageHeight - roomHeight)
+                    {
+                        fy = roomImageHeight - roomHeight;
+                    }
+                    CurrentState.SetFlag(Flags.Known.RoomScrollY, (short)fy);
+                    
+                    //scroll room x
+                    var prevDx = (int)CurrentState.GetFlag(Flags.Known.RoomScrollX);
+                    if (x > prevDx + Constants.GameScreenWidth - 160)
+                    {
+                        var dx = x - (prevDx + Constants.GameScreenWidth - 160);
+                        prevDx += dx;
+                    }
+                    else if (x < prevDx + 160)
+                    {
+                        var dx = prevDx + 160 - x;
+                        prevDx -= dx;
+                        if (prevDx < 0)
+                        {
+                            prevDx = 0;
+                        }
+                    }
+                    if (prevDx < 0)
+                    {
+                        prevDx = 0;
+                    }
+                    if (prevDx > roomImageWidth - Constants.GameScreenWidth)
+                    {
+                        prevDx = roomImageWidth - Constants.GameScreenWidth;
+                    }
+                    
+                    CurrentState.SetFlag(Flags.Known.RoomScrollX, (short)(prevDx));
+                }
+            }
             if (!justJumped)
             {
                 idx += 1;
                 CurrentState.CurrentOffset = instructionOffsets[idx];
             }   
         }
+
+        return programPaused;
     }
 }
