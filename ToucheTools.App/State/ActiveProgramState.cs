@@ -36,6 +36,15 @@ public class ActiveProgramState
             public int? PositionZ { get; set; }
             public int Direction { get; set; }
             #endregion
+            
+            #region Items
+            public short Money { get; set; }
+            /// <summary>
+            /// Only used to track amounts (e.g. money)
+            /// </summary>
+            public short[] CountedInventoryItems { get; set; } = new short[4];
+            
+            #endregion
         }
 
         public enum JumpReason
@@ -118,6 +127,23 @@ public class ActiveProgramState
         public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
         public short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
+
+        public KeyChar GetKeyChar(int id)
+        {
+            if (id == 256 && CurrentKeyChar != 256)
+            {
+                return GetKeyChar(CurrentKeyChar);
+            }
+
+            if (!KeyChars.ContainsKey(id))
+            {
+                KeyChars[id] = new KeyChar()
+                {
+                };
+            }
+
+            return KeyChars[id];
+        }
 
         public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>()
         {
@@ -232,11 +258,7 @@ public class ActiveProgramState
                 throw new Exception("Sequence not loaded yet: " + initCharScript.SequenceIndex);
             }
 
-            if (!CurrentState.KeyChars.ContainsKey(initCharScript.Character))
-            {
-                CurrentState.KeyChars[initCharScript.Character] = new ProgramState.KeyChar();
-            }
-            var keyChar = CurrentState.KeyChars[initCharScript.Character];
+            var keyChar = CurrentState.GetKeyChar(initCharScript.Character);
             keyChar.Initialised = true;
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
@@ -256,11 +278,7 @@ public class ActiveProgramState
             CurrentState.LoadedRoom = loadRoom.Num;
         } else if (instruction is SetCharFrameInstruction setCharFrame)
         {
-            if (!CurrentState.KeyChars.ContainsKey(setCharFrame.Character))
-            {
-                CurrentState.KeyChars[setCharFrame.Character] = new ProgramState.KeyChar();
-            }
-            var keyChar = CurrentState.KeyChars[setCharFrame.Character];
+            var keyChar = CurrentState.GetKeyChar(setCharFrame.Character);
             
             if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Loop) // 0
             {
@@ -308,11 +326,7 @@ public class ActiveProgramState
             } //TODO: more
         } else if (instruction is SetCharBoxInstruction setCharBox)
         {
-            if (!CurrentState.KeyChars.ContainsKey(setCharBox.Character))
-            {
-                CurrentState.KeyChars[setCharBox.Character] = new ProgramState.KeyChar();
-            }
-            var keyChar = CurrentState.KeyChars[setCharBox.Character];
+            var keyChar = CurrentState.GetKeyChar(setCharBox.Character);
             var point = program.Points[setCharBox.Num];
             keyChar.PositionX = point.X;
             keyChar.PositionY = point.Y;
@@ -320,11 +334,7 @@ public class ActiveProgramState
             keyChar.LastProgramPoint = setCharBox.Num;
         } else if (instruction is InitCharInstruction initChar)
         {
-            if (!CurrentState.KeyChars.ContainsKey(initChar.Character))
-            {
-                CurrentState.KeyChars[initChar.Character] = new ProgramState.KeyChar();
-            }
-            var keyChar = CurrentState.KeyChars[initChar.Character];
+            var keyChar = CurrentState.GetKeyChar(initChar.Character);
             keyChar.Anim1Start = 0;
             keyChar.Anim1Count = 1;
             keyChar.Anim2Start = 0;
@@ -398,6 +408,27 @@ public class ActiveProgramState
             {
                 CurrentState.CurrentOffset = jz.NewOffset;
                 justJumped = true;
+            }
+        } else if (instruction is GetInventoryItemInstruction getInventoryItem)
+        {
+            var keyChar = CurrentState.GetKeyChar(getInventoryItem.Character);
+            var val = keyChar.Money;
+            if (!getInventoryItem.MoneyItem)
+            {
+                val = keyChar.CountedInventoryItems[getInventoryItem.Item];
+            }
+            CurrentState.SetStackValue(val);
+        } else if (instruction is SetInventoryItemInstruction setInventoryItem)
+        {
+            var keyChar = CurrentState.GetKeyChar(setInventoryItem.Character);
+            var val = CurrentState.StackValue;
+            if (setInventoryItem.MoneyItem)
+            {
+                keyChar.Money = val;
+            }
+            else
+            {
+                keyChar.CountedInventoryItems[setInventoryItem.Item] = val;
             }
         }
         else

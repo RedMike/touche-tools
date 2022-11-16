@@ -308,6 +308,36 @@ public class ProgramReferenceViewWindow : IWindow
             
                 ImGui.EndTable();
             }
+            
+            if (ImGui.CollapsingHeader("Key Character Inventory"))
+            {
+                ImGui.BeginTable("key_char_inventory", 6);
+                ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("Money");
+                ImGui.TableSetupColumn("Item1");
+                ImGui.TableSetupColumn("Item2");
+                ImGui.TableSetupColumn("Item3");
+                ImGui.TableSetupColumn("Item4");
+                ImGui.TableHeadersRow();
+                foreach (var (keyCharId, keyChar) in state.KeyChars.OrderBy(p => p.Key))
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.Money}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CountedInventoryItems[0]}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CountedInventoryItems[1]}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CountedInventoryItems[2]}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CountedInventoryItems[3]}");
+                    ImGui.TableNextRow();
+                }
+            
+                ImGui.EndTable();
+            }
         }
         #endregion
 
