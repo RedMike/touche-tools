@@ -98,6 +98,14 @@ public class ActiveProgramState
         {
             throw new Exception("Unknown program offset: " + curOffset);
         }
+        
+        var instructionOffsets = program.Instructions.Keys.OrderBy(k => k).ToList();
+        var idx = instructionOffsets.FindIndex(k => k == curOffset);
+        if (idx == instructionOffsets.Count - 1)
+        {
+            throw new Exception("Reached end of script");
+        }
+        var justJumped = false;
 
         var instruction = program.Instructions[curOffset];
         if (instruction is StopScriptInstruction)
@@ -109,6 +117,7 @@ public class ActiveProgramState
             
             CurrentState.CurrentOffset = CurrentState.JumpOffset.Value;
             CurrentState.JumpOffset = null;
+            justJumped = true;
         } else if (instruction is NoopInstruction)
         {
             
@@ -149,6 +158,19 @@ public class ActiveProgramState
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
+
+            var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == initCharScript.Character);
+            if (cso != null)
+            {
+                if (CurrentState.JumpOffset != null)
+                {
+                    throw new Exception("Recursion jumping");
+                }
+                var jumpOffset = instructionOffsets[idx + 1];
+                CurrentState.JumpOffset = jumpOffset;
+                CurrentState.CurrentOffset = cso.Offs;
+                justJumped = true;
+            }
         } else if (instruction is LoadRoomInstruction loadRoom)
         {
             CurrentState.LoadedRoom = loadRoom.Num;
@@ -276,14 +298,10 @@ public class ActiveProgramState
             _log.Error($"Unhandled instruction type: {instruction.Opcode:G}");
         }
 
-        var instructionOffsets = program.Instructions.Keys.OrderBy(k => k).ToList();
-        var idx = instructionOffsets.FindIndex(k => k == curOffset);
-        if (idx == instructionOffsets.Count - 1)
+        if (!justJumped)
         {
-            throw new Exception("Reached end of script");
+            idx += 1;
+            CurrentState.CurrentOffset = instructionOffsets[idx];
         }
-
-        idx += 1;
-        CurrentState.CurrentOffset = instructionOffsets[idx];
     }
 }
