@@ -52,6 +52,7 @@ public class ProgramViewWindow : IWindow
             if (currentInstruction)
             {
                 ImGui.PopStyleColor();
+                _viewState.QueueScrollToOffset(offset);
             }
 
             idx++;
