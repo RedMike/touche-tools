@@ -13,8 +13,19 @@ public static class Flags
         //NoDecodeImages = 267, //internal to loading logic??
         //NoDecodeOtherImages = 268, //internal to loading logic??
         DisableBackgroundAnim = 269,
-        PlayRandomSound = 270,
+        
+        PlayRandomSound = 270, // 16 => play a sound from the range flags[273 + rnd(0, 16)]
+        RndSndMinDelay = 271, //delay next change for at least X frames
+        RndSndRandomDelay = 272, //delay next change for between X, and X+rnd(Y) frames
+        RndSndPotential1 = 273, // potential sound 1
+        RndSndPotential2 = 274, // potential sound 2
+        //...
+        
         ProcessRandomPalette = 290,
+        RndPalMinColour = 291, //240 => the scale is at least 240
+        RndPalRandomRange = 292, //16 => the scale is between 240 and 256
+        RndPalMinDelay = 293, //delay next change for at least X frames
+        RndPalRandomDelay = 294, //delay next change for between X, and X+rnd(Y) frames
         
         GameCycleCounter1 = 295,
         GameCycleCounter2 = 296,
@@ -52,7 +63,7 @@ public static class Flags
     {
         if (Enum.IsDefined(typeof(Known), (int)flag))
         {
-            return ((Known)flag).ToString("G");
+            return $"F{flag} ({(Known)flag:G})";
         }
 
         return $"F{flag}";

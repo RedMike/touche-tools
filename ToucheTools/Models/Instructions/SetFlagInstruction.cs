@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models.Instructions;
+﻿using ToucheTools.Constants;
+
+namespace ToucheTools.Models.Instructions;
 
 public class SetFlagInstruction : BaseInstruction
 {
@@ -19,6 +21,6 @@ public class SetFlagInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} {Flag} to STK value";
+        return $"{Opcode:G} {Flags.GetFlagText(Flag)} to STK value";
     }
 }

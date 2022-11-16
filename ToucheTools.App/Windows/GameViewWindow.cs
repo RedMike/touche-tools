@@ -82,6 +82,10 @@ public class GameViewWindow : BaseWindow
         }
         var w = Constants.GameScreenWidth;
         var h = Constants.RoomHeight;
+        if (_activeProgramState.CurrentState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
+        {
+            h = Constants.GameScreenHeight;
+        }
 
         var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
         var roomImage = _model.RoomImages[roomImageId].Value;

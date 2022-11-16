@@ -73,16 +73,13 @@ public class ProgramReferenceViewWindow : IWindow
         #region Flags
         if (ImGui.CollapsingHeader("Flags"))
         {
-            ImGui.BeginTable("flags", 3);
-            ImGui.TableSetupColumn("ID");
-            ImGui.TableSetupColumn("Name");
+            ImGui.BeginTable("flags", 2);
+            ImGui.TableSetupColumn("Flag");
             ImGui.TableSetupColumn("Value");
             ImGui.TableHeadersRow();
             foreach (var (flagId, flagValue) in state.Flags.OrderBy(p => p.Key))
             {
                 var flagName = Flags.GetFlagText(flagId);
-                ImGui.TableNextColumn();
-                ImGui.Text($"{flagId}");
                 ImGui.TableNextColumn();
                 ImGui.Text($"{flagName}");
                 ImGui.TableNextColumn();
