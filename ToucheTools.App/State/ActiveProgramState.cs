@@ -43,10 +43,32 @@ public class ActiveProgramState
             /// Only used to track amounts (e.g. money)
             /// </summary>
             public short[] CountedInventoryItems { get; set; } = new short[4];
-            
             #endregion
         }
 
+        public class InventoryList
+        {
+            public short DisplayOffset { get; set; } = 0;
+            public short LastItem { get; set; } = 0;
+            public short ItemsPerLine { get; set; } = 0;
+            public List<short> Items { get; set; } = new List<short>();
+
+            public List<short> GetActualItems()
+            {
+                return Items.Where(i => i > 0).ToList();
+            }
+
+            public void PrependItem(short item)
+            {
+                if (Items.All(i => i != 0))
+                {
+                    throw new Exception("No space in inventory");
+                }
+                Items.Insert(0, item);
+                Items.RemoveAt(Items.Count - 1);
+            }
+        }
+        
         public enum JumpReason
         {
             Unknown = 0,
@@ -125,6 +147,8 @@ public class ActiveProgramState
         public int? LoadedRoom { get; set; } = null;
         public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
+        
+        #region KeyChars
         public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
         public short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
 
@@ -144,15 +168,15 @@ public class ActiveProgramState
 
             return KeyChars[id];
         }
+        #endregion
 
-        public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>()
-        {
-            //values set from game code
-            { (ushort)ToucheTools.Constants.Flags.Known.RndPalMinColour, 240 },
-            { (ushort)ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16 },
-            { (ushort)ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0 },
-            { (ushort)ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1 },
-        };
+        #region Inventory
+
+        public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
+        #endregion
+        
+        #region Flags
+        public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>();
 
         public short GetFlag(ushort flag)
         {
@@ -168,7 +192,50 @@ public class ActiveProgramState
             return GetFlag((ushort)known);
         }
 
+        public void SetFlag(Flags.Known known, short val)
+        {
+            Flags[(ushort)known] = val;
+        }
+        #endregion
+
         public Dictionary<ushort, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<ushort, (int, int)>();
+
+        public ProgramState()
+        {
+            //values set from game code
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColour, 240);
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
+            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
+
+            //from game code
+            InventoryLists[0] = new InventoryList()
+            {
+                DisplayOffset = 0,
+                LastItem = 100,
+                ItemsPerLine = 6,
+                Items = Enumerable.Repeat((short)0, 101).ToList()
+            };
+            InventoryLists[0].Items[100] = -1;
+            
+            InventoryLists[1] = new InventoryList()
+            {
+                DisplayOffset = 0,
+                LastItem = 100,
+                ItemsPerLine = 6,
+                Items = Enumerable.Repeat((short)0, 101).ToList()
+            };
+            InventoryLists[1].Items[100] = -1;
+            
+            InventoryLists[2] = new InventoryList()
+            {
+                DisplayOffset = 0,
+                LastItem = 6,
+                ItemsPerLine = 6,
+                Items = Enumerable.Repeat((short)0, 7).ToList()
+            };
+            InventoryLists[2].Items[6] = -1;
+        }
     }
 
     private readonly DatabaseModel _model;
@@ -429,6 +496,29 @@ public class ActiveProgramState
             else
             {
                 keyChar.CountedInventoryItems[setInventoryItem.Item] = val;
+            }
+        } else if (instruction is AddItemToInventoryAndRedrawInstruction addItemToInventory)
+        {
+            var keyChar = CurrentState.GetKeyChar(addItemToInventory.Character);
+            var item = CurrentState.StackValue;
+            if (item == 0)
+            {
+                _log.Error("TODO: re-sort inventory items"); //TODO: just re-sort the inventory items
+            } else if (item == 1)
+            {
+                //it's really about money
+                keyChar.Money += CurrentState.GetFlag(Flags.Known.CurrentMoney);
+            }
+            else
+            {
+                //it's about adding an item
+                if (addItemToInventory.Character >= CurrentState.InventoryLists.Length)
+                {
+                    throw new Exception("Adding inventory to non-existent list");
+                }
+
+                var inventoryList = CurrentState.InventoryLists[addItemToInventory.Character];
+                inventoryList.PrependItem(item);
             }
         }
         else

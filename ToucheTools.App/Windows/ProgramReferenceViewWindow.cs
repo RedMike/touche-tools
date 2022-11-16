@@ -343,6 +343,33 @@ public class ProgramReferenceViewWindow : IWindow
 
         ImGui.Separator();
         
+        #region Inventory
+        if (ImGui.CollapsingHeader("Item Inventory"))
+        {
+            ImGui.BeginTable("item_inventory", 6);
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("Item");
+            ImGui.TableHeadersRow();
+            var inventoryId = 0;
+            foreach (var inventoryList in state.InventoryLists)
+            {
+                foreach (var item in inventoryList.GetActualItems())
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{inventoryId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{item:D2}");
+                    ImGui.TableNextRow();
+                }
+                inventoryId++;
+            }
+            
+            ImGui.EndTable();
+        }
+        #endregion
+        
+        ImGui.Separator();
+        
         #region Backgrounds
         if (program.Backgrounds.Count > 0)
         {
