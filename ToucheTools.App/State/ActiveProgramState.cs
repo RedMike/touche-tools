@@ -41,8 +41,26 @@ public class ActiveProgramState
         public int CurrentOffset { get; set; } = 0;
         public int? JumpOffset { get; set; } = null;
         
-        public ushort StackPointer { get; set; } = 0;
-        public ushort[] Stack { get; set; } = new ushort[500];
+        public ushort StackPointer { get; private set; } = 0;
+
+        public void MoveStackPointerForwards()
+        {
+            StackPointer++;
+            if (StackPointer >= Stack.Length)
+            {
+                StackPointer = 0;
+            }
+        }
+
+        public void MoveStackPointerBackwards()
+        {
+            StackPointer--;
+            if (StackPointer >= Stack.Length)
+            {
+                StackPointer = (ushort)(Stack.Length - 1);
+            }
+        }
+        public short[] Stack { get; set; } = new short[500];
 
         public int? LoadedRoom { get; set; } = null;
         public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
@@ -123,7 +141,7 @@ public class ActiveProgramState
             
         } else if (instruction is FetchScriptWordInstruction fetchScriptWord)
         {
-            CurrentState.Stack[CurrentState.StackPointer] = fetchScriptWord.Val;
+            CurrentState.Stack[CurrentState.StackPointer] = (short)fetchScriptWord.Val;
         } else if (instruction is LoadSpriteInstruction loadSprite)
         {
             if (CurrentState.SpriteIndexToNum.ContainsKey(loadSprite.Index))
@@ -216,7 +234,7 @@ public class ActiveProgramState
         } else if (instruction is SetFlagInstruction setFlag)
         {
             var val = CurrentState.Stack[CurrentState.StackPointer];
-            CurrentState.Flags[setFlag.Flag] = val;
+            CurrentState.Flags[setFlag.Flag] = (ushort)val;
             
             if (setFlag.Flag == 104)
             {
@@ -292,6 +310,41 @@ public class ActiveProgramState
             var x = CurrentState.Flags[addRoomArea.Flag];
             var y = CurrentState.Flags[(ushort)(addRoomArea.Flag + 1)];
             CurrentState.BackgroundOffsets[addRoomArea.Num] = (x, y);
+        } else if (instruction is GetFlagInstruction getFlag)
+        {
+            var flagVal = 0;
+            if (CurrentState.Flags.ContainsKey(getFlag.Flag))
+            {
+                flagVal = CurrentState.Flags[getFlag.Flag];
+            }
+            CurrentState.Stack[CurrentState.StackPointer] = (short)flagVal;
+        } else if (instruction is PushInstruction)
+        {
+            CurrentState.MoveStackPointerBackwards();
+            CurrentState.Stack[CurrentState.StackPointer] = 0;
+        } else if (instruction is TestEqualsInstruction)
+        {
+            var val = CurrentState.Stack[CurrentState.StackPointer];
+            CurrentState.MoveStackPointerForwards();
+            short newVal = 0;
+            if (val == CurrentState.Stack[CurrentState.StackPointer])
+            {
+                newVal = -1;
+            }
+            CurrentState.Stack[CurrentState.StackPointer] = newVal;
+        } else if (instruction is JzInstruction jz)
+        {
+            if (CurrentState.Stack[CurrentState.StackPointer] == 0)
+            {
+                if (CurrentState.JumpOffset != null)
+                {
+                    throw new Exception("Recursion jumping");
+                }
+                var jumpOffset = instructionOffsets[idx + 1];
+                CurrentState.JumpOffset = jumpOffset;
+                CurrentState.CurrentOffset = jz.NewOffset;
+                justJumped = true;
+            }
         }
         else
         {
