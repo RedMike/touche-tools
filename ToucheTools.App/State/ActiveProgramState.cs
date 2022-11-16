@@ -438,12 +438,6 @@ public class ActiveProgramState
                 _log.Error($"Flag {(addRoomArea.Flag + 1)} value required but not known");
             }
 
-            if (CurrentState.Flags[addRoomArea.Flag] == 20000)
-            {
-                throw new Exception("Room scroll offset roll back");
-                //TODO: room scroll offset roll back
-            }
-
             var x = CurrentState.Flags[addRoomArea.Flag];
             var y = CurrentState.Flags[(ushort)(addRoomArea.Flag + 1)];
             CurrentState.BackgroundOffsets[addRoomArea.Num] = (x, y);

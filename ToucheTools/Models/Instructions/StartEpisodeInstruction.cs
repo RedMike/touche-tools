@@ -24,6 +24,6 @@ public class StartEpisodeInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} {Num} flag {Flags.GetFlagText(Flag)}";
+        return $"{Opcode:G} {Num} flag {Flag}";
     }
 }
