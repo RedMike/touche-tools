@@ -122,6 +122,16 @@ public class GameViewWindow : BaseWindow
 
                 ImGui.SetCursorPos(offset + new Vector2(x, y));
                 ImGui.Image(roomAreaTexture, new Vector2(background.Rect.W, background.Rect.H));
+
+                var roomAreaRectTexture = _render.RenderRectangle(1, background.Rect.W, background.Rect.H,
+                    (255, 0, 255, 50), (255, 255, 255, 150));
+                ImGui.SetCursorPos(offset + new Vector2(x, y));
+                ImGui.Image(roomAreaRectTexture, new Vector2(background.Rect.W, background.Rect.H));
+                
+                var text = $"BG Area {idx}";
+                var textSize = ImGui.CalcTextSize(text);
+                ImGui.SetCursorPos(offset + new Vector2(x + background.Rect.W - textSize.X - 2, y + background.Rect.H - textSize.Y - 2));
+                ImGui.Text(text);
             }
 
             idx++;
