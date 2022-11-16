@@ -389,6 +389,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         #region Inventory
+        ImGui.Text("Global money: " + _activeProgramState.GlobalMoney);
         if (ImGui.CollapsingHeader("Item Inventory"))
         {
             ImGui.BeginTable("item_inventory", 6);
@@ -396,7 +397,7 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.TableSetupColumn("Item");
             ImGui.TableHeadersRow();
             var inventoryId = 0;
-            foreach (var inventoryList in state.InventoryLists)
+            foreach (var inventoryList in _activeProgramState.InventoryLists)
             {
                 foreach (var item in inventoryList.GetActualItems())
                 {

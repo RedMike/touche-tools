@@ -8,6 +8,29 @@ namespace ToucheTools.App.State;
 
 public class ActiveProgramState
 {
+    public class InventoryList
+    {
+        public short DisplayOffset { get; set; } = 0;
+        public short LastItem { get; set; } = 0;
+        public short ItemsPerLine { get; set; } = 0;
+        public List<short> Items { get; set; } = new List<short>();
+
+        public List<short> GetActualItems()
+        {
+            return Items.Where(i => i > 0).ToList();
+        }
+
+        public void PrependItem(short item)
+        {
+            if (Items.All(i => i != 0))
+            {
+                throw new Exception("No space in inventory");
+            }
+            Items.Insert(0, item);
+            Items.RemoveAt(Items.Count - 1);
+        }
+    }
+    
     public class ProgramState
     {
         public class KeyChar
@@ -53,29 +76,6 @@ public class ActiveProgramState
             #endregion
         }
 
-        public class InventoryList
-        {
-            public short DisplayOffset { get; set; } = 0;
-            public short LastItem { get; set; } = 0;
-            public short ItemsPerLine { get; set; } = 0;
-            public List<short> Items { get; set; } = new List<short>();
-
-            public List<short> GetActualItems()
-            {
-                return Items.Where(i => i > 0).ToList();
-            }
-
-            public void PrependItem(short item)
-            {
-                if (Items.All(i => i != 0))
-                {
-                    throw new Exception("No space in inventory");
-                }
-                Items.Insert(0, item);
-                Items.RemoveAt(Items.Count - 1);
-            }
-        }
-        
         public enum JumpReason
         {
             Unknown = 0,
@@ -179,11 +179,6 @@ public class ActiveProgramState
             return KeyChars[id];
         }
         #endregion
-
-        #region Inventory
-
-        public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
-        #endregion
         
         #region Flags
         public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>();
@@ -217,34 +212,6 @@ public class ActiveProgramState
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
-
-            //from game code
-            InventoryLists[0] = new InventoryList()
-            {
-                DisplayOffset = 0,
-                LastItem = 100,
-                ItemsPerLine = 6,
-                Items = Enumerable.Repeat((short)0, 101).ToList()
-            };
-            InventoryLists[0].Items[100] = -1;
-            
-            InventoryLists[1] = new InventoryList()
-            {
-                DisplayOffset = 0,
-                LastItem = 100,
-                ItemsPerLine = 6,
-                Items = Enumerable.Repeat((short)0, 101).ToList()
-            };
-            InventoryLists[1].Items[100] = -1;
-            
-            InventoryLists[2] = new InventoryList()
-            {
-                DisplayOffset = 0,
-                LastItem = 6,
-                ItemsPerLine = 6,
-                Items = Enumerable.Repeat((short)0, 7).ToList()
-            };
-            InventoryLists[2].Items[6] = -1;
         }
     }
 
@@ -257,11 +224,47 @@ public class ActiveProgramState
         _model = model;
         _program = program;
         _log = log;
+
+        Init();
+        
         _program.ObserveActive(Update);
         Update();
     }
 
+    private void Init()
+    {
+        //from game code
+        InventoryLists[0] = new InventoryList()
+        {
+            DisplayOffset = 0,
+            LastItem = 100,
+            ItemsPerLine = 6,
+            Items = Enumerable.Repeat((short)0, 101).ToList()
+        };
+        InventoryLists[0].Items[100] = -1;
+            
+        InventoryLists[1] = new InventoryList()
+        {
+            DisplayOffset = 0,
+            LastItem = 100,
+            ItemsPerLine = 6,
+            Items = Enumerable.Repeat((short)0, 101).ToList()
+        };
+        InventoryLists[1].Items[100] = -1;
+            
+        InventoryLists[2] = new InventoryList()
+        {
+            DisplayOffset = 0,
+            LastItem = 6,
+            ItemsPerLine = 6,
+            Items = Enumerable.Repeat((short)0, 7).ToList()
+        };
+        InventoryLists[2].Items[6] = -1;
+    }
+
     public ProgramState CurrentState { get; set; } = new ProgramState();
+    public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
+    public short GlobalMoney { get; set; }
 
     private void Update()
     {
@@ -521,6 +524,12 @@ public class ActiveProgramState
             var val = CurrentState.StackValue;
             if (setInventoryItem.MoneyItem)
             {
+                //first, dump any 'global' money into the current keychar
+                var currentKeyChar = CurrentState.GetKeyChar(CurrentState.CurrentKeyChar);
+                currentKeyChar.Money = GlobalMoney;
+                GlobalMoney = 0;
+                
+                //second, set the keychar money
                 keyChar.Money = val;
             }
             else
@@ -529,7 +538,6 @@ public class ActiveProgramState
             }
         } else if (instruction is AddItemToInventoryAndRedrawInstruction addItemToInventory)
         {
-            var keyChar = CurrentState.GetKeyChar(addItemToInventory.Character);
             var item = CurrentState.StackValue;
             if (item == 0)
             {
@@ -537,17 +545,17 @@ public class ActiveProgramState
             } else if (item == 1)
             {
                 //it's really about money
-                keyChar.Money += CurrentState.GetFlag(Flags.Known.CurrentMoney);
+                GlobalMoney += CurrentState.GetFlag(Flags.Known.CurrentMoney);
             }
             else
             {
                 //it's about adding an item
-                if (addItemToInventory.Character >= CurrentState.InventoryLists.Length)
+                if (addItemToInventory.Character >= InventoryLists.Length)
                 {
                     throw new Exception("Adding inventory to non-existent list");
                 }
 
-                var inventoryList = CurrentState.InventoryLists[addItemToInventory.Character];
+                var inventoryList = InventoryLists[addItemToInventory.Character];
                 inventoryList.PrependItem(item);
             }
         } else if (instruction is StartEpisodeInstruction startEpisode)
