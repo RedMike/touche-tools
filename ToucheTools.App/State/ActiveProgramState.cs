@@ -47,6 +47,8 @@ public class ActiveProgramState
         
         public int CurrentProgram { get; set; } = 0;
         public int CurrentOffset { get; set; } = 0;
+        
+        #region Jumps
         public readonly List<(JumpReason, int)> JumpFrames = new List<(JumpReason, int)>();
         
         public bool IsInAJump()
@@ -76,7 +78,9 @@ public class ActiveProgramState
             JumpFrames.RemoveAt(JumpFrames.Count-1);
             CurrentOffset = offset;
         }
+        #endregion
         
+        #region STK
         public ushort StackPointer { get; private set; } = 0;
 
         public void MoveStackPointerForwards()
@@ -87,7 +91,6 @@ public class ActiveProgramState
                 StackPointer = 0;
             }
         }
-
         public void MoveStackPointerBackwards()
         {
             StackPointer--;
@@ -96,7 +99,19 @@ public class ActiveProgramState
                 StackPointer = (ushort)(Stack.Length - 1);
             }
         }
-        public short[] Stack { get; set; } = new short[500];
+        private short[] Stack { get; set; } = new short[500];
+        public short StackValue => Stack[StackPointer];
+        public void SetStackValue(short val)
+        {
+            Stack[StackPointer] = val;
+        }
+
+        public Dictionary<ushort, short> GetFullStackValues()
+        {
+            return Stack.Select((val, idx) => (idx, val)).Where(pair => pair.val != 0 || pair.idx == StackPointer)
+                .ToDictionary(pair => (ushort)pair.idx, pair => pair.val);
+        }
+        #endregion
 
         public int? LoadedRoom { get; set; } = null;
         public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
@@ -190,7 +205,7 @@ public class ActiveProgramState
             
         } else if (instruction is FetchScriptWordInstruction fetchScriptWord)
         {
-            CurrentState.Stack[CurrentState.StackPointer] = (short)fetchScriptWord.Val;
+            CurrentState.SetStackValue((short)fetchScriptWord.Val);
         } else if (instruction is LoadSpriteInstruction loadSprite)
         {
             if (CurrentState.SpriteIndexToNum.ContainsKey(loadSprite.Index))
@@ -279,7 +294,7 @@ public class ActiveProgramState
             
         } else if (instruction is SetFlagInstruction setFlag)
         {
-            var val = CurrentState.Stack[CurrentState.StackPointer];
+            var val = CurrentState.StackValue;
             CurrentState.Flags[setFlag.Flag] = (short)val;
             
             if (setFlag.Flag == 104)
@@ -364,24 +379,24 @@ public class ActiveProgramState
             {
                 flagVal = CurrentState.Flags[getFlag.Flag];
             }
-            CurrentState.Stack[CurrentState.StackPointer] = (short)flagVal;
+            CurrentState.SetStackValue((short)flagVal);
         } else if (instruction is PushInstruction)
         {
             CurrentState.MoveStackPointerBackwards();
-            CurrentState.Stack[CurrentState.StackPointer] = 0;
+            CurrentState.SetStackValue(0);
         } else if (instruction is TestEqualsInstruction)
         {
-            var val = CurrentState.Stack[CurrentState.StackPointer];
+            var val = CurrentState.StackValue;
             CurrentState.MoveStackPointerForwards();
             short newVal = 0;
-            if (val == CurrentState.Stack[CurrentState.StackPointer])
+            if (val == CurrentState.StackValue)
             {
                 newVal = -1;
             }
-            CurrentState.Stack[CurrentState.StackPointer] = newVal;
+            CurrentState.SetStackValue(newVal);
         } else if (instruction is JzInstruction jz)
         {
-            if (CurrentState.Stack[CurrentState.StackPointer] == 0)
+            if (CurrentState.StackValue == 0)
             {
                 CurrentState.CurrentOffset = jz.NewOffset;
                 justJumped = true;

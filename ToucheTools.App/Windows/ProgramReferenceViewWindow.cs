@@ -65,7 +65,37 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.EndTable();
             }
         }
-        ImGui.Text($"STK at: {state.StackPointer:D4} value: {state.Stack[state.StackPointer]}");
+        #endregion
+        
+        ImGui.Separator();
+        
+        #region Stack
+        ImGui.Text($"STK at: {state.StackPointer:D4} value: {state.StackValue}");
+        if (ImGui.CollapsingHeader("Stack"))
+        {
+            ImGui.BeginTable("stack", 2);
+            ImGui.TableSetupColumn("Cell");
+            ImGui.TableSetupColumn("Value");
+            ImGui.TableHeadersRow();
+            foreach (var (idx, value) in state.GetFullStackValues().OrderBy(p => p.Key))
+            {
+                ImGui.TableNextColumn();
+                if (idx == state.StackPointer)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{idx:D3}");
+                ImGui.TableNextColumn();
+                if (idx == state.StackPointer)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{value}");
+                ImGui.TableNextRow();
+            }
+            
+            ImGui.EndTable();
+        }
         #endregion
         
         ImGui.Separator();
