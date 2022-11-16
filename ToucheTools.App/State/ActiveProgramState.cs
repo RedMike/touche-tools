@@ -75,7 +75,8 @@ public class ActiveProgramState
             CharacterScript = 1,
             ActionScript = 2
         }
-        
+
+        public bool FinishedRunningMain { get; set; } = false;
         public int CurrentProgram { get; set; } = 0;
         public int CurrentOffset { get; set; } = 0;
 
@@ -277,6 +278,11 @@ public class ActiveProgramState
     
     public bool Step()
     {
+        if (CurrentState.FinishedRunningMain)
+        {
+            return true;
+        }
+        
         var program = _model.Programs[_program.Active];
 
         var curOffset = CurrentState.CurrentOffset;
@@ -553,12 +559,16 @@ public class ActiveProgramState
         {
             if (CurrentState.QueuedProgram == null)
             {
-                throw new Exception("Reached end of script unexpectedly");
+                _log.Info("Finished running main loop, waiting for player actions.");
+                CurrentState.FinishedRunningMain = true;
+                programPaused = true;
             }
-
-            var newProgram = CurrentState.QueuedProgram.Value;
-            CurrentState.QueuedProgram = null;
-            _program.SetActive(newProgram);
+            else
+            {
+                var newProgram = CurrentState.QueuedProgram.Value;
+                CurrentState.QueuedProgram = null;
+                _program.SetActive(newProgram);
+            }
         }
         else
         {

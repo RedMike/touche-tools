@@ -33,20 +33,30 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
         ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
-        if (ImGui.Button("Step"))
-        {
-            _activeProgramState.Step();
-        }
-        ImGui.SameLine();
-        if (ImGui.Button("Step Until Paused"))
-        {
-            _activeProgramState.StepUntilPaused();
-        }
-        
-        ImGui.Separator();
-        
         var state = _activeProgramState.CurrentState;
         var program = _model.Programs[state.CurrentProgram];
+
+        if (!state.FinishedRunningMain)
+        {
+            if (ImGui.Button("Step"))
+            {
+                _activeProgramState.Step();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Step Until Paused"))
+            {
+                _activeProgramState.StepUntilPaused();
+            }
+        }
+        else
+        {
+            ImGui.Text("Finished main loop.");
+            //TODO: player actions
+        }
+
+        ImGui.Separator();
+        
 
         #region Offsets
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
