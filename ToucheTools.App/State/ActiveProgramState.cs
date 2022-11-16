@@ -78,6 +78,8 @@ public class ActiveProgramState
         
         public int CurrentProgram { get; set; } = 0;
         public int CurrentOffset { get; set; } = 0;
+
+        public int? QueuedProgram { get; set; } = null;
         
         #region Jumps
         public readonly List<(JumpReason, int)> JumpFrames = new List<(JumpReason, int)>();
@@ -282,18 +284,22 @@ public class ActiveProgramState
         {
             throw new Exception("Reached end of script");
         }
+
+        var programStopped = false;
         var justJumped = false;
 
         var instruction = program.Instructions[curOffset];
         if (instruction is StopScriptInstruction)
         {
-            if (!CurrentState.IsInAJump())
+            if (CurrentState.IsInAJump())
             {
-                throw new Exception("Reached end of script");
+                CurrentState.JumpReturn();
+                justJumped = true;   
             }
-            
-            CurrentState.JumpReturn();
-            justJumped = true;
+            else
+            {
+                programStopped = true;
+            }
         } else if (instruction is NoopInstruction)
         {
             
@@ -304,14 +310,14 @@ public class ActiveProgramState
         {
             if (CurrentState.SpriteIndexToNum.ContainsKey(loadSprite.Index))
             {
-                throw new Exception("Reloaded same sprite: " + loadSprite.Index);
+                _log.Info("Reloaded same sprite: " + loadSprite.Index + " was: " + CurrentState.SpriteIndexToNum[loadSprite.Index] + " + now: " + loadSprite.Num);
             }
             CurrentState.SpriteIndexToNum[loadSprite.Index] = loadSprite.Num;
         } else if (instruction is LoadSequenceInstruction loadSequence)
         {
             if (CurrentState.SequenceIndexToNum.ContainsKey(loadSequence.Index))
             {
-                throw new Exception("Reloaded same sequence: " + loadSequence.Index);
+                _log.Info("Reloaded same sequence: " + loadSequence.Index + " was: " + CurrentState.SequenceIndexToNum[loadSequence.Index] + " + now: " + loadSequence.Num);
             }
             CurrentState.SequenceIndexToNum[loadSequence.Index] = loadSequence.Num;
         } else if (instruction is InitCharScriptInstruction initCharScript)
@@ -519,16 +525,37 @@ public class ActiveProgramState
                 var inventoryList = CurrentState.InventoryLists[addItemToInventory.Character];
                 inventoryList.PrependItem(item);
             }
+        } else if (instruction is StartEpisodeInstruction startEpisode)
+        {
+            if (CurrentState.QueuedProgram != null)
+            {
+                throw new Exception("Trying to start episode that's already queued");
+            }
+            CurrentState.QueuedProgram = startEpisode.Num;
         }
         else
         {
             _log.Error($"Unhandled instruction type: {instruction.Opcode:G}");
         }
 
-        if (!justJumped)
+        if (programStopped)
         {
-            idx += 1;
-            CurrentState.CurrentOffset = instructionOffsets[idx];
+            if (CurrentState.QueuedProgram == null)
+            {
+                throw new Exception("Reached end of script unexpectedly");
+            }
+
+            var newProgram = CurrentState.QueuedProgram.Value;
+            CurrentState.QueuedProgram = null;
+            _program.SetActive(newProgram);
+        }
+        else
+        {
+            if (!justJumped)
+            {
+                idx += 1;
+                CurrentState.CurrentOffset = instructionOffsets[idx];
+            }   
         }
     }
 }
