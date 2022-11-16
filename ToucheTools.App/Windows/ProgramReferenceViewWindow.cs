@@ -194,6 +194,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         #region Characters
+        ImGui.Text($"Current key character: {state.CurrentKeyChar}");
         if (state.KeyChars.Count > 0)
         {
             if (ImGui.CollapsingHeader("Key Character Graphics"))

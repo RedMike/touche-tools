@@ -117,14 +117,15 @@ public class ActiveProgramState
         public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
         public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
+        public short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
 
         public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>()
         {
             //values set from game code
-            { 291, 240 },
-            { 292, 16 },
-            { 293, 0 },
-            { 294, 1 },
+            { (ushort)ToucheTools.Constants.Flags.Known.RndPalMinColour, 240 },
+            { (ushort)ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16 },
+            { (ushort)ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0 },
+            { (ushort)ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1 },
         };
 
         public short GetFlag(ushort flag)
@@ -297,10 +298,7 @@ public class ActiveProgramState
             var val = CurrentState.StackValue;
             CurrentState.Flags[setFlag.Flag] = (short)val;
             
-            if (setFlag.Flag == 104)
-            {
-                //TODO: selects current keychar
-            } else if (setFlag.Flag == 611 && val != 0)
+            if (setFlag.Flag == 611 && val != 0)
             {
                 //TODO: quits game
             } else if (setFlag.Flag == 612)

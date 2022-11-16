@@ -5,6 +5,8 @@ public static class Flags
     public enum Known
     {
         StartedEpisode = 0,
+        
+        CurrentKeyChar = 104,
         KeepPaletteOnRoomLoad = 115,
         CurrentMoney = 118, 
         CurrentCursorObject = 119, 
