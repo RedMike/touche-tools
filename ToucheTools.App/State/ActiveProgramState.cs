@@ -105,43 +105,25 @@ public class ActiveProgramState
             ActionScript = 2
         }
 
+        public enum RunMode
+        {
+            Unknown = 0,
+            MainLoop = 1,
+            DoneMainLoop = 2,
+            DoneCharacterScript = 3,
+            CharacterScript = 4,
+            DoneActionScript = 5,
+            ActionScript = 6,
+            WaitingForPlayer = 7,
+        }
+
+        public RunMode CurrentRunMode { get; set; } = RunMode.Unknown;
+        
         public bool FinishedRunningMain { get; set; } = false;
         public int CurrentProgram { get; set; } = 0;
         public int CurrentOffset { get; set; } = 0;
 
         public int? QueuedProgram { get; set; } = null;
-        
-        #region Jumps
-        public readonly List<(JumpReason, int)> JumpFrames = new List<(JumpReason, int)>();
-        
-        public bool IsInAJump()
-        {
-            return JumpFrames.Count != 0;
-        }
-
-        public void Jump(JumpReason reason, int offset)
-        {
-            var curOffset = CurrentOffset;
-            CurrentOffset = offset;
-            JumpFrames.Add((reason, curOffset));
-            if (JumpFrames.Count > 500)
-            {
-                throw new Exception("Recursion overflow");
-            }
-        }
-
-        public void JumpReturn()
-        {
-            if (!IsInAJump())
-            {
-                throw new Exception("Tried to return outside of a jump frame");
-            }
-
-            var (reason, offset) = JumpFrames.Last();
-            JumpFrames.RemoveAt(JumpFrames.Count-1);
-            CurrentOffset = offset;
-        }
-        #endregion
         
         #region STK
         public ushort StackPointer { get; private set; } = 0;
@@ -293,7 +275,8 @@ public class ActiveProgramState
         {
             CurrentState = new ProgramState()
             {
-                CurrentProgram = _program.Active
+                CurrentProgram = _program.Active,
+                CurrentRunMode = ProgramState.RunMode.MainLoop
             };
             Flags[0] = (short)_program.Active;
             //values set from game code
@@ -323,16 +306,38 @@ public class ActiveProgramState
             
         }
     }
-    
+
     public bool Step()
     {
-        if (CurrentState.FinishedRunningMain)
+        if (CurrentState.CurrentRunMode == ProgramState.RunMode.DoneMainLoop)
         {
+            if (CurrentState.QueuedProgram != null)
+            {
+                //starting new episode
+                var newProgram = CurrentState.QueuedProgram.Value;
+                CurrentState.QueuedProgram = null;
+                _program.SetActive(newProgram);
+            }
+            else
+            {
+                //iterate over character scripts
+                CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
+            }
+
             return true;
         }
-        
-        var program = _model.Programs[_program.Active];
 
+        if (CurrentState.CurrentRunMode == ProgramState.RunMode.MainLoop)
+        {
+            return RunStep();
+        }
+        
+        throw new Exception($"Unknown run mode: {CurrentState.CurrentRunMode:G}");
+    }
+    
+    public bool RunStep()
+    {
+        var program = _model.Programs[_program.Active];
         var curOffset = CurrentState.CurrentOffset;
         
         if (!program.Instructions.ContainsKey(curOffset))
@@ -354,16 +359,7 @@ public class ActiveProgramState
         var instruction = program.Instructions[curOffset];
         if (instruction is StopScriptInstruction)
         {
-            programPaused = true;
-            if (CurrentState.IsInAJump())
-            {
-                CurrentState.JumpReturn();
-                justJumped = true;   
-            }
-            else
-            {
-                programStopped = true;
-            }
+            programStopped = true;
         } else if (instruction is NoopInstruction)
         {
             
@@ -400,16 +396,6 @@ public class ActiveProgramState
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
-
-            var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == initCharScript.Character);
-            if (cso != null)
-            {
-                var nextOffset = instructionOffsets[idx + 1];
-                CurrentState.CurrentOffset = nextOffset;
-                var jumpOffset = cso.Offs;
-                CurrentState.Jump(ProgramState.JumpReason.CharacterScript, jumpOffset);
-                justJumped = true;
-            }
         } else if (instruction is LoadRoomInstruction loadRoom)
         {
             CurrentState.LoadedRoom = loadRoom.Num;
@@ -625,18 +611,9 @@ public class ActiveProgramState
 
         if (programStopped)
         {
-            if (CurrentState.QueuedProgram == null)
-            {
-                _log.Info("Finished running main loop, waiting for player actions.");
-                CurrentState.FinishedRunningMain = true;
-                programPaused = true;
-            }
-            else
-            {
-                var newProgram = CurrentState.QueuedProgram.Value;
-                CurrentState.QueuedProgram = null;
-                _program.SetActive(newProgram);
-            }
+            _log.Info("Finished running main loop.");
+            CurrentState.CurrentRunMode = ProgramState.RunMode.DoneMainLoop;
+            programPaused = true;
         }
         else
         {

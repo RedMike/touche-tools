@@ -36,51 +36,22 @@ public class ProgramReferenceViewWindow : IWindow
         var state = _activeProgramState.CurrentState;
         var program = _model.Programs[state.CurrentProgram];
 
-        if (!state.FinishedRunningMain)
+        if (ImGui.Button("Step"))
         {
-            if (ImGui.Button("Step"))
-            {
-                _activeProgramState.Step();
-            }
-
-            ImGui.SameLine();
-            if (ImGui.Button("Step Until Paused"))
-            {
-                _activeProgramState.StepUntilPaused();
-            }
+            _activeProgramState.Step();
         }
-        else
+
+        ImGui.SameLine();
+        if (ImGui.Button("Step Until Paused"))
         {
-            ImGui.Text("Finished main loop.");
-            //TODO: player actions
+            _activeProgramState.StepUntilPaused();
         }
 
         ImGui.Separator();
         
 
-        #region Offsets
+        ImGui.Text($"Current run mode: {state.CurrentRunMode:G}");
         LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
-        if (state.IsInAJump())
-        {
-            if (ImGui.CollapsingHeader($"Jump Frames ({state.JumpFrames.Count})"))
-            {
-                ImGui.BeginTable("jumps", 2);
-                ImGui.TableSetupColumn("Reason");
-                ImGui.TableSetupColumn("Offset");
-                ImGui.TableHeadersRow();
-                foreach (var (reason, offset) in state.JumpFrames)
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{reason:G}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{offset:D5}");
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-        }
-        #endregion
         
         ImGui.Separator();
         
