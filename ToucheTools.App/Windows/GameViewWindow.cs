@@ -101,6 +101,38 @@ public class GameViewWindow : BaseWindow
         ImGui.SetCursorPos(offset + new Vector2(0.0f, 0.0f));
         ImGui.Image(roomFullTexture, new Vector2(w, h));
 
+        #region Areas
+        ushort aIdx = 0;
+        foreach (var area in program.Areas)
+        {
+            continue; //TODO: what to render and when
+            var ox = area.Rect.X;
+            var oy = area.Rect.Y;
+            // if (_activeProgramState.CurrentState.BackgroundOffsets.ContainsKey(aIdx))
+            // {
+            //     (ox, oy) = _activeProgramState.CurrentState.BackgroundOffsets[aIdx];
+            // }
+            if (oy != 20000)
+            {
+                var x = ox - offsetX;
+                var y = oy - offsetY;
+
+                var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
+                    (255, 255, 0, 50), (255, 255, 255, 150));
+                ImGui.SetCursorPos(offset + new Vector2(x, y));
+                ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
+                
+                var text = $"Area {aIdx}";
+                var textSize = ImGui.CalcTextSize(text);
+                ImGui.SetCursorPos(offset + new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
+                ImGui.Text(text);
+            }
+
+            aIdx++;
+        }
+        #endregion
+        
+        #region Backgrounds
         ushort idx = 0;
         foreach (var background in program.Backgrounds)
         {
@@ -142,6 +174,7 @@ public class GameViewWindow : BaseWindow
 
             idx++;
         }
+        #endregion
     }
 
     private void RenderKeyChars(Vector2 offset)
