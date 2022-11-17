@@ -64,6 +64,11 @@ public class ActiveProgramState
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public int PositionZ { get; set; }
+        
+        public int? TargetPositionX { get; set; }
+        public int? TargetPositionY { get; set; }
+        public int? TargetPositionZ { get; set; }
+        public bool Walking => TargetPositionX != null && TargetPositionY != null && TargetPositionZ != null;
         #endregion
         
         #region Items
@@ -89,6 +94,9 @@ public class ActiveProgramState
             IsSelectable = false;
             OffScreen = false;
             PositionX = 10; //from game code
+            TargetPositionX = null;
+            TargetPositionY = null;
+            TargetPositionZ = null;
             //intentional that no position y/z update, from game code
             SpriteIndex = null;
             SequenceIndex = null;
@@ -249,7 +257,7 @@ public class ActiveProgramState
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 50;
+    private const int MinimumTimeBetweenTicksInMillis = 27;
     
     #region Talk Entries
     public class TalkEntry
@@ -405,8 +413,74 @@ public class ActiveProgramState
         }
     }
 
+    private int _ticker = 0;
     private void OnGraphicalUpdate()
     {
+        #region Walking (TODO)
+        foreach (var (keyCharId, keyChar) in KeyChars)
+        {
+            //TODO: correctly use walk routes
+            if (keyChar.Initialised && 
+                keyChar.TargetPositionX != null && 
+                keyChar.TargetPositionY != null &&
+                keyChar.TargetPositionZ != null)
+            {
+                var dx = keyChar.TargetPositionX.Value - keyChar.PositionX;
+                var dy = keyChar.TargetPositionY.Value - keyChar.PositionY;
+                var dz = keyChar.TargetPositionZ.Value - keyChar.PositionZ;
+
+                if (dx < -2)
+                {
+                    dx = -2;
+                }
+                if (dx > 2)
+                {
+                    dx = 2;
+                }
+                
+                if (dy < -2)
+                {
+                    dy = -2;
+                }
+                if (dy > 2)
+                {
+                    dy = 2;
+                }
+                
+                if (dz < -2)
+                {
+                    dz = -2;
+                }
+                if (dz > 2)
+                {
+                    dz = 2;
+                }
+
+                keyChar.PositionX += dx;
+                keyChar.PositionY += dy;
+                keyChar.PositionZ += dz;
+
+                if (keyChar.PositionX == keyChar.TargetPositionX &&
+                    keyChar.PositionY == keyChar.TargetPositionY &&
+                    keyChar.PositionZ == keyChar.TargetPositionZ)
+                {
+                    keyChar.TargetPositionX = null;
+                    keyChar.TargetPositionY = null;
+                    keyChar.TargetPositionZ = null;
+                }
+                else
+                {
+                    var script = CurrentState.GetKeyCharScript(keyCharId);
+                    if (script != null && script.Status != ProgramState.ScriptStatus.Stopped && script.Status != ProgramState.ScriptStatus.NotInit)
+                    {
+                        script.Status = ProgramState.ScriptStatus.Paused;
+                        //script.Delay += 1;
+                    }
+                }
+            }
+        }
+        #endregion
+        
         #region Room Scrolling
         if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
         {
@@ -573,81 +647,98 @@ public class ActiveProgramState
         }
         #endregion
         
-        #region Delay
-        foreach (var script in CurrentState.Scripts)
+        _ticker++;
+        _ticker = _ticker % 120;
+        if (_ticker % 3 == 0)
         {
-            if (script.Status != ProgramState.ScriptStatus.NotInit &&
-                script.Status != ProgramState.ScriptStatus.Stopped)
+            #region Delay
+
+            foreach (var script in CurrentState.Scripts)
             {
-                if (script.Delay > 0)
+                if (script.Status != ProgramState.ScriptStatus.NotInit &&
+                    script.Status != ProgramState.ScriptStatus.Stopped)
                 {
-                    script.Delay--;
+                    if (script.Delay > 0)
+                    {
+                        script.Delay--;
+                    }
+                }
+
+                if (script.Status == ProgramState.ScriptStatus.Paused)
+                {
+                    if (script.Delay == 0)
+                    {
+                        script.Status = ProgramState.ScriptStatus.Ready;
+                    }
                 }
             }
 
-            if (script.Status == ProgramState.ScriptStatus.Paused)
+            #endregion
+
+            #region Talk Entries
+
+            if (TalkEntries.Count > 0)
             {
-                if (script.Delay == 0)
+                var lastTalkEntry = TalkEntries.Last();
+                lastTalkEntry.Counter--;
+                if (lastTalkEntry.Counter <= 0)
                 {
-                    script.Status = ProgramState.ScriptStatus.Ready;
-                }
-            }
-        }
-        #endregion
-        
-        #region Talk Entries
-        if (TalkEntries.Count > 0)
-        {
-            var lastTalkEntry = TalkEntries.Last();
-            lastTalkEntry.Counter--;
-            if (lastTalkEntry.Counter <= 0)
-            {
-                foreach (var talkEntry in TalkEntries)
-                {
-                    if (talkEntry.OtherKeyChar != -1)
+                    foreach (var talkEntry in TalkEntries)
                     {
-                        var script = CurrentState.GetKeyCharScript(talkEntry.OtherKeyChar);
-                        if (script != null)
+                        if (talkEntry.OtherKeyChar != -1)
                         {
-                            if (script.Status == ProgramState.ScriptStatus.Paused)
+                            var script = CurrentState.GetKeyCharScript(talkEntry.OtherKeyChar);
+                            if (script != null)
                             {
-                                script.Status = ProgramState.ScriptStatus.Ready;
+                                if (script.Status == ProgramState.ScriptStatus.Paused)
+                                {
+                                    script.Status = ProgramState.ScriptStatus.Ready;
+                                }
                             }
                         }
+
+                        var keyChar = GetKeyChar(talkEntry.TalkingKeyChar);
+                        if (keyChar.CurrentAnim >= keyChar.Anim1Start &&
+                            keyChar.CurrentAnim < keyChar.Anim1Start + keyChar.Anim1Count)
+                        {
+                            keyChar.CurrentAnim = keyChar.Anim2Start;
+                            keyChar.CurrentAnimCounter = 0;
+                            keyChar.CurrentAnimSpeed = 0;
+                        }
                     }
-                    var keyChar = GetKeyChar(talkEntry.TalkingKeyChar);
-                    if (keyChar.CurrentAnim >= keyChar.Anim1Start &&
-                        keyChar.CurrentAnim < keyChar.Anim1Start + keyChar.Anim1Count)
-                    {
-                        keyChar.CurrentAnim = keyChar.Anim2Start;
-                        keyChar.CurrentAnimCounter = 0;
-                        keyChar.CurrentAnimSpeed = 0;
-                    }
+
+                    TalkEntries = new List<TalkEntry>();
                 }
-                TalkEntries = new List<TalkEntry>();
+                else
+                {
+                    SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3, 0);
+                }
             }
-            else
+
+            #endregion
+
+            #region Counters
+
+            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1,
+                (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1) + 1));
+            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2,
+                (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2) + 1));
+            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3,
+                (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3) + 1));
+            var f1 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1);
+            if (f1 > 0)
             {
-                SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3, 0);
+                SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1, (short)(f1 - 1));
             }
+
+            var f2 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2);
+            if (f2 > 0)
+            {
+                SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2, (short)(f2 - 1));
+            }
+
+            #endregion
         }
-        #endregion
-        
-        #region Counters
-        SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1, (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1) + 1));
-        SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2, (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2) + 1));
-        SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3, (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3) + 1));
-        var f1 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1);
-        if (f1 > 0)
-        {
-            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1, (short)(f1 - 1));
-        }
-        var f2 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2);
-        if (f2 > 0)
-        {
-            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2, (short)(f2 - 1));
-        }
-        #endregion
     }
     
     private void Update()
@@ -850,6 +941,9 @@ public class ActiveProgramState
             keyChar.PositionX = point.X;
             keyChar.PositionY = point.Y;
             keyChar.PositionZ = point.Z;
+            keyChar.TargetPositionX = null;
+            keyChar.TargetPositionY = null;
+            keyChar.TargetPositionZ = null;
             keyChar.LastProgramPoint = setCharBox.Num;
         } else if (instruction is InitCharInstruction initChar)
         {
@@ -878,14 +972,21 @@ public class ActiveProgramState
             }
 
             var point = program.Points[moveCharToPos.Num];
-            keyChar.PositionX = point.X;
-            keyChar.PositionY = point.Y;
-            keyChar.PositionZ = point.Z;
+            keyChar.TargetPositionX = point.X;
+            keyChar.TargetPositionY = point.Y;
+            keyChar.TargetPositionZ = point.Z;
             keyChar.LastProgramPoint = moveCharToPos.Num;
             keyChar.IsFollowing = false;
 
             if (currentScript.Type == ProgramState.ScriptType.KeyChar && currentScript.Id == charId)
             {
+                foreach (var talkEntry in TalkEntries)
+                {
+                    if (talkEntry.OtherKeyChar == charId)
+                    {
+                        talkEntry.OtherKeyChar = -1;
+                    }
+                }
                 _log.Error("Waiting logic not implemented yet"); //TODO:
                 //TODO: waiting logic
                 programPaused = true;
