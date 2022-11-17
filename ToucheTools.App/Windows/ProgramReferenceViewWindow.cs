@@ -317,41 +317,42 @@ public class ProgramReferenceViewWindow : IWindow
             ushort idx = 0;
             foreach (var areaId in state.RoomAreas)
             {
-                var area = program.Areas[areaId];
-                var destX = area.Rect.X;
-                var destY = area.Rect.Y;
+                foreach (var area in program.Areas.Where(a => a.Id == areaId))
+                {
+                    var destX = area.Rect.X;
+                    var destY = area.Rect.Y;
 
-                ImGui.TableNextColumn();
-                ImGui.Text($"{idx}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{destX}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{destY}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{area.Rect.W}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{area.Rect.H}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{area.SrcX}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{area.SrcY}");
-                ImGui.TableNextRow();
-                idx++;
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{area.Id}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{destX}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{destY}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{area.Rect.W}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{area.Rect.H}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{area.SrcX}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{area.SrcY}");
+                    ImGui.TableNextRow();
+                    idx++;
+                }
             }
         
             ImGui.EndTable();
         }
         if (ImGui.CollapsingHeader($"Background Areas ({program.Backgrounds.Count})"))
         {
-            ImGui.BeginTable("background_areas", 8);
-            ImGui.TableSetupColumn("ID");
-            ImGui.TableSetupColumn("Draw");
+            ImGui.BeginTable("background_areas", 7);
+            ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.WidthFixed, 15.0f);
             ImGui.TableSetupColumn("DX");
             ImGui.TableSetupColumn("DY");
-            ImGui.TableSetupColumn("W");
-            ImGui.TableSetupColumn("H");
-            ImGui.TableSetupColumn("SX");
-            ImGui.TableSetupColumn("SY");
+            ImGui.TableSetupColumn("W", ImGuiTableColumnFlags.WidthFixed, 25.0f);
+            ImGui.TableSetupColumn("H", ImGuiTableColumnFlags.WidthFixed, 25.0f);
+            ImGui.TableSetupColumn("SX", ImGuiTableColumnFlags.WidthFixed, 25.0f);
+            ImGui.TableSetupColumn("SY", ImGuiTableColumnFlags.WidthFixed, 25.0f);
             ImGui.TableHeadersRow();
             ushort idx = 0;
             foreach (var background in program.Backgrounds)
@@ -370,11 +371,9 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.TableNextColumn();
                 ImGui.Text($"{idx}");
                 ImGui.TableNextColumn();
-                ImGui.Text($"{(destY != 20000 ? "Y" : "N")}");
+                ImGui.Text($"{destX} ({background.Rect.X})");
                 ImGui.TableNextColumn();
-                ImGui.Text($"{destX}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{destY}");
+                ImGui.Text($"{destY} ({background.Rect.Y})");
                 ImGui.TableNextColumn();
                 ImGui.Text($"{background.Rect.W}");
                 ImGui.TableNextColumn();

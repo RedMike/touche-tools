@@ -697,6 +697,8 @@ public class ActiveProgramState
             LoadedSprites[5].SequenceNum = null;
             LoadedSprites[6].SpriteNum = null;
             LoadedSprites[6].SequenceNum = null;
+            CurrentState.RoomAreas = new List<int>();
+            CurrentState.BackgroundOffsets = new Dictionary<ushort, (int, int)>();
         } else if (instruction is SetCharFrameInstruction setCharFrame)
         {
             var keyChar = GetKeyChar(setCharFrame.Character);
