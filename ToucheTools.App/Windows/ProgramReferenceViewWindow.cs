@@ -230,9 +230,7 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.EndTable();
         }
         #endregion
-        ImGui.Separator();
-        
-        #region Key Char Graphics
+        #region Key Char Positions
         if (ImGui.CollapsingHeader($"Key Char Positions"))
         {
             ImGui.BeginTable("key_char_position", 4);
@@ -253,6 +251,36 @@ public class ProgramReferenceViewWindow : IWindow
                     ImGui.Text($"{keyChar.PositionY}");
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyChar.PositionZ}");
+                    ImGui.TableNextRow();
+                }
+            }
+            ImGui.EndTable();
+        }
+        #endregion
+        #region Key Char Animations
+        if (ImGui.CollapsingHeader($"Key Char Animations"))
+        {
+            ImGui.BeginTable("key_char_animation", 5);
+            ImGui.TableSetupColumn("Index");
+            ImGui.TableSetupColumn("Anim");
+            ImGui.TableSetupColumn("Dir");
+            ImGui.TableSetupColumn("Frame");
+            ImGui.TableSetupColumn("Delay");
+            ImGui.TableHeadersRow();
+            foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
+            {
+                if (keyChar.Initialised && !keyChar.OffScreen)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CurrentAnim}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CurrentDirection}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CurrentAnimCounter}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.CurrentAnimSpeed}");
                     ImGui.TableNextRow();
                 }
             }

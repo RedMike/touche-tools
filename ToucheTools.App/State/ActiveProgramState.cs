@@ -237,7 +237,7 @@ public class ActiveProgramState
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 25;
+    private const int MinimumTimeBetweenTicksInMillis = 50;
     
     #region Loaded Sprites
     public class LoadedSprite //includes sequence info
@@ -460,10 +460,17 @@ public class ActiveProgramState
             {
                 continue;
             }
+            
+            var frames = _model.Sequences[LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum.Value]
+                .Characters[keyChar.Character.Value]
+                .Animations[keyChar.CurrentAnim]
+                .Directions[keyChar.CurrentDirection]
+                .Frames;
 
             if (keyChar.CurrentAnimSpeed <= 0)
             {
-                //TODO: read from current frame data
+                var frame = frames[keyChar.CurrentAnimCounter];
+                keyChar.CurrentAnimSpeed = frame.Delay;
             }
 
             keyChar.CurrentAnimSpeed -= 1;
@@ -471,12 +478,6 @@ public class ActiveProgramState
             {
                 keyChar.CurrentAnimCounter += 1;
             }
-
-            var frames = _model.Sequences[LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum.Value]
-                .Characters[keyChar.Character.Value]
-                .Animations[keyChar.CurrentAnim]
-                .Directions[keyChar.CurrentDirection]
-                .Frames;
             if (keyChar.CurrentAnimCounter >= frames.Count)
             {
                 keyChar.CurrentAnimSpeed = 0;
