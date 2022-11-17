@@ -128,16 +128,17 @@ public class ProgramReferenceViewWindow : IWindow
         #endregion
         
         ImGui.Separator();
-        
-        
 
-        ImGui.Text($"Current run mode: {state.CurrentRunMode:G}");
-        if (state.CurrentRunMode == ActiveProgramState.ProgramState.RunMode.CharacterScript)
+        var currentScript = state.GetRunningScript();
+        if (currentScript == null)
         {
-            ImGui.Text($"Current keychar running: {state.CurrentKeyCharScript}");
+            ImGui.Text("Paused waiting for scripts.");
         }
-
-        LabelAndButton("Current offset: ", $"{state.CurrentOffset:D5}");
+        else
+        {
+            ImGui.Text($"Current script: {currentScript.Type:G} {currentScript.Id}");
+            LabelAndButton($"Current offset: ", currentScript.Offset.ToString("D5"));
+        }
         
         ImGui.Separator();
         
