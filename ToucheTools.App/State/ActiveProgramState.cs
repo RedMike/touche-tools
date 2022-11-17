@@ -56,9 +56,9 @@ public class ActiveProgramState
         
         #region Position
         public ushort? LastProgramPoint { get; set; }
-        public int? PositionX { get; set; }
-        public int? PositionY { get; set; }
-        public int? PositionZ { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+        public int PositionZ { get; set; }
         public int Direction { get; set; }
         #endregion
         
@@ -769,7 +769,7 @@ public class ActiveProgramState
                 var roomImageHeight = roomImage.Height;
                 
                 var keyChar = GetKeyChar(CurrentKeyChar);
-                var (x, y) = (keyChar.PositionX ?? 0, keyChar.PositionY ?? 0);
+                var (x, y) = (keyChar.PositionX, keyChar.PositionY);
 
                 //center to keychar
                 var fx = x - Constants.GameScreenWidth / 2;

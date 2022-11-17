@@ -210,6 +210,35 @@ public class ProgramReferenceViewWindow : IWindow
         #endregion
         ImGui.Separator();
         
+        #region Key Char Graphics
+        if (ImGui.CollapsingHeader($"Key Char Positions"))
+        {
+            ImGui.BeginTable("key_char_position", 4);
+            ImGui.TableSetupColumn("Index");
+            ImGui.TableSetupColumn("X");
+            ImGui.TableSetupColumn("Y");
+            ImGui.TableSetupColumn("Z");
+            ImGui.TableHeadersRow();
+            foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
+            {
+                if (keyChar.Initialised && !keyChar.OffScreen)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.PositionX}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.PositionY}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.PositionZ}");
+                    ImGui.TableNextRow();
+                }
+            }
+            ImGui.EndTable();
+        }
+        #endregion
+        ImGui.Separator();
+        
         ImGui.End();
         return;
         

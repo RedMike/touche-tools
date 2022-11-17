@@ -159,9 +159,9 @@ public class GameViewWindow : BaseWindow
             colIdx++;
             colIdx = colIdx % _colours.Count;
             
-            var x = keyChar.PositionX ?? 0;
-            var y = keyChar.PositionY ?? 0;
-            var z = keyChar.PositionZ ?? 0;
+            var x = keyChar.PositionX;
+            var y = keyChar.PositionY;
+            var z = keyChar.PositionZ;
             if (z < Game.ZDepthMin)
             {
                 z = Game.ZDepthMin;
