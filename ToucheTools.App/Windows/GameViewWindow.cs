@@ -34,8 +34,9 @@ public class GameViewWindow : BaseWindow
     private readonly ActiveProgramState _activeProgramState;
     private readonly RoomImageRenderer _roomImageRenderer;
     private readonly SpriteSheetRenderer _spriteSheetRenderer;
+    private readonly LogData _log;
 
-    public GameViewWindow(DatabaseModel model, RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer)
+    public GameViewWindow(DatabaseModel model, RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer, LogData log)
     {
         _model = model;
         _render = render;
@@ -43,6 +44,7 @@ public class GameViewWindow : BaseWindow
         _activeProgramState = activeProgramState;
         _roomImageRenderer = roomImageRenderer;
         _spriteSheetRenderer = spriteSheetRenderer;
+        _log = log;
     }
 
     public override void Render()
@@ -204,12 +206,24 @@ public class GameViewWindow : BaseWindow
                 var sequence = _model.Sequences[seqNum];
                 var ch = sequence.Characters[keyChar.Character.Value];
                 
-                //TODO: anim id
-                var anim = ch.Animations.First().Value;
-                //TODO: dir id
-                var dir = anim.Directions.First().Value;
-                //TODO: frame id
-                var frame = dir.Frames.First();
+                var animId = keyChar.CurrentAnim;
+                if (!ch.Animations.ContainsKey(animId))
+                {
+                    throw new Exception($"Could not find current animation: {animId}");
+                }
+                var anim = ch.Animations[animId];
+                var dirId = keyChar.CurrentDirection;
+                if (!anim.Directions.ContainsKey(dirId))
+                {
+                    throw new Exception($"Could not find current direction: {dirId}");
+                }
+                var dir = anim.Directions[dirId];
+                var frameId = keyChar.CurrentAnimCounter;
+                if (frameId >= dir.Frames.Count || frameId < 0)
+                {
+                    throw new Exception($"Could not find current frame: {frameId}");
+                }
+                var frame = dir.Frames[frameId];
 
                 var spritePosition = offset + new Vector2(x, y);
                 var lowX = 0;

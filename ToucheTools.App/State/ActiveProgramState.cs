@@ -46,6 +46,11 @@ public class ActiveProgramState
         #endregion
         
         #region Animation
+        public int CurrentDirection { get; set; } //into sequence (direction)
+        public int CurrentAnim { get; set; } //into sequence (animation)
+        public int CurrentAnimSpeed { get; set; }
+        public int CurrentAnimCounter { get; set; } //into sequence (frame)
+        
         public int Anim1Start { get; set; }
         public int Anim1Count { get; set; }
         public int Anim2Start { get; set; }
@@ -59,7 +64,6 @@ public class ActiveProgramState
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public int PositionZ { get; set; }
-        public int Direction { get; set; }
         #endregion
         
         #region Items
@@ -67,10 +71,13 @@ public class ActiveProgramState
         public short[] CountedInventoryItems { get; set; } = new short[4];
         #endregion
         
-        public void Init()
+        public void OnProgramChange()
         {
             Initialised = false;
-            Direction = 0;
+            CurrentDirection = 0;
+            CurrentAnim = 0;
+            CurrentAnimSpeed = 0;
+            CurrentAnimCounter = 0;
             Anim1Count = 1;
             Anim1Start = 0;
             Anim2Count = 1;
@@ -185,13 +192,13 @@ public class ActiveProgramState
         _program = program;
         _log = log;
 
-        Init();
+        OnStartup();
         
         _program.ObserveActive(Update);
         Update();
     }
 
-    private void Init()
+    private void OnStartup()
     {
         //from game code
         InventoryLists[0] = new InventoryList()
@@ -309,69 +316,246 @@ public class ActiveProgramState
             //StepUntilPaused(); //correct way
         }
     }
+
+    private void OnProgramChange()
+    {
+        for (var i = 0; i < 32; i++)
+        {
+            if (!KeyChars.ContainsKey(i))
+            {
+                KeyChars[i] = new KeyChar();
+            }
+        }
+        var program = _model.Programs[_program.Active];
+        CurrentState = new ProgramState()
+        {
+            CurrentProgram = _program.Active,
+        };
+        
+        Flags[0] = (short)_program.Active;
+        //values set from game code
+        for (ushort i = 200; i < 300; i++)
+        {
+            if (GetFlag(i) != 0)
+            {
+                SetFlag(i, 0);
+            }
+        }
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColour, 240);
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
+        SetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar, 0);
+        
+        CurrentState.Scripts.Add(new ProgramState.Script()
+        {
+            Type = ProgramState.ScriptType.KeyChar,
+            Id = CurrentKeyChar,
+            Offset = 0,
+            StartOffset = 0,
+            Status = ProgramState.ScriptStatus.Running
+        });
+        foreach (var (keyCharId, keyChar) in KeyChars)
+        {
+            keyChar.OnProgramChange();
+            if (keyCharId == CurrentKeyChar)
+            {
+                continue;
+            }
+            var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
+            if (cso != null)
+            {
+                CurrentState.Scripts.Add(new ProgramState.Script()
+                {
+                    Type = ProgramState.ScriptType.KeyChar,
+                    Id = keyCharId,
+                    StartOffset = cso.Offs,
+                    Offset = cso.Offs,
+                    Status = ProgramState.ScriptStatus.NotInit
+                });
+            }
+        }
+    }
+
+    private void OnGraphicalUpdate()
+    {
+        #region Room Scrolling
+        if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
+        {
+            //center to current keychar
+            var roomImageNum = _model.Rooms[CurrentState.LoadedRoom.Value].RoomImageNum;
+            var roomImage = _model.RoomImages[roomImageNum].Value;
+            var roomImageWidth = roomImage.RoomWidth;
+            var roomImageHeight = roomImage.Height;
+            
+            var keyChar = GetKeyChar(CurrentKeyChar);
+            var (x, y) = (keyChar.PositionX, keyChar.PositionY);
+
+            //center to keychar
+            var fx = x - Constants.GameScreenWidth / 2;
+            var fy = y - Constants.GameScreenHeight / 2;
+            if (fy < 0)
+            {
+                fy = 0;
+            }
+            if (fy > roomImageHeight - Constants.RoomHeight)
+            {
+                fy = roomImageHeight - Constants.RoomHeight;
+            }
+            SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX, (short)fx);
+            SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY, (short)fy);
+
+            //scroll room y
+            fy = y + 32 - Constants.GameScreenHeight / 2;
+            var roomHeight = Constants.RoomHeight;
+            if (GetFlag(ToucheTools.Constants.Flags.Known.DisableInventoryDraw) != 0)
+            {
+                roomHeight = Constants.GameScreenHeight;
+            }
+            if (fy < 0)
+            {
+                fy = 0;
+            }
+            if (fy > roomImageHeight - roomHeight)
+            {
+                fy = roomImageHeight - roomHeight;
+            }
+            SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY, (short)fy);
+            
+            //scroll room x
+            var prevDx = (int)GetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX);
+            if (x > prevDx + Constants.GameScreenWidth - 160)
+            {
+                var dx = x - (prevDx + Constants.GameScreenWidth - 160);
+                prevDx += dx;
+            }
+            else if (x < prevDx + 160)
+            {
+                var dx = prevDx + 160 - x;
+                prevDx -= dx;
+                if (prevDx < 0)
+                {
+                    prevDx = 0;
+                }
+            }
+            if (prevDx < 0)
+            {
+                prevDx = 0;
+            }
+            if (prevDx > roomImageWidth - Constants.GameScreenWidth)
+            {
+                prevDx = roomImageWidth - Constants.GameScreenWidth;
+            }
+            
+            SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX, (short)(prevDx));
+        }
+        #endregion
+        
+        #region Animation updates
+
+        foreach (var (keyCharId, keyChar) in KeyChars)
+        {
+            if (!keyChar.Initialised || keyChar.OffScreen || keyChar.SpriteIndex == null ||
+                keyChar.SequenceIndex == null)
+            {
+                continue;
+            }
+
+            if (keyChar.CurrentAnimSpeed <= 0)
+            {
+                //TODO: read from current frame data
+            }
+
+            keyChar.CurrentAnimSpeed -= 1;
+            if (keyChar.CurrentAnimSpeed <= 0)
+            {
+                keyChar.CurrentAnimCounter += 1;
+            }
+
+            var frames = _model.Sequences[LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum.Value]
+                .Characters[keyChar.Character.Value]
+                .Animations[keyChar.CurrentAnim]
+                .Directions[keyChar.CurrentDirection]
+                .Frames;
+            if (keyChar.CurrentAnimCounter >= frames.Count)
+            {
+                keyChar.CurrentAnimSpeed = 0;
+                keyChar.CurrentAnimCounter = 0;
+                var animStart = 0;
+                var animCount = 0;
+                if (keyChar.CurrentAnim != 1)
+                {
+                    if (false && GetFlag(901) == 1) //TODO: if current char talking?
+                    {
+                        animStart = keyChar.Anim1Start;
+                        animCount = keyChar.Anim1Count;
+                    } else if (false) //TODO: framesListCount random then stop?
+                    {
+                        //animStart is looked up in a list of 16?
+                        animCount = 0;
+                    }
+                    else
+                    {
+                        animStart = keyChar.Anim2Start;
+                        animCount = keyChar.Anim2Count;
+
+                        if (keyChar.CurrentAnim >= animStart && keyChar.CurrentAnim < animStart + animCount)
+                        {
+                            var rnd = new Random().Next(0, 100);
+                            if (keyChar.IsFollowing)
+                            {
+                                //TODO:
+                            }
+                            else
+                            {
+                                if (rnd >= 50 && rnd <= 51)
+                                {
+                                    animStart = keyChar.Anim3Start;
+                                    animCount = keyChar.Anim3Count;
+                                }
+                            }
+                        }
+                    }
+
+                    if (animCount != 0)
+                    {
+                        animCount = new Random().Next(0, animCount);
+                    }
+
+                    keyChar.CurrentAnim = animStart + animCount;
+                }
+            }
+        }
+        #endregion
+        
+        #region Delay
+        foreach (var script in CurrentState.Scripts)
+        {
+            if (script.Status != ProgramState.ScriptStatus.NotInit &&
+                script.Status != ProgramState.ScriptStatus.Stopped)
+            {
+                if (script.Delay > 0)
+                {
+                    script.Delay--;
+                }
+            }
+
+            if (script.Status == ProgramState.ScriptStatus.Paused)
+            {
+                if (script.Delay == 0)
+                {
+                    script.Status = ProgramState.ScriptStatus.Ready;
+                }
+            }
+        }
+        #endregion
+    }
     
     private void Update()
     {
         if (CurrentState.CurrentProgram != _program.Active)
         {
-            //new program, run init
-            
-            for (var i = 0; i < 32; i++)
-            {
-                if (!KeyChars.ContainsKey(i))
-                {
-                    KeyChars[i] = new KeyChar();
-                }
-            }
-            var program = _model.Programs[_program.Active];
-            CurrentState = new ProgramState()
-            {
-                CurrentProgram = _program.Active,
-            };
-            
-            Flags[0] = (short)_program.Active;
-            //values set from game code
-            for (ushort i = 200; i < 300; i++)
-            {
-                if (GetFlag(i) != 0)
-                {
-                    SetFlag(i, 0);
-                }
-            }
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColour, 240);
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
-            SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
-            SetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar, 0);
-            
-            CurrentState.Scripts.Add(new ProgramState.Script()
-            {
-                Type = ProgramState.ScriptType.KeyChar,
-                Id = CurrentKeyChar,
-                Offset = 0,
-                StartOffset = 0,
-                Status = ProgramState.ScriptStatus.Running
-            });
-            foreach (var (keyCharId, keyChar) in KeyChars)
-            {
-                keyChar.Init();
-                if (keyCharId == CurrentKeyChar)
-                {
-                    continue;
-                }
-                var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
-                if (cso != null)
-                {
-                    CurrentState.Scripts.Add(new ProgramState.Script()
-                    {
-                        Type = ProgramState.ScriptType.KeyChar,
-                        Id = keyCharId,
-                        StartOffset = cso.Offs,
-                        Offset = cso.Offs,
-                        Status = ProgramState.ScriptStatus.NotInit
-                    });
-                }
-            }
+            OnProgramChange();
         }
     }
 
@@ -407,30 +591,10 @@ public class ActiveProgramState
             {
                 throw new Exception("All scripts in non-paused state");
             }
+            
+            OnGraphicalUpdate();
 
-            var foundScript = false;
-            foreach (var script in CurrentState.Scripts)
-            {
-                if (script.Status != ProgramState.ScriptStatus.NotInit &&
-                    script.Status != ProgramState.ScriptStatus.Stopped)
-                {
-                    if (script.Delay > 0)
-                    {
-                        script.Delay--;
-                    }
-                }
-
-                if (script.Status == ProgramState.ScriptStatus.Paused)
-                {
-                    if (script.Delay == 0)
-                    {
-                        foundScript = true;
-                        script.Status = ProgramState.ScriptStatus.Ready;
-                    }
-                }
-            }
-
-            return foundScript;
+            return false;
         }
 
         if (nextScript.Type != ProgramState.ScriptType.KeyChar)
@@ -549,7 +713,9 @@ public class ActiveProgramState
             } 
             else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.StartPaused) //3
             {
-                _log.Error("Unknown transition type " + setCharFrame.TransitionType.ToString("G"));
+                keyChar.CurrentAnim = setCharFrame.Val2;
+                keyChar.CurrentAnimSpeed = 0;
+                keyChar.CurrentAnimCounter = 0;
             }
             else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.Todo4) //4
             {
@@ -587,7 +753,7 @@ public class ActiveProgramState
         } else if (instruction is InitCharInstruction initChar)
         {
             var keyChar = GetKeyChar(initChar.Character);
-            keyChar.Init();
+            keyChar.OnProgramChange();
             keyChar.Initialised = true;
             keyChar.Anim1Start = 0;
             keyChar.Anim1Count = 1;
@@ -595,7 +761,7 @@ public class ActiveProgramState
             keyChar.Anim2Count = 1;
             keyChar.Anim3Start = 0;
             keyChar.Anim3Count = 1;
-            keyChar.Direction = 0;
+            keyChar.CurrentDirection = 0;
         } else if (instruction is MoveCharToPosInstruction moveCharToPos)
         {
             var keyChar = GetKeyChar(moveCharToPos.Character);
@@ -759,76 +925,7 @@ public class ActiveProgramState
         if (programPaused)
         {
             currentScript.Status = ProgramState.ScriptStatus.Paused;
-            
-            if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
-            {
-                //center to current keychar
-                var roomImageNum = _model.Rooms[CurrentState.LoadedRoom.Value].RoomImageNum;
-                var roomImage = _model.RoomImages[roomImageNum].Value;
-                var roomImageWidth = roomImage.RoomWidth;
-                var roomImageHeight = roomImage.Height;
-                
-                var keyChar = GetKeyChar(CurrentKeyChar);
-                var (x, y) = (keyChar.PositionX, keyChar.PositionY);
-
-                //center to keychar
-                var fx = x - Constants.GameScreenWidth / 2;
-                var fy = y - Constants.GameScreenHeight / 2;
-                if (fy < 0)
-                {
-                    fy = 0;
-                }
-                if (fy > roomImageHeight - Constants.RoomHeight)
-                {
-                    fy = roomImageHeight - Constants.RoomHeight;
-                }
-                SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX, (short)fx);
-                SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY, (short)fy);
-
-                //scroll room y
-                fy = y + 32 - Constants.GameScreenHeight / 2;
-                var roomHeight = Constants.RoomHeight;
-                if (GetFlag(ToucheTools.Constants.Flags.Known.DisableInventoryDraw) != 0)
-                {
-                    roomHeight = Constants.GameScreenHeight;
-                }
-                if (fy < 0)
-                {
-                    fy = 0;
-                }
-                if (fy > roomImageHeight - roomHeight)
-                {
-                    fy = roomImageHeight - roomHeight;
-                }
-                SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY, (short)fy);
-                
-                //scroll room x
-                var prevDx = (int)GetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX);
-                if (x > prevDx + Constants.GameScreenWidth - 160)
-                {
-                    var dx = x - (prevDx + Constants.GameScreenWidth - 160);
-                    prevDx += dx;
-                }
-                else if (x < prevDx + 160)
-                {
-                    var dx = prevDx + 160 - x;
-                    prevDx -= dx;
-                    if (prevDx < 0)
-                    {
-                        prevDx = 0;
-                    }
-                }
-                if (prevDx < 0)
-                {
-                    prevDx = 0;
-                }
-                if (prevDx > roomImageWidth - Constants.GameScreenWidth)
-                {
-                    prevDx = roomImageWidth - Constants.GameScreenWidth;
-                }
-                
-                SetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX, (short)(prevDx));
-            }
+            OnGraphicalUpdate();
         }
         if (!justJumped)
         {

@@ -12,7 +12,7 @@ public class RoomImageRenderer
         width ??= roomImage.Width;
         height ??= roomImage.Height;
         var id = GetId(roomImageId, paletteId, offsetX, offsetY, width.Value, height.Value, transparency);
-        if (false && _cache.ContainsKey(id))
+        if (_cache.ContainsKey(id))
         {
             return (id, _cache[id]);
         }
