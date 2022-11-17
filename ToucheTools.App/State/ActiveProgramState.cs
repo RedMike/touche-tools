@@ -60,15 +60,11 @@ public class ActiveProgramState
         #endregion
         
         #region Position
-        public ushort? LastProgramPoint { get; set; }
+        public ushort? Point { get; set; }
+        public ushort? TargetPoint { get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public int PositionZ { get; set; }
-        
-        public int? TargetPositionX { get; set; }
-        public int? TargetPositionY { get; set; }
-        public int? TargetPositionZ { get; set; }
-        public bool Walking => TargetPositionX != null && TargetPositionY != null && TargetPositionZ != null;
         #endregion
         
         #region Items
@@ -89,14 +85,13 @@ public class ActiveProgramState
             Anim2Start = 0;
             Anim3Count = 1;
             Anim3Start = 0;
-            LastProgramPoint = null;
+            Point = null;
             IsFollowing = false;
             IsSelectable = false;
             OffScreen = false;
             PositionX = 10; //from game code
-            TargetPositionX = null;
-            TargetPositionY = null;
-            TargetPositionZ = null;
+            Point = null;
+            TargetPoint = null;
             //intentional that no position y/z update, from game code
             SpriteIndex = null;
             SequenceIndex = null;
@@ -420,64 +415,7 @@ public class ActiveProgramState
         foreach (var (keyCharId, keyChar) in KeyChars)
         {
             //TODO: correctly use walk routes
-            if (keyChar.Initialised && 
-                keyChar.TargetPositionX != null && 
-                keyChar.TargetPositionY != null &&
-                keyChar.TargetPositionZ != null)
-            {
-                var dx = keyChar.TargetPositionX.Value - keyChar.PositionX;
-                var dy = keyChar.TargetPositionY.Value - keyChar.PositionY;
-                var dz = keyChar.TargetPositionZ.Value - keyChar.PositionZ;
-
-                if (dx < -2)
-                {
-                    dx = -2;
-                }
-                if (dx > 2)
-                {
-                    dx = 2;
-                }
-                
-                if (dy < -2)
-                {
-                    dy = -2;
-                }
-                if (dy > 2)
-                {
-                    dy = 2;
-                }
-                
-                if (dz < -2)
-                {
-                    dz = -2;
-                }
-                if (dz > 2)
-                {
-                    dz = 2;
-                }
-
-                keyChar.PositionX += dx;
-                keyChar.PositionY += dy;
-                keyChar.PositionZ += dz;
-
-                if (keyChar.PositionX == keyChar.TargetPositionX &&
-                    keyChar.PositionY == keyChar.TargetPositionY &&
-                    keyChar.PositionZ == keyChar.TargetPositionZ)
-                {
-                    keyChar.TargetPositionX = null;
-                    keyChar.TargetPositionY = null;
-                    keyChar.TargetPositionZ = null;
-                }
-                else
-                {
-                    var script = CurrentState.GetKeyCharScript(keyCharId);
-                    if (script != null && script.Status != ProgramState.ScriptStatus.Stopped && script.Status != ProgramState.ScriptStatus.NotInit)
-                    {
-                        script.Status = ProgramState.ScriptStatus.Paused;
-                        //script.Delay += 1;
-                    }
-                }
-            }
+            
         }
         #endregion
         
@@ -941,10 +879,8 @@ public class ActiveProgramState
             keyChar.PositionX = point.X;
             keyChar.PositionY = point.Y;
             keyChar.PositionZ = point.Z;
-            keyChar.TargetPositionX = null;
-            keyChar.TargetPositionY = null;
-            keyChar.TargetPositionZ = null;
-            keyChar.LastProgramPoint = setCharBox.Num;
+            keyChar.Point = setCharBox.Num;
+            keyChar.TargetPoint = setCharBox.Num;
         } else if (instruction is InitCharInstruction initChar)
         {
             var keyChar = GetKeyChar(initChar.Character);
@@ -972,10 +908,7 @@ public class ActiveProgramState
             }
 
             var point = program.Points[moveCharToPos.Num];
-            keyChar.TargetPositionX = point.X;
-            keyChar.TargetPositionY = point.Y;
-            keyChar.TargetPositionZ = point.Z;
-            keyChar.LastProgramPoint = moveCharToPos.Num;
+            keyChar.TargetPoint = moveCharToPos.Num;
             keyChar.IsFollowing = false;
 
             if (currentScript.Type == ProgramState.ScriptType.KeyChar && currentScript.Id == charId)

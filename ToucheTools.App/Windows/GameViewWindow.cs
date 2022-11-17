@@ -181,6 +181,57 @@ public class GameViewWindow : BaseWindow
         }
         #endregion
         
+        #region Walks
+        ushort wIdx = 0;
+        foreach (var walk in program.Walks)
+        {
+            var point1 = walk.Point1;
+            var point2 = walk.Point2;
+
+            var p1 = program.Points[point1];
+            var p2 = program.Points[point2];
+            
+            var ox = p1.X;
+            var oy = p1.Y;
+            var oz = p1.Z;
+            if (oz < Game.ZDepthMin)
+            {
+                oz = Game.ZDepthMin;
+            }
+            if (oz > Game.ZDepthMax)
+            {
+                oz = Game.ZDepthMax;
+            }
+            var zFactor = 1.0f;
+            if (oz < Game.ZDepthEven)
+            {
+                zFactor = (float)oz / Game.ZDepthEven;
+            }
+
+            if (oz > Game.ZDepthEven)
+            {
+                zFactor = (float)(Game.ZDepthMax - Game.ZDepthEven)/(Game.ZDepthMax - oz);
+            }
+
+            var x = ox - offsetX;
+            var y = oy - offsetY;
+            var wid = 10;
+            var hei = 10;
+            
+            var pointRectTexture = _render.RenderRectangle(1, (int)(wid*zFactor), (int)(hei*zFactor),
+                (255, 255, 255, 50), (255, 255, 255, 150));
+            ImGui.SetCursorPos(offset + new Vector2(x, y)*zFactor);
+            ImGui.Image(pointRectTexture, new Vector2(wid, hei)*zFactor);
+
+            var text = $"P{wIdx}-1";
+            var textSize = ImGui.CalcTextSize(text);
+            ImGui.SetCursorPos(offset + new Vector2(x * zFactor + wid * zFactor - textSize.X - 2, y * zFactor + hei * zFactor - textSize.Y - 2));
+            ImGui.Text(text);
+
+            wIdx++;
+        }
+        #endregion
+        
         #region Talk Entries
         ushort tIdx = 0;
         foreach (var talkEntry in _activeProgramState.TalkEntries)

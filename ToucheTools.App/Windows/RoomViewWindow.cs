@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ToucheTools.App.ViewModels;
 using ToucheTools.App.ViewModels.Observables;
+using ToucheTools.Constants;
 
 namespace ToucheTools.App.Windows;
 
@@ -32,8 +33,9 @@ public class RoomViewWindow : IWindow
     private readonly MultiActiveRects _rects;
     private readonly MultiActiveBackgrounds _backgrounds;
     private readonly MultiActiveAreas _areas;
+    private readonly MultiActivePoints _points;
 
-    public RoomViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveRoom room, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, MultiActiveAreas areas)
+    public RoomViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveRoom room, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, MultiActiveAreas areas, MultiActivePoints points)
     {
         _render = render;
         _windowSettings = windowSettings;
@@ -42,6 +44,7 @@ public class RoomViewWindow : IWindow
         _rects = rects;
         _backgrounds = backgrounds;
         _areas = areas;
+        _points = points;
     }
 
     public void Render()
@@ -178,6 +181,62 @@ public class RoomViewWindow : IWindow
                 idx++;
             }
         }
+        
+        if (_viewSettings.ShowPoints)
+        {
+            if (_points.PointsView.Count > _colours.Count)
+            {
+                throw new Exception($"Not enough colours defined in code for number of points, need {_points.PointsView.Count}");
+            }
+
+            var idx = 0;
+            foreach (var (pointX, pointY, pointZ, pointOrder) in _points.PointsView)
+            {
+                var (rectR, rectG, rectB) = _colours[idx];
+                var borderR = (byte)Math.Min(255, rectR * 2.5f + 150);
+                var borderG = (byte)Math.Min(255, rectG * 2.5f + 100);
+                var borderB = (byte)Math.Min(255, rectB * 2.5f + 150);
+                var borderWidth = 1;
+                var pointW = 25;
+                var pointH = 25;
+                var ox = pointX;
+                var oy = pointY;
+                var oz = pointZ;
+                if (oz < Game.ZDepthMin)
+                {
+                    oz = Game.ZDepthMin;
+                }
+                if (oz > Game.ZDepthMax)
+                {
+                    oz = Game.ZDepthMax;
+                }
+                var zFactor = 1.0f;
+                if (oz < Game.ZDepthEven)
+                {
+                    zFactor = (float)oz / Game.ZDepthEven;
+                }
+
+                if (oz > Game.ZDepthEven)
+                {
+                    zFactor = (float)(Game.ZDepthMax - Game.ZDepthEven)/(Game.ZDepthMax - oz);
+                }
+                
+                var rectTexture = _render.RenderRectangle(borderWidth, (int)(Math.Max(1.0f, pointW * zFactor)), (int)(Math.Max(1.0f, pointH * zFactor)), (rectR, rectG, rectB, 150), (borderR, borderG, borderB, 255));
+                
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + ox + areaOffsetX, contentRegion.Y + oy + areaOffsetY) * zFactor);
+                ImGui.Image(rectTexture, new Vector2(pointW, pointH) * zFactor);
+
+                var text = $"Point {idx}";
+                var textSize = ImGui.CalcTextSize(text);
+                ImGui.SetCursorPos(new Vector2(contentRegion.X + ox + areaOffsetX + pointW - textSize.X - borderWidth, contentRegion.Y + oy + areaOffsetY + pointH - textSize.Y - borderWidth) * zFactor);
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(borderR/255.0f, borderG/255.0f, borderB/255.0f, 1.0f));
+                ImGui.Text(text);
+                ImGui.PopStyleColor();
+
+                idx++;
+            }
+        }
+
         
         ImGui.End();
     }

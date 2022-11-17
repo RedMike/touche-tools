@@ -13,9 +13,10 @@ public class RoomViewSettingsWindow : BaseWindow
     private readonly MultiActiveBackgrounds _backgrounds;
     private readonly ActiveRoom _room;
     private readonly MultiActiveAreas _areas;
+    private readonly MultiActivePoints _points;
 
 
-    public RoomViewSettingsWindow(WindowSettings windowSettings, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, ActiveRoom room, MultiActiveAreas areas)
+    public RoomViewSettingsWindow(WindowSettings windowSettings, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, ActiveRoom room, MultiActiveAreas areas, MultiActivePoints points)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
@@ -23,6 +24,7 @@ public class RoomViewSettingsWindow : BaseWindow
         _backgrounds = backgrounds;
         _room = room;
         _areas = areas;
+        _points = points;
     }
 
     public override void Render()
@@ -58,12 +60,13 @@ public class RoomViewSettingsWindow : BaseWindow
         ImGui.SliderInt("Area Y offset", ref areaOffsetY, -roomH, roomH);
         if (areaOffsetY != origAreaOffsetY)
         {
-            _viewSettings.AreaOffsetX = areaOffsetY;
+            _viewSettings.AreaOffsetY = areaOffsetY;
         }
         
         ObservableCheckboxList("Rects", _rects);
         ObservableCheckboxList("Backgrounds", _backgrounds);
         ObservableCheckboxList("Areas", _areas);
+        ObservableCheckboxList("Points", _points);
         
         ImGui.End();
     }
