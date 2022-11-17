@@ -386,6 +386,93 @@ public class ProgramReferenceViewWindow : IWindow
         
             ImGui.EndTable();
         }
+        if (ImGui.CollapsingHeader($"Points"))
+        {
+            ImGui.BeginTable("points", 5);
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("X");
+            ImGui.TableSetupColumn("Y");
+            ImGui.TableSetupColumn("Z");
+            ImGui.TableSetupColumn("Order");
+            ImGui.TableHeadersRow();
+            ushort idx = 0;
+            foreach (var point in program.Points)
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text($"{idx}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{point.X}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{point.Y}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{point.Z}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{point.Order}");
+                ImGui.TableNextRow();
+                idx++;
+            }
+        
+            ImGui.EndTable();
+        }
+        if (ImGui.CollapsingHeader($"Rects"))
+        {
+            ImGui.BeginTable("rects", 5);
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("X");
+            ImGui.TableSetupColumn("Y");
+            ImGui.TableSetupColumn("W");
+            ImGui.TableSetupColumn("H");
+            ImGui.TableHeadersRow();
+            ushort idx = 0;
+            foreach (var rect in program.Rects)
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text($"{idx}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{rect.X}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{rect.Y}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{rect.W}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{rect.H}");
+                ImGui.TableNextRow();
+                idx++;
+            }
+        
+            ImGui.EndTable();
+        }
+        if (ImGui.CollapsingHeader($"Walks"))
+        {
+            ImGui.BeginTable("walks", 6);
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("P1");
+            ImGui.TableSetupColumn("P2");
+            ImGui.TableSetupColumn("R");
+            ImGui.TableSetupColumn("A1");
+            ImGui.TableSetupColumn("A2");
+            ImGui.TableHeadersRow();
+            ushort idx = 0;
+            foreach (var walk in program.Walks)
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text($"{idx}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{walk.Point1}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{walk.Point2}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{walk.ClipRect}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{walk.Area1}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{walk.Area2}");
+                ImGui.TableNextRow();
+                idx++;
+            }
+        
+            ImGui.EndTable();
+        }
         #endregion
         
         ImGui.Separator();
