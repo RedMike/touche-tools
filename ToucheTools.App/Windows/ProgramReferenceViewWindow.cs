@@ -49,6 +49,78 @@ public class ProgramReferenceViewWindow : IWindow
 
         ImGui.Separator();
         
+        #region Scripts
+        if (ImGui.CollapsingHeader("Scripts", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ImGui.BeginTable("scripts", 5);
+            ImGui.TableSetupColumn("Type");
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("Offset");
+            ImGui.TableSetupColumn("State");
+            ImGui.TableSetupColumn("Delay");
+            ImGui.TableHeadersRow();
+            foreach (var script in state.Scripts)
+            {
+                var isRunning = script.Status == ActiveProgramState.ProgramState.ScriptStatus.Running;
+                var isPaused = script.Status == ActiveProgramState.ProgramState.ScriptStatus.Paused;
+                var isStopped = script.Status == ActiveProgramState.ProgramState.ScriptStatus.Stopped ||
+                                script.Status == ActiveProgramState.ProgramState.ScriptStatus.NotInit;
+                
+                if (isStopped)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.15f, 0.2f, 0.15f, 1.0f));
+                } else if (isPaused)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.25f, 0.3f, 0.35f, 1.0f));
+                }
+                ImGui.TableNextColumn();
+                if (isRunning)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{script.Type:G}");
+                ImGui.TableNextColumn();
+                if (isRunning)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{script.Id}");
+                ImGui.TableNextColumn();
+                if (isRunning)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{script.Offset}");
+                
+                ImGui.TableNextColumn();
+                if (isRunning)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{script.Status:G}");
+                
+                ImGui.TableNextColumn();
+                if (isRunning)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{script.Delay}");
+                
+                ImGui.TableNextRow();
+                
+                if (isStopped || isPaused)
+                {
+                    ImGui.PopStyleColor();
+                }
+            }
+            
+            ImGui.EndTable();
+        }
+        #endregion
+        
+        ImGui.Separator();
+        
+        
 
         ImGui.Text($"Current run mode: {state.CurrentRunMode:G}");
         if (state.CurrentRunMode == ActiveProgramState.ProgramState.RunMode.CharacterScript)

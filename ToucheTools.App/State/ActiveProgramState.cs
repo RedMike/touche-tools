@@ -34,6 +34,38 @@ public class ActiveProgramState
     
     public class ProgramState
     {
+        #region Scripts
+        public enum ScriptType
+        {
+            Unknown = 0,
+            KeyChar = 1, //includes initial main loop
+            Action = 2,
+            Conversation = 3,
+        }
+
+        public enum ScriptStatus
+        {
+            Unknown = 0,
+            NotInit = 1,
+            Ready = 2,
+            Running = 3,
+            Paused = 4,
+            Stopped = 5,
+        }
+        
+        public class Script
+        {
+            public ScriptType Type { get; set; }
+            public int Id { get; set; }
+            public int StartOffset { get; set; }
+            public int Offset { get; set; }
+            public ScriptStatus Status { get; set; }
+            public int Delay { get; set; }
+        }
+
+        public List<Script> Scripts { get; set; } = new List<Script>();
+        #endregion
+        
         public class KeyChar
         {
             public bool Initialised { get; set; } = false;
@@ -276,8 +308,6 @@ public class ActiveProgramState
             CurrentState = new ProgramState()
             {
                 CurrentProgram = _program.Active,
-                CurrentRunMode = ProgramState.RunMode.CharacterScript,
-                CurrentKeyCharScript = CurrentKeyChar,
             };
             
             Flags[0] = (short)_program.Active;
@@ -294,12 +324,31 @@ public class ActiveProgramState
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
             SetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar, 0);
+            
+            CurrentState.Scripts.Add(new ProgramState.Script()
+            {
+                Type = ProgramState.ScriptType.KeyChar,
+                Id = CurrentKeyChar,
+                Offset = 0,
+                StartOffset = 0,
+                Status = ProgramState.ScriptStatus.Running
+            });
+            CurrentState.CurrentKeyCharScript = CurrentKeyChar;
+            CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
             foreach (var (keyCharId, keyChar) in KeyChars)
             {
                 keyChar.Init();
                 var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
                 if (cso != null)
                 {
+                    CurrentState.Scripts.Add(new ProgramState.Script()
+                    {
+                        Type = ProgramState.ScriptType.KeyChar,
+                        Id = keyCharId,
+                        StartOffset = cso.Offs,
+                        Offset = cso.Offs,
+                        Status = ProgramState.ScriptStatus.NotInit
+                    });
                     keyChar.ScriptOffset = cso.Offs;
                 }
                 else
@@ -334,39 +383,60 @@ public class ActiveProgramState
             return true;
         }
         
-        if (CurrentState.CurrentRunMode == ProgramState.RunMode.Paused)
-        {
-            //find the next keychar's script to run
-            var newOffset = -1;
-            var newKeyCharId = -1;
-            
-            foreach (var (keyCharId, keyChar) in KeyChars
-                         .Where(p => !p.Value.ScriptStopped && p.Value.Initialised && p.Value.ScriptOffset >= 0)
-                         .OrderBy(p => p.Value.ScriptPaused)
-                         .ThenBy(p => p.Key)
-                    )
-            {
-                newKeyCharId = keyCharId;
-                newOffset = keyChar.ScriptOffset;
-                break;
-            }
-
-            if (newOffset == -1)
-            {
-                CurrentState.CurrentOffset = -1;
-                CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
-            }
-            else
-            {
-                CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
-                CurrentState.CurrentKeyCharScript = newKeyCharId;
-                CurrentState.CurrentOffset = newOffset;
-            }
-        }
-
         if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
         {
             return RunStep();
+        }
+        
+        if (CurrentState.CurrentRunMode == ProgramState.RunMode.Paused)
+        {
+            var nextScript = CurrentState.Scripts.FirstOrDefault(s => s.Status == ProgramState.ScriptStatus.Ready);
+            if (nextScript != null)
+            {
+                if (nextScript.Type == ProgramState.ScriptType.KeyChar)
+                {
+                    CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
+                    CurrentState.CurrentKeyCharScript = nextScript.Id;
+                    CurrentState.CurrentOffset = nextScript.Offset;
+                    nextScript.Status = ProgramState.ScriptStatus.Running;
+                }
+                else
+                {
+                    throw new Exception($"Unknown script type: {nextScript.Type:G}");
+                }
+
+                return true;
+            }
+
+            if (CurrentState.Scripts.All(s => s.Status != ProgramState.ScriptStatus.Paused))
+            {
+                throw new Exception("Paused but no scripts waiting for tick");
+            }
+            
+            //no script is ready, so tick all the delays
+            var foundNewOne = false;
+            foreach (var script in CurrentState.Scripts)
+            {
+                if (script.Status != ProgramState.ScriptStatus.NotInit &&
+                    script.Status != ProgramState.ScriptStatus.Stopped)
+                {
+                    if (script.Delay > 0)
+                    {
+                        script.Delay--;
+                    }
+                }
+
+                if (script.Status == ProgramState.ScriptStatus.Paused)
+                {
+                    if (script.Delay == 0)
+                    {
+                        foundNewOne = true;
+                        script.Status = ProgramState.ScriptStatus.Ready;
+                    }
+                }
+            }
+
+            return foundNewOne;
         }
 
         if (CurrentState.CurrentRunMode == ProgramState.RunMode.WaitingForPlayer)
@@ -439,6 +509,17 @@ public class ActiveProgramState
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
+            var keyCharScript = CurrentState.Scripts.FirstOrDefault(s => 
+                                                                  s.Type == ProgramState.ScriptType.KeyChar && 
+                                                                  s.Id == initCharScript.Character && 
+                                                                  s.Status != ProgramState.ScriptStatus.Running &&
+                                                                  s.Status != ProgramState.ScriptStatus.Stopped
+            );
+            if (keyCharScript != null)
+            {
+                keyCharScript.Offset = keyCharScript.StartOffset;
+                keyCharScript.Status = ProgramState.ScriptStatus.Ready;
+            }
         } else if (instruction is LoadRoomInstruction loadRoom)
         {
             CurrentState.LoadedRoom = loadRoom.Num;
@@ -536,7 +617,14 @@ public class ActiveProgramState
             programPaused = true;
         } else if (instruction is SetCharDelayInstruction setCharDelay)
         {
-            _log.Error("SetCharDelay not implemented yet"); //TODO:
+            var keyCharScript = CurrentState.Scripts.FirstOrDefault(s => 
+                s.Type == ProgramState.ScriptType.KeyChar && 
+                s.Id == CurrentKeyChar
+            );
+            if (keyCharScript != null)
+            {
+                keyCharScript.Delay = setCharDelay.Delay;
+            }
             programPaused = true;
         } else if (instruction is SetupWaitingCharInstruction setupWaitingChar)
         {
@@ -679,6 +767,14 @@ public class ActiveProgramState
                 var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
                 
                 keyChar.ScriptStopped = true;
+                var keyCharScript = CurrentState.Scripts.FirstOrDefault(s =>
+                    s.Type == ProgramState.ScriptType.KeyChar &&
+                    s.Id == CurrentState.CurrentKeyCharScript
+                );
+                if (keyCharScript != null)
+                {
+                    keyCharScript.Status = ProgramState.ScriptStatus.Stopped;
+                }
                 CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
                 justJumped = true;
             }
@@ -693,10 +789,17 @@ public class ActiveProgramState
                     throw new Exception("Missing key char index");
                 }
                 var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
-
                 if (!keyChar.ScriptStopped)
                 {
                     keyChar.ScriptPaused = true;
+                }
+                var keyCharScript = CurrentState.Scripts.FirstOrDefault(s =>
+                    s.Type == ProgramState.ScriptType.KeyChar &&
+                    s.Id == CurrentState.CurrentKeyCharScript
+                );
+                if (keyCharScript != null && keyCharScript.Status == ProgramState.ScriptStatus.Running)
+                {
+                    keyCharScript.Status = ProgramState.ScriptStatus.Ready;
                 }
 
                 CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
@@ -776,8 +879,26 @@ public class ActiveProgramState
         {
             idx += 1;
             CurrentState.CurrentOffset = instructionOffsets[idx];
-        }   
+        }
+        
         GetKeyChar(CurrentState.CurrentKeyCharScript).ScriptOffset = CurrentState.CurrentOffset;
+        var script = CurrentState.Scripts.FirstOrDefault(s =>
+            s.Type == ProgramState.ScriptType.KeyChar && 
+            s.Id == CurrentState.CurrentKeyCharScript
+        );
+        if (script == null)
+        {
+            throw new Exception("Can't find script to update");
+        }
+
+        script.Offset = CurrentState.CurrentOffset;
+        if (programStopped)
+        {
+            script.Status = ProgramState.ScriptStatus.Stopped;
+        } else if (programPaused)
+        {
+            script.Status = ProgramState.ScriptStatus.Paused;
+        }
 
         return programPaused || programStopped;
     }
