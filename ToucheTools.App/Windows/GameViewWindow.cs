@@ -181,10 +181,64 @@ public class GameViewWindow : BaseWindow
         }
         #endregion
         
+        #region Points
+        ushort pIdx = 0;
+        foreach (var point in program.Points)
+        {
+            var ox = point.X;
+            var oy = point.Y;
+            var oz = point.Z;
+            if (oz < Game.ZDepthMin)
+            {
+                oz = Game.ZDepthMin;
+            }
+            if (oz > Game.ZDepthMax)
+            {
+                oz = Game.ZDepthMax;
+            }
+            var zFactor = 1.0f;
+            if (oz < Game.ZDepthEven)
+            {
+                zFactor = (float)oz / Game.ZDepthEven;
+            }
+
+            if (oz > Game.ZDepthEven)
+            {
+                zFactor = (float)(Game.ZDepthMax - Game.ZDepthEven)/(Game.ZDepthMax - oz);
+            }
+
+            var x = ox - offsetX;
+            var y = oy - offsetY;
+            var pointWidth = 25 * zFactor;
+            var pointHeight = 25 * zFactor;
+            if (pointWidth < 1.0f)
+            {
+                pointWidth = 1.0f;
+            }
+            if (pointHeight < 1.0f)
+            {
+                pointHeight = 1.0f;
+            }
+            
+            var pointRectTexture = _render.RenderRectangle(1, (int)(pointWidth), (int)(pointHeight),
+                (255, 255, 255, 50), (255, 255, 255, 150));
+            ImGui.SetCursorPos(offset + new Vector2(x, y)*zFactor);
+            ImGui.Image(pointRectTexture, new Vector2(pointWidth, pointHeight));
+
+            var text = $"P{pIdx}";
+            var textSize = ImGui.CalcTextSize(text);
+            ImGui.SetCursorPos(offset + new Vector2(x * zFactor + pointWidth - textSize.X - 2, y * zFactor + pointHeight - textSize.Y - 2));
+            ImGui.Text(text);
+            
+            pIdx++;
+        }
+        #endregion
+        
         #region Walks
         ushort wIdx = 0;
         foreach (var walk in program.Walks)
         {
+            continue;
             var point1 = walk.Point1;
             var point2 = walk.Point2;
 
