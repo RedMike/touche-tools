@@ -64,6 +64,16 @@ public class ActiveProgramState
         }
 
         public List<Script> Scripts { get; set; } = new List<Script>();
+
+        public Script? GetRunningScript()
+        {
+            return Scripts.SingleOrDefault(s => s.Status == ScriptStatus.Running);
+        }
+
+        public Script? GetNextScript()
+        {
+            return Scripts.FirstOrDefault(s => s.Status == ScriptStatus.Ready);
+        }
         #endregion
         
         public class KeyChar
@@ -401,39 +411,22 @@ public class ActiveProgramState
             _program.SetActive(newProgram);
             return true;
         }
-        
-        if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
+
+        var currentScript = CurrentState.GetRunningScript();
+        if (currentScript != null)
         {
             return RunStep();
         }
-        
-        if (CurrentState.CurrentRunMode == ProgramState.RunMode.Paused)
+
+        var nextScript = CurrentState.GetNextScript();
+        if (nextScript == null)
         {
-            var nextScript = CurrentState.Scripts.FirstOrDefault(s => s.Status == ProgramState.ScriptStatus.Ready);
-            if (nextScript != null)
-            {
-                if (nextScript.Type == ProgramState.ScriptType.KeyChar)
-                {
-                    CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
-                    CurrentState.CurrentKeyCharScript = nextScript.Id;
-                    CurrentState.CurrentOffset = nextScript.Offset;
-                    nextScript.Status = ProgramState.ScriptStatus.Running;
-                }
-                else
-                {
-                    throw new Exception($"Unknown script type: {nextScript.Type:G}");
-                }
-
-                return true;
-            }
-
             if (CurrentState.Scripts.All(s => s.Status != ProgramState.ScriptStatus.Paused))
             {
-                throw new Exception("Paused but no scripts waiting for tick");
+                throw new Exception("All scripts in non-paused state");
             }
-            
-            //no script is ready, so tick all the delays
-            var foundNewOne = false;
+
+            var foundScript = false;
             foreach (var script in CurrentState.Scripts)
             {
                 if (script.Status != ProgramState.ScriptStatus.NotInit &&
@@ -449,22 +442,25 @@ public class ActiveProgramState
                 {
                     if (script.Delay == 0)
                     {
-                        foundNewOne = true;
+                        foundScript = true;
                         script.Status = ProgramState.ScriptStatus.Ready;
                     }
                 }
             }
 
-            return true;
+            return foundScript;
         }
 
-        if (CurrentState.CurrentRunMode == ProgramState.RunMode.WaitingForPlayer)
+        if (nextScript.Type != ProgramState.ScriptType.KeyChar)
         {
-            //nothing to do
-            return true;
+            throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
         }
         
-        throw new Exception($"Unknown run mode: {CurrentState.CurrentRunMode:G}");
+        CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
+        CurrentState.CurrentKeyCharScript = nextScript.Id;
+        CurrentState.CurrentOffset = nextScript.Offset;
+        nextScript.Status = ProgramState.ScriptStatus.Running;
+        return true;
     }
     
     public bool RunStep()
