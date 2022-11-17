@@ -4,7 +4,7 @@ public class WindowSettings
 {
     public bool RoomViewOpen { get; private set; }
     public bool SpriteViewOpen { get; private set; }
-    public bool ProgramViewOpen { get; private set; }
+    public bool ProgramViewOpen { get; private set; } = true;
 
     public void CloseAllViews()
     {
