@@ -504,6 +504,8 @@ public class ActiveProgramState
                 throw new Exception("Sequence not loaded yet: " + initCharScript.SequenceIndex);
             }
             
+            _log.Info($"Initialising key char {initCharScript.Character} with sprite {initCharScript.SpriteIndex} ({sprite.SpriteNum}) and sequence {initCharScript.SequenceIndex} ({sequence.SequenceNum}).");
+            
             var keyChar = GetKeyChar(initCharScript.Character);
             keyChar.Initialised = true;
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
