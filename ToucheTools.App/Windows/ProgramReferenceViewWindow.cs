@@ -290,7 +290,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         #region Areas
-        if (ImGui.CollapsingHeader($"Areas ({program.Areas.Count})"))
+        if (ImGui.CollapsingHeader($"Areas ({state.RoomAreas.Count})"))
         {
             ImGui.BeginTable("areas", 7);
             ImGui.TableSetupColumn("ID");
@@ -302,18 +302,11 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.TableSetupColumn("SY");
             ImGui.TableHeadersRow();
             ushort idx = 0;
-            foreach (var area in program.Areas)
+            foreach (var areaId in state.RoomAreas)
             {
+                var area = program.Areas[areaId];
                 var destX = area.Rect.X;
-                // if (state.BackgroundOffsets.ContainsKey(idx))
-                // {
-                //     destX = state.BackgroundOffsets[idx].Item1;
-                // }
                 var destY = area.Rect.Y;
-                // if (state.BackgroundOffsets.ContainsKey(idx))
-                // {
-                //     destY = state.BackgroundOffsets[idx].Item2;
-                // }
 
                 ImGui.TableNextColumn();
                 ImGui.Text($"{idx}");

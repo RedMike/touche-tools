@@ -103,32 +103,37 @@ public class GameViewWindow : BaseWindow
 
         #region Areas
         ushort aIdx = 0;
-        foreach (var area in program.Areas)
+        foreach (var areaId in _activeProgramState.CurrentState.RoomAreas)
         {
-            continue; //TODO: what to render and when
-            var ox = area.Rect.X;
-            var oy = area.Rect.Y;
-            // if (_activeProgramState.CurrentState.BackgroundOffsets.ContainsKey(aIdx))
-            // {
-            //     (ox, oy) = _activeProgramState.CurrentState.BackgroundOffsets[aIdx];
-            // }
-            if (oy != 20000)
+            foreach (var area in program.Areas.Where(a => a.Id == areaId))
             {
+                var ox = area.Rect.X;
+                var oy = area.Rect.Y;
+
                 var x = ox - offsetX;
                 var y = oy - offsetY;
+                
+                var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H);
+
+                var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, area.Rect.W, area.Rect.H, areaBytes);
+
+                ImGui.SetCursorPos(offset + new Vector2(x, y));
+                ImGui.Image(roomAreaTexture, new Vector2(area.Rect.W, area.Rect.H));
+
 
                 var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
                     (255, 255, 0, 50), (255, 255, 255, 150));
                 ImGui.SetCursorPos(offset + new Vector2(x, y));
                 ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
-                
-                var text = $"Area {aIdx}";
-                var textSize = ImGui.CalcTextSize(text);
-                ImGui.SetCursorPos(offset + new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
-                ImGui.Text(text);
-            }
 
-            aIdx++;
+                var text = $"Area {aIdx} ({area.Id})";
+                var textSize = ImGui.CalcTextSize(text);
+                ImGui.SetCursorPos(offset +
+                                   new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
+                ImGui.Text(text);
+
+                aIdx++;
+            }
         }
         #endregion
         

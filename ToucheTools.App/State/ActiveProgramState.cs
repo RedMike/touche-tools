@@ -140,6 +140,10 @@ public class ActiveProgramState
         }
         #endregion
 
+        #region Room Areas
+        public List<int> RoomAreas { get; set; } = new List<int>();
+        #endregion
+        
         public int CurrentProgram { get; set; } = 0;
 
         public int? QueuedProgram { get; set; } = null;
@@ -909,6 +913,24 @@ public class ActiveProgramState
             var keyChar = GetKeyChar(unsetCharFlags.Character);
             keyChar.IsSelectable &= (unsetCharFlags.Flags & 0x4000) == 0;
             keyChar.OffScreen &= (unsetCharFlags.Flags & 0x8000) == 0;
+        } else if (instruction is UpdateRoomAreasInstruction updateRoomAreas)
+        {
+            var areaId = updateRoomAreas.Area;
+            if (CurrentState.RoomAreas.Count == 199)
+            {
+                CurrentState.RoomAreas = new List<int>();
+            }
+
+            CurrentState.RoomAreas.Add(areaId);
+        } else if (instruction is UpdateRoomInstruction updateRoom)
+        {
+            var areaId = updateRoom.Area;
+            if (CurrentState.RoomAreas.Count == 199)
+            {
+                CurrentState.RoomAreas = new List<int>();
+            }
+
+            CurrentState.RoomAreas.Add(areaId);
         }
         else
         {
