@@ -303,7 +303,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         #region Areas
-        if (ImGui.CollapsingHeader($"Areas ({state.RoomAreas.Count})"))
+        if (ImGui.CollapsingHeader($"Areas"))
         {
             ImGui.BeginTable("areas", 7);
             ImGui.TableSetupColumn("ID");
@@ -314,7 +314,6 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.TableSetupColumn("SX");
             ImGui.TableSetupColumn("SY");
             ImGui.TableHeadersRow();
-            ushort idx = 0;
             foreach (var areaId in state.RoomAreas)
             {
                 foreach (var area in program.Areas.Where(a => a.Id == areaId))
@@ -337,13 +336,12 @@ public class ProgramReferenceViewWindow : IWindow
                     ImGui.TableNextColumn();
                     ImGui.Text($"{area.SrcY}");
                     ImGui.TableNextRow();
-                    idx++;
                 }
             }
         
             ImGui.EndTable();
         }
-        if (ImGui.CollapsingHeader($"Background Areas ({program.Backgrounds.Count})"))
+        if (ImGui.CollapsingHeader($"Background Areas"))
         {
             ImGui.BeginTable("background_areas", 7);
             ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.WidthFixed, 15.0f);
@@ -384,6 +382,39 @@ public class ProgramReferenceViewWindow : IWindow
                 ImGui.Text($"{background.SrcY}");
                 ImGui.TableNextRow();
                 idx++;
+            }
+        
+            ImGui.EndTable();
+        }
+        #endregion
+        
+        ImGui.Separator();
+        
+        #region Talk
+        if (ImGui.CollapsingHeader($"Talk Entries"))
+        {
+            ImGui.BeginTable("talk_entries", 5);
+            ImGui.TableSetupColumn("KC1", ImGuiTableColumnFlags.WidthFixed, 25.0f);
+            ImGui.TableSetupColumn("KC2", ImGuiTableColumnFlags.WidthFixed, 25.0f);
+            ImGui.TableSetupColumn("Num", ImGuiTableColumnFlags.WidthFixed, 25.0f);
+            ImGui.TableSetupColumn("Counter", ImGuiTableColumnFlags.WidthFixed, 25.0f);
+            ImGui.TableSetupColumn("Text");
+            ImGui.TableHeadersRow();
+            foreach (var talkEntry in _activeProgramState.TalkEntries
+                         .OrderBy(t => t.TalkingKeyChar)
+                         .ThenBy(t => t.OtherKeyChar))
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text($"{talkEntry.TalkingKeyChar}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{talkEntry.OtherKeyChar}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{talkEntry.Num}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{talkEntry.Counter}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{talkEntry.Text}");
+                ImGui.TableNextRow();
             }
         
             ImGui.EndTable();

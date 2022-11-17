@@ -180,6 +180,56 @@ public class GameViewWindow : BaseWindow
             idx++;
         }
         #endregion
+        
+        #region Talk Entries
+        ushort tIdx = 0;
+        foreach (var talkEntry in _activeProgramState.TalkEntries)
+        {
+            var keyChar = _activeProgramState.GetKeyChar(talkEntry.TalkingKeyChar);
+            var (charX, charY) = (keyChar.PositionX, keyChar.PositionY - (keyChar.PositionZ / 2 + 16));
+            
+            var entryTextSize = ImGui.CalcTextSize(talkEntry.Text);
+            var tx = entryTextSize.X;
+            if (tx > 200)
+            {
+                tx = 200;
+            }
+            var ty = entryTextSize.Y;
+            
+            var x = charX - offsetX - tx/2;
+            if (x < 0)
+            {
+                x = 0;
+            }
+            if (x + tx >= Constants.GameScreenWidth)
+            {
+                x = Constants.GameScreenWidth - tx - 1;
+            }
+            var y = charY - offsetY - ty;
+            if (y < 0)
+            {
+                y = 1;
+            } else if (y > Constants.RoomHeight)
+            {
+                y = Constants.RoomHeight - 16;
+            }
+
+            ImGui.SetCursorPos(offset + new Vector2(x, y));
+            ImGui.Text(talkEntry.Text);
+
+            var roomAreaRectTexture = _render.RenderRectangle(1, (int)tx, (int)ty*2,
+                (255, 0, 0, 50), (255, 255, 255, 150));
+            ImGui.SetCursorPos(offset + new Vector2(x, y));
+            ImGui.Image(roomAreaRectTexture, new Vector2(tx, ty*2));
+            
+            var text = $"Text {tIdx}";
+            var textSize = ImGui.CalcTextSize(text);
+            ImGui.SetCursorPos(offset + new Vector2(x + tx - textSize.X - 2, y + ty*2 - textSize.Y - 2));
+            ImGui.Text(text);
+
+            tIdx++;
+        }
+        #endregion
     }
 
     private void RenderKeyChars(Vector2 offset)
