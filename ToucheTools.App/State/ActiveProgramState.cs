@@ -94,7 +94,8 @@ public class ActiveProgramState
                 IsFollowing = false;
                 IsSelectable = false;
                 OffScreen = false;
-                PositionX = 10;
+                PositionX = 10; //from game code
+                //intentional that no position y/z update, from game code
                 SpriteIndex = null;
                 SequenceIndex = null;
                 Character = null;
