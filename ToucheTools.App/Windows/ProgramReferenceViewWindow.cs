@@ -144,6 +144,28 @@ public class ProgramReferenceViewWindow : IWindow
         
         ImGui.Separator();
         
+        #region Flags
+        if (ImGui.CollapsingHeader("Flags"))
+        {
+            ImGui.BeginTable("flags", 2);
+            ImGui.TableSetupColumn("Flag", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthFixed, 50.0f);
+            ImGui.TableHeadersRow();
+            foreach (var (flagId, flagValue) in _activeProgramState.Flags.OrderBy(p => p.Key))
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text($"{Flags.GetFlagText(flagId)}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{flagValue}");
+                ImGui.TableNextRow();
+            }
+            
+            ImGui.EndTable();
+        }
+        #endregion
+        
+        ImGui.Separator();
+        
         #region Sprites
         if (ImGui.CollapsingHeader($"Sprites"))
         {
