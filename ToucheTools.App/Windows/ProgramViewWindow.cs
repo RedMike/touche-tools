@@ -38,7 +38,7 @@ public class ProgramViewWindow : IWindow
         var idx = 0;
         foreach (var (offset, instruction) in _viewSettings.InstructionsView)
         {
-            var currentInstruction = (_activeProgramState.CurrentState?.CurrentOffset ?? 0) == offset;
+            var currentInstruction = (_activeProgramState.CurrentState?.GetRunningScript()?.Offset ?? -1) == offset;
             if (currentInstruction)
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));

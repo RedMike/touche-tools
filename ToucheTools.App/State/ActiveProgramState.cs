@@ -141,23 +141,8 @@ public class ActiveProgramState
             public short[] CountedInventoryItems { get; set; } = new short[4];
             #endregion
         }
-
-
-        public enum RunMode
-        {
-            Unknown = 0,
-            Paused = 1,
-            CharacterScript = 2,
-            DoneActionScript = 3,
-            ActionScript = 4,
-            WaitingForPlayer = 5,
-        }
-
-        public RunMode CurrentRunMode { get; set; } = RunMode.Unknown;
-        public int CurrentKeyCharScript { get; set; } = -1;
         
         public int CurrentProgram { get; set; } = 0;
-        public int CurrentOffset { get; set; } = 0; //TODO: one per character script
 
         public int? QueuedProgram { get; set; } = null;
         
@@ -362,8 +347,6 @@ public class ActiveProgramState
                 StartOffset = 0,
                 Status = ProgramState.ScriptStatus.Running
             });
-            CurrentState.CurrentKeyCharScript = CurrentKeyChar;
-            CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
             foreach (var (keyCharId, keyChar) in KeyChars)
             {
                 keyChar.Init();
@@ -456,9 +439,6 @@ public class ActiveProgramState
             throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
         }
         
-        CurrentState.CurrentRunMode = ProgramState.RunMode.CharacterScript;
-        CurrentState.CurrentKeyCharScript = nextScript.Id;
-        CurrentState.CurrentOffset = nextScript.Offset;
         nextScript.Status = ProgramState.ScriptStatus.Running;
         return true;
     }
@@ -466,8 +446,14 @@ public class ActiveProgramState
     public bool RunStep()
     {
         var program = _model.Programs[_program.Active];
-        var curOffset = CurrentState.CurrentOffset;
         
+        var currentScript = CurrentState.GetRunningScript();
+        if (currentScript == null)
+        {
+            throw new Exception("No running script found");
+        }
+
+        var curOffset = currentScript.Offset;
         if (!program.Instructions.ContainsKey(curOffset))
         {
             throw new Exception("Unknown program offset: " + curOffset);
@@ -479,7 +465,7 @@ public class ActiveProgramState
         {
             throw new Exception("Reached end of script");
         }
-
+        
         var programPaused = false;
         var programStopped = false;
         var justJumped = false;
@@ -687,7 +673,7 @@ public class ActiveProgramState
         {
             if (CurrentState.StackValue == 0)
             {
-                CurrentState.CurrentOffset = jz.NewOffset;
+                currentScript.Offset = jz.NewOffset;
                 justJumped = true;
             }
         } else if (instruction is GetInventoryItemInstruction getInventoryItem)
@@ -762,56 +748,30 @@ public class ActiveProgramState
             _log.Error($"Unhandled instruction type: {instruction.Opcode:G}");
         }
         
-        if (CurrentState.CurrentKeyCharScript < 0)
-        {
-            throw new Exception("Missing key char index");
-        }
-        
         if (programStopped)
         {
-            _log.Info($"Finished running {CurrentState.CurrentRunMode:G}.");
+            _log.Info($"Finished running {currentScript.Type:G} {currentScript.Id}.");
 
-            if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
+            if (currentScript.Type == ProgramState.ScriptType.KeyChar)
             {
-                var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
+                var keyChar = GetKeyChar(currentScript.Id);
                 
                 keyChar.ScriptStopped = true;
-                var keyCharScript = CurrentState.Scripts.FirstOrDefault(s =>
-                    s.Type == ProgramState.ScriptType.KeyChar &&
-                    s.Id == CurrentState.CurrentKeyCharScript
-                );
-                if (keyCharScript != null)
-                {
-                    keyCharScript.Status = ProgramState.ScriptStatus.Stopped;
-                }
-                CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
+                currentScript.Status = ProgramState.ScriptStatus.Stopped;
                 justJumped = true;
             }
         }
         
         if (programPaused)
         {
-            if (CurrentState.CurrentRunMode == ProgramState.RunMode.CharacterScript)
+            if (currentScript.Type == ProgramState.ScriptType.KeyChar)
             {
-                if (CurrentState.CurrentKeyCharScript < 0)
-                {
-                    throw new Exception("Missing key char index");
-                }
-                var keyChar = GetKeyChar(CurrentState.CurrentKeyCharScript);
+                var keyChar = GetKeyChar(currentScript.Id);
                 if (!keyChar.ScriptStopped)
                 {
                     keyChar.ScriptPaused = true;
                 }
-                var keyCharScript = CurrentState.Scripts.FirstOrDefault(s =>
-                    s.Type == ProgramState.ScriptType.KeyChar &&
-                    s.Id == CurrentState.CurrentKeyCharScript
-                );
-                if (keyCharScript != null && keyCharScript.Status == ProgramState.ScriptStatus.Running)
-                {
-                    keyCharScript.Status = ProgramState.ScriptStatus.Ready;
-                }
-
-                CurrentState.CurrentRunMode = ProgramState.RunMode.Paused;
+                currentScript.Status = ProgramState.ScriptStatus.Paused;
             }
             
             if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
@@ -887,26 +847,13 @@ public class ActiveProgramState
         if (!justJumped)
         {
             idx += 1;
-            CurrentState.CurrentOffset = instructionOffsets[idx];
-        }
-        
-        GetKeyChar(CurrentState.CurrentKeyCharScript).ScriptOffset = CurrentState.CurrentOffset;
-        var script = CurrentState.Scripts.FirstOrDefault(s =>
-            s.Type == ProgramState.ScriptType.KeyChar && 
-            s.Id == CurrentState.CurrentKeyCharScript
-        );
-        if (script == null)
-        {
-            throw new Exception("Can't find script to update");
+            currentScript.Offset = instructionOffsets[idx];
         }
 
-        script.Offset = CurrentState.CurrentOffset;
-        if (programStopped)
+
+        if (currentScript.Type == ProgramState.ScriptType.KeyChar)
         {
-            script.Status = ProgramState.ScriptStatus.Stopped;
-        } else if (programPaused)
-        {
-            script.Status = ProgramState.ScriptStatus.Paused;
+            GetKeyChar(currentScript.Id).ScriptOffset = currentScript.Offset;
         }
 
         return programPaused || programStopped;
