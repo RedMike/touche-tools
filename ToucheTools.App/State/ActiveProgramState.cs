@@ -32,6 +32,63 @@ public class ActiveProgramState
         }
     }
     
+    public class KeyChar
+    {
+        public bool Initialised { get; set; } = false;
+        public bool IsSelectable { get; set; } = false; //unsure?
+        public bool OffScreen { get; set; } = false; //unsure?
+        public bool IsFollowing { get; set; } = false;
+        
+        #region Graphics
+        public int? SpriteIndex { get; set; }
+        public int? SequenceIndex { get; set; }
+        public int? Character { get; set; } //within sequence
+        #endregion
+        
+        #region Animation
+        public int Anim1Start { get; set; }
+        public int Anim1Count { get; set; }
+        public int Anim2Start { get; set; }
+        public int Anim2Count { get; set; }
+        public int Anim3Start { get; set; }
+        public int Anim3Count { get; set; }
+        #endregion
+        
+        #region Position
+        public ushort? LastProgramPoint { get; set; }
+        public int? PositionX { get; set; }
+        public int? PositionY { get; set; }
+        public int? PositionZ { get; set; }
+        public int Direction { get; set; }
+        #endregion
+        
+        #region Items
+        public short Money { get; set; }
+        public short[] CountedInventoryItems { get; set; } = new short[4];
+        #endregion
+        
+        public void Init()
+        {
+            Initialised = false;
+            Direction = 0;
+            Anim1Count = 1;
+            Anim1Start = 0;
+            Anim2Count = 1;
+            Anim2Start = 0;
+            Anim3Count = 1;
+            Anim3Start = 0;
+            LastProgramPoint = null;
+            IsFollowing = false;
+            IsSelectable = false;
+            OffScreen = false;
+            PositionX = 10; //from game code
+            //intentional that no position y/z update, from game code
+            SpriteIndex = null;
+            SequenceIndex = null;
+            Character = null;
+        }
+    }
+    
     public class ProgramState
     {
         #region Scripts
@@ -75,68 +132,7 @@ public class ActiveProgramState
             return Scripts.FirstOrDefault(s => s.Status == ScriptStatus.Ready);
         }
         #endregion
-        
-        public class KeyChar
-        {
-            public bool Initialised { get; set; } = false;
 
-            public void Init()
-            {
-                Initialised = false;
-                Direction = 0;
-                Anim1Count = 1;
-                Anim1Start = 0;
-                Anim2Count = 1;
-                Anim2Start = 0;
-                Anim3Count = 1;
-                Anim3Start = 0;
-                LastProgramPoint = null;
-                IsFollowing = false;
-                IsSelectable = false;
-                OffScreen = false;
-                PositionX = 10; //from game code
-                //intentional that no position y/z update, from game code
-                SpriteIndex = null;
-                SequenceIndex = null;
-                Character = null;
-            }
-            public bool IsSelectable { get; set; } = false; //unsure?
-            public bool OffScreen { get; set; } = false; //unsure?
-            public bool IsFollowing { get; set; } = false;
-            
-            #region Graphics
-            public int? SpriteIndex { get; set; }
-            public int? SequenceIndex { get; set; }
-            public int? Character { get; set; } //within sequence
-            #endregion
-            
-            #region Animation
-            public int Anim1Start { get; set; }
-            public int Anim1Count { get; set; }
-            public int Anim2Start { get; set; }
-            public int Anim2Count { get; set; }
-            public int Anim3Start { get; set; }
-            public int Anim3Count { get; set; }
-            #endregion
-            
-            #region Position
-            public ushort? LastProgramPoint { get; set; }
-            public int? PositionX { get; set; }
-            public int? PositionY { get; set; }
-            public int? PositionZ { get; set; }
-            public int Direction { get; set; }
-            #endregion
-            
-            //TODO: items shold not be in the program-based state
-            #region Items
-            public short Money { get; set; }
-            /// <summary>
-            /// Only used to track amounts (e.g. money)
-            /// </summary>
-            public short[] CountedInventoryItems { get; set; } = new short[4];
-            #endregion
-        }
-        
         public int CurrentProgram { get; set; } = 0;
 
         public int? QueuedProgram { get; set; } = null;
@@ -279,10 +275,10 @@ public class ActiveProgramState
     #endregion
 
     #region KeyChars
-    public Dictionary<int, ProgramState.KeyChar> KeyChars { get; set; } = new Dictionary<int, ProgramState.KeyChar>();
+    public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
     public short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
 
-    public ProgramState.KeyChar GetKeyChar(int id)
+    public KeyChar GetKeyChar(int id)
     {
         if (id == 256 && CurrentKeyChar != 256)
         {
@@ -324,7 +320,7 @@ public class ActiveProgramState
             {
                 if (!KeyChars.ContainsKey(i))
                 {
-                    KeyChars[i] = new ProgramState.KeyChar();
+                    KeyChars[i] = new KeyChar();
                 }
             }
             var program = _model.Programs[_program.Active];
@@ -602,11 +598,7 @@ public class ActiveProgramState
             keyChar.Direction = 0;
         } else if (instruction is MoveCharToPosInstruction moveCharToPos)
         {
-            if (!KeyChars.ContainsKey(moveCharToPos.Character))
-            {
-                KeyChars[moveCharToPos.Character] = new ProgramState.KeyChar();
-            }
-            var keyChar = KeyChars[moveCharToPos.Character];
+            var keyChar = GetKeyChar(moveCharToPos.Character);
 
             if (moveCharToPos.TargetingAnotherCharacter)
             {
