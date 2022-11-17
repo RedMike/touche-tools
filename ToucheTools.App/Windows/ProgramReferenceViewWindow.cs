@@ -133,12 +133,25 @@ public class ProgramReferenceViewWindow : IWindow
         var currentScript = state.GetRunningScript();
         if (currentScript == null)
         {
+            ImGui.Text("");
             ImGui.Text("Paused waiting for scripts.");
         }
         else
         {
             ImGui.Text($"Current script: {currentScript.Type:G} {currentScript.Id}");
             LabelAndButton($"Current offset: ", currentScript.Offset.ToString("D5"));
+        }
+        
+        LabelAndButton($"Current program: ", state.CurrentProgram.ToString());
+
+        var currentRoom = state.LoadedRoom;
+        if (currentRoom == null)
+        {
+            ImGui.Text("Not in a room.");
+        }
+        else
+        {
+            LabelAndButton($"Current room: ", currentRoom.Value.ToString());
         }
         #endregion
         
