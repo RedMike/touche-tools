@@ -145,7 +145,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
         
         #region Sprites
-        if (ImGui.CollapsingHeader($"Sprites", ImGuiTreeNodeFlags.DefaultOpen))
+        if (ImGui.CollapsingHeader($"Sprites"))
         {
             ImGui.BeginTable("sprites", 3);
             ImGui.TableSetupColumn("Index");
@@ -173,6 +173,41 @@ public class ProgramReferenceViewWindow : IWindow
         }
         #endregion
         
+        ImGui.Separator();
+        
+        #region Key Char Graphics
+        if (ImGui.CollapsingHeader($"Key Char Graphics"))
+        {
+            ImGui.BeginTable("key_char_graphics", 4);
+            ImGui.TableSetupColumn("Index");
+            ImGui.TableSetupColumn("Spr Num");
+            ImGui.TableSetupColumn("Seq Num");
+            ImGui.TableSetupColumn("Char");
+            ImGui.TableHeadersRow();
+            foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
+            {
+                if (keyChar.Initialised && !keyChar.OffScreen && keyChar.SpriteIndex != null && keyChar.SequenceIndex != null)
+                {
+                    var spriteIndex = keyChar.SpriteIndex.Value;
+                    var seqIndex = keyChar.SequenceIndex.Value;
+                    var sprite = _activeProgramState.LoadedSprites[spriteIndex];
+                    var seq = _activeProgramState.LoadedSprites[seqIndex];
+                    var character = keyChar.Character?.ToString() ?? "";
+                    
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{spriteIndex} ({sprite.SpriteNum})");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{seqIndex} ({seq.SequenceNum})");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{character}");
+                    ImGui.TableNextRow();
+                }
+            }
+            ImGui.EndTable();
+        }
+        #endregion
         ImGui.Separator();
         
         ImGui.End();
