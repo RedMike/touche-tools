@@ -753,17 +753,11 @@ public class ActiveProgramState
         } else if (instruction is SetCharFlagsInstruction setCharFlags)
         {
             var keyChar = GetKeyChar(setCharFlags.Character);
-            keyChar.ScriptStopped |= (setCharFlags.Flags & 0x01) != 0;
-            keyChar.ScriptPaused |= (setCharFlags.Flags & 0x02) != 0;
-            keyChar.IsFollowing |= (setCharFlags.Flags & 0x10) != 0;
             keyChar.IsSelectable |= (setCharFlags.Flags & 0x4000) != 0;
             keyChar.OffScreen |= (setCharFlags.Flags & 0x8000) != 0;
         } else if (instruction is UnsetCharFlagsInstruction unsetCharFlags)
         {
             var keyChar = GetKeyChar(unsetCharFlags.Character);
-            keyChar.ScriptStopped &= (unsetCharFlags.Flags & 0x01) == 0;
-            keyChar.ScriptPaused &= (unsetCharFlags.Flags & 0x02) == 0;
-            keyChar.IsFollowing &= (unsetCharFlags.Flags & 0x10) == 0;
             keyChar.IsSelectable &= (unsetCharFlags.Flags & 0x4000) == 0;
             keyChar.OffScreen &= (unsetCharFlags.Flags & 0x8000) == 0;
         }
