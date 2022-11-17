@@ -84,14 +84,12 @@ public class ActiveProgramState
             {
                 Initialised = false;
                 Direction = 0;
-                Anim1Count = 0;
+                Anim1Count = 1;
                 Anim1Start = 0;
-                Anim2Count = 0;
+                Anim2Count = 1;
                 Anim2Start = 0;
-                Anim3Count = 0;
+                Anim3Count = 1;
                 Anim3Start = 0;
-                ScriptPaused = false;
-                ScriptStopped = false;
                 LastProgramPoint = null;
                 IsFollowing = false;
                 IsSelectable = false;
@@ -101,10 +99,6 @@ public class ActiveProgramState
                 SequenceIndex = null;
                 Character = null;
             }
-
-            public bool ScriptPaused { get; set; } = false;
-            public bool ScriptStopped { get; set; } = false;
-            public int ScriptOffset { get; set; } = -1;
             public bool IsSelectable { get; set; } = false; //unsure?
             public bool OffScreen { get; set; } = false; //unsure?
             public bool IsFollowing { get; set; } = false;
@@ -180,8 +174,6 @@ public class ActiveProgramState
         #endregion
 
         public int? LoadedRoom { get; set; } = null;
-        public Dictionary<int, int> SpriteIndexToNum { get; set; } = new Dictionary<int, int>();
-        public Dictionary<int, int> SequenceIndexToNum { get; set; } = new Dictionary<int, int>();
 
         public Dictionary<ushort, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<ushort, (int, int)>();
     }
@@ -231,12 +223,26 @@ public class ActiveProgramState
             Items = Enumerable.Repeat((short)0, 7).ToList()
         };
         InventoryLists[2].Items[6] = -1;
+
+        for (var i = 0; i < 7; i++)
+        {
+            LoadedSprites[i] = new LoadedSprite();
+        }
     }
 
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
     private const int MinimumTimeBetweenTicksInMillis = 25;
+    
+    #region Loaded Sprites
+    public class LoadedSprite //includes sequence info
+    {
+        public int? SpriteNum { get; set; } = null;
+        public int? SequenceNum { get; set; } = null;
+    }
+    public LoadedSprite[] LoadedSprites { get; set; } = new LoadedSprite[7];
+    #endregion
     
     #region Inventory
     public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
@@ -311,6 +317,8 @@ public class ActiveProgramState
     {
         if (CurrentState.CurrentProgram != _program.Active)
         {
+            //new program, run init
+            
             for (var i = 0; i < 32; i++)
             {
                 if (!KeyChars.ContainsKey(i))
@@ -350,6 +358,10 @@ public class ActiveProgramState
             foreach (var (keyCharId, keyChar) in KeyChars)
             {
                 keyChar.Init();
+                if (keyCharId == CurrentKeyChar)
+                {
+                    continue;
+                }
                 var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
                 if (cso != null)
                 {
@@ -361,16 +373,6 @@ public class ActiveProgramState
                         Offset = cso.Offs,
                         Status = ProgramState.ScriptStatus.NotInit
                     });
-                    keyChar.ScriptOffset = cso.Offs;
-                }
-                else
-                {
-                    keyChar.ScriptOffset = 0;
-                    if (keyCharId != CurrentKeyChar)
-                    {
-                        keyChar.ScriptOffset = -1;
-                        keyChar.ScriptStopped = true;
-                    }
                 }
             }
         }
@@ -482,29 +484,26 @@ public class ActiveProgramState
             CurrentState.SetStackValue((short)fetchScriptWord.Val);
         } else if (instruction is LoadSpriteInstruction loadSprite)
         {
-            if (CurrentState.SpriteIndexToNum.ContainsKey(loadSprite.Index))
-            {
-                _log.Info("Reloaded same sprite: " + loadSprite.Index + " was: " + CurrentState.SpriteIndexToNum[loadSprite.Index] + " + now: " + loadSprite.Num);
-            }
-            CurrentState.SpriteIndexToNum[loadSprite.Index] = loadSprite.Num;
+            _log.Info($"Loaded sprite {loadSprite.Num} into slot {loadSprite.Index}.");
+            LoadedSprites[loadSprite.Index].SpriteNum = loadSprite.Num;
         } else if (instruction is LoadSequenceInstruction loadSequence)
         {
-            if (CurrentState.SequenceIndexToNum.ContainsKey(loadSequence.Index))
-            {
-                _log.Info("Reloaded same sequence: " + loadSequence.Index + " was: " + CurrentState.SequenceIndexToNum[loadSequence.Index] + " + now: " + loadSequence.Num);
-            }
-            CurrentState.SequenceIndexToNum[loadSequence.Index] = loadSequence.Num;
+            _log.Info($"Loaded sequence {loadSequence.Num} into slot {loadSequence.Index}.");
+            LoadedSprites[loadSequence.Index].SequenceNum = loadSequence.Num;
         } else if (instruction is InitCharScriptInstruction initCharScript)
         {
-            if (!CurrentState.SpriteIndexToNum.ContainsKey(initCharScript.SpriteIndex))
+            var sprite = LoadedSprites[initCharScript.SpriteIndex];
+            if (sprite.SpriteNum == null)
             {
                 throw new Exception("Sprite not loaded yet: " + initCharScript.SpriteIndex);
             }
-            if (!CurrentState.SequenceIndexToNum.ContainsKey(initCharScript.SequenceIndex))
+
+            var sequence = LoadedSprites[initCharScript.SequenceIndex];
+            if (sequence.SequenceNum == null)
             {
                 throw new Exception("Sequence not loaded yet: " + initCharScript.SequenceIndex);
             }
-
+            
             var keyChar = GetKeyChar(initCharScript.Character);
             keyChar.Initialised = true;
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
@@ -524,6 +523,12 @@ public class ActiveProgramState
         } else if (instruction is LoadRoomInstruction loadRoom)
         {
             CurrentState.LoadedRoom = loadRoom.Num;
+            
+            //from game code
+            LoadedSprites[5].SpriteNum = null;
+            LoadedSprites[5].SequenceNum = null;
+            LoadedSprites[6].SpriteNum = null;
+            LoadedSprites[6].SequenceNum = null;
         } else if (instruction is SetCharFrameInstruction setCharFrame)
         {
             var keyChar = GetKeyChar(setCharFrame.Character);
@@ -752,27 +757,13 @@ public class ActiveProgramState
         {
             _log.Info($"Finished running {currentScript.Type:G} {currentScript.Id}.");
 
-            if (currentScript.Type == ProgramState.ScriptType.KeyChar)
-            {
-                var keyChar = GetKeyChar(currentScript.Id);
-                
-                keyChar.ScriptStopped = true;
-                currentScript.Status = ProgramState.ScriptStatus.Stopped;
-                justJumped = true;
-            }
+            currentScript.Status = ProgramState.ScriptStatus.Stopped;
+            justJumped = true;
         }
         
         if (programPaused)
         {
-            if (currentScript.Type == ProgramState.ScriptType.KeyChar)
-            {
-                var keyChar = GetKeyChar(currentScript.Id);
-                if (!keyChar.ScriptStopped)
-                {
-                    keyChar.ScriptPaused = true;
-                }
-                currentScript.Status = ProgramState.ScriptStatus.Paused;
-            }
+            currentScript.Status = ProgramState.ScriptStatus.Paused;
             
             if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
             {
@@ -848,12 +839,6 @@ public class ActiveProgramState
         {
             idx += 1;
             currentScript.Offset = instructionOffsets[idx];
-        }
-
-
-        if (currentScript.Type == ProgramState.ScriptType.KeyChar)
-        {
-            GetKeyChar(currentScript.Id).ScriptOffset = currentScript.Offset;
         }
 
         return programPaused || programStopped;

@@ -184,21 +184,23 @@ public class GameViewWindow : BaseWindow
             var width = 70;
             var height = 100;
 
-            if (keyChar.SpriteIndex != null && keyChar.SequenceIndex != null && keyChar.Character != null && _activeProgramState.CurrentState.LoadedRoom != null
-                && _activeProgramState.CurrentState.SequenceIndexToNum.ContainsKey(keyChar.SequenceIndex.Value) && 
-                _model.Sequences.ContainsKey(_activeProgramState.CurrentState.SequenceIndexToNum[keyChar.SequenceIndex.Value]) &&
-                _model.Sequences[_activeProgramState.CurrentState.SequenceIndexToNum[keyChar.SequenceIndex.Value]].Characters.ContainsKey(keyChar.Character.Value)
-                )
+            if (keyChar.SpriteIndex != null && keyChar.SequenceIndex != null && keyChar.Character != null && 
+                _activeProgramState.CurrentState.LoadedRoom != null &&
+                _activeProgramState.LoadedSprites[keyChar.SpriteIndex.Value].SpriteNum != null &&
+                _activeProgramState.LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum != null &&
+                _model.Sequences.ContainsKey(_activeProgramState.LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum.Value) &&
+                _model.Sequences[_activeProgramState.LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum.Value].Characters.ContainsKey(keyChar.Character.Value)
+               )
             {
                 var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-                var spriteNum = _activeProgramState.CurrentState.SpriteIndexToNum[keyChar.SpriteIndex.Value];
+                var spriteNum = _activeProgramState.LoadedSprites[keyChar.SpriteIndex.Value].SpriteNum.Value;
                 var sprite = _model.Sprites[spriteNum].Value;
                 var palette = _model.Palettes[activeRoom];
                 
                 var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum, sprite, activeRoom, palette);
                 var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, viewId, sprite.Width, sprite.Height, bytes);
 
-                var seqNum = _activeProgramState.CurrentState.SequenceIndexToNum[keyChar.SequenceIndex.Value];
+                var seqNum = _activeProgramState.LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum.Value;
                 var sequence = _model.Sequences[seqNum];
                 var ch = sequence.Characters[keyChar.Character.Value];
                 

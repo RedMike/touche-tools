@@ -129,6 +129,7 @@ public class ProgramReferenceViewWindow : IWindow
         
         ImGui.Separator();
 
+        #region Status
         var currentScript = state.GetRunningScript();
         if (currentScript == null)
         {
@@ -139,6 +140,38 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.Text($"Current script: {currentScript.Type:G} {currentScript.Id}");
             LabelAndButton($"Current offset: ", currentScript.Offset.ToString("D5"));
         }
+        #endregion
+        
+        ImGui.Separator();
+        
+        #region Sprites
+        if (ImGui.CollapsingHeader($"Sprites", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ImGui.BeginTable("sprites", 3);
+            ImGui.TableSetupColumn("Index");
+            ImGui.TableSetupColumn("Spr Num");
+            ImGui.TableSetupColumn("Seq Num");
+            ImGui.TableHeadersRow();
+            var idx = 0;
+            foreach (var sprite in _activeProgramState.LoadedSprites)
+            {
+                if (sprite.SpriteNum != null || sprite.SequenceNum != null)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{idx}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{sprite.SpriteNum}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{sprite.SequenceNum}");
+                    ImGui.TableNextRow();
+                }
+
+                idx++;
+            }
+            
+            ImGui.EndTable();
+        }
+        #endregion
         
         ImGui.Separator();
         
@@ -210,259 +243,6 @@ public class ProgramReferenceViewWindow : IWindow
         }
         #endregion
         
-        ImGui.Separator();
-        
-        #region Loaded data
-        if (state.SpriteIndexToNum.Count > 0)
-        {
-            if (ImGui.CollapsingHeader($"Loaded Sprites ({state.SpriteIndexToNum.Count})"))
-            {
-                ImGui.BeginTable("sprites", 3);
-                ImGui.TableSetupColumn("Index");
-                ImGui.TableSetupColumn("Sprite");
-                ImGui.TableSetupColumn("Link");
-                ImGui.TableHeadersRow();
-                foreach (var (spriteIndex, spriteNum) in state.SpriteIndexToNum.OrderBy(p => p.Key))
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{spriteIndex}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{spriteNum}");
-                    ImGui.TableNextColumn();
-                    if (ImGui.Button("Go to"))
-                    {
-                        //TODO: link to sprite view
-                    }
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-        }
-        if (state.SequenceIndexToNum.Count > 0)
-        {
-            if (ImGui.CollapsingHeader($"Loaded Sequences ({state.SequenceIndexToNum.Count})"))
-            {
-                ImGui.BeginTable("sequences", 3);
-                ImGui.TableSetupColumn("Index");
-                ImGui.TableSetupColumn("Seq");
-                ImGui.TableSetupColumn("Link");
-                ImGui.TableHeadersRow();
-                foreach (var (seqIndex, seqNum) in state.SequenceIndexToNum.OrderBy(p => p.Key))
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{seqIndex}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{seqNum}");
-                    ImGui.TableNextColumn();
-                    if (ImGui.Button("Go to"))
-                    {
-                        //TODO: link to sequence view
-                    }
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-        }
-        #endregion
-        
-        ImGui.Separator();
-        
-        #region Characters
-        ImGui.Text($"Current key character: {_activeProgramState.CurrentKeyChar}");
-        if (_activeProgramState.KeyChars.Count > 0)
-        {
-            if (ImGui.CollapsingHeader("Key Character Flags"))
-            {
-                ImGui.BeginTable("key_char_flags", 7);
-                ImGui.TableSetupColumn("ID");
-                ImGui.TableSetupColumn("Offset");
-                ImGui.TableSetupColumn("Stopped");
-                ImGui.TableSetupColumn("Paused");
-                ImGui.TableSetupColumn("Following");
-                ImGui.TableSetupColumn("Selectable");
-                ImGui.TableSetupColumn("Offscreen");
-                ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
-                             .Where(p => p.Value.Initialised)
-                             .OrderBy(p => p.Key))
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyCharId}");
-                    ImGui.TableNextColumn();
-                    if (keyChar.ScriptOffset >= 0)
-                    {
-                        ImGui.Text($"{keyChar.ScriptOffset:D5}");
-                    }
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.ScriptStopped}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.ScriptPaused}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.IsFollowing}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.IsSelectable}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.OffScreen}");
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-            
-            if (ImGui.CollapsingHeader("Key Character Graphics"))
-            {
-                ImGui.BeginTable("key_char_graphics", 5);
-                ImGui.TableSetupColumn("ID");
-                ImGui.TableSetupColumn("Sprite");
-                ImGui.TableSetupColumn("Seq");
-                ImGui.TableSetupColumn("Char");
-                ImGui.TableSetupColumn("Link");
-                ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
-                             .Where(p => p.Value.Initialised)
-                             .OrderBy(p => p.Key))
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyCharId}");
-                    ImGui.TableNextColumn();
-                    if (keyChar.SpriteIndex != null)
-                    {
-                        ImGui.Text($"{state.SpriteIndexToNum[keyChar.SpriteIndex.Value]}");
-                    }
-                    ImGui.TableNextColumn();
-                    if (keyChar.SequenceIndex != null)
-                    {
-                        ImGui.Text($"{state.SequenceIndexToNum[keyChar.SequenceIndex.Value]}");
-                    }
-                    ImGui.TableNextColumn();
-                    if (keyChar.Character != null)
-                    {
-                        ImGui.Text($"{keyChar.Character.Value}");
-                    }
-                    ImGui.TableNextColumn();
-                    if (ImGui.Button("Go to"))
-                    {
-                        //TODO: link to sprite view
-                    }
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-            
-            if (ImGui.CollapsingHeader("Key Character Animations"))
-            {
-                ImGui.BeginTable("key_char_anims", 7);
-                ImGui.TableSetupColumn("ID");
-                ImGui.TableSetupColumn("A1 Start");
-                ImGui.TableSetupColumn("A1 Count");
-                ImGui.TableSetupColumn("A2 Start");
-                ImGui.TableSetupColumn("A2 Count");
-                ImGui.TableSetupColumn("A3 Start");
-                ImGui.TableSetupColumn("A3 Count");
-                ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
-                             .Where(p => p.Value.Initialised)
-                             .OrderBy(p => p.Key))
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyCharId}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.Anim1Start}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.Anim1Count}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.Anim2Start}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.Anim2Count}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.Anim3Start}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.Anim3Count}");
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-            
-            if (ImGui.CollapsingHeader("Key Character Position"))
-            {
-                ImGui.BeginTable("key_char_position", 5);
-                ImGui.TableSetupColumn("ID");
-                ImGui.TableSetupColumn("X");
-                ImGui.TableSetupColumn("Y");
-                ImGui.TableSetupColumn("Z");
-                ImGui.TableSetupColumn("Point");
-                ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
-                             .Where(p => p.Value.Initialised)
-                             .OrderBy(p => p.Key))
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyCharId}");
-                    ImGui.TableNextColumn();
-                    if (keyChar.PositionX != null)
-                    {
-                        ImGui.Text($"{keyChar.PositionX}");
-                    }
-                    ImGui.TableNextColumn();
-                    if (keyChar.PositionY != null)
-                    {
-                        ImGui.Text($"{keyChar.PositionY}");
-                    }
-
-                    ImGui.TableNextColumn();
-                    if (keyChar.PositionZ != null)
-                    {
-                        ImGui.Text($"{keyChar.PositionZ}");
-                    }
-                    ImGui.TableNextColumn();
-                    if (keyChar.LastProgramPoint != null)
-                    {
-                        ImGui.Text($"{keyChar.LastProgramPoint}");
-                    }
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-            
-            if (ImGui.CollapsingHeader("Key Character Inventory"))
-            {
-                ImGui.BeginTable("key_char_inventory", 6);
-                ImGui.TableSetupColumn("ID");
-                ImGui.TableSetupColumn("Money");
-                ImGui.TableSetupColumn("Item1");
-                ImGui.TableSetupColumn("Item2");
-                ImGui.TableSetupColumn("Item3");
-                ImGui.TableSetupColumn("Item4");
-                ImGui.TableHeadersRow();
-                foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
-                             .Where(p => p.Value.Initialised)
-                             .OrderBy(p => p.Key))
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyCharId}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.Money}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.CountedInventoryItems[0]}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.CountedInventoryItems[1]}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.CountedInventoryItems[2]}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{keyChar.CountedInventoryItems[3]}");
-                    ImGui.TableNextRow();
-                }
-            
-                ImGui.EndTable();
-            }
-        }
-        #endregion
-
         ImGui.Separator();
         
         #region Inventory
