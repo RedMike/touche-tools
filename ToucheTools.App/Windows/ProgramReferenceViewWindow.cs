@@ -27,6 +27,9 @@ public class ProgramReferenceViewWindow : IWindow
             return;
         }
         
+        //TODO: move this
+        _activeProgramState.Tick();
+        
         var viewW = 350.0f;
         var viewH = 600.0f;
         ImGui.SetNextWindowPos(new Vector2(400.0f, 200.0f));
@@ -45,6 +48,12 @@ public class ProgramReferenceViewWindow : IWindow
         if (ImGui.Button("Step Until Paused"))
         {
             _activeProgramState.StepUntilPaused();
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button(_activeProgramState.AutoPlay ? "Stop Auto" : "Step Auto"))
+        {
+            _activeProgramState.AutoPlay = !_activeProgramState.AutoPlay;
         }
 
         ImGui.Separator();

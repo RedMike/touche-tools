@@ -239,6 +239,9 @@ public class ActiveProgramState
     }
 
     public ProgramState CurrentState { get; set; } = new ProgramState();
+    public bool AutoPlay { get; set; } = false;
+    private DateTime _lastTick = DateTime.MinValue;
+    private const int MinimumTimeBetweenTicksInMillis = 25;
     
     #region Inventory
     public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
@@ -292,6 +295,22 @@ public class ActiveProgramState
         return KeyChars[id];
     }
     #endregion
+
+    public void Tick()
+    {
+        if (!AutoPlay)
+        {
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
+        {
+            _lastTick = now;
+            Step(); //debug way
+            //StepUntilPaused(); //correct way
+        }
+    }
     
     private void Update()
     {
@@ -436,7 +455,7 @@ public class ActiveProgramState
                 }
             }
 
-            return foundNewOne;
+            return true;
         }
 
         if (CurrentState.CurrentRunMode == ProgramState.RunMode.WaitingForPlayer)
