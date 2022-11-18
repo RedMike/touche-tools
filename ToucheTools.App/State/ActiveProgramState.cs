@@ -421,6 +421,47 @@ public class ActiveProgramState
 
     private int _ticker = 0;
 
+    private static int GetDirection(int x1, int y1, int z1, int x2, int y2, int z2) {
+        int ret = -1;
+        x2 -= x1;
+        y2 -= y1;
+        z2 -= z1;
+        if (x2 == 0 && y2 == 0 && z2 == 0) {
+            ret = -2;
+        } else {
+            if (Math.Abs(x2) >= Math.Abs(z2)) {
+                if (Math.Abs(x2) > Math.Abs(y2)) {
+                    if (x2 > 0) {
+                        ret = 0;
+                    } else {
+                        ret = 3;
+                    }
+                } else {
+                    if (y2 > 0) {
+                        ret = 1;
+                    } else {
+                        ret = 2;
+                    }
+                }
+            } else {
+                if (z2 != 0) {
+                    if (z2 > 0) {
+                        ret = 1;
+                    } else {
+                        ret = 2;
+                    }
+                } else {
+                    if (y2 > 0) {
+                        ret = 1;
+                    } else {
+                        ret = 2;
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+    
     private void OnGameTick()
     {
         var program = _model.Programs[_program.Active];
@@ -533,31 +574,84 @@ public class ActiveProgramState
                 var ty = nextPoint.Y;
                 var tz = nextPoint.Z;
                 
-                var dx = (x - tx) * zFactor;
-                if (dx < 0)
+                var direction = GetDirection(x, y, z, tx, ty, tz);
+                if (direction < 0)
                 {
-                    dx = -1;
-                } else if (dx > 0)
-                {
-                    dx = 1;
+                    direction = keyChar.CurrentDirection;
                 }
-                var dy = (y - ty) * zFactor;
-                if (dy < 0)
+
+                if (direction != keyChar.CurrentDirection)
                 {
-                    dy = -1;
-                } else if (dy > 0)
-                {
-                    dy = 1;
+                    keyChar.CurrentAnimCounter = 0;
+                    keyChar.CurrentDirection = direction;
                 }
-                var dz = (z - tz) * zFactor;
-                if (dz < 0)
+
+                if (keyChar.CurrentAnim < 1)
                 {
-                    dz = -1;
-                } else if (dz > 0)
-                {
-                    dz = 1;
+                    keyChar.CurrentAnimCounter = 0;
+                    keyChar.CurrentAnim = 1;
                 }
                 
+                var sequenceNum = LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum;
+                var frames = _model.Sequences[sequenceNum.Value]
+                    .Characters[keyChar.Character.Value]
+                    .Animations[keyChar.CurrentAnim]
+                    .Directions[keyChar.CurrentDirection]
+                    .Frames;
+
+                var frame = frames[keyChar.CurrentAnimCounter];
+                
+                var dx = 0.0f;
+                if (frame.WalkDx != 0)
+                {
+                    dx = -frame.WalkDx * zFactor;
+                    if (direction == 3)
+                    {
+                        dx = -dx;
+                    }
+                    if (dx < 0)
+                    {
+                        dx = Math.Min(dx, -1);
+                    }
+                    else if (dx > 0)
+                    {
+                        dx = Math.Max(dx, 1);
+                    }
+                }
+
+                var dy = 0.0f;
+                if (frame.WalkDy != 0)
+                {
+                    dy = -frame.WalkDy * zFactor;
+                    if (dy < 0)
+                    {
+                        dy = Math.Min(dy, -1);
+                    }
+                    else if (dy > 0)
+                    {
+                        dy = Math.Max(dy, 1);
+                    }
+                }
+
+                var dz = 0.0f;
+                if (frame.WalkDz != 0)
+                {
+                    dz = -frame.WalkDz * zFactor;
+                    if (dz < 0)
+                    {
+                        dz = Math.Min(dz, -1);
+                    }
+                    else if (dz > 0)
+                    {
+                        dz = Math.Max(dz, 1);
+                    }
+                }
+
+                if (dx == 0 && dy == 0 && dz == 0)
+                {
+                    continue;
+                }
+
                 //TODO: get real dx/dy/dz based on current frame
 
                 keyChar.PositionX = (int)(x - dx);
