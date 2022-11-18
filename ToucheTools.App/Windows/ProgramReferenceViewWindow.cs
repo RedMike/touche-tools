@@ -246,11 +246,13 @@ public class ProgramReferenceViewWindow : IWindow
         #region Key Char Positions
         if (ImGui.CollapsingHeader($"Key Char Positions"))
         {
-            ImGui.BeginTable("key_char_position", 4);
+            ImGui.BeginTable("key_char_position", 6);
             ImGui.TableSetupColumn("Index");
             ImGui.TableSetupColumn("X");
             ImGui.TableSetupColumn("Y");
             ImGui.TableSetupColumn("Z");
+            ImGui.TableSetupColumn("LP");
+            ImGui.TableSetupColumn("TP");
             ImGui.TableHeadersRow();
             foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
             {
@@ -264,6 +266,10 @@ public class ProgramReferenceViewWindow : IWindow
                     ImGui.Text($"{keyChar.PositionY}");
                     ImGui.TableNextColumn();
                     ImGui.Text($"{keyChar.PositionZ}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.LastPoint}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.TargetPoint}");
                     ImGui.TableNextRow();
                 }
             }

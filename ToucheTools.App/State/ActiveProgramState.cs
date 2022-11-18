@@ -423,11 +423,157 @@ public class ActiveProgramState
 
     private void OnGameTick()
     {
-        #region Walking (TODO)
+        var program = _model.Programs[_program.Active];
+        #region Walking
         foreach (var (keyCharId, keyChar) in KeyChars)
         {
-            //TODO: correctly use walk routes
-            
+            if (keyChar.TargetPoint != null && keyChar.TargetPoint.Value != keyChar.LastPoint)
+            {
+                var targetPoint = program.Points[keyChar.TargetPoint.Value];
+
+                var nextPointId = -1;
+                ProgramDataModel.Point nextPoint;
+                if (keyChar.LastPoint == null)
+                {
+                    //we're not at a point yet, so path directly to the nearest point
+                    int nearestPointId = -1;
+                    var closestDistance = int.MaxValue;
+                    for (var i = 0; i < program.Points.Count; i++)
+                    {
+                        var point = program.Points[i];
+                        var distance = Math.Abs(point.X - keyChar.PositionX) + 
+                                       Math.Abs(point.Y - keyChar.PositionY) +
+                                       Math.Abs(point.Z - keyChar.PositionZ);
+                        if (distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            nearestPointId = i;
+                        }
+                    }
+
+                    nextPointId = nearestPointId;
+                    nextPoint = program.Points[nearestPointId];
+                }
+                else
+                {
+                    //we were at a point already, so path from it to the next one
+                    //use a basic breadth first search to figure out the correct path, game precalculates this and saves
+                    var searchedPoints = new HashSet<int>() { keyChar.TargetPoint.Value };
+                    var foundLastPoint = false;
+                    var iterationCount = 0;
+                    var iterations = new Dictionary<int, int>() { {keyChar.TargetPoint.Value, 0}};
+                    while (!foundLastPoint)
+                    {
+                        iterationCount++;
+                        var walksWithSearchPoint = program.Walks.Where(w => 
+                            (searchedPoints.Contains(w.Point1) || searchedPoints.Contains(w.Point2))
+                            && !(searchedPoints.Contains(w.Point1) && searchedPoints.Contains(w.Point2)) //remove cycles
+                        ).ToList();
+                        if (walksWithSearchPoint.Count == 0)
+                        {
+                            break;
+                        }
+                        foreach (var walk in walksWithSearchPoint)
+                        {
+                            var p = walk.Point1;
+                            if (searchedPoints.Contains(p))
+                            {
+                                p = walk.Point2;
+                            }
+
+                            if (!iterations.ContainsKey(p))
+                            {
+                                iterations[p] = iterationCount;
+                            }
+
+                            searchedPoints.Add(p);
+                        }
+                        foundLastPoint = walksWithSearchPoint.Any(w =>
+                            w.Point1 == keyChar.LastPoint.Value ||
+                            w.Point2 == keyChar.LastPoint.Value
+                        );
+                    }
+                    //TODO: set current walk
+                    var curWalk = program.Walks.Where(w =>
+                        w.Point1 == keyChar.LastPoint.Value ||
+                        w.Point2 == keyChar.LastPoint.Value
+                    ).MinBy(w => 
+                        iterations.GetValueOrDefault(w.Point1, 999) + 
+                        iterations.GetValueOrDefault(w.Point2, 999) - 
+                        iterations.GetValueOrDefault(keyChar.LastPoint.Value, 999));
+                    if (curWalk == null)
+                    {
+                        throw new Exception("No possible path");
+                    }
+
+                    nextPointId = curWalk.Point1;
+                    if (curWalk.Point1 == keyChar.LastPoint)
+                    {
+                        nextPointId = curWalk.Point2;
+                    }
+                    nextPoint = program.Points[nextPointId];
+                }
+
+                if (nextPointId == -1)
+                {
+                    throw new Exception("No next point");
+                }
+
+                if (nextPointId == keyChar.LastPoint)
+                {
+                    throw new Exception("Queued to move to the same place");
+                }
+                
+                var x = keyChar.PositionX;
+                var y = keyChar.PositionY;
+                var z = keyChar.PositionZ;
+                var zFactor = z / 160.0f;
+
+                var tx = nextPoint.X;
+                var ty = nextPoint.Y;
+                var tz = nextPoint.Z;
+                
+                var dx = (x - tx) * zFactor;
+                if (dx < 0)
+                {
+                    dx = -1;
+                } else if (dx > 0)
+                {
+                    dx = 1;
+                }
+                var dy = (y - ty) * zFactor;
+                if (dy < 0)
+                {
+                    dy = -1;
+                } else if (dy > 0)
+                {
+                    dy = 1;
+                }
+                var dz = (z - tz) * zFactor;
+                if (dz < 0)
+                {
+                    dz = -1;
+                } else if (dz > 0)
+                {
+                    dz = 1;
+                }
+                
+                //TODO: get real dx/dy/dz based on current frame
+
+                keyChar.PositionX = (int)(x - dx);
+                keyChar.PositionY = (int)(y - dy);
+                keyChar.PositionZ = (int)(z - dz);
+                if (x == keyChar.PositionX && y == keyChar.PositionY && z == keyChar.PositionZ)
+                {
+                    throw new Exception("No movement");
+                }
+
+                if (keyChar.PositionX == nextPoint.X && keyChar.PositionY == nextPoint.Y &&
+                    keyChar.PositionZ == nextPoint.Z)
+                {
+                    keyChar.LastPoint = (ushort)nextPointId;
+                }
+            }
         }
         #endregion
         
