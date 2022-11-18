@@ -60,7 +60,7 @@ public class ActiveProgramState
         #endregion
         
         #region Position
-        public ushort? Point { get; set; }
+        public ushort? LastPoint { get; set; }
         public ushort? TargetPoint { get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
@@ -85,12 +85,12 @@ public class ActiveProgramState
             Anim2Start = 0;
             Anim3Count = 1;
             Anim3Start = 0;
-            Point = null;
+            LastPoint = null;
             IsFollowing = false;
             IsSelectable = false;
             OffScreen = false;
             PositionX = 10; //from game code
-            Point = null;
+            LastPoint = null;
             TargetPoint = null;
             //intentional that no position y/z update, from game code
             SpriteIndex = null;
@@ -882,7 +882,7 @@ public class ActiveProgramState
             keyChar.PositionX = point.X;
             keyChar.PositionY = point.Y;
             keyChar.PositionZ = point.Z;
-            keyChar.Point = setCharBox.Num;
+            keyChar.LastPoint = setCharBox.Num;
             keyChar.TargetPoint = setCharBox.Num;
         } else if (instruction is InitCharInstruction initChar)
         {

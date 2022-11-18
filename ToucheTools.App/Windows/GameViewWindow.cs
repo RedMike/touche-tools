@@ -222,12 +222,12 @@ public class GameViewWindow : BaseWindow
             
             var pointRectTexture = _render.RenderRectangle(1, (int)(pointWidth), (int)(pointHeight),
                 (255, 255, 255, 50), (255, 255, 255, 150));
-            ImGui.SetCursorPos(offset + new Vector2(x, y)*zFactor);
+            ImGui.SetCursorPos(offset + new Vector2(x, y));
             ImGui.Image(pointRectTexture, new Vector2(pointWidth, pointHeight));
 
             var text = $"P{pIdx}";
             var textSize = ImGui.CalcTextSize(text);
-            ImGui.SetCursorPos(offset + new Vector2(x * zFactor + pointWidth - textSize.X - 2, y * zFactor + pointHeight - textSize.Y - 2));
+            ImGui.SetCursorPos(offset + new Vector2(x + pointWidth - textSize.X - 2, y + pointHeight - textSize.Y - 2));
             ImGui.Text(text);
             
             pIdx++;
