@@ -340,8 +340,8 @@ public class ActiveProgramState
         if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
         {
             _lastTick = now;
-            Step(); //debug way
-            //StepUntilPaused(); //correct way
+            //Step(); //debug way
+            StepUntilPaused(); //correct way
         }
     }
 
@@ -598,6 +598,7 @@ public class ActiveProgramState
                 {
                     if (script.Delay > 0)
                     {
+                        script.Status = ProgramState.ScriptStatus.Paused;
                         script.Delay--;
                     }
                 }
@@ -722,7 +723,7 @@ public class ActiveProgramState
             
             OnGraphicalUpdate();
 
-            return false;
+            return true;
         }
 
         if (nextScript.Type != ProgramState.ScriptType.KeyChar)
@@ -764,7 +765,9 @@ public class ActiveProgramState
         var instruction = program.Instructions[curOffset];
         if (instruction is StopScriptInstruction)
         {
-            programStopped = true;
+            programPaused = true;
+            currentScript.Offset = currentScript.StartOffset;
+            justJumped = true;
         } else if (instruction is NoopInstruction)
         {
             
