@@ -72,6 +72,13 @@ public class ActiveProgramState
         public short[] CountedInventoryItems { get; set; } = new short[4];
         #endregion
         
+        #region Waiting
+        public int? WaitForKeyChar { get; set; } = null;
+        public int? WaitForAnimationId { get; set; } = null;
+        public int? WaitForPoint { get; set; } = null;
+        public int? WaitForWalk { get; set; } = null;
+        #endregion
+        
         public void OnProgramChange()
         {
             Initialised = false;
@@ -96,6 +103,10 @@ public class ActiveProgramState
             SpriteIndex = null;
             SequenceIndex = null;
             Character = null;
+            WaitForKeyChar = null;
+            WaitForPoint = null;
+            WaitForWalk = null;
+            WaitForAnimationId = null;
         }
     }
     
@@ -252,7 +263,7 @@ public class ActiveProgramState
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 27;
+    private const int MinimumTimeBetweenTicksInMillis = 50;
     
     #region Talk Entries
     public class TalkEntry
@@ -409,7 +420,8 @@ public class ActiveProgramState
     }
 
     private int _ticker = 0;
-    private void OnGraphicalUpdate()
+
+    private void OnGameTick()
     {
         #region Walking (TODO)
         foreach (var (keyCharId, keyChar) in KeyChars)
@@ -419,6 +431,127 @@ public class ActiveProgramState
         }
         #endregion
         
+        #region Delay
+        foreach (var script in CurrentState.Scripts)
+        {
+            if (script.Status != ProgramState.ScriptStatus.NotInit &&
+                script.Status != ProgramState.ScriptStatus.Stopped)
+            {
+                if (script.Delay > 0)
+                {
+                    script.Status = ProgramState.ScriptStatus.Paused;
+                    script.Delay--;
+                    if (script.Status == ProgramState.ScriptStatus.Paused && script.Delay == 0)
+                    {
+                        script.Status = ProgramState.ScriptStatus.Ready;
+                    }
+                }
+            }
+
+            if (script.Type == ProgramState.ScriptType.KeyChar)
+            {
+                if (script.Status == ProgramState.ScriptStatus.Paused && script.Delay == 0)
+                {
+                    //no delay was set, so maybe keychar waiting
+                    var keyChar = GetKeyChar(script.Id);
+                    if (keyChar.WaitForKeyChar != null)
+                    {
+                        var otherKeyChar = GetKeyChar(keyChar.WaitForKeyChar.Value);
+                        if ((
+                                keyChar.WaitForAnimationId != null &&
+                                otherKeyChar.CurrentAnim == keyChar.WaitForAnimationId.Value
+                            ) ||
+                            (
+                                keyChar.WaitForPoint != null &&
+                                otherKeyChar.LastPoint == keyChar.WaitForPoint.Value
+                            ) ||
+                            (
+                                keyChar.WaitForWalk != null &&
+                                false //TODO
+                            )
+                           )
+                        {
+                            keyChar.WaitForKeyChar = null;
+                            script.Status = ProgramState.ScriptStatus.Ready;
+                        }
+                    }
+                    else
+                    {
+                        script.Status = ProgramState.ScriptStatus.Ready;
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Talk Entries
+
+        if (TalkEntries.Count > 0)
+        {
+            var lastTalkEntry = TalkEntries.Last();
+            lastTalkEntry.Counter--;
+            if (lastTalkEntry.Counter <= 0)
+            {
+                foreach (var talkEntry in TalkEntries)
+                {
+                    if (talkEntry.OtherKeyChar != -1)
+                    {
+                        var script = CurrentState.GetKeyCharScript(talkEntry.OtherKeyChar);
+                        if (script != null)
+                        {
+                            if (script.Status == ProgramState.ScriptStatus.Paused)
+                            {
+                                script.Status = ProgramState.ScriptStatus.Ready;
+                            }
+                        }
+                    }
+
+                    var keyChar = GetKeyChar(talkEntry.TalkingKeyChar);
+                    if (keyChar.CurrentAnim >= keyChar.Anim1Start &&
+                        keyChar.CurrentAnim < keyChar.Anim1Start + keyChar.Anim1Count)
+                    {
+                        keyChar.CurrentAnim = keyChar.Anim2Start;
+                        keyChar.CurrentAnimCounter = 0;
+                        keyChar.CurrentAnimSpeed = 0;
+                    }
+                }
+
+                TalkEntries = new List<TalkEntry>();
+            }
+            else
+            {
+                SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3, 0);
+            }
+        }
+
+        #endregion
+
+        #region Counters
+
+        SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1,
+            (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1) + 1));
+        SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2,
+            (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2) + 1));
+        SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3,
+            (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3) + 1));
+        var f1 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1);
+        if (f1 > 0)
+        {
+            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1, (short)(f1 - 1));
+        }
+
+        var f2 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2);
+        if (f2 > 0)
+        {
+            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2, (short)(f2 - 1));
+        }
+
+        #endregion
+    }
+    
+    private void OnGraphicalUpdate()
+    {
         #region Room Scrolling
         if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
         {
@@ -584,100 +717,6 @@ public class ActiveProgramState
             }
         }
         #endregion
-        
-        _ticker++;
-        _ticker = _ticker % 120;
-        if (_ticker % 3 == 0)
-        {
-            #region Delay
-
-            foreach (var script in CurrentState.Scripts)
-            {
-                if (script.Status != ProgramState.ScriptStatus.NotInit &&
-                    script.Status != ProgramState.ScriptStatus.Stopped)
-                {
-                    if (script.Delay > 0)
-                    {
-                        script.Status = ProgramState.ScriptStatus.Paused;
-                        script.Delay--;
-                    }
-                }
-
-                if (script.Status == ProgramState.ScriptStatus.Paused)
-                {
-                    if (script.Delay == 0)
-                    {
-                        script.Status = ProgramState.ScriptStatus.Ready;
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Talk Entries
-
-            if (TalkEntries.Count > 0)
-            {
-                var lastTalkEntry = TalkEntries.Last();
-                lastTalkEntry.Counter--;
-                if (lastTalkEntry.Counter <= 0)
-                {
-                    foreach (var talkEntry in TalkEntries)
-                    {
-                        if (talkEntry.OtherKeyChar != -1)
-                        {
-                            var script = CurrentState.GetKeyCharScript(talkEntry.OtherKeyChar);
-                            if (script != null)
-                            {
-                                if (script.Status == ProgramState.ScriptStatus.Paused)
-                                {
-                                    script.Status = ProgramState.ScriptStatus.Ready;
-                                }
-                            }
-                        }
-
-                        var keyChar = GetKeyChar(talkEntry.TalkingKeyChar);
-                        if (keyChar.CurrentAnim >= keyChar.Anim1Start &&
-                            keyChar.CurrentAnim < keyChar.Anim1Start + keyChar.Anim1Count)
-                        {
-                            keyChar.CurrentAnim = keyChar.Anim2Start;
-                            keyChar.CurrentAnimCounter = 0;
-                            keyChar.CurrentAnimSpeed = 0;
-                        }
-                    }
-
-                    TalkEntries = new List<TalkEntry>();
-                }
-                else
-                {
-                    SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3, 0);
-                }
-            }
-
-            #endregion
-
-            #region Counters
-
-            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1,
-                (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1) + 1));
-            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2,
-                (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter2) + 1));
-            SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3,
-                (short)(GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter3) + 1));
-            var f1 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1);
-            if (f1 > 0)
-            {
-                SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec1, (short)(f1 - 1));
-            }
-
-            var f2 = GetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2);
-            if (f2 > 0)
-            {
-                SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounterDec2, (short)(f2 - 1));
-            }
-
-            #endregion
-        }
     }
     
     private void Update()
@@ -712,27 +751,38 @@ public class ActiveProgramState
         {
             return RunStep();
         }
+        
+        _ticker++;
+        _ticker = _ticker % 120;
+        var isGameTick = _ticker % 3 == 0;
 
+        if (!isGameTick)
+        {
+            //loop again until it is a game tick
+            return Step();
+        }
+        
         var nextScript = CurrentState.GetNextScript();
+        OnGameTick();
+        OnGraphicalUpdate();
         if (nextScript == null)
         {
-            if (CurrentState.Scripts.All(s => s.Status != ProgramState.ScriptStatus.Paused))
+            if (CurrentState.Scripts.All(s => s.Status != ProgramState.ScriptStatus.Paused && s.Status != ProgramState.ScriptStatus.Ready))
             {
                 throw new Exception("All scripts in non-paused state");
             }
             
-            OnGraphicalUpdate();
-
+            //no script ready
             return true;
         }
-
+        
         if (nextScript.Type != ProgramState.ScriptType.KeyChar)
         {
             throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
         }
-        
+
         nextScript.Status = ProgramState.ScriptStatus.Running;
-        return true;
+        return false;
     }
     
     public bool RunStep()
@@ -861,7 +911,7 @@ public class ActiveProgramState
             }
         } else if (instruction is EnableInputInstruction)
         {
-            programPaused = true;
+            
         } else if (instruction is SetFlagInstruction setFlag)
         {
             var val = CurrentState.StackValue;
@@ -923,8 +973,11 @@ public class ActiveProgramState
                         talkEntry.OtherKeyChar = -1;
                     }
                 }
-                _log.Error("Waiting logic not implemented yet"); //TODO:
-                //TODO: waiting logic
+
+                keyChar.WaitForAnimationId = null;
+                keyChar.WaitForWalk = null;
+                keyChar.WaitForKeyChar = charId;
+                keyChar.WaitForPoint = moveCharToPos.Num;
                 programPaused = true;
             }
         } else if (instruction is StartTalkInstruction startTalk)
@@ -1020,14 +1073,37 @@ public class ActiveProgramState
         {
             if (setupWaitingChar.Val1 == ushort.MaxValue)
             {
-                _log.Error("Waiting logic not implemented yet"); //TODO:
+                _log.Error("Some waiting logic not implemented yet"); //TODO:
                 //TODO: waiting logic
                 programPaused = true;
             }
             else
             {
-                _log.Error("Waiting logic not implemented yet"); //TODO:
-                //TODO: waiting logic
+                if (currentScript.Type != ProgramState.ScriptType.KeyChar)
+                {
+                    throw new Exception("Setup waiting chars outside of keychar script");
+                }
+
+                var keyChar = GetKeyChar(currentScript.Id);
+                keyChar.WaitForPoint = null;
+                keyChar.WaitForAnimationId = null;
+                keyChar.WaitForWalk = null;
+                if (setupWaitingChar.Val1 == 0)
+                {
+                    keyChar.WaitForAnimationId = setupWaitingChar.Val2;
+                } else if (setupWaitingChar.Val1 == 1)
+                {
+                    keyChar.WaitForPoint = setupWaitingChar.Val2;
+                } else if (setupWaitingChar.Val1 == 2)
+                {
+                    keyChar.WaitForWalk = setupWaitingChar.Val2;
+                }
+                else
+                {
+                    throw new Exception("Unknown wait property: " + setupWaitingChar.Val1);
+                }
+
+                keyChar.WaitForKeyChar = setupWaitingChar.CurrentCharacter ? CurrentKeyChar : setupWaitingChar.Character;
                 programPaused = true;
             }
         }

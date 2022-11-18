@@ -300,6 +300,59 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.EndTable();
         }
         #endregion
+        #region Key Char Waiting
+        if (ImGui.CollapsingHeader($"Key Char Waiting"))
+        {
+            ImGui.BeginTable("key_char_wait", 5);
+            ImGui.TableSetupColumn("Index");
+            ImGui.TableSetupColumn("Other");
+            ImGui.TableSetupColumn("Anim");
+            ImGui.TableSetupColumn("Point");
+            ImGui.TableSetupColumn("Walk");
+            ImGui.TableHeadersRow();
+            foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
+            {
+                if (keyChar.WaitForKeyChar != null)
+                {
+                    var otherKeyChar = _activeProgramState.KeyChars[keyChar.WaitForKeyChar.Value];
+                    
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyCharId}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{keyChar.WaitForKeyChar}");
+                    ImGui.TableNextColumn();
+                    if (keyChar.WaitForAnimationId != null)
+                    {
+                        ImGui.Text($"{keyChar.WaitForAnimationId} ({otherKeyChar.CurrentAnim})");
+                    }
+                    else
+                    {
+                        ImGui.Text("");
+                    }
+                    ImGui.TableNextColumn();
+                    if (keyChar.WaitForPoint != null)
+                    {
+                        ImGui.Text($"{keyChar.WaitForPoint} ({otherKeyChar.LastPoint})");
+                    }
+                    else
+                    {
+                        ImGui.Text("");
+                    }
+                    ImGui.TableNextColumn();
+                    if (keyChar.WaitForWalk != null)
+                    {
+                        ImGui.Text($"{keyChar.WaitForWalk} (?)");
+                    }
+                    else
+                    {
+                        ImGui.Text("");
+                    }
+                    ImGui.TableNextRow();
+                }
+            }
+            ImGui.EndTable();
+        }
+        #endregion
         ImGui.Separator();
         
         #region Areas
