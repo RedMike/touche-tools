@@ -1009,11 +1009,12 @@ public class ActiveProgramState
             }
         } else if (instruction is SetCharDelayInstruction setCharDelay)
         {
-            var keyCharScript = CurrentState.GetKeyCharScript(CurrentKeyChar);
-            if (keyCharScript != null)
+            if (currentScript.Type != ProgramState.ScriptType.KeyChar)
             {
-                keyCharScript.Delay = setCharDelay.Delay;
+                throw new Exception("Unknown script type for delay");
             }
+
+            currentScript.Delay = setCharDelay.Delay;
             programPaused = true;
         } else if (instruction is SetupWaitingCharInstruction setupWaitingChar)
         {
