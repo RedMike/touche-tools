@@ -268,8 +268,14 @@ public class GameViewWindow : BaseWindow
                 y = Constants.RoomHeight - 16;
             }
 
+            var col = keyChar.TextColour;
+            var col1 = (int)(col & 0xFF);
+            var paletteCol1 = palette.Colors[col1];
+            
             ImGui.SetCursorPos(offset + new Vector2(x, y));
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(paletteCol1.R/255.0f, paletteCol1.G/255.0f, paletteCol1.B/255.0f, 1.0f));
             ImGui.Text(talkEntry.Text);
+            ImGui.PopStyleColor();
 
             // var roomAreaRectTexture = _render.RenderRectangle(1, (int)tx, (int)ty*2,
             //     (255, 0, 0, 50), (255, 255, 255, 150));

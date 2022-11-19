@@ -38,6 +38,7 @@ public class ActiveProgramState
         public bool IsSelectable { get; set; } = false; //unsure?
         public bool OffScreen { get; set; } = false; //unsure?
         public bool IsFollowing { get; set; } = false;
+        public uint TextColour { get; set; }
         
         #region Graphics
         public int? SpriteIndex { get; set; }
@@ -83,6 +84,7 @@ public class ActiveProgramState
         public void OnProgramChange()
         {
             Initialised = false;
+            TextColour = 253;
             CurrentDirection = 0;
             CurrentAnim = 0;
             CurrentAnimSpeed = 0;
@@ -1270,6 +1272,7 @@ public class ActiveProgramState
             
             var keyChar = GetKeyChar(initCharScript.Character);
             keyChar.Initialised = true;
+            keyChar.TextColour = initCharScript.Color;
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
