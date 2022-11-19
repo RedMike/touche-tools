@@ -60,6 +60,7 @@ public class ActiveProgramState
         #endregion
         
         #region Position
+        public ushort? LastWalk { get; set; }
         public ushort? LastPoint { get; set; }
         public ushort? TargetPoint { get; set; }
         public int PositionX { get; set; }
@@ -563,7 +564,6 @@ public class ActiveProgramState
                             );
                         }
 
-                        //TODO: set current walk
                         var curWalk = program.Walks.Where(w =>
                             w.Point1 == keyChar.LastPoint.Value ||
                             w.Point2 == keyChar.LastPoint.Value
@@ -575,6 +575,8 @@ public class ActiveProgramState
                         {
                             throw new Exception("No possible path");
                         }
+
+                        keyChar.LastWalk = (ushort)program.Walks.FindIndex(w => w == curWalk);
 
                         nextPointId = curWalk.Point1;
                         if (curWalk.Point1 == keyChar.LastPoint)
@@ -847,7 +849,7 @@ public class ActiveProgramState
                             ) ||
                             (
                                 keyChar.WaitForWalk != null &&
-                                false //TODO
+                                otherKeyChar.LastWalk == keyChar.WaitForWalk.Value
                             )
                            )
                         {
