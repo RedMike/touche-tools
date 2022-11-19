@@ -31,7 +31,7 @@ public static class Flags
         
         GameCycleCounter1 = 295,
         GameCycleCounter2 = 296,
-        GameCycleCounter3 = 297,
+        GameCycleCounter3 = 297, //cycles since the last speech
         GameCycleCounterDec1 = 298,
         GameCycleCounterDec2 = 299,
         

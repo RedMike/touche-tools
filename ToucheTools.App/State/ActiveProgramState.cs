@@ -859,7 +859,11 @@ public class ActiveProgramState
                     }
                     else
                     {
-                        script.Status = ProgramState.ScriptStatus.Ready;
+                        //expecting talk to remove it
+                        if (TalkEntries.All(t => t.OtherKeyChar != script.Id))
+                        {
+                            throw new Exception("Pause waiting for talk with no talk scripts");
+                        }
                     }
                 }
             }
@@ -1141,6 +1145,7 @@ public class ActiveProgramState
         if (!isGameTick)
         {
             //loop again until it is a game tick
+            OnGraphicalUpdate();
             return Step();
         }
         
@@ -1189,7 +1194,8 @@ public class ActiveProgramState
         {
             throw new Exception("Reached end of script");
         }
-        
+
+        var programRestart = false;
         var programPaused = false;
         var programStopped = false;
         var justJumped = false;
@@ -1198,7 +1204,12 @@ public class ActiveProgramState
         if (instruction is StopScriptInstruction)
         {
             programPaused = true;
-            currentScript.Offset = currentScript.StartOffset;
+            if (currentScript.Type != ProgramState.ScriptType.KeyChar || currentScript.Id != CurrentKeyChar)
+            {
+                //the current keychar script always only pauses
+                programRestart = true;
+                currentScript.Offset = currentScript.StartOffset;
+            }
             justJumped = true;
         } else if (instruction is NoopInstruction)
         {
@@ -1366,7 +1377,6 @@ public class ActiveProgramState
         {
             if (!startTalk.DoNothing)
             {
-                _log.Error("StartTalk not implemented yet"); //TODO:
                 int talkingChar = startTalk.Character;
                 int num = startTalk.Num;
                 int otherChar = CurrentKeyChar;
@@ -1633,8 +1643,14 @@ public class ActiveProgramState
         
         if (programPaused)
         {
-            currentScript.Status = ProgramState.ScriptStatus.Paused;
-            OnGraphicalUpdate();
+            if (programRestart)
+            {
+                currentScript.Status = ProgramState.ScriptStatus.Ready;
+            }
+            else
+            {
+                currentScript.Status = ProgramState.ScriptStatus.Paused;
+            }
         }
         if (!justJumped)
         {
