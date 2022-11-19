@@ -423,35 +423,40 @@ public class ActiveProgramState
 
     private static int GetDirection(int x1, int y1, int z1, int x2, int y2, int z2) {
         int ret = -1;
-        x2 -= x1;
-        y2 -= y1;
-        z2 -= z1;
-        if (x2 == 0 && y2 == 0 && z2 == 0) {
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var dz = z2 - z1;
+        if (dx == 0 && dy == 0 && dz == 0) {
             ret = -2;
         } else {
-            if (Math.Abs(x2) >= Math.Abs(z2)) {
-                if (Math.Abs(x2) > Math.Abs(y2)) {
-                    if (x2 > 0) {
+            if (Math.Abs(dx) >= Math.Abs(dz)) {
+                //if x is further apart than z is
+                if (Math.Abs(dx) > Math.Abs(dy)) {
+                    //if x is further apart than y is
+                    if (dx > 0) {
                         ret = 0;
                     } else {
                         ret = 3;
                     }
                 } else {
-                    if (y2 > 0) {
+                    //if y is further apart than x is
+                    if (dy > 0) {
                         ret = 1;
                     } else {
                         ret = 2;
                     }
                 }
             } else {
-                if (z2 != 0) {
-                    if (z2 > 0) {
+                //if z is further apart than x is
+                if (dz != 0) {
+                    //if moving in z direction at all, use z different to determine direction
+                    if (dz > 0) {
                         ret = 1;
                     } else {
                         ret = 2;
                     }
                 } else {
-                    if (y2 > 0) {
+                    if (dy > 0) {
                         ret = 1;
                     } else {
                         ret = 2;
@@ -470,6 +475,9 @@ public class ActiveProgramState
         {
             if (keyChar.TargetPoint != null && keyChar.TargetPoint.Value != keyChar.LastPoint)
             {
+                var lastX = keyChar.PositionX;
+                var lastY = keyChar.PositionY;
+                var lastZ = keyChar.PositionZ;
                 var targetPoint = program.Points[keyChar.TargetPoint.Value];
 
                 var nextPointId = -1;
@@ -498,6 +506,10 @@ public class ActiveProgramState
                 else
                 {
                     //we were at a point already, so path from it to the next one
+                    var lastPoint = program.Points[keyChar.LastPoint.Value];
+                    lastX = lastPoint.X;
+                    lastY = lastPoint.Y;
+                    lastZ = lastPoint.Z;
                     //use a basic breadth first search to figure out the correct path, game precalculates this and saves
                     var searchedPoints = new HashSet<int>() { keyChar.TargetPoint.Value };
                     var foundLastPoint = false;
@@ -568,29 +580,20 @@ public class ActiveProgramState
                 var x = keyChar.PositionX;
                 var y = keyChar.PositionY;
                 var z = keyChar.PositionZ;
-                var zFactor = z / 160.0f;
+                if (z < Game.ZDepthMin)
+                {
+                    z = Game.ZDepthMin;
+                }
+                if (z > Game.ZDepthMax)
+                {
+                    z = Game.ZDepthMax;
+                }
+
+                var zFactor = Game.GetZFactor(z);
 
                 var tx = nextPoint.X;
                 var ty = nextPoint.Y;
                 var tz = nextPoint.Z;
-                
-                var direction = GetDirection(x, y, z, tx, ty, tz);
-                if (direction < 0)
-                {
-                    direction = keyChar.CurrentDirection;
-                }
-
-                if (direction != keyChar.CurrentDirection)
-                {
-                    keyChar.CurrentAnimCounter = 0;
-                    keyChar.CurrentDirection = direction;
-                }
-
-                if (keyChar.CurrentAnim < 1)
-                {
-                    keyChar.CurrentAnimCounter = 0;
-                    keyChar.CurrentAnim = 1;
-                }
                 
                 var sequenceNum = LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum;
                 var frames = _model.Sequences[sequenceNum.Value]
@@ -605,7 +608,7 @@ public class ActiveProgramState
                 if (frame.WalkDx != 0)
                 {
                     dx = -frame.WalkDx * zFactor;
-                    if (direction == 3)
+                    if (keyChar.CurrentDirection == 3)
                     {
                         dx = -dx;
                     }
@@ -647,16 +650,112 @@ public class ActiveProgramState
                     }
                 }
 
-                if (dx == 0 && dy == 0 && dz == 0)
+                if (keyChar.CurrentAnim > 1)
                 {
+                    //not a walk animation, so just cancel out the dy/dz movement
+                    if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
+                    {
+                        dx = tx - keyChar.PositionX; //exact movement
+                    }
+                    keyChar.PositionX = (int)(x - dx);
+                    if (keyChar.PositionX == nextPoint.X && keyChar.PositionY == nextPoint.Y &&
+                        keyChar.PositionZ == nextPoint.Z)
+                    {
+                        keyChar.LastPoint = (ushort)nextPointId;
+                    }
+
+                    continue;
+                }
+                
+                var direction = GetDirection(x, y, z, tx, ty, tz);
+                if (direction < 0)
+                {
+                    direction = keyChar.CurrentDirection;
+                }
+
+                if (direction != keyChar.CurrentDirection)
+                {
+                    keyChar.CurrentAnimCounter = 0;
+                    keyChar.CurrentDirection = direction;
+                    //don't want to process the movement in this frame
                     continue;
                 }
 
-                //TODO: get real dx/dy/dz based on current frame
+                if (keyChar.CurrentAnim < 1)
+                {
+                    keyChar.CurrentAnimCounter = 0;
+                    keyChar.CurrentAnim = 1;
+                    if (dx == 0 && dy == 0 && dz == 0)
+                    {
+                        continue;
+                    }   
+                }
 
-                keyChar.PositionX = (int)(x - dx);
-                keyChar.PositionY = (int)(y - dy);
-                keyChar.PositionZ = (int)(z - dz);
+                var ddx = nextPoint.X - lastX;
+                var ddy = nextPoint.Y - lastY;
+                var ddz = nextPoint.Z - lastZ;
+                
+                if (keyChar.CurrentDirection == 0 || keyChar.CurrentDirection == 3)
+                {
+                    //x movement only
+                    if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
+                    {
+                        keyChar.PositionX = tx;
+                    }
+                    else
+                    {
+                        keyChar.PositionX = (int)(keyChar.PositionX - dx);
+                        //if the path moves along x at all, then
+                        if (ddx != 0)
+                        {
+                            //adjust y/z based on x change
+                            keyChar.PositionY = ddy * (keyChar.PositionX - lastX) / ddx + lastY;
+                            keyChar.PositionZ = ddz * (keyChar.PositionX - lastX) / ddx + lastZ;
+                        }
+                    }
+                }
+                else
+                {
+                    //y/z movement
+                    if (nextPoint.Z != keyChar.PositionZ)
+                    {
+                        //first move along z, 
+                        if (Math.Abs(tz - z) < Math.Abs(dz))
+                        {
+                            keyChar.PositionZ = tz;
+                        }
+                        else
+                        {
+                            keyChar.PositionZ = (int)(keyChar.PositionZ - dz);
+                            //if the path moves along z at all, then
+                            if (ddz != 0)
+                            {
+                                //adjust x/y based on z change
+                                keyChar.PositionX = ddx * (keyChar.PositionZ - lastZ) / ddz + lastX;
+                                keyChar.PositionY = ddy * (keyChar.PositionZ - lastZ) / ddz + lastY;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //then move along y
+                        if (Math.Abs(ty - y) < Math.Abs(dz))
+                        {
+                            keyChar.PositionY = ty;
+                        }
+                        else
+                        {
+                            keyChar.PositionY = (int)(keyChar.PositionY - dz); //intentional that it uses dz! so y isn't actually used
+                            //if the path moves along y at all, then
+                            if (ddy != 0)
+                            {
+                                //adjust x/z based on y change
+                                keyChar.PositionX = ddx * (keyChar.PositionY - lastY) / ddy + lastX;
+                                keyChar.PositionZ = ddz * (keyChar.PositionY - lastY) / ddy + lastZ;
+                            }
+                        }
+                    }
+                }
                 if (x == keyChar.PositionX && y == keyChar.PositionY && z == keyChar.PositionZ)
                 {
                     throw new Exception("No movement");

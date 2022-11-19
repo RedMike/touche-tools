@@ -13,8 +13,9 @@ public class SpriteViewWindow : IWindow
     private readonly ActiveRoom _room;
     private readonly ActiveSprite _sprite;
     private readonly ActiveFrame _frame;
+    private readonly ActiveDirection _direction;
 
-    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite, ActiveFrame frame)
+    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite, ActiveFrame frame, ActiveDirection direction)
     {
         _render = render;
         _windowSettings = windowSettings;
@@ -22,6 +23,7 @@ public class SpriteViewWindow : IWindow
         _room = room;
         _sprite = sprite;
         _frame = frame;
+        _direction = direction;
     }
 
     public void Render()
@@ -60,7 +62,8 @@ public class SpriteViewWindow : IWindow
         
         var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _sprite.SpriteView;
         var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, spriteViewId, spriteWidth, spriteHeight, spriteBytes);
-
+        var direction = _direction.Elements[_direction.Active];
+        
         foreach (var (frameIndex, destX, destY, hFlip, vFlip) in _frame.PartsView)
         {
             var tileWidthRatio = (float)spriteTileWidth / spriteWidth;
@@ -78,7 +81,14 @@ public class SpriteViewWindow : IWindow
             {
                 (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
             }
-            ImGui.SetCursorPos(spritePosition + new Vector2(destX, destY));
+
+            //fix the position based on the direction
+            var ox = 0;
+            if (direction == 3)
+            {
+                ox = -spriteTileWidth;
+            }
+            ImGui.SetCursorPos(spritePosition + new Vector2(destX + ox, destY));
             ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);   
         }
         

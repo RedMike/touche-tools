@@ -365,17 +365,9 @@ public class GameViewWindow : BaseWindow
             {
                 z = Game.ZDepthMax;
             }
-            var zFactor = 1.0f;
-            if (z < Game.ZDepthEven)
-            {
-                zFactor = (float)z / Game.ZDepthEven;
-            }
 
-            if (z > Game.ZDepthEven)
-            {
-                zFactor = (float)(Game.ZDepthMax - Game.ZDepthEven)/(Game.ZDepthMax - z);
-            }
-
+            var zFactor = Game.GetZFactor(z);
+            
             var width = 70;
             var height = 100;
 
@@ -443,6 +435,7 @@ public class GameViewWindow : BaseWindow
                     {
                         highY = destY + sprite.SpriteHeight;
                     }
+
                     var tileWidthRatio = (float)sprite.SpriteWidth / sprite.Width;
                     var tileHeightRatio = (float)sprite.SpriteHeight / sprite.Height;
                     var tilesPerRow = (int)Math.Floor((float)sprite.Width / sprite.SpriteWidth);
@@ -458,7 +451,13 @@ public class GameViewWindow : BaseWindow
                     {
                         (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
                     }
-                    ImGui.SetCursorPos(spritePosition + new Vector2(destX, destY) * zFactor);
+
+                    var dirX = 0;
+                    if (dirId == 3)
+                    {
+                        dirX = -sprite.SpriteWidth;
+                    }
+                    ImGui.SetCursorPos(spritePosition + new Vector2(dirX + destX, destY) * zFactor);
                     ImGui.Image(spriteTexture, new Vector2(sprite.SpriteWidth, sprite.SpriteHeight) * zFactor, spriteUv1, spriteUv2);   
                 }
                 width = highX - lowX;

@@ -3,7 +3,7 @@
 public class LogData
 {
     private const int MaxNewLineCount = 500;
-    private readonly Queue<(bool, string)> _logs = new Queue<(bool, string)>();
+    private Queue<(bool, string)> _logs = new Queue<(bool, string)>();
 
     public void Info(string message)
     {
@@ -33,7 +33,8 @@ public class LogData
             var newLineCount = tempLogs.Sum(s => s.Item2.Count(c => c == '\n') + 1);
             if (newLineCount > MaxNewLineCount)
             {
-                _logs.Dequeue();
+                _logs = new Queue<(bool, string)>();
+                //_logs.Dequeue();
                 ok = false;
             }
         } while (!ok);
