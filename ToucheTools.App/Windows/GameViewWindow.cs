@@ -121,16 +121,16 @@ public class GameViewWindow : BaseWindow
                 ImGui.Image(roomAreaTexture, new Vector2(area.Rect.W, area.Rect.H));
 
 
-                var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
-                    (255, 255, 0, 50), (255, 255, 255, 150));
-                ImGui.SetCursorPos(offset + new Vector2(x, y));
-                ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
-
-                var text = $"Area {aIdx} ({area.Id})";
-                var textSize = ImGui.CalcTextSize(text);
-                ImGui.SetCursorPos(offset +
-                                   new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
-                ImGui.Text(text);
+                // var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
+                //     (255, 255, 0, 50), (255, 255, 255, 150));
+                // ImGui.SetCursorPos(offset + new Vector2(x, y));
+                // ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
+                //
+                // var text = $"Area {aIdx} ({area.Id})";
+                // var textSize = ImGui.CalcTextSize(text);
+                // ImGui.SetCursorPos(offset +
+                //                    new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
+                // ImGui.Text(text);
 
                 aIdx++;
             }
@@ -166,15 +166,15 @@ public class GameViewWindow : BaseWindow
                 ImGui.SetCursorPos(offset + new Vector2(x, y));
                 ImGui.Image(roomAreaTexture, new Vector2(background.Rect.W, background.Rect.H));
 
-                var roomAreaRectTexture = _render.RenderRectangle(1, background.Rect.W, background.Rect.H,
-                    (255, 0, 255, 50), (255, 255, 255, 150));
-                ImGui.SetCursorPos(offset + new Vector2(x, y));
-                ImGui.Image(roomAreaRectTexture, new Vector2(background.Rect.W, background.Rect.H));
-                
-                var text = $"BG Area {idx}";
-                var textSize = ImGui.CalcTextSize(text);
-                ImGui.SetCursorPos(offset + new Vector2(x + background.Rect.W - textSize.X - 2, y + background.Rect.H - textSize.Y - 2));
-                ImGui.Text(text);
+                // var roomAreaRectTexture = _render.RenderRectangle(1, background.Rect.W, background.Rect.H,
+                //     (255, 0, 255, 50), (255, 255, 255, 150));
+                // ImGui.SetCursorPos(offset + new Vector2(x, y));
+                // ImGui.Image(roomAreaRectTexture, new Vector2(background.Rect.W, background.Rect.H));
+                //
+                // var text = $"BG Area {idx}";
+                // var textSize = ImGui.CalcTextSize(text);
+                // ImGui.SetCursorPos(offset + new Vector2(x + background.Rect.W - textSize.X - 2, y + background.Rect.H - textSize.Y - 2));
+                // ImGui.Text(text);
             }
 
             idx++;
@@ -220,19 +220,20 @@ public class GameViewWindow : BaseWindow
                 pointHeight = 1.0f;
             }
             
-            var pointRectTexture = _render.RenderRectangle(1, (int)(pointWidth), (int)(pointHeight),
-                (255, 255, 255, 50), (255, 255, 255, 150));
-            ImGui.SetCursorPos(offset + new Vector2(x, y));
-            ImGui.Image(pointRectTexture, new Vector2(pointWidth, pointHeight));
-
-            var text = $"P{pIdx}";
-            var textSize = ImGui.CalcTextSize(text);
-            ImGui.SetCursorPos(offset + new Vector2(x + pointWidth - textSize.X - 2, y + pointHeight - textSize.Y - 2));
-            ImGui.Text(text);
+            // var pointRectTexture = _render.RenderRectangle(1, (int)(pointWidth), (int)(pointHeight),
+            //     (255, 255, 255, 50), (255, 255, 255, 150));
+            // ImGui.SetCursorPos(offset + new Vector2(x, y));
+            // ImGui.Image(pointRectTexture, new Vector2(pointWidth, pointHeight));
+            //
+            // var text = $"P{pIdx}";
+            // var textSize = ImGui.CalcTextSize(text);
+            // ImGui.SetCursorPos(offset + new Vector2(x + pointWidth - textSize.X - 2, y + pointHeight - textSize.Y - 2));
+            // ImGui.Text(text);
             
             pIdx++;
         }
         #endregion
+        
         
         #region Talk Entries
         ushort tIdx = 0;
@@ -270,15 +271,15 @@ public class GameViewWindow : BaseWindow
             ImGui.SetCursorPos(offset + new Vector2(x, y));
             ImGui.Text(talkEntry.Text);
 
-            var roomAreaRectTexture = _render.RenderRectangle(1, (int)tx, (int)ty*2,
-                (255, 0, 0, 50), (255, 255, 255, 150));
-            ImGui.SetCursorPos(offset + new Vector2(x, y));
-            ImGui.Image(roomAreaRectTexture, new Vector2(tx, ty*2));
-            
-            var text = $"Text {tIdx}";
-            var textSize = ImGui.CalcTextSize(text);
-            ImGui.SetCursorPos(offset + new Vector2(x + tx - textSize.X - 2, y + ty*2 - textSize.Y - 2));
-            ImGui.Text(text);
+            // var roomAreaRectTexture = _render.RenderRectangle(1, (int)tx, (int)ty*2,
+            //     (255, 0, 0, 50), (255, 255, 255, 150));
+            // ImGui.SetCursorPos(offset + new Vector2(x, y));
+            // ImGui.Image(roomAreaRectTexture, new Vector2(tx, ty*2));
+            //
+            // var text = $"Text {tIdx}";
+            // var textSize = ImGui.CalcTextSize(text);
+            // ImGui.SetCursorPos(offset + new Vector2(x + tx - textSize.X - 2, y + ty*2 - textSize.Y - 2));
+            // ImGui.Text(text);
 
             tIdx++;
         }
@@ -426,17 +427,17 @@ public class GameViewWindow : BaseWindow
             width = (int)Math.Ceiling(width * zFactor);
             height = (int)Math.Ceiling(height * zFactor);
 
-            var rectTexture = _render.RenderRectangle(1, width, height, (colR, colG, colB, 50), (255, 255, 255, 150));
-
-            var ox = x - width / 2.0f;
-            var oy = y - height;
-            ImGui.SetCursorPos(offset + new Vector2(ox , oy));
-            ImGui.Image(rectTexture, new Vector2(width, height));
-
-            var text = $"{keyCharId}";
-            var textSize = ImGui.CalcTextSize(text);
-            ImGui.SetCursorPos(offset + new Vector2(ox + width - textSize.X - 2, oy + height - textSize.Y - 2));
-            ImGui.Text(text);
+            // var rectTexture = _render.RenderRectangle(1, width, height, (colR, colG, colB, 50), (255, 255, 255, 150));
+            //
+            // var ox = x - width / 2.0f;
+            // var oy = y - height;
+            // ImGui.SetCursorPos(offset + new Vector2(ox , oy));
+            // ImGui.Image(rectTexture, new Vector2(width, height));
+            //
+            // var text = $"{keyCharId}";
+            // var textSize = ImGui.CalcTextSize(text);
+            // ImGui.SetCursorPos(offset + new Vector2(ox + width - textSize.X - 2, oy + height - textSize.Y - 2));
+            // ImGui.Text(text);
         }
     }
 }
