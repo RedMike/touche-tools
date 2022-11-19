@@ -143,6 +143,7 @@ public class ActiveProgramState
         }
 
         public List<Script> Scripts { get; set; } = new List<Script>();
+        public List<Script> ScriptsForCurrentTick { get; set; } = new List<Script>();
 
         public Script? GetKeyCharScript(int keyCharId)
         {
@@ -157,9 +158,32 @@ public class ActiveProgramState
             return Scripts.SingleOrDefault(s => s.Status == ScriptStatus.Running);
         }
 
+        public bool AreScriptsRemainingInCurrentTick()
+        {
+            return ScriptsForCurrentTick.Count(s => s.Status != ScriptStatus.Stopped && 
+                                                    s.Status != ScriptStatus.NotInit) != 0;
+        }
+
         public Script? GetNextScript()
         {
-            return Scripts.FirstOrDefault(s => s.Status == ScriptStatus.Ready);
+            return ScriptsForCurrentTick.FirstOrDefault(s => s.Status == ScriptStatus.Ready);
+        }
+
+        public void MarkScriptAsDoneInCurrentTick(Script s)
+        {
+            ScriptsForCurrentTick.Remove(s);
+        }
+
+        public void TickDone()
+        {
+            if (ScriptsForCurrentTick
+                    .Count(s => s.Status != ScriptStatus.Stopped && 
+                                s.Status != ScriptStatus.NotInit) != 0)
+            {
+                throw new Exception("Scripts not all done in tick");
+            }
+
+            ScriptsForCurrentTick = Scripts.ToList();
         }
         #endregion
 
@@ -374,7 +398,7 @@ public class ActiveProgramState
         {
             CurrentProgram = _program.Active,
         };
-        
+
         Flags[0] = (short)_program.Active;
         //values set from game code
         for (ushort i = 200; i < 300; i++)
@@ -384,12 +408,13 @@ public class ActiveProgramState
                 SetFlag(i, 0);
             }
         }
+
         SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColour, 240);
         SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
         SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
         SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
         SetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar, 0);
-        
+
         CurrentState.Scripts.Add(new ProgramState.Script()
         {
             Type = ProgramState.ScriptType.KeyChar,
@@ -405,6 +430,7 @@ public class ActiveProgramState
             {
                 continue;
             }
+
             var cso = program.CharScriptOffsets.FirstOrDefault(x => x.Character == keyCharId);
             if (cso != null)
             {
@@ -418,9 +444,9 @@ public class ActiveProgramState
                 });
             }
         }
-    }
 
-    private int _ticker = 0;
+        CurrentState.TickDone();
+    }
 
     private static int GetDirection(int x1, int y1, int z1, int x2, int y2, int z2) {
         int ret = -1;
@@ -1131,38 +1157,38 @@ public class ActiveProgramState
             _program.SetActive(newProgram);
             return true;
         }
+        
+        if (!CurrentState.AreScriptsRemainingInCurrentTick())
+        {
+            CurrentState.TickDone();
+        }
 
+        //if we're in the middle fo running a script, just run it
         var currentScript = CurrentState.GetRunningScript();
         if (currentScript != null)
         {
-            return RunStep();
+            var ret = RunStep();
+            if (currentScript.Status != ProgramState.ScriptStatus.Running)
+            {
+                CurrentState.MarkScriptAsDoneInCurrentTick(currentScript);
+            }
+            return ret;
         }
-        
-        _ticker++;
-        _ticker = _ticker % 120;
-        var isGameTick = _ticker % 3 == 0;
 
-        if (!isGameTick)
-        {
-            //loop again until it is a game tick
-            OnGraphicalUpdate();
-            return Step();
-        }
-        
-        var nextScript = CurrentState.GetNextScript();
         OnGameTick();
         OnGraphicalUpdate();
+        
+        var nextScript = CurrentState.GetNextScript();
         if (nextScript == null)
         {
-            if (CurrentState.Scripts.All(s => s.Status != ProgramState.ScriptStatus.Paused && s.Status != ProgramState.ScriptStatus.Ready))
-            {
-                throw new Exception("All scripts in non-paused state");
-            }
-            
+            // if (CurrentState.Scripts.All(s => s.Status != ProgramState.ScriptStatus.Paused && s.Status != ProgramState.ScriptStatus.Ready))
+            // {
+            //     throw new Exception("All scripts in non-paused state");
+            // }
+        
             //no script ready
             return true;
         }
-        
         if (nextScript.Type != ProgramState.ScriptType.KeyChar)
         {
             throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");

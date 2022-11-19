@@ -61,12 +61,13 @@ public class ProgramReferenceViewWindow : IWindow
         #region Scripts
         if (ImGui.CollapsingHeader("Scripts", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGui.BeginTable("scripts", 5);
+            ImGui.BeginTable("scripts", 6);
             ImGui.TableSetupColumn("Type");
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Offset");
             ImGui.TableSetupColumn("State");
             ImGui.TableSetupColumn("Delay");
+            ImGui.TableSetupColumn("Tick");
             ImGui.TableHeadersRow();
             foreach (var script in state.Scripts)
             {
@@ -74,6 +75,7 @@ public class ProgramReferenceViewWindow : IWindow
                 var isPaused = script.Status == ActiveProgramState.ProgramState.ScriptStatus.Paused;
                 var isStopped = script.Status == ActiveProgramState.ProgramState.ScriptStatus.Stopped ||
                                 script.Status == ActiveProgramState.ProgramState.ScriptStatus.NotInit;
+                var isInCurrentTick = !isStopped && state.ScriptsForCurrentTick.Contains(script);
                 
                 if (isStopped)
                 {
@@ -114,6 +116,13 @@ public class ProgramReferenceViewWindow : IWindow
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
                 }
                 ImGui.Text($"{script.Delay}");
+                
+                ImGui.TableNextColumn();
+                if (isRunning)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
+                }
+                ImGui.Text($"{(isInCurrentTick ? "Y" : "")}");
                 
                 ImGui.TableNextRow();
                 
