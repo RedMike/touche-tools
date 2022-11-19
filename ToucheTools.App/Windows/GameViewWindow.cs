@@ -234,58 +234,6 @@ public class GameViewWindow : BaseWindow
         }
         #endregion
         
-        #region Walks
-        ushort wIdx = 0;
-        foreach (var walk in program.Walks)
-        {
-            continue;
-            var point1 = walk.Point1;
-            var point2 = walk.Point2;
-
-            var p1 = program.Points[point1];
-            var p2 = program.Points[point2];
-            
-            var ox = p1.X;
-            var oy = p1.Y;
-            var oz = p1.Z;
-            if (oz < Game.ZDepthMin)
-            {
-                oz = Game.ZDepthMin;
-            }
-            if (oz > Game.ZDepthMax)
-            {
-                oz = Game.ZDepthMax;
-            }
-            var zFactor = 1.0f;
-            if (oz < Game.ZDepthEven)
-            {
-                zFactor = (float)oz / Game.ZDepthEven;
-            }
-
-            if (oz > Game.ZDepthEven)
-            {
-                zFactor = (float)(Game.ZDepthMax - Game.ZDepthEven)/(Game.ZDepthMax - oz);
-            }
-
-            var x = ox - offsetX;
-            var y = oy - offsetY;
-            var wid = 10;
-            var hei = 10;
-            
-            var pointRectTexture = _render.RenderRectangle(1, (int)(wid*zFactor), (int)(hei*zFactor),
-                (255, 255, 255, 50), (255, 255, 255, 150));
-            ImGui.SetCursorPos(offset + new Vector2(x, y)*zFactor);
-            ImGui.Image(pointRectTexture, new Vector2(wid, hei)*zFactor);
-
-            var text = $"P{wIdx}-1";
-            var textSize = ImGui.CalcTextSize(text);
-            ImGui.SetCursorPos(offset + new Vector2(x * zFactor + wid * zFactor - textSize.X - 2, y * zFactor + hei * zFactor - textSize.Y - 2));
-            ImGui.Text(text);
-
-            wIdx++;
-        }
-        #endregion
-        
         #region Talk Entries
         ushort tIdx = 0;
         foreach (var talkEntry in _activeProgramState.TalkEntries)
@@ -340,6 +288,18 @@ public class GameViewWindow : BaseWindow
     private void RenderKeyChars(Vector2 offset)
     {
         var colIdx = 0;
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
+        var offsetX = _activeProgramState.GetFlag(Flags.Known.RoomScrollX);
+        var offsetY = _activeProgramState.GetFlag(Flags.Known.RoomScrollY);
+        if (_activeProgramState.GetFlag(Flags.Known.DisableRoomScroll) != 0)
+        {
+            offsetX = 0;
+            offsetY = 0;
+        }
         foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
         {
             if (!keyChar.Initialised)
@@ -354,8 +314,8 @@ public class GameViewWindow : BaseWindow
             colIdx++;
             colIdx = colIdx % _colours.Count;
             
-            var x = keyChar.PositionX;
-            var y = keyChar.PositionY;
+            var x = keyChar.PositionX - offsetX;
+            var y = keyChar.PositionY - offsetY;
             var z = keyChar.PositionZ;
             if (z < Game.ZDepthMin)
             {
@@ -379,7 +339,6 @@ public class GameViewWindow : BaseWindow
                 _model.Sequences[_activeProgramState.LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum.Value].Characters.ContainsKey(keyChar.Character.Value)
                )
             {
-                var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
                 var spriteNum = _activeProgramState.LoadedSprites[keyChar.SpriteIndex.Value].SpriteNum.Value;
                 var sprite = _model.Sprites[spriteNum].Value;
                 var palette = _model.Palettes[activeRoom];
