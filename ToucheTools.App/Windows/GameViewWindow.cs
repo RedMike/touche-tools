@@ -301,7 +301,10 @@ public class GameViewWindow : BaseWindow
             offsetX = 0;
             offsetY = 0;
         }
-        foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars)
+
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
+                     .OrderBy(k => k.Value.PositionZ))
         {
             if (!keyChar.Initialised)
             {
@@ -310,6 +313,21 @@ public class GameViewWindow : BaseWindow
             if (keyChar.OffScreen)
             {
                 continue;
+            }
+
+            if (keyChar.LastWalk != null)
+            {
+                var walk = program.Walks[keyChar.LastWalk.Value];
+                var clipRect = program.Rects[walk.ClipRect];
+                
+                // var r1 = _render.RenderRectangle(1, clipRect.W, clipRect.H, (255, 0, 0, 50), (255, 255, 255, 150));
+                // ImGui.SetCursorPos(offset + new Vector2(clipRect.X - offsetX , clipRect.Y - offsetY));
+                // ImGui.Image(r1, new Vector2(clipRect.W, clipRect.H));
+
+                var windowOffset = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
+                ImGui.PushClipRect(windowOffset + new Vector2(clipRect.X - offsetX,  clipRect.Y - offsetY),
+                    windowOffset + new Vector2(clipRect.X - offsetX + clipRect.W, clipRect.Y - offsetY + clipRect.H), 
+                    true);
             }
             var (colR, colG, colB) = _colours[colIdx];
             colIdx++;
@@ -417,6 +435,7 @@ public class GameViewWindow : BaseWindow
                     {
                         dirX = -sprite.SpriteWidth;
                     }
+
                     ImGui.SetCursorPos(spritePosition + new Vector2(dirX + destX, destY) * zFactor);
                     ImGui.Image(spriteTexture, new Vector2(sprite.SpriteWidth, sprite.SpriteHeight) * zFactor, spriteUv1, spriteUv2);   
                 }
@@ -424,9 +443,10 @@ public class GameViewWindow : BaseWindow
                 height = highY - lowY;
             }
 
-            width = (int)Math.Ceiling(width * zFactor);
-            height = (int)Math.Ceiling(height * zFactor);
 
+            // width = (int)Math.Ceiling(width * zFactor);
+            // height = (int)Math.Ceiling(height * zFactor);
+            //
             // var rectTexture = _render.RenderRectangle(1, width, height, (colR, colG, colB, 50), (255, 255, 255, 150));
             //
             // var ox = x - width / 2.0f;
@@ -438,6 +458,12 @@ public class GameViewWindow : BaseWindow
             // var textSize = ImGui.CalcTextSize(text);
             // ImGui.SetCursorPos(offset + new Vector2(ox + width - textSize.X - 2, oy + height - textSize.Y - 2));
             // ImGui.Text(text);
+            
+            
+            if (keyChar.LastWalk != null)
+            {
+                ImGui.PopClipRect();
+            }
         }
     }
 }

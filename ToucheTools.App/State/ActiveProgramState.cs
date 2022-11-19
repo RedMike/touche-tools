@@ -99,6 +99,7 @@ public class ActiveProgramState
             OffScreen = false;
             PositionX = 10; //from game code
             LastPoint = null;
+            LastWalk = null;
             TargetPoint = null;
             //intentional that no position y/z update, from game code
             SpriteIndex = null;
@@ -1353,6 +1354,7 @@ public class ActiveProgramState
             keyChar.PositionZ = point.Z;
             keyChar.LastPoint = setCharBox.Num;
             keyChar.TargetPoint = setCharBox.Num;
+            keyChar.LastWalk = (ushort)program.Walks.FindIndex(w => w.Point1 == setCharBox.Num || w.Point2 == setCharBox.Num);
         } else if (instruction is InitCharInstruction initChar)
         {
             var keyChar = GetKeyChar(initChar.Character);
