@@ -2,41 +2,20 @@
 
 public class LogData
 {
-    private const int MaxNewLineCount = 500;
-    private Queue<(bool, string)> _logs = new Queue<(bool, string)>();
+    private List<(bool, string)> _logs = new List<(bool, string)>();
 
     public void Info(string message)
     {
-        _logs.Enqueue((false, message));
-        DequeueUntilBelowLimit();
+        _logs.Add((false, message));
     }
     
     public void Error(string message)
     {
-        _logs.Enqueue((true, message));
-        DequeueUntilBelowLimit();
+        _logs.Add((true, message));
     }
 
     public List<(bool, string)> List()
     {
-        var list = _logs.ToList();
-        list.Reverse();
-        return list;
-    }
-
-    private void DequeueUntilBelowLimit()
-    {
-        var ok = true;
-        do
-        {
-            var tempLogs = _logs.ToList();
-            var newLineCount = tempLogs.Sum(s => s.Item2.Count(c => c == '\n') + 1);
-            if (newLineCount > MaxNewLineCount)
-            {
-                _logs = new Queue<(bool, string)>();
-                //_logs.Dequeue();
-                ok = false;
-            }
-        } while (!ok);
+        return _logs;
     }
 }

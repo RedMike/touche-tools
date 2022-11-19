@@ -473,299 +473,340 @@ public class ActiveProgramState
         #region Walking
         foreach (var (keyCharId, keyChar) in KeyChars)
         {
-            if (keyChar.TargetPoint != null && keyChar.TargetPoint.Value != keyChar.LastPoint)
+            while (true)
             {
-                var lastX = keyChar.PositionX;
-                var lastY = keyChar.PositionY;
-                var lastZ = keyChar.PositionZ;
-                var targetPoint = program.Points[keyChar.TargetPoint.Value];
-
-                var nextPointId = -1;
-                ProgramDataModel.Point nextPoint;
-                if (keyChar.LastPoint == null)
+                if (keyChar.TargetPoint != null)
                 {
-                    //we're not at a point yet, so path directly to the nearest point
-                    int nearestPointId = -1;
-                    var closestDistance = int.MaxValue;
-                    for (var i = 0; i < program.Points.Count; i++)
+                    var lastX = keyChar.PositionX;
+                    var lastY = keyChar.PositionY;
+                    var lastZ = keyChar.PositionZ;
+                    var targetPoint = program.Points[keyChar.TargetPoint.Value];
+                    if (keyChar.TargetPoint == keyChar.LastPoint &&
+                        targetPoint.X == lastX &&
+                        targetPoint.Y == lastY &&
+                        targetPoint.Z == lastZ)
                     {
-                        var point = program.Points[i];
-                        var distance = Math.Abs(point.X - keyChar.PositionX) + 
-                                       Math.Abs(point.Y - keyChar.PositionY) +
-                                       Math.Abs(point.Z - keyChar.PositionZ);
-                        if (distance < closestDistance)
-                        {
-                            closestDistance = distance;
-                            nearestPointId = i;
-                        }
+                        break;
                     }
 
-                    nextPointId = nearestPointId;
-                    nextPoint = program.Points[nearestPointId];
-                }
-                else
-                {
-                    //we were at a point already, so path from it to the next one
-                    var lastPoint = program.Points[keyChar.LastPoint.Value];
-                    lastX = lastPoint.X;
-                    lastY = lastPoint.Y;
-                    lastZ = lastPoint.Z;
-                    //use a basic breadth first search to figure out the correct path, game precalculates this and saves
-                    var searchedPoints = new HashSet<int>() { keyChar.TargetPoint.Value };
-                    var foundLastPoint = false;
-                    var iterationCount = 0;
-                    var iterations = new Dictionary<int, int>() { {keyChar.TargetPoint.Value, 0}};
-                    while (!foundLastPoint)
+                    var nextPointId = -1;
+                    ProgramDataModel.Point nextPoint;
+                    if (keyChar.LastPoint != null && keyChar.TargetPoint == keyChar.LastPoint)
                     {
-                        iterationCount++;
-                        var walksWithSearchPoint = program.Walks.Where(w => 
-                            (searchedPoints.Contains(w.Point1) || searchedPoints.Contains(w.Point2))
-                            && !(searchedPoints.Contains(w.Point1) && searchedPoints.Contains(w.Point2)) //remove cycles
-                        ).ToList();
-                        if (walksWithSearchPoint.Count == 0)
+                        //we're moving back to our last point
+                        nextPointId = keyChar.LastPoint.Value;
+                    }
+                    else if (keyChar.LastPoint == null)
+                    {
+                        //we're not at a point yet, so path directly to the nearest point
+                        int nearestPointId = -1;
+                        var closestDistance = int.MaxValue;
+                        for (var i = 0; i < program.Points.Count; i++)
                         {
-                            break;
-                        }
-                        foreach (var walk in walksWithSearchPoint)
-                        {
-                            var p = walk.Point1;
-                            if (searchedPoints.Contains(p))
+                            var point = program.Points[i];
+                            var distance = Math.Abs(point.X - keyChar.PositionX) +
+                                           Math.Abs(point.Y - keyChar.PositionY) +
+                                           Math.Abs(point.Z - keyChar.PositionZ);
+                            if (distance < closestDistance)
                             {
-                                p = walk.Point2;
+                                closestDistance = distance;
+                                nearestPointId = i;
+                            }
+                        }
+
+                        nextPointId = nearestPointId;
+                    }
+                    else
+                    {
+                        //we were at a point already, so path from it to the next one
+                        var lastPoint = program.Points[keyChar.LastPoint.Value];
+                        lastX = lastPoint.X;
+                        lastY = lastPoint.Y;
+                        lastZ = lastPoint.Z;
+                        //use a basic breadth first search to figure out the correct path, game precalculates this and saves
+                        var searchedPoints = new HashSet<int>() { keyChar.TargetPoint.Value };
+                        var foundLastPoint = false;
+                        var iterationCount = 0;
+                        var iterations = new Dictionary<int, int>() { { keyChar.TargetPoint.Value, 0 } };
+                        while (!foundLastPoint)
+                        {
+                            iterationCount++;
+                            var walksWithSearchPoint = program.Walks.Where(w =>
+                                    (searchedPoints.Contains(w.Point1) || searchedPoints.Contains(w.Point2))
+                                    && !(searchedPoints.Contains(w.Point1) &&
+                                         searchedPoints.Contains(w.Point2)) //remove cycles
+                            ).ToList();
+                            if (walksWithSearchPoint.Count == 0)
+                            {
+                                break;
                             }
 
-                            if (!iterations.ContainsKey(p))
+                            foreach (var walk in walksWithSearchPoint)
                             {
-                                iterations[p] = iterationCount;
+                                var p = walk.Point1;
+                                if (searchedPoints.Contains(p))
+                                {
+                                    p = walk.Point2;
+                                }
+
+                                if (!iterations.ContainsKey(p))
+                                {
+                                    iterations[p] = iterationCount;
+                                }
+
+                                searchedPoints.Add(p);
                             }
 
-                            searchedPoints.Add(p);
+                            foundLastPoint = walksWithSearchPoint.Any(w =>
+                                w.Point1 == keyChar.LastPoint.Value ||
+                                w.Point2 == keyChar.LastPoint.Value
+                            );
                         }
-                        foundLastPoint = walksWithSearchPoint.Any(w =>
+
+                        //TODO: set current walk
+                        var curWalk = program.Walks.Where(w =>
                             w.Point1 == keyChar.LastPoint.Value ||
                             w.Point2 == keyChar.LastPoint.Value
-                        );
-                    }
-                    //TODO: set current walk
-                    var curWalk = program.Walks.Where(w =>
-                        w.Point1 == keyChar.LastPoint.Value ||
-                        w.Point2 == keyChar.LastPoint.Value
-                    ).MinBy(w => 
-                        iterations.GetValueOrDefault(w.Point1, 999) + 
-                        iterations.GetValueOrDefault(w.Point2, 999) - 
-                        iterations.GetValueOrDefault(keyChar.LastPoint.Value, 999));
-                    if (curWalk == null)
-                    {
-                        throw new Exception("No possible path");
+                        ).MinBy(w =>
+                            iterations.GetValueOrDefault(w.Point1, 999) +
+                            iterations.GetValueOrDefault(w.Point2, 999) -
+                            iterations.GetValueOrDefault(keyChar.LastPoint.Value, 999));
+                        if (curWalk == null)
+                        {
+                            throw new Exception("No possible path");
+                        }
+
+                        nextPointId = curWalk.Point1;
+                        if (curWalk.Point1 == keyChar.LastPoint)
+                        {
+                            nextPointId = curWalk.Point2;
+                        }
                     }
 
-                    nextPointId = curWalk.Point1;
-                    if (curWalk.Point1 == keyChar.LastPoint)
+                    if (nextPointId == -1)
                     {
-                        nextPointId = curWalk.Point2;
+                        throw new Exception("No next point");
                     }
+
                     nextPoint = program.Points[nextPointId];
-                }
 
-                if (nextPointId == -1)
-                {
-                    throw new Exception("No next point");
-                }
+                    var x = keyChar.PositionX;
+                    var y = keyChar.PositionY;
+                    var z = keyChar.PositionZ;
+                    if (z < Game.ZDepthMin)
+                    {
+                        z = Game.ZDepthMin;
+                    }
 
-                if (nextPointId == keyChar.LastPoint)
-                {
-                    throw new Exception("Queued to move to the same place");
-                }
-                
-                var x = keyChar.PositionX;
-                var y = keyChar.PositionY;
-                var z = keyChar.PositionZ;
-                if (z < Game.ZDepthMin)
-                {
-                    z = Game.ZDepthMin;
-                }
-                if (z > Game.ZDepthMax)
-                {
-                    z = Game.ZDepthMax;
-                }
+                    if (z > Game.ZDepthMax)
+                    {
+                        z = Game.ZDepthMax;
+                    }
 
-                var zFactor = Game.GetZFactor(z);
+                    var zFactor = Game.GetZFactor(z);
 
-                var tx = nextPoint.X;
-                var ty = nextPoint.Y;
-                var tz = nextPoint.Z;
-                
-                var sequenceNum = LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum;
-                var frames = _model.Sequences[sequenceNum.Value]
-                    .Characters[keyChar.Character.Value]
-                    .Animations[keyChar.CurrentAnim]
-                    .Directions[keyChar.CurrentDirection]
-                    .Frames;
+                    var tx = nextPoint.X;
+                    var ty = nextPoint.Y;
+                    var tz = nextPoint.Z;
 
-                var frame = frames[keyChar.CurrentAnimCounter];
-                
-                var dx = 0.0f;
-                if (frame.WalkDx != 0)
-                {
-                    dx = -frame.WalkDx * zFactor;
-                    if (keyChar.CurrentDirection == 3)
-                    {
-                        dx = -dx;
-                    }
-                    if (dx < 0)
-                    {
-                        dx = Math.Min(dx, -1);
-                    }
-                    else if (dx > 0)
-                    {
-                        dx = Math.Max(dx, 1);
-                    }
-                }
+                    var sequenceNum = LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum;
+                    var frames = _model.Sequences[sequenceNum.Value]
+                        .Characters[keyChar.Character.Value]
+                        .Animations[keyChar.CurrentAnim]
+                        .Directions[keyChar.CurrentDirection]
+                        .Frames;
 
-                var dy = 0.0f;
-                if (frame.WalkDy != 0)
-                {
-                    dy = -frame.WalkDy * zFactor;
-                    if (dy < 0)
-                    {
-                        dy = Math.Min(dy, -1);
-                    }
-                    else if (dy > 0)
-                    {
-                        dy = Math.Max(dy, 1);
-                    }
-                }
+                    var frame = frames[keyChar.CurrentAnimCounter];
 
-                var dz = 0.0f;
-                if (frame.WalkDz != 0)
-                {
-                    dz = -frame.WalkDz * zFactor;
-                    if (dz < 0)
+                    var dx = 0.0f;
+                    if (frame.WalkDx != 0)
                     {
-                        dz = Math.Min(dz, -1);
-                    }
-                    else if (dz > 0)
-                    {
-                        dz = Math.Max(dz, 1);
-                    }
-                }
+                        dx = -frame.WalkDx * zFactor;
+                        if (keyChar.CurrentDirection == 3)
+                        {
+                            dx = -dx;
+                        }
 
-                if (keyChar.CurrentAnim > 1)
-                {
-                    //not a walk animation, so just cancel out the dy/dz movement
-                    if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
-                    {
-                        dx = tx - keyChar.PositionX; //exact movement
+                        if (dx < 0)
+                        {
+                            dx = Math.Min(dx, -1);
+                        }
+                        else if (dx > 0)
+                        {
+                            dx = Math.Max(dx, 1);
+                        }
                     }
-                    keyChar.PositionX = (int)(x - dx);
+
+                    var dy = 0.0f;
+                    if (frame.WalkDy != 0)
+                    {
+                        dy = -frame.WalkDy * zFactor;
+                        if (dy < 0)
+                        {
+                            dy = Math.Min(dy, -1);
+                        }
+                        else if (dy > 0)
+                        {
+                            dy = Math.Max(dy, 1);
+                        }
+                    }
+
+                    var dz = 0.0f;
+                    if (frame.WalkDz != 0)
+                    {
+                        dz = -frame.WalkDz * zFactor;
+                        if (dz < 0)
+                        {
+                            dz = Math.Min(dz, -1);
+                        }
+                        else if (dz > 0)
+                        {
+                            dz = Math.Max(dz, 1);
+                        }
+                    }
+
+                    if (keyChar.CurrentAnim > 1)
+                    {
+                        //not a walk animation, so just cancel out the dy/dz movement
+                        if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
+                        {
+                            dx = tx - keyChar.PositionX; //exact movement
+                        }
+
+                        keyChar.PositionX = (int)(x - dx);
+                        if (keyChar.PositionX == nextPoint.X && keyChar.PositionY == nextPoint.Y &&
+                            keyChar.PositionZ == nextPoint.Z)
+                        {
+                            if (keyChar.CurrentAnim == 1)
+                            {
+                                keyChar.CurrentAnimCounter = 0;
+                                keyChar.CurrentAnimSpeed = 0;
+                                var rnd = new Random();
+                                keyChar.CurrentAnim = keyChar.Anim2Start + rnd.Next(0, keyChar.Anim2Count);
+                            }
+                            keyChar.LastPoint = (ushort)nextPointId;
+                            continue;
+                        }
+
+                        break;
+                    }
+
+                    var direction = GetDirection(x, y, z, tx, ty, tz);
+                    if (direction < 0)
+                    {
+                        direction = keyChar.CurrentDirection;
+                    }
+
+                    if (direction != keyChar.CurrentDirection)
+                    {
+                        keyChar.CurrentAnimCounter = 0;
+                        keyChar.CurrentDirection = direction;
+                        //don't want to process the movement in this frame
+                        continue;
+                    }
+
+                    if (keyChar.CurrentAnim < 1)
+                    {
+                        keyChar.CurrentAnimCounter = 0;
+                        keyChar.CurrentAnim = 1;
+                        if (dx == 0 && dy == 0 && dz == 0)
+                        {
+                            continue;
+                        }
+                    }
+
+                    var ddx = nextPoint.X - lastX;
+                    var ddy = nextPoint.Y - lastY;
+                    var ddz = nextPoint.Z - lastZ;
+
+                    if (keyChar.CurrentDirection == 0 || keyChar.CurrentDirection == 3)
+                    {
+                        //x movement only
+                        if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
+                        {
+                            keyChar.PositionX = tx;
+                        }
+                        else
+                        {
+                            keyChar.PositionX = (int)(keyChar.PositionX - dx);
+                            //if the path moves along x at all, then
+                            if (ddx != 0)
+                            {
+                                //adjust y/z based on x change
+                                keyChar.PositionY = ddy * (keyChar.PositionX - lastX) / ddx + lastY;
+                                keyChar.PositionZ = ddz * (keyChar.PositionX - lastX) / ddx + lastZ;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //y/z movement
+                        if (nextPoint.Z != keyChar.PositionZ)
+                        {
+                            //first move along z, 
+                            if (Math.Abs(tz - z) < Math.Abs(dz))
+                            {
+                                keyChar.PositionZ = tz;
+                            }
+                            else
+                            {
+                                keyChar.PositionZ = (int)(keyChar.PositionZ - dz);
+                                //if the path moves along z at all, then
+                                if (ddz != 0)
+                                {
+                                    //adjust x/y based on z change
+                                    keyChar.PositionX = ddx * (keyChar.PositionZ - lastZ) / ddz + lastX;
+                                    keyChar.PositionY = ddy * (keyChar.PositionZ - lastZ) / ddz + lastY;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //then move along y
+                            if (Math.Abs(ty - y) < Math.Abs(dz))
+                            {
+                                keyChar.PositionY = ty;
+                            }
+                            else
+                            {
+                                keyChar.PositionY =
+                                    (int)(keyChar.PositionY -
+                                          dz); //intentional that it uses dz! so y isn't actually used
+                                //if the path moves along y at all, then
+                                if (ddy != 0)
+                                {
+                                    //adjust x/z based on y change
+                                    keyChar.PositionX = ddx * (keyChar.PositionY - lastY) / ddy + lastX;
+                                    keyChar.PositionZ = ddz * (keyChar.PositionY - lastY) / ddy + lastZ;
+                                }
+                            }
+                        }
+                    }
+
+                    if (x == keyChar.PositionX && y == keyChar.PositionY && z == keyChar.PositionZ)
+                    {
+                        throw new Exception("No movement");
+                    }
+                    
+                    //TODO: when moving from an intermediate point to the next one there's a slight hitch
+
                     if (keyChar.PositionX == nextPoint.X && keyChar.PositionY == nextPoint.Y &&
                         keyChar.PositionZ == nextPoint.Z)
                     {
+                        if (keyChar.CurrentAnim == 1)
+                        {
+                            keyChar.CurrentAnimCounter = 0;
+                            keyChar.CurrentAnimSpeed = 0;
+                            var rnd = new Random();
+                            keyChar.CurrentAnim = keyChar.Anim2Start + rnd.Next(0, keyChar.Anim2Count);
+                        }
+
                         keyChar.LastPoint = (ushort)nextPointId;
-                    }
-
-                    continue;
-                }
-                
-                var direction = GetDirection(x, y, z, tx, ty, tz);
-                if (direction < 0)
-                {
-                    direction = keyChar.CurrentDirection;
-                }
-
-                if (direction != keyChar.CurrentDirection)
-                {
-                    keyChar.CurrentAnimCounter = 0;
-                    keyChar.CurrentDirection = direction;
-                    //don't want to process the movement in this frame
-                    continue;
-                }
-
-                if (keyChar.CurrentAnim < 1)
-                {
-                    keyChar.CurrentAnimCounter = 0;
-                    keyChar.CurrentAnim = 1;
-                    if (dx == 0 && dy == 0 && dz == 0)
-                    {
                         continue;
-                    }   
+                    }
                 }
 
-                var ddx = nextPoint.X - lastX;
-                var ddy = nextPoint.Y - lastY;
-                var ddz = nextPoint.Z - lastZ;
-                
-                if (keyChar.CurrentDirection == 0 || keyChar.CurrentDirection == 3)
-                {
-                    //x movement only
-                    if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
-                    {
-                        keyChar.PositionX = tx;
-                    }
-                    else
-                    {
-                        keyChar.PositionX = (int)(keyChar.PositionX - dx);
-                        //if the path moves along x at all, then
-                        if (ddx != 0)
-                        {
-                            //adjust y/z based on x change
-                            keyChar.PositionY = ddy * (keyChar.PositionX - lastX) / ddx + lastY;
-                            keyChar.PositionZ = ddz * (keyChar.PositionX - lastX) / ddx + lastZ;
-                        }
-                    }
-                }
-                else
-                {
-                    //y/z movement
-                    if (nextPoint.Z != keyChar.PositionZ)
-                    {
-                        //first move along z, 
-                        if (Math.Abs(tz - z) < Math.Abs(dz))
-                        {
-                            keyChar.PositionZ = tz;
-                        }
-                        else
-                        {
-                            keyChar.PositionZ = (int)(keyChar.PositionZ - dz);
-                            //if the path moves along z at all, then
-                            if (ddz != 0)
-                            {
-                                //adjust x/y based on z change
-                                keyChar.PositionX = ddx * (keyChar.PositionZ - lastZ) / ddz + lastX;
-                                keyChar.PositionY = ddy * (keyChar.PositionZ - lastZ) / ddz + lastY;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //then move along y
-                        if (Math.Abs(ty - y) < Math.Abs(dz))
-                        {
-                            keyChar.PositionY = ty;
-                        }
-                        else
-                        {
-                            keyChar.PositionY = (int)(keyChar.PositionY - dz); //intentional that it uses dz! so y isn't actually used
-                            //if the path moves along y at all, then
-                            if (ddy != 0)
-                            {
-                                //adjust x/z based on y change
-                                keyChar.PositionX = ddx * (keyChar.PositionY - lastY) / ddy + lastX;
-                                keyChar.PositionZ = ddz * (keyChar.PositionY - lastY) / ddy + lastZ;
-                            }
-                        }
-                    }
-                }
-                if (x == keyChar.PositionX && y == keyChar.PositionY && z == keyChar.PositionZ)
-                {
-                    throw new Exception("No movement");
-                }
-
-                if (keyChar.PositionX == nextPoint.X && keyChar.PositionY == nextPoint.Y &&
-                    keyChar.PositionZ == nextPoint.Z)
-                {
-                    keyChar.LastPoint = (ushort)nextPointId;
-                }
+                break;
             }
         }
         #endregion
