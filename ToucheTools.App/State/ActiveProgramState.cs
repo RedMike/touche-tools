@@ -58,6 +58,7 @@ public class ActiveProgramState
         public int Anim2Count { get; set; }
         public int Anim3Start { get; set; }
         public int Anim3Count { get; set; }
+        public List<int> QueuedAnimations { get; set; }
         #endregion
         
         #region Position
@@ -95,6 +96,7 @@ public class ActiveProgramState
             Anim2Start = 0;
             Anim3Count = 1;
             Anim3Start = 0;
+            QueuedAnimations = new List<int>();
             LastPoint = null;
             IsFollowing = false;
             IsSelectable = false;
@@ -147,6 +149,7 @@ public class ActiveProgramState
 
         public List<Script> Scripts { get; set; } = new List<Script>();
         public List<Script> ScriptsForCurrentTick { get; set; } = new List<Script>();
+        public int TickCounter { get; set; }
 
         public Script? GetKeyCharScript(int keyCharId)
         {
@@ -169,7 +172,7 @@ public class ActiveProgramState
 
         public Script? GetNextScript()
         {
-            return ScriptsForCurrentTick.FirstOrDefault(s => s.Status == ScriptStatus.Ready);
+            return ScriptsForCurrentTick.FirstOrDefault(s => s.Status == ScriptStatus.Ready || s.Status == ScriptStatus.Paused);
         }
 
         public void MarkScriptAsDoneInCurrentTick(Script s)
@@ -179,14 +182,15 @@ public class ActiveProgramState
 
         public void TickDone()
         {
-            if (ScriptsForCurrentTick
-                    .Count(s => s.Status != ScriptStatus.Stopped && 
-                                s.Status != ScriptStatus.NotInit) != 0)
-            {
-                throw new Exception("Scripts not all done in tick");
-            }
+            // if (ScriptsForCurrentTick
+            //         .Count(s => s.Status != ScriptStatus.Stopped && 
+            //                     s.Status != ScriptStatus.NotInit) != 0)
+            // {
+            //     throw new Exception("Scripts not all done in tick");
+            // }
 
             ScriptsForCurrentTick = Scripts.ToList();
+            TickCounter++;
         }
         #endregion
 
@@ -291,7 +295,7 @@ public class ActiveProgramState
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 50;
+    private const int MinimumTimeBetweenTicksInMillis = 37;
     
     #region Talk Entries
     public class TalkEntry
@@ -367,7 +371,8 @@ public class ActiveProgramState
         return KeyChars[id];
     }
     #endregion
-    
+
+    private int TickCounter = 0;
     public void Tick()
     {
         if (!AutoPlay)
@@ -376,11 +381,20 @@ public class ActiveProgramState
         }
 
         var now = DateTime.UtcNow;
+        
         if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
         {
-            _lastTick = now;
-            //Step(); //debug way
-            StepUntilPaused(); //correct way
+            if (CurrentState.TickCounter != TickCounter || !CurrentState.AreScriptsRemainingInCurrentTick())
+            {
+                TickCounter = CurrentState.TickCounter;
+                _lastTick = now;
+                
+                StepUntilPaused(true);
+            }
+            else
+            {
+                StepUntilPaused(false);
+            }
         }
     }
 
@@ -889,7 +903,7 @@ public class ActiveProgramState
                     else
                     {
                         //expecting talk to remove it
-                        if (TalkEntries.All(t => t.OtherKeyChar != script.Id))
+                        if (script.Id != CurrentKeyChar && TalkEntries.All(t => t.OtherKeyChar != script.Id))
                         {
                             throw new Exception("Pause waiting for talk with no talk scripts");
                         }
@@ -1092,9 +1106,11 @@ public class ActiveProgramState
                             {
                                 animStart = keyChar.Anim1Start;
                                 animCount = keyChar.Anim1Count;
-                            } else if (false) //TODO: framesListCount random then stop?
+                            } else if (keyChar.QueuedAnimations.Any())
                             {
-                                //animStart is looked up in a list of 16?
+                                var nextQueuedAnimation = keyChar.QueuedAnimations[0];
+                                keyChar.QueuedAnimations.RemoveAt(0);
+                                animStart = nextQueuedAnimation;
                                 animCount = 0;
                             }
                             else
@@ -1142,15 +1158,15 @@ public class ActiveProgramState
         }
     }
 
-    public void StepUntilPaused()
+    public void StepUntilPaused(bool allowGameTick = true)
     {
-        while (!Step())
+        while (!Step(allowGameTick))
         {
             
         }
     }
 
-    public bool Step()
+    public bool Step(bool allowGameTick = true)
     {
         if (CurrentState.QueuedProgram != null)
         {
@@ -1161,44 +1177,50 @@ public class ActiveProgramState
             return true;
         }
         
-        if (!CurrentState.AreScriptsRemainingInCurrentTick())
-        {
-            CurrentState.TickDone();
-        }
-
         //if we're in the middle fo running a script, just run it
         var currentScript = CurrentState.GetRunningScript();
+        bool ret = false;
         if (currentScript != null)
         {
-            var ret = RunStep();
+            ret = RunStep();
             if (currentScript.Status != ProgramState.ScriptStatus.Running)
             {
                 CurrentState.MarkScriptAsDoneInCurrentTick(currentScript);
             }
-            return ret;
+        }
+        else
+        {
+            var nextScript = CurrentState.GetNextScript();
+            if (nextScript != null)
+            {
+                if (nextScript.Type != ProgramState.ScriptType.KeyChar)
+                {
+                    throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
+                }
+
+                if (nextScript.Status == ProgramState.ScriptStatus.Ready)
+                {
+                    nextScript.Status = ProgramState.ScriptStatus.Running;
+                }
+
+                CurrentState.MarkScriptAsDoneInCurrentTick(nextScript);
+            }
         }
 
-        OnGameTick();
-        OnGraphicalUpdate();
-        
-        var nextScript = CurrentState.GetNextScript();
-        if (nextScript == null)
+        if (!CurrentState.AreScriptsRemainingInCurrentTick())
         {
-            // if (CurrentState.Scripts.All(s => s.Status != ProgramState.ScriptStatus.Paused && s.Status != ProgramState.ScriptStatus.Ready))
-            // {
-            //     throw new Exception("All scripts in non-paused state");
-            // }
-        
-            //no script ready
-            return true;
+            if (allowGameTick)
+            {
+                OnGameTick();
+                OnGraphicalUpdate();
+                CurrentState.TickDone();
+            }
+            else
+            {
+                return true;
+            }
         }
-        if (nextScript.Type != ProgramState.ScriptType.KeyChar)
-        {
-            throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
-        }
-
-        nextScript.Status = ProgramState.ScriptStatus.Running;
-        return false;
+        return ret;
     }
     
     public bool RunStep()
@@ -1310,7 +1332,18 @@ public class ActiveProgramState
                 keyChar.Anim3Count = setCharFrame.Val3;
             } else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.RandomCountThenStop) //1
             {
-                _log.Error("Unknown transition type " + setCharFrame.TransitionType.ToString("G"));
+                var rnd = new Random();
+                int v = setCharFrame.Val3;
+                if (setCharFrame.Val3 != 0)
+                {
+                    v = rnd.Next(0, v);
+                }
+
+                keyChar.QueuedAnimations.Add(v + setCharFrame.Val2);
+                if (keyChar.QueuedAnimations.Count > 15)
+                {
+                    throw new Exception("Too many queued animations");
+                }
             }
             else if (setCharFrame.TransitionType == SetCharFrameInstruction.Type.TalkFrames) //2
             {

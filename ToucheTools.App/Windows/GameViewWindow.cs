@@ -321,7 +321,7 @@ public class GameViewWindow : BaseWindow
                 continue;
             }
 
-            if (keyChar.LastWalk != null)
+            if (keyChar.LastWalk != null && keyChar.LastWalk.Value < program.Walks.Count)
             {
                 var walk = program.Walks[keyChar.LastWalk.Value];
                 var clipRect = program.Rects[walk.ClipRect];
@@ -466,7 +466,7 @@ public class GameViewWindow : BaseWindow
             // ImGui.Text(text);
             
             
-            if (keyChar.LastWalk != null)
+            if (keyChar.LastWalk != null && keyChar.LastWalk.Value < program.Walks.Count)
             {
                 ImGui.PopClipRect();
             }
