@@ -37,6 +37,7 @@ public static class Flags
         
         LastAsciiKeyPress = 600,
         FadePaletteScaleIncrement = 603,
+        DisableWalkAreaRedraw = 604,
         FadePaletteScale = 605,
         DisableInventoryDraw = 606,
         FadePaletteFirstColour = 607,
