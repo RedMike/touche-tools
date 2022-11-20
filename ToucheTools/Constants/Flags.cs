@@ -4,7 +4,7 @@ public static class Flags
 {
     public enum Known
     {
-        StartedEpisode = 0,
+        StartedEpisodeFlag = 0,
         
         CurrentKeyChar = 104,
         KeepPaletteOnRoomLoad = 115,
