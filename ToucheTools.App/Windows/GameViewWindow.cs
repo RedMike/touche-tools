@@ -31,6 +31,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugAreaRects = ShowDebug && true;
     private const bool ShowDebugBackgroundRects = ShowDebug && true;
     private const bool ShowDebugPointRects = ShowDebug && true;
+    private const bool ShowDebugWalkRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -184,25 +185,16 @@ public class GameViewWindow : BaseWindow
 
                     var x = ox - offsetX;
                     var y = oy - offsetY;
-                
-                    var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H);
 
-                    var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, area.Rect.W, area.Rect.H, areaBytes);
+                    RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette,
+                        x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
 
-                    ImGui.SetCursorPos(offset + new Vector2(x, y));
-                    ImGui.Image(roomAreaTexture, new Vector2(area.Rect.W, area.Rect.H));
-
-
-                    var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
-                        (255, 255, 0, 50), (255, 255, 255, 150));
-                    ImGui.SetCursorPos(offset + new Vector2(x, y));
-                    ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
-                    
-                    var text = $"Walk {keyCharId} 1 ({area.Id})";
-                    var textSize = ImGui.CalcTextSize(text);
-                    ImGui.SetCursorPos(offset +
-                                       new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
-                    ImGui.Text(text);
+                    if (ShowDebugWalkRects)
+                    {
+                        RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, 
+                            $"Walk {keyCharId} 1 ({area.Id})", 1, 
+                            255, 255, 0, 50, 255, 255, 255, 150);
+                    }
                 }
             }
             if (walk.Area2 != 0)
@@ -214,25 +206,16 @@ public class GameViewWindow : BaseWindow
 
                     var x = ox - offsetX;
                     var y = oy - offsetY;
-                
-                    var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H);
 
-                    var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, area.Rect.W, area.Rect.H, areaBytes);
+                    RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette,
+                        x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
 
-                    ImGui.SetCursorPos(offset + new Vector2(x, y));
-                    ImGui.Image(roomAreaTexture, new Vector2(area.Rect.W, area.Rect.H));
-
-
-                    var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
-                        (255, 255, 0, 50), (255, 255, 255, 150));
-                    ImGui.SetCursorPos(offset + new Vector2(x, y));
-                    ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
-                    
-                    var text = $"Walk {keyCharId} 2 ({area.Id})";
-                    var textSize = ImGui.CalcTextSize(text);
-                    ImGui.SetCursorPos(offset +
-                                       new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
-                    ImGui.Text(text);
+                    if (ShowDebugWalkRects)
+                    {
+                        RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, 
+                            $"Walk {keyCharId} 2 ({area.Id})", 1, 
+                            255, 255, 0, 50, 255, 255, 255, 150);
+                    }
                 }
             }
         }
