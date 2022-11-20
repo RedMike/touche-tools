@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.Services;
 using ToucheTools.App.State;
@@ -12,11 +13,12 @@ public class GameViewWindow : BaseWindow
 {
     private const bool ShowDebug = true;
     private const bool ShowDebugAreaRects = ShowDebug && true;
-    private const bool ShowDebugBackgroundRects = ShowDebug && false;
-    private const bool ShowDebugPointRects = ShowDebug && false;
-    private const bool ShowDebugWalkRects = ShowDebug && false;
-    private const bool ShowDebugTalkRects = ShowDebug && false;
-    private const bool ShowDebugKeyCharRects = ShowDebug && false;
+    private const bool ShowDebugBackgroundRects = ShowDebug && true;
+    private const bool ShowDebugPointRects = ShowDebug && true;
+    private const bool ShowDebugWalkRects = ShowDebug && true;
+    private const bool ShowDebugTalkRects = ShowDebug && true;
+    private const bool ShowDebugKeyCharRects = ShowDebug && true;
+    private const bool ShowDebugRoomSpriteRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -52,10 +54,11 @@ public class GameViewWindow : BaseWindow
         ImGui.Begin("Game View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         RenderRoom(offset);
-        RenderActiveAreas(offset); //after background areas
+        RenderActiveAreas(offset); //after background
         RenderKeyChars(offset);
         RenderActiveWalkAreas(offset); //after key chars
         
+        RenderRoomSprites(offset); //after background and active areas
         RenderBackgroundActiveAreas(offset); //after key chars and areas
 
         RenderPointsDebug(offset);
@@ -83,6 +86,30 @@ public class GameViewWindow : BaseWindow
 
                 aIdx++;
             }
+        }
+    }
+
+    private void RenderRoomSprites(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        
+        ushort idx = 0;
+        foreach (var (spriteId, x, y) in _activeProgramState.CurrentState.ActiveRoomSprites)
+        {
+            var (ox, oy) = (x - offsetX, y - offsetY);
+            DrawEntireSpriteSheet(offset, ox, oy, spriteId);
+            var sprite = _model.Sprites[spriteId].Value;
+
+            if (ShowDebugRoomSpriteRects)
+            {
+                RenderRectangle(offset, sprite.Width, sprite.Height, ox, oy, $"Room Sprite {idx}", 1,
+                    0, 0, 255, 50, 255, 255, 255, 150);
+            }
+            idx++;
         }
     }
     
@@ -291,10 +318,8 @@ public class GameViewWindow : BaseWindow
         {
             return;
         }
-        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
                      .OrderBy(k => k.Value.PositionZ))
         {
@@ -330,7 +355,6 @@ public class GameViewWindow : BaseWindow
         {
             throw new Exception("Room not loaded");
         }
-        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
@@ -382,15 +406,7 @@ public class GameViewWindow : BaseWindow
                 true);
         }
 
-        var sprite = _model.Sprites[spriteNum.Value].Value;
-        var palette = _model.Palettes[activeRoom];
-
-        var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum.Value, sprite, activeRoom, palette);
-        var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, viewId, sprite.Width, sprite.Height, bytes);
-
-        var sequence = _model.Sequences[sequenceNum.Value];
-        var ch = sequence.Characters[keyChar.Character.Value];
-
+        var ch = _model.Sequences[sequenceNum.Value].Characters[character];
         var animId = keyChar.CurrentAnim;
         if (!ch.Animations.ContainsKey(animId))
         {
@@ -411,67 +427,7 @@ public class GameViewWindow : BaseWindow
             throw new Exception($"Could not find current frame: {frameId}");
         }
 
-        var frame = dir.Frames[frameId];
-
-        var spritePosition = offset + new Vector2(x, y);
-        var lowX = 0;
-        var lowY = 0;
-        var highX = 0;
-        var highY = 0;
-        foreach (var part in frame.Parts)
-        {
-            var (frameIndex, destX, destY, hFlip, vFlip) = (part.FrameIndex, part.DestX, part.DestY,
-                part.HFlipped, part.VFlipped);
-            if (destX < lowX)
-            {
-                lowX = destX;
-            }
-
-            if (destY < lowY)
-            {
-                lowY = destY;
-            }
-
-            if (destX + sprite.SpriteWidth > highX)
-            {
-                highX = destX + sprite.SpriteWidth;
-            }
-
-            if (destY + sprite.SpriteHeight > highY)
-            {
-                highY = destY + sprite.SpriteHeight;
-            }
-
-            var tileWidthRatio = (float)sprite.SpriteWidth / sprite.Width;
-            var tileHeightRatio = (float)sprite.SpriteHeight / sprite.Height;
-            var tilesPerRow = (int)Math.Floor((float)sprite.Width / sprite.SpriteWidth);
-            var tileX = frameIndex % tilesPerRow;
-            var tileY = (int)Math.Floor((float)frameIndex / tilesPerRow);
-            var spriteUv1 = new Vector2(tileX * tileWidthRatio, tileY * tileHeightRatio);
-            var spriteUv2 = new Vector2((tileX + 1) * tileWidthRatio, (tileY + 1) * tileHeightRatio);
-            if (hFlip)
-            {
-                (spriteUv1.X, spriteUv2.X) = (spriteUv2.X, spriteUv1.X);
-            }
-
-            if (vFlip)
-            {
-                (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
-            }
-
-            var dirX = 0;
-            if (dirId == 3)
-            {
-                dirX = -sprite.SpriteWidth;
-            }
-
-            ImGui.SetCursorPos(spritePosition + new Vector2(dirX + destX, destY) * zFactor);
-            ImGui.Image(spriteTexture, new Vector2(sprite.SpriteWidth, sprite.SpriteHeight) * zFactor, spriteUv1,
-                spriteUv2);
-        }
-
-        var width = highX - lowX;
-        var height = highY - lowY;
+        DrawSpriteImage(offset, x, y, spriteNum.Value, sequenceNum.Value, character, animId, dirId, frameId, zFactor, out var width, out var height);
 
         if (ShowDebugKeyCharRects)
         {
@@ -535,6 +491,108 @@ public class GameViewWindow : BaseWindow
             RenderRectangle(offset, area.Rect.W, area.Rect.H, ox, oy, message, 1,
                 255, 255, 0, 50, 255, 255, 255, 150);
         }
+    }
+
+    private void DrawEntireSpriteSheet(Vector2 offset, int x, int y, int spriteNum)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            throw new Exception("Room not loaded");
+        }
+        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
+        var sprite = _model.Sprites[spriteNum].Value;
+        var palette = _model.Palettes[activeRoom];
+
+        var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum, sprite, activeRoom, palette);
+        var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, viewId, sprite.Width, sprite.Height, bytes);
+        var spritePosition = offset + new Vector2(x, y);
+        
+        ImGui.SetCursorPos(spritePosition);
+        ImGui.Image(spriteTexture, new Vector2(sprite.Width, sprite.Height));
+    }
+    
+    private void DrawSpriteImage(Vector2 offset, int x, int y, 
+        int spriteNum, int sequenceNum, int charId, 
+        int animId, int dirId, int frameId,
+        float zFactor, 
+        out int width, out int height)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            throw new Exception("Room not loaded");
+        }
+        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
+        var sprite = _model.Sprites[spriteNum].Value;
+        var palette = _model.Palettes[activeRoom];
+
+        var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum, sprite, activeRoom, palette);
+        var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, viewId, sprite.Width, sprite.Height, bytes);
+
+        var sequence = _model.Sequences[sequenceNum];
+        var ch = sequence.Characters[charId];
+        var anim = ch.Animations[animId];
+        var dir = anim.Directions[dirId];
+        var frame = dir.Frames[frameId];
+
+        var spritePosition = offset + new Vector2(x, y);
+        var lowX = 0;
+        var lowY = 0;
+        var highX = 0;
+        var highY = 0;
+        foreach (var part in frame.Parts)
+        {
+            var (frameIndex, destX, destY, hFlip, vFlip) = (part.FrameIndex, part.DestX, part.DestY,
+                part.HFlipped, part.VFlipped);
+            if (destX < lowX)
+            {
+                lowX = destX;
+            }
+
+            if (destY < lowY)
+            {
+                lowY = destY;
+            }
+
+            if (destX + sprite.SpriteWidth > highX)
+            {
+                highX = destX + sprite.SpriteWidth;
+            }
+
+            if (destY + sprite.SpriteHeight > highY)
+            {
+                highY = destY + sprite.SpriteHeight;
+            }
+
+            var tileWidthRatio = (float)sprite.SpriteWidth / sprite.Width;
+            var tileHeightRatio = (float)sprite.SpriteHeight / sprite.Height;
+            var tilesPerRow = (int)Math.Floor((float)sprite.Width / sprite.SpriteWidth);
+            var tileX = frameIndex % tilesPerRow;
+            var tileY = (int)Math.Floor((float)frameIndex / tilesPerRow);
+            var spriteUv1 = new Vector2(tileX * tileWidthRatio, tileY * tileHeightRatio);
+            var spriteUv2 = new Vector2((tileX + 1) * tileWidthRatio, (tileY + 1) * tileHeightRatio);
+            if (hFlip)
+            {
+                (spriteUv1.X, spriteUv2.X) = (spriteUv2.X, spriteUv1.X);
+            }
+
+            if (vFlip)
+            {
+                (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
+            }
+
+            var dirX = 0;
+            if (dirId == 3)
+            {
+                dirX = -sprite.SpriteWidth;
+            }
+
+            ImGui.SetCursorPos(spritePosition + new Vector2(dirX + destX, destY) * zFactor);
+            ImGui.Image(spriteTexture, new Vector2(sprite.SpriteWidth, sprite.SpriteHeight) * zFactor, spriteUv1,
+                spriteUv2);
+        }
+
+        width = highX - lowX;
+        height = highY - lowY;
     }
     
     private void RenderRoomImageSubsection(Vector2 offset, int x, int y, int srcX, int srcY, int w, int h, bool transparency)

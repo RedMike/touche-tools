@@ -195,13 +195,11 @@ public class ActiveProgramState
         #endregion
 
         #region Room Areas
-
-        public enum AreaState
-        {
-            Static = 0,
-            
-        }
         public Dictionary<int, ProgramDataModel.AreaState> ActiveRoomAreas { get; set; } = new Dictionary<int, ProgramDataModel.AreaState>();
+        #endregion
+        
+        #region Room Sprites
+        public List<(int, int, int)> ActiveRoomSprites { get; set; } = new List<(int, int, int)>();
         #endregion
         
         public int CurrentProgram { get; set; } = 0;
@@ -1368,6 +1366,7 @@ public class ActiveProgramState
             LoadedSprites[6].SequenceNum = null;
             CurrentState.ActiveRoomAreas = new Dictionary<int, ProgramDataModel.AreaState>();
             CurrentState.BackgroundOffsets = new Dictionary<ushort, (int, int)>();
+            CurrentState.ActiveRoomSprites = new List<(int, int, int)>();
         } else if (instruction is SetCharFrameInstruction setCharFrame)
         {
             var keyChar = GetKeyChar(setCharFrame.Character);
@@ -1638,12 +1637,27 @@ public class ActiveProgramState
             var val = CurrentState.StackValue;
             CurrentState.MoveStackPointerForwards();
             CurrentState.SetStackValue((short)(CurrentState.StackValue + val));
+        } else if (instruction is SubInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            CurrentState.SetStackValue((short)(CurrentState.StackValue - val));
         } else if (instruction is TestEqualsInstruction)
         {
             var val = CurrentState.StackValue;
             CurrentState.MoveStackPointerForwards();
             short newVal = 0;
             if (val == CurrentState.StackValue)
+            {
+                newVal = -1;
+            }
+            CurrentState.SetStackValue(newVal);
+        } else if (instruction is TestLowerInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            short newVal = 0;
+            if (val < CurrentState.StackValue)
             {
                 newVal = -1;
             }
@@ -1742,6 +1756,14 @@ public class ActiveProgramState
             }
 
             CurrentState.ActiveRoomAreas[areaId] = area.InitialState;
+        } else if (instruction is DrawSpriteOnBackdropInstruction drawSpriteOnBackdrop)
+        {
+            var spriteId = drawSpriteOnBackdrop.Num;
+            if (!_model.Sprites.ContainsKey(spriteId))
+            {
+                throw new Exception("Unknown sprite referenced");
+            }
+            CurrentState.ActiveRoomSprites.Add((spriteId, drawSpriteOnBackdrop.X, drawSpriteOnBackdrop.Y));
         }
         else
         {
