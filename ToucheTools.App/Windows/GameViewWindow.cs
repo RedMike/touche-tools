@@ -335,16 +335,8 @@ public class GameViewWindow : BaseWindow
         RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, area.SrcX, area.SrcY,
             area.Rect.W, area.Rect.H, true);
 
-        var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
-            (255, 255, 0, 50), (255, 255, 255, 150));
-        ImGui.SetCursorPos(offset + new Vector2(x, y));
-        ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
-
-        var text = $"Area {aIdx} ({area.Id})";
-        var textSize = ImGui.CalcTextSize(text);
-        ImGui.SetCursorPos(offset +
-                           new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
-        ImGui.Text(text);
+        RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, $"Area {aIdx} ({area.Id})", 1,
+            255, 255, 0, 50, 255, 255, 255, 150);
     }
 
     
@@ -564,6 +556,21 @@ public class GameViewWindow : BaseWindow
 
         ImGui.SetCursorPos(offset + new Vector2(x, y));
         ImGui.Image(roomAreaTexture, new Vector2(w, h));
+    }
+
+    private void RenderRectangle(Vector2 offset, int w, int h, int x, int y, string message, 
+        int borderWidth,
+        byte fillR, byte fillG, byte fillB, byte fillA, 
+        byte borderR, byte borderG, byte borderB, byte borderA)
+    {
+        var roomAreaRectTexture = _render.RenderRectangle(borderWidth, w, h,
+            (fillR, fillG, fillB, fillA), (borderR, borderG, borderB, borderA));
+        ImGui.SetCursorPos(offset + new Vector2(x, y));
+        ImGui.Image(roomAreaRectTexture, new Vector2(w, h));
+
+        var textSize = ImGui.CalcTextSize(message);
+        ImGui.SetCursorPos(offset + new Vector2(x + w - textSize.X - 2, y + h - textSize.Y - 2));
+        ImGui.Text(message);
     }
 #endregion
 }
