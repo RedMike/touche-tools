@@ -74,32 +74,17 @@ public class GameViewWindow : BaseWindow
         {
             return;
         }
+
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-        var offsetX = _activeProgramState.GetFlag(Flags.Known.RoomScrollX);
-        var offsetY = _activeProgramState.GetFlag(Flags.Known.RoomScrollY);
-        if (_activeProgramState.GetFlag(Flags.Known.DisableRoomScroll) != 0)
-        {
-            offsetX = 0;
-            offsetY = 0;
-        }
-        var w = Constants.GameScreenWidth;
-        var h = Constants.RoomHeight;
-        if (_activeProgramState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
-        {
-            h = Constants.GameScreenHeight;
-        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        var (w, h) = GetGameScreenSize();
 
         var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
         var roomImage = _model.RoomImages[roomImageId].Value;
         var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
 
-        var (viewId, bytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, offsetX, offsetY, w, h, false);
-
-        var roomFullTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, w, h, bytes);
-
-        ImGui.SetCursorPos(offset + new Vector2(0.0f, 0.0f));
-        ImGui.Image(roomFullTexture, new Vector2(w, h));
+        RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, 0, 0, offsetX, offsetY, w, h, false);
 
         #region Areas
         ushort aIdx = 0;
@@ -107,30 +92,7 @@ public class GameViewWindow : BaseWindow
         {
             foreach (var area in program.Areas.Where(a => a.Id == areaId))
             {
-                var ox = area.Rect.X;
-                var oy = area.Rect.Y;
-
-                var x = ox - offsetX;
-                var y = oy - offsetY;
-                
-                var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H);
-
-                var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, area.Rect.W, area.Rect.H, areaBytes);
-
-                ImGui.SetCursorPos(offset + new Vector2(x, y));
-                ImGui.Image(roomAreaTexture, new Vector2(area.Rect.W, area.Rect.H));
-
-
-                // var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
-                //     (255, 255, 0, 50), (255, 255, 255, 150));
-                // ImGui.SetCursorPos(offset + new Vector2(x, y));
-                // ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
-                //
-                // var text = $"Area {aIdx} ({area.Id})";
-                // var textSize = ImGui.CalcTextSize(text);
-                // ImGui.SetCursorPos(offset +
-                //                    new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
-                // ImGui.Text(text);
+                RenderArea(offset, area, offsetX, offsetY, roomImageId, roomImage, activeRoom, palette, aIdx);
 
                 aIdx++;
             }
@@ -361,6 +323,32 @@ public class GameViewWindow : BaseWindow
         #endregion
     }
 
+    private void RenderArea(Vector2 offset, ProgramDataModel.Area area, int roomOffsetX, int roomOffsetY, 
+        int roomImageId, RoomImageDataModel roomImage, int activeRoom, PaletteDataModel palette, ushort aIdx)
+    {
+        var ox = area.Rect.X;
+        var oy = area.Rect.Y;
+
+        var x = ox - roomOffsetX;
+        var y = oy - roomOffsetY;
+
+        RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, area.SrcX, area.SrcY,
+            area.Rect.W, area.Rect.H, true);
+
+        var roomAreaRectTexture = _render.RenderRectangle(1, area.Rect.W, area.Rect.H,
+            (255, 255, 0, 50), (255, 255, 255, 150));
+        ImGui.SetCursorPos(offset + new Vector2(x, y));
+        ImGui.Image(roomAreaRectTexture, new Vector2(area.Rect.W, area.Rect.H));
+
+        var text = $"Area {aIdx} ({area.Id})";
+        var textSize = ImGui.CalcTextSize(text);
+        ImGui.SetCursorPos(offset +
+                           new Vector2(x + area.Rect.W - textSize.X - 2, y + area.Rect.H - textSize.Y - 2));
+        ImGui.Text(text);
+    }
+
+    
+
     private void RenderKeyChars(Vector2 offset)
     {
         var colIdx = 0;
@@ -369,14 +357,8 @@ public class GameViewWindow : BaseWindow
             return;
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-        var offsetX = _activeProgramState.GetFlag(Flags.Known.RoomScrollX);
-        var offsetY = _activeProgramState.GetFlag(Flags.Known.RoomScrollY);
-        if (_activeProgramState.GetFlag(Flags.Known.DisableRoomScroll) != 0)
-        {
-            offsetX = 0;
-            offsetY = 0;
-        }
-
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
                      .OrderBy(k => k.Value.PositionZ))
@@ -541,4 +523,47 @@ public class GameViewWindow : BaseWindow
             }
         }
     }
+    
+#region Generic methods    
+    private (int, int) GetLoadedRoomOffset()
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return (0, 0);
+        }
+        var offsetX = _activeProgramState.GetFlag(Flags.Known.RoomScrollX);
+        var offsetY = _activeProgramState.GetFlag(Flags.Known.RoomScrollY);
+        if (_activeProgramState.GetFlag(Flags.Known.DisableRoomScroll) != 0)
+        {
+            offsetX = 0;
+            offsetY = 0;
+        }
+
+        return (offsetX, offsetY);
+    }
+    
+    private (int, int) GetGameScreenSize()
+    {
+        var w = Constants.GameScreenWidth;
+        var h = Constants.RoomHeight;
+        if (_activeProgramState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
+        {
+            h = Constants.GameScreenHeight;
+        }
+
+        return (w, h);
+    }
+    
+    private void RenderRoomImageSubsection(Vector2 offset, int roomImageId, RoomImageDataModel roomImage,
+        int paletteId, PaletteDataModel palette, int x, int y, int srcX, int srcY, int w, int h, bool transparency)
+    {
+        var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, paletteId, palette,
+            srcX, srcY, w, h, transparency);
+
+        var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, w, h, areaBytes);
+
+        ImGui.SetCursorPos(offset + new Vector2(x, y));
+        ImGui.Image(roomAreaTexture, new Vector2(w, h));
+    }
+#endregion
 }
