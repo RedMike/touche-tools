@@ -79,7 +79,7 @@ public class GameViewWindow : BaseWindow
         {
             foreach (var area in program.Areas.Where(a => a.Id == areaId))
             {
-                RenderArea(offset, area, aIdx);
+                RenderArea(offset, area, $"Area {aIdx} ({area.Id})", ShowDebugAreaRects);
 
                 aIdx++;
             }
@@ -147,45 +147,23 @@ public class GameViewWindow : BaseWindow
             {
                 throw new Exception("Missing last walk somehow");
             }
+            if (keyChar.LastWalk.Value >= program.Walks.Count)
+            {
+                continue;
+            }
             var walk = program.Walks[keyChar.LastWalk.Value];
             if (walk.Area1 != 0)
             {
                 foreach (var area in program.Areas.Where(a => a.Id == walk.Area1))
                 {
-                    var ox = area.Rect.X;
-                    var oy = area.Rect.Y;
-
-                    var x = ox - offsetX;
-                    var y = oy - offsetY;
-
-                    RenderRoomImageSubsection(offset, x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
-
-                    if (ShowDebugWalkRects)
-                    {
-                        RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, 
-                            $"Walk {keyCharId} 1 ({area.Id})", 1, 
-                            255, 255, 0, 50, 255, 255, 255, 150);
-                    }
+                    RenderArea(offset, area, $"Walk {keyCharId} 1 ({area.Id})", ShowDebugWalkRects);
                 }
             }
             if (walk.Area2 != 0)
             {
                 foreach (var area in program.Areas.Where(a => a.Id == walk.Area2))
                 {
-                    var ox = area.Rect.X;
-                    var oy = area.Rect.Y;
-
-                    var x = ox - offsetX;
-                    var y = oy - offsetY;
-
-                    RenderRoomImageSubsection(offset, x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
-
-                    if (ShowDebugWalkRects)
-                    {
-                        RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, 
-                            $"Walk {keyCharId} 2 ({area.Id})", 1, 
-                            255, 255, 0, 50, 255, 255, 255, 150);
-                    }
+                    RenderArea(offset, area, $"Walk {keyCharId} 1 ({area.Id})", ShowDebugWalkRects);
                 }
             }
         }
@@ -306,24 +284,6 @@ public class GameViewWindow : BaseWindow
         RenderRoomImageSubsection(offset, 0, 0, offsetX, offsetY, w, h, false);
     }
 
-    private void RenderArea(Vector2 offset, ProgramDataModel.Area area, ushort aIdx)
-    {
-        if (_activeProgramState.CurrentState.LoadedRoom == null)
-        {
-            throw new Exception("Room not loaded");
-        }
-        var (offsetX, offsetY) = GetLoadedRoomOffset();
-        var (ox, oy) = (area.Rect.X - offsetX, area.Rect.Y - offsetY);
-
-        RenderRoomImageSubsection(offset, ox, oy, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
-
-        if (ShowDebugAreaRects)
-        {
-            RenderRectangle(offset, area.Rect.W, area.Rect.H, ox, oy, $"Area {aIdx} ({area.Id})", 1,
-                255, 255, 0, 50, 255, 255, 255, 150);
-        }
-    }
-    
     private void RenderKeyChars(Vector2 offset)
     {
         var colIdx = 0;
@@ -557,6 +517,24 @@ public class GameViewWindow : BaseWindow
         }
 
         return (w, h);
+    }
+    
+    private void RenderArea(Vector2 offset, ProgramDataModel.Area area, string message, bool renderRect)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            throw new Exception("Room not loaded");
+        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        var (ox, oy) = (area.Rect.X - offsetX, area.Rect.Y - offsetY);
+
+        RenderRoomImageSubsection(offset, ox, oy, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
+
+        if (renderRect)
+        {
+            RenderRectangle(offset, area.Rect.W, area.Rect.H, ox, oy, message, 1,
+                255, 255, 0, 50, 255, 255, 255, 150);
+        }
     }
     
     private void RenderRoomImageSubsection(Vector2 offset, int x, int y, int srcX, int srcY, int w, int h, bool transparency)
