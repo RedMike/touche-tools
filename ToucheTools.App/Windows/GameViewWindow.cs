@@ -68,8 +68,15 @@ public class GameViewWindow : BaseWindow
         ImGui.Begin("Game View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         RenderRoom(offset);
-        RenderActiveAreas(offset);
+        RenderActiveAreas(offset); //after background areas
         RenderKeyChars(offset);
+        RenderActiveWalkAreas(offset); //after key chars
+        
+        RenderBackgroundActiveAreas(offset); //after key chars and areas
+
+        RenderPointsDebug(offset);
+
+        RenderActiveTalkEntries(offset); //last
 
         ImGui.End();
         ImGui.PopStyleVar();
@@ -94,23 +101,16 @@ public class GameViewWindow : BaseWindow
             }
         }
     }
-
-    private void RenderRoom(Vector2 offset)
+    
+    private void RenderBackgroundActiveAreas(Vector2 offset)
     {
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
-
-        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-        var (offsetX, offsetY) = GetLoadedRoomOffset();
-        var (w, h) = GetGameScreenSize();
-
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
-
-        RenderRoomImageSubsection(offset, 0, 0, offsetX, offsetY, w, h, false);
-
-        #region Backgrounds
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        
         ushort idx = 0;
         foreach (var background in program.Backgrounds)
         {
@@ -144,43 +144,25 @@ public class GameViewWindow : BaseWindow
 
             idx++;
         }
-        #endregion
-        
-        #region Points
-        ushort pIdx = 0;
-        foreach (var point in program.Points)
+    }
+    
+    private void RenderActiveWalkAreas(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
-            var ox = point.X;
-            var oy = point.Y;
-            var oz = point.Z;
-
-            var zFactor = Game.GetZFactor(oz);
-            
-            var x = ox - offsetX;
-            var y = oy - offsetY;
-            var pointSize = 40;
-            var pointWidth = (int)(pointSize * zFactor);
-            if (pointWidth < 3)
-            {
-                pointWidth = 3;
-            }
-
-            if (ShowDebugPointRects)
-            {
-                RenderRectangle(offset, pointWidth, pointWidth, x - pointWidth/2, y - pointWidth/2, 
-                    $"P{pIdx}", 1,
-                    255, 255, 255, 50, 255, 255, 255, 150);
-            }
-            
-            pIdx++;
+            return;
         }
-        #endregion
-        
-        #region Walk Areas
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
 
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        
         foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.Where(p =>
                      p.Value.Initialised && !p.Value.OffScreen && p.Value.LastWalk != null))
         {
+            if (keyChar.LastWalk == null)
+            {
+                throw new Exception("Missing last walk somehow");
+            }
             var walk = program.Walks[keyChar.LastWalk.Value];
             if (walk.Area1 != 0)
             {
@@ -223,10 +205,17 @@ public class GameViewWindow : BaseWindow
                 }
             }
         }
-        #endregion
+    }
+
+    private void RenderActiveTalkEntries(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
         
-        
-        #region Talk Entries
         ushort tIdx = 0;
         foreach (var talkEntry in _activeProgramState.TalkEntries)
         {
@@ -280,7 +269,57 @@ public class GameViewWindow : BaseWindow
 
             tIdx++;
         }
-        #endregion
+    }
+
+    private void RenderPointsDebug(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        
+        ushort pIdx = 0;
+        foreach (var point in program.Points)
+        {
+            var ox = point.X;
+            var oy = point.Y;
+            var oz = point.Z;
+
+            var zFactor = Game.GetZFactor(oz);
+            
+            var x = ox - offsetX;
+            var y = oy - offsetY;
+            var pointSize = 40;
+            var pointWidth = (int)(pointSize * zFactor);
+            if (pointWidth < 3)
+            {
+                pointWidth = 3;
+            }
+
+            if (ShowDebugPointRects)
+            {
+                RenderRectangle(offset, pointWidth, pointWidth, x - pointWidth/2, y - pointWidth/2, 
+                    $"P{pIdx}", 1,
+                    255, 255, 255, 50, 255, 255, 255, 150);
+            }
+            
+            pIdx++;
+        }
+    }
+
+    private void RenderRoom(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        var (w, h) = GetGameScreenSize();
+
+        RenderRoomImageSubsection(offset, 0, 0, offsetX, offsetY, w, h, false);
     }
 
     private void RenderArea(Vector2 offset, ProgramDataModel.Area area, ushort aIdx)
