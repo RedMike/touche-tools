@@ -27,6 +27,7 @@ public class GameViewWindow : BaseWindow
         (255, 0, 255),
         (200, 200, 200)
     };
+    private const bool ShowDebug = true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -121,22 +122,14 @@ public class GameViewWindow : BaseWindow
                 var x = ox - offsetX;
                 var y = oy - offsetY;
 
-                var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H);
+                RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H, true);
 
-                var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, background.Rect.W, background.Rect.H, areaBytes);
-
-                ImGui.SetCursorPos(offset + new Vector2(x, y));
-                ImGui.Image(roomAreaTexture, new Vector2(background.Rect.W, background.Rect.H));
-
-                // var roomAreaRectTexture = _render.RenderRectangle(1, background.Rect.W, background.Rect.H,
-                //     (255, 0, 255, 50), (255, 255, 255, 150));
-                // ImGui.SetCursorPos(offset + new Vector2(x, y));
-                // ImGui.Image(roomAreaRectTexture, new Vector2(background.Rect.W, background.Rect.H));
-                //
-                // var text = $"BG Area {idx}";
-                // var textSize = ImGui.CalcTextSize(text);
-                // ImGui.SetCursorPos(offset + new Vector2(x + background.Rect.W - textSize.X - 2, y + background.Rect.H - textSize.Y - 2));
-                // ImGui.Text(text);
+                if (ShowDebug)
+                {
+                    RenderRectangle(offset, background.Rect.W, background.Rect.H, background.Rect.X, background.Rect.Y,
+                        $"BG Area {idx}", 1,
+                        255, 0, 255, 50, 255, 255, 255, 150);
+                }
             }
 
             idx++;
@@ -335,8 +328,11 @@ public class GameViewWindow : BaseWindow
         RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, area.SrcX, area.SrcY,
             area.Rect.W, area.Rect.H, true);
 
-        RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, $"Area {aIdx} ({area.Id})", 1,
-            255, 255, 0, 50, 255, 255, 255, 150);
+        if (ShowDebug)
+        {
+            RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, $"Area {aIdx} ({area.Id})", 1,
+                255, 255, 0, 50, 255, 255, 255, 150);
+        }
     }
 
     
