@@ -294,8 +294,8 @@ public class ActiveProgramState
 
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
-    private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 37;
+    public DateTime _lastTick = DateTime.MinValue;
+    private const int MinimumTimeBetweenTicksInMillis = 50;
     
     #region Talk Entries
     public class TalkEntry
@@ -371,32 +371,6 @@ public class ActiveProgramState
         return KeyChars[id];
     }
     #endregion
-
-    private int TickCounter = 0;
-    public void Tick()
-    {
-        if (!AutoPlay)
-        {
-            return;
-        }
-
-        var now = DateTime.UtcNow;
-        
-        if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
-        {
-            if (CurrentState.TickCounter != TickCounter || !CurrentState.AreScriptsRemainingInCurrentTick())
-            {
-                TickCounter = CurrentState.TickCounter;
-                _lastTick = now;
-                
-                StepUntilPaused(true);
-            }
-            else
-            {
-                StepUntilPaused(false);
-            }
-        }
-    }
 
     private void OnProgramChange()
     {
@@ -1150,6 +1124,36 @@ public class ActiveProgramState
         #endregion
     }
     
+    private int TickCounter = 0;
+    public void Tick()
+    {
+        if (!AutoPlay)
+        {
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        
+        if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
+        {
+            if (CurrentState.TickCounter != TickCounter || !CurrentState.AreScriptsRemainingInCurrentTick())
+            {
+                TickCounter = CurrentState.TickCounter;
+                _lastTick = now;
+                
+                StepUntilPaused(true);
+            }
+            else
+            {
+                StepUntilPaused(false);
+            }
+        }
+        else
+        {
+            StepUntilPaused(false);
+        }
+    }
+    
     private void Update()
     {
         if (CurrentState.CurrentProgram != _program.Active)
@@ -1183,26 +1187,28 @@ public class ActiveProgramState
         if (currentScript != null)
         {
             ret = RunStep();
-            if (currentScript.Status != ProgramState.ScriptStatus.Running)
+            if (ret)
             {
                 CurrentState.MarkScriptAsDoneInCurrentTick(currentScript);
             }
+
+            return ret;
         }
-        else
+        
+        var nextScript = CurrentState.GetNextScript();
+        if (nextScript != null)
         {
-            var nextScript = CurrentState.GetNextScript();
-            if (nextScript != null)
+            if (nextScript.Type != ProgramState.ScriptType.KeyChar)
             {
-                if (nextScript.Type != ProgramState.ScriptType.KeyChar)
-                {
-                    throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
-                }
+                throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
+            }
 
-                if (nextScript.Status == ProgramState.ScriptStatus.Ready)
-                {
-                    nextScript.Status = ProgramState.ScriptStatus.Running;
-                }
-
+            if (nextScript.Status == ProgramState.ScriptStatus.Ready)
+            {
+                nextScript.Status = ProgramState.ScriptStatus.Running;
+            }
+            else
+            {
                 CurrentState.MarkScriptAsDoneInCurrentTick(nextScript);
             }
         }
@@ -1220,7 +1226,8 @@ public class ActiveProgramState
                 return true;
             }
         }
-        return ret;
+
+        return false;
     }
     
     public bool RunStep()
