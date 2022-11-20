@@ -10,30 +10,13 @@ namespace ToucheTools.App.Windows;
 
 public class GameViewWindow : BaseWindow
 {
-    private readonly List<(byte, byte, byte)> _colours = new List<(byte, byte, byte)>()
-    {
-        (150, 70, 20),
-        (70, 150, 20),
-        (20, 70, 150),
-        (150, 20, 150),
-        (20, 20, 70),
-        (20, 20, 20),
-        (150, 250, 250),
-        (250, 250, 50),
-        (255, 0, 0),
-        (0, 255, 0),
-        (0, 0, 255),
-        (50, 255, 150),
-        (255, 0, 255),
-        (200, 200, 200)
-    };
     private const bool ShowDebug = true;
-    private const bool ShowDebugAreaRects = ShowDebug && true;
-    private const bool ShowDebugBackgroundRects = ShowDebug && true;
-    private const bool ShowDebugPointRects = ShowDebug && true;
-    private const bool ShowDebugWalkRects = ShowDebug && true;
-    private const bool ShowDebugTalkRects = ShowDebug && true;
-    private const bool ShowDebugKeyCharRects = ShowDebug && true;
+    private const bool ShowDebugAreaRects = ShowDebug && false;
+    private const bool ShowDebugBackgroundRects = ShowDebug && false;
+    private const bool ShowDebugPointRects = ShowDebug && false;
+    private const bool ShowDebugWalkRects = ShowDebug && false;
+    private const bool ShowDebugTalkRects = ShowDebug && false;
+    private const bool ShowDebugKeyCharRects = ShowDebug && false;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
