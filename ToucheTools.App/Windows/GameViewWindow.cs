@@ -68,10 +68,31 @@ public class GameViewWindow : BaseWindow
         ImGui.Begin("Game View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         RenderRoom(offset);
+        RenderActiveAreas(offset);
         RenderKeyChars(offset);
 
         ImGui.End();
         ImGui.PopStyleVar();
+    }
+
+    private void RenderActiveAreas(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        
+        ushort aIdx = 0;
+        foreach (var areaId in _activeProgramState.CurrentState.ActiveRoomAreas)
+        {
+            foreach (var area in program.Areas.Where(a => a.Id == areaId))
+            {
+                RenderArea(offset, area, aIdx);
+
+                aIdx++;
+            }
+        }
     }
 
     private void RenderRoom(Vector2 offset)
@@ -85,26 +106,10 @@ public class GameViewWindow : BaseWindow
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         var (w, h) = GetGameScreenSize();
 
-        var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
-        var roomImage = _model.RoomImages[roomImageId].Value;
-        var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
 
-        RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, 0, 0, offsetX, offsetY, w, h, false);
+        RenderRoomImageSubsection(offset, 0, 0, offsetX, offsetY, w, h, false);
 
-        #region Areas
-        ushort aIdx = 0;
-        foreach (var areaId in _activeProgramState.CurrentState.ActiveRoomAreas)
-        {
-            foreach (var area in program.Areas.Where(a => a.Id == areaId))
-            {
-                RenderArea(offset, area, offsetX, offsetY, roomImageId, roomImage, activeRoom, palette, aIdx);
-
-                aIdx++;
-            }
-        }
-        #endregion
-        
         #region Backgrounds
         ushort idx = 0;
         foreach (var background in program.Backgrounds)
@@ -127,7 +132,7 @@ public class GameViewWindow : BaseWindow
                 var x = ox - offsetX;
                 var y = oy - offsetY;
 
-                RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H, true);
+                RenderRoomImageSubsection(offset, x, y, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H, true);
 
                 if (ShowDebugBackgroundRects)
                 {
@@ -187,8 +192,7 @@ public class GameViewWindow : BaseWindow
                     var x = ox - offsetX;
                     var y = oy - offsetY;
 
-                    RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette,
-                        x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
+                    RenderRoomImageSubsection(offset, x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
 
                     if (ShowDebugWalkRects)
                     {
@@ -208,8 +212,7 @@ public class GameViewWindow : BaseWindow
                     var x = ox - offsetX;
                     var y = oy - offsetY;
 
-                    RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette,
-                        x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
+                    RenderRoomImageSubsection(offset, x, y, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
 
                     if (ShowDebugWalkRects)
                     {
@@ -258,6 +261,7 @@ public class GameViewWindow : BaseWindow
 
             var col = keyChar.TextColour;
             var col1 = (int)(col & 0xFF);
+            var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
             var paletteCol1 = palette.Colors[col1];
             
             ImGui.SetCursorPos(offset + new Vector2(x, y));
@@ -279,21 +283,20 @@ public class GameViewWindow : BaseWindow
         #endregion
     }
 
-    private void RenderArea(Vector2 offset, ProgramDataModel.Area area, int roomOffsetX, int roomOffsetY, 
-        int roomImageId, RoomImageDataModel roomImage, int activeRoom, PaletteDataModel palette, ushort aIdx)
+    private void RenderArea(Vector2 offset, ProgramDataModel.Area area, ushort aIdx)
     {
-        var ox = area.Rect.X;
-        var oy = area.Rect.Y;
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            throw new Exception("Room not loaded");
+        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        var (ox, oy) = (area.Rect.X - offsetX, area.Rect.Y - offsetY);
 
-        var x = ox - roomOffsetX;
-        var y = oy - roomOffsetY;
-
-        RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, area.SrcX, area.SrcY,
-            area.Rect.W, area.Rect.H, true);
+        RenderRoomImageSubsection(offset, ox, oy, area.SrcX, area.SrcY, area.Rect.W, area.Rect.H, true);
 
         if (ShowDebugAreaRects)
         {
-            RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, $"Area {aIdx} ({area.Id})", 1,
+            RenderRectangle(offset, area.Rect.W, area.Rect.H, ox, oy, $"Area {aIdx} ({area.Id})", 1,
                 255, 255, 0, 50, 255, 255, 255, 150);
         }
     }
@@ -505,10 +508,19 @@ public class GameViewWindow : BaseWindow
         return (w, h);
     }
     
-    private void RenderRoomImageSubsection(Vector2 offset, int roomImageId, RoomImageDataModel roomImage,
-        int paletteId, PaletteDataModel palette, int x, int y, int srcX, int srcY, int w, int h, bool transparency)
+    private void RenderRoomImageSubsection(Vector2 offset, int x, int y, int srcX, int srcY, int w, int h, bool transparency)
     {
-        var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, paletteId, palette,
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            throw new Exception("Room not loaded");
+        }
+        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
+
+        var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
+        var roomImage = _model.RoomImages[roomImageId].Value;
+        var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
+        
+        var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette,
             srcX, srcY, w, h, transparency);
 
         var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, w, h, areaBytes);
