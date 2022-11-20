@@ -386,7 +386,7 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.TableSetupColumn("SX");
             ImGui.TableSetupColumn("SY");
             ImGui.TableHeadersRow();
-            foreach (var areaId in state.RoomAreas)
+            foreach (var areaId in state.ActiveRoomAreas)
             {
                 foreach (var area in program.Areas.Where(a => a.Id == areaId))
                 {

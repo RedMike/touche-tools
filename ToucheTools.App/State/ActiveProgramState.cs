@@ -195,7 +195,7 @@ public class ActiveProgramState
         #endregion
 
         #region Room Areas
-        public List<int> RoomAreas { get; set; } = new List<int>();
+        public List<int> ActiveRoomAreas { get; set; } = new List<int>();
         #endregion
         
         public int CurrentProgram { get; set; } = 0;
@@ -1360,7 +1360,7 @@ public class ActiveProgramState
             LoadedSprites[5].SequenceNum = null;
             LoadedSprites[6].SpriteNum = null;
             LoadedSprites[6].SequenceNum = null;
-            CurrentState.RoomAreas = new List<int>();
+            CurrentState.ActiveRoomAreas = new List<int>();
             CurrentState.BackgroundOffsets = new Dictionary<ushort, (int, int)>();
         } else if (instruction is SetCharFrameInstruction setCharFrame)
         {
@@ -1719,21 +1719,21 @@ public class ActiveProgramState
         } else if (instruction is UpdateRoomAreasInstruction updateRoomAreas)
         {
             var areaId = updateRoomAreas.Area;
-            if (CurrentState.RoomAreas.Count == 199)
+            if (CurrentState.ActiveRoomAreas.Count == 199)
             {
-                CurrentState.RoomAreas = new List<int>();
+                CurrentState.ActiveRoomAreas = new List<int>();
             }
 
-            CurrentState.RoomAreas.Add(areaId);
+            CurrentState.ActiveRoomAreas.Add(areaId);
         } else if (instruction is UpdateRoomInstruction updateRoom)
         {
             var areaId = updateRoom.Area;
-            if (CurrentState.RoomAreas.Count == 199)
+            if (CurrentState.ActiveRoomAreas.Count == 199)
             {
-                CurrentState.RoomAreas = new List<int>();
+                CurrentState.ActiveRoomAreas = new List<int>();
             }
 
-            CurrentState.RoomAreas.Add(areaId);
+            CurrentState.ActiveRoomAreas.Add(areaId);
         }
         else
         {

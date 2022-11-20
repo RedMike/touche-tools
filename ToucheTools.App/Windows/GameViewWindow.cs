@@ -88,7 +88,7 @@ public class GameViewWindow : BaseWindow
 
         #region Areas
         ushort aIdx = 0;
-        foreach (var areaId in _activeProgramState.CurrentState.RoomAreas)
+        foreach (var areaId in _activeProgramState.CurrentState.ActiveRoomAreas)
         {
             foreach (var area in program.Areas.Where(a => a.Id == areaId))
             {
