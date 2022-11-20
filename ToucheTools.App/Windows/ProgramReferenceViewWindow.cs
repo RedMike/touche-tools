@@ -377,7 +377,7 @@ public class ProgramReferenceViewWindow : IWindow
         #region Areas
         if (ImGui.CollapsingHeader($"Areas"))
         {
-            ImGui.BeginTable("areas", 7);
+            ImGui.BeginTable("areas", 8);
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("DX");
             ImGui.TableSetupColumn("DY");
@@ -385,8 +385,9 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.TableSetupColumn("H");
             ImGui.TableSetupColumn("SX");
             ImGui.TableSetupColumn("SY");
+            ImGui.TableSetupColumn("S");
             ImGui.TableHeadersRow();
-            foreach (var areaId in state.ActiveRoomAreas)
+            foreach (var (areaId, areaState) in state.ActiveRoomAreas)
             {
                 foreach (var area in program.Areas.Where(a => a.Id == areaId))
                 {
@@ -407,6 +408,8 @@ public class ProgramReferenceViewWindow : IWindow
                     ImGui.Text($"{area.SrcX}");
                     ImGui.TableNextColumn();
                     ImGui.Text($"{area.SrcY}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{areaState:G}");
                     ImGui.TableNextRow();
                 }
             }

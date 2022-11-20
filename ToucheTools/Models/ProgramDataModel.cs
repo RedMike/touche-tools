@@ -29,13 +29,20 @@ public class ProgramDataModel
         public int Area2 { get; set; }
     }
 
+    public enum AreaState
+    {
+        Static = 0,
+        Animate = 1,
+        AnimateAndSkip = 2
+    }
+
     public class Area
     {
         public Rect Rect { get; set; }
         public int SrcX { get; set; }
         public int SrcY { get; set; }
         public int Id { get; set; }
-        public int InitialState { get; set; }
+        public AreaState InitialState { get; set; }
         public int AnimationCount { get; set; }
         public int AnimationNext { get; set; }
     }

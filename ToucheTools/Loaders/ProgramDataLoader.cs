@@ -233,7 +233,7 @@ public class ProgramDataLoader
                     SrcX = srcX,
                     SrcY = srcY,
                     Id = id,
-                    InitialState = state,
+                    InitialState = (ProgramDataModel.AreaState)state,
                     AnimationCount = animCount,
                     AnimationNext = animNext
                 };

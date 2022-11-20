@@ -11,7 +11,7 @@ namespace ToucheTools.App.Windows;
 public class GameViewWindow : BaseWindow
 {
     private const bool ShowDebug = true;
-    private const bool ShowDebugAreaRects = ShowDebug && false;
+    private const bool ShowDebugAreaRects = ShowDebug && true;
     private const bool ShowDebugBackgroundRects = ShowDebug && false;
     private const bool ShowDebugPointRects = ShowDebug && false;
     private const bool ShowDebugWalkRects = ShowDebug && false;
@@ -75,11 +75,11 @@ public class GameViewWindow : BaseWindow
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         
         ushort aIdx = 0;
-        foreach (var areaId in _activeProgramState.CurrentState.ActiveRoomAreas)
+        foreach (var (areaId, areaState) in _activeProgramState.CurrentState.ActiveRoomAreas)
         {
             foreach (var area in program.Areas.Where(a => a.Id == areaId))
             {
-                RenderArea(offset, area, $"Area {aIdx} ({area.Id})", ShowDebugAreaRects);
+                RenderArea(offset, area, $"Area {aIdx} {areaState:G} ({area.Id})", ShowDebugAreaRects);
 
                 aIdx++;
             }
