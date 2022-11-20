@@ -28,6 +28,9 @@ public class GameViewWindow : BaseWindow
         (200, 200, 200)
     };
     private const bool ShowDebug = true;
+    private const bool ShowDebugAreaRects = ShowDebug && true;
+    private const bool ShowDebugBackgroundRects = ShowDebug && true;
+    private const bool ShowDebugPointRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -124,7 +127,7 @@ public class GameViewWindow : BaseWindow
 
                 RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H, true);
 
-                if (ShowDebug)
+                if (ShowDebugBackgroundRects)
                 {
                     RenderRectangle(offset, background.Rect.W, background.Rect.H, background.Rect.X, background.Rect.Y,
                         $"BG Area {idx}", 1,
@@ -143,47 +146,24 @@ public class GameViewWindow : BaseWindow
             var ox = point.X;
             var oy = point.Y;
             var oz = point.Z;
-            if (oz < Game.ZDepthMin)
-            {
-                oz = Game.ZDepthMin;
-            }
-            if (oz > Game.ZDepthMax)
-            {
-                oz = Game.ZDepthMax;
-            }
-            var zFactor = 1.0f;
-            if (oz < Game.ZDepthEven)
-            {
-                zFactor = (float)oz / Game.ZDepthEven;
-            }
 
-            if (oz > Game.ZDepthEven)
-            {
-                zFactor = (float)(Game.ZDepthMax - Game.ZDepthEven)/(Game.ZDepthMax - oz);
-            }
-
+            var zFactor = Game.GetZFactor(oz);
+            
             var x = ox - offsetX;
             var y = oy - offsetY;
-            var pointWidth = 25 * zFactor;
-            var pointHeight = 25 * zFactor;
-            if (pointWidth < 1.0f)
+            var pointSize = 40;
+            var pointWidth = (int)(pointSize * zFactor);
+            if (pointWidth < 3)
             {
-                pointWidth = 1.0f;
+                pointWidth = 3;
             }
-            if (pointHeight < 1.0f)
+
+            if (ShowDebugPointRects)
             {
-                pointHeight = 1.0f;
+                RenderRectangle(offset, pointWidth, pointWidth, x - pointWidth/2, y - pointWidth/2, 
+                    $"P{pIdx}", 1,
+                    255, 255, 255, 50, 255, 255, 255, 150);
             }
-            
-            // var pointRectTexture = _render.RenderRectangle(1, (int)(pointWidth), (int)(pointHeight),
-            //     (255, 255, 255, 50), (255, 255, 255, 150));
-            // ImGui.SetCursorPos(offset + new Vector2(x, y));
-            // ImGui.Image(pointRectTexture, new Vector2(pointWidth, pointHeight));
-            //
-            // var text = $"P{pIdx}";
-            // var textSize = ImGui.CalcTextSize(text);
-            // ImGui.SetCursorPos(offset + new Vector2(x + pointWidth - textSize.X - 2, y + pointHeight - textSize.Y - 2));
-            // ImGui.Text(text);
             
             pIdx++;
         }
@@ -328,7 +308,7 @@ public class GameViewWindow : BaseWindow
         RenderRoomImageSubsection(offset, roomImageId, roomImage, activeRoom, palette, x, y, area.SrcX, area.SrcY,
             area.Rect.W, area.Rect.H, true);
 
-        if (ShowDebug)
+        if (ShowDebugAreaRects)
         {
             RenderRectangle(offset, area.Rect.W, area.Rect.H, x, y, $"Area {aIdx} ({area.Id})", 1,
                 255, 255, 0, 50, 255, 255, 255, 150);
