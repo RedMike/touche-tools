@@ -33,6 +33,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugPointRects = ShowDebug && true;
     private const bool ShowDebugWalkRects = ShowDebug && true;
     private const bool ShowDebugTalkRects = ShowDebug && true;
+    private const bool ShowDebugKeyCharRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -339,9 +340,7 @@ public class GameViewWindow : BaseWindow
                 255, 255, 0, 50, 255, 255, 255, 150);
         }
     }
-
     
-
     private void RenderKeyChars(Vector2 offset)
     {
         var colIdx = 0;
@@ -370,10 +369,6 @@ public class GameViewWindow : BaseWindow
                 var walk = program.Walks[keyChar.LastWalk.Value];
                 var clipRect = program.Rects[walk.ClipRect];
                 
-                // var r1 = _render.RenderRectangle(1, clipRect.W, clipRect.H, (255, 0, 0, 50), (255, 255, 255, 150));
-                // ImGui.SetCursorPos(offset + new Vector2(clipRect.X - offsetX , clipRect.Y - offsetY));
-                // ImGui.Image(r1, new Vector2(clipRect.W, clipRect.H));
-
                 var windowOffset = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
                 ImGui.PushClipRect(windowOffset + new Vector2(clipRect.X - offsetX,  clipRect.Y - offsetY),
                     windowOffset + new Vector2(clipRect.X - offsetX + clipRect.W, clipRect.Y - offsetY + clipRect.H), 
@@ -494,22 +489,16 @@ public class GameViewWindow : BaseWindow
             }
 
 
-            // width = (int)Math.Ceiling(width * zFactor);
-            // height = (int)Math.Ceiling(height * zFactor);
-            //
-            // var rectTexture = _render.RenderRectangle(1, width, height, (colR, colG, colB, 50), (255, 255, 255, 150));
-            //
-            // var ox = x - width / 2.0f;
-            // var oy = y - height;
-            // ImGui.SetCursorPos(offset + new Vector2(ox , oy));
-            // ImGui.Image(rectTexture, new Vector2(width, height));
-            //
-            // var text = $"{keyCharId}";
-            // var textSize = ImGui.CalcTextSize(text);
-            // ImGui.SetCursorPos(offset + new Vector2(ox + width - textSize.X - 2, oy + height - textSize.Y - 2));
-            // ImGui.Text(text);
-            
-            
+            if (ShowDebugKeyCharRects)
+            {
+                width = (int)Math.Ceiling(width * zFactor);
+                height = (int)Math.Ceiling(height * zFactor);
+                var ox = (int)(x - width / 2.0f);
+                var oy = y - height;
+                RenderRectangle(offset, width, height, ox, oy, $"{keyCharId}", 1,
+                    0, 0, 255, 50, 255, 255, 255, 150);
+            }
+
             if (keyChar.LastWalk != null && keyChar.LastWalk.Value < program.Walks.Count)
             {
                 ImGui.PopClipRect();
