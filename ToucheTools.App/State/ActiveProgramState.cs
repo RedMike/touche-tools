@@ -292,6 +292,10 @@ public class ActiveProgramState
         }
     }
 
+    public List<int> Breakpoints { get; set; } = new List<int>();
+    public bool BreakpointHit { get; set; } = false;
+    public int LastKnownOffset { get; set; } = -1;
+    
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     public DateTime _lastTick = DateTime.MinValue;
@@ -374,6 +378,10 @@ public class ActiveProgramState
 
     private void OnProgramChange()
     {
+        Breakpoints = new List<int>();
+        BreakpointHit = false;
+        LastKnownOffset = -1;
+        
         for (var i = 0; i < 32; i++)
         {
             if (!KeyChars.ContainsKey(i))
@@ -390,7 +398,6 @@ public class ActiveProgramState
             CurrentProgram = _program.Active,
         };
 
-        Flags[0] = (short)_program.Active;
         //values set from game code
         for (ushort i = 200; i < 300; i++)
         {
@@ -622,7 +629,7 @@ public class ActiveProgramState
                         z = Game.ZDepthMax;
                     }
 
-                    var zFactor = Game.GetZFactor(z);
+                    //var zFactor = Game.GetZFactor(z); //weirdly the walk calculations use a simplified z factor
 
                     var tx = nextPoint.X;
                     var ty = nextPoint.Y;
@@ -637,48 +644,60 @@ public class ActiveProgramState
 
                     var frame = frames[keyChar.CurrentAnimCounter];
 
-                    var dx = 0.0f;
+                    int dx = 0;
                     if (frame.WalkDx != 0)
                     {
-                        dx = -frame.WalkDx * zFactor;
+                        dx = -frame.WalkDx * z / 160;
                         if (keyChar.CurrentDirection == 3)
                         {
                             dx = -dx;
                         }
 
+                        if (dx == 0)
+                        {
+                            dx = 1;
+                        }
                         if (dx < 0)
                         {
-                            dx = Math.Min(dx, -1);
+                            dx = Math.Min(dx, -1); 
                         }
-                        else if (dx > 0)
+                        if (dx > 0)
                         {
                             dx = Math.Max(dx, 1);
                         }
                     }
 
-                    var dy = 0.0f;
+                    int dy = 0;
                     if (frame.WalkDy != 0)
                     {
-                        dy = -frame.WalkDy * zFactor;
+                        dy = -frame.WalkDy * z / 160;
+                        if (dy == 0)
+                        {
+                            dy = 1;
+                        }
                         if (dy < 0)
                         {
                             dy = Math.Min(dy, -1);
                         }
-                        else if (dy > 0)
+                        if (dy > 0)
                         {
                             dy = Math.Max(dy, 1);
                         }
                     }
 
-                    var dz = 0.0f;
+                    int dz = 0;
                     if (frame.WalkDz != 0)
                     {
-                        dz = -frame.WalkDz * zFactor;
+                        dz = -frame.WalkDz * z / 160;
+                        if (dz == 0)
+                        {
+                            dz = 1;
+                        }
                         if (dz < 0)
                         {
                             dz = Math.Min(dz, -1);
                         }
-                        else if (dz > 0)
+                        if (dz > 0)
                         {
                             dz = Math.Max(dz, 1);
                         }
@@ -1132,6 +1151,12 @@ public class ActiveProgramState
             return;
         }
 
+        if (BreakpointHit && AutoPlay)
+        {
+            AutoPlay = false;
+            return;
+        }
+
         var now = DateTime.UtcNow;
         
         if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
@@ -1164,7 +1189,8 @@ public class ActiveProgramState
 
     public void StepUntilPaused(bool allowGameTick = true)
     {
-        while (!Step(allowGameTick))
+        BreakpointHit = false;
+        while (!Step(allowGameTick) && !BreakpointHit)
         {
             
         }
@@ -1172,6 +1198,7 @@ public class ActiveProgramState
 
     public bool Step(bool allowGameTick = true)
     {
+        BreakpointHit = false;
         if (CurrentState.QueuedProgram != null)
         {
             //starting new episode
@@ -1244,6 +1271,14 @@ public class ActiveProgramState
         if (!program.Instructions.ContainsKey(curOffset))
         {
             throw new Exception("Unknown program offset: " + curOffset);
+        }
+
+        var prevLastKnown = LastKnownOffset;
+        LastKnownOffset = curOffset;
+        if (Breakpoints.Contains(curOffset) && curOffset != prevLastKnown)
+        {
+            BreakpointHit = true;
+            return false; //not a game pause, just a breakpoint hit
         }
         
         var instructionOffsets = program.Instructions.Keys.OrderBy(k => k).ToList();
@@ -1670,6 +1705,7 @@ public class ActiveProgramState
                 throw new Exception("Trying to start episode that's already queued");
             }
             CurrentState.QueuedProgram = startEpisode.Num;
+            Flags[0] = (short)startEpisode.Flag;
         } else if (instruction is SetCharFlagsInstruction setCharFlags)
         {
             var keyChar = GetKeyChar(setCharFlags.Character);

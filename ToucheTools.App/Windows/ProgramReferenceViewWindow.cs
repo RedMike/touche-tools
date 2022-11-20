@@ -53,6 +53,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.SameLine();
         if (ImGui.Button(_activeProgramState.AutoPlay ? "Stop Auto" : "Step Auto"))
         {
+            _activeProgramState.BreakpointHit = false;
             _activeProgramState.AutoPlay = !_activeProgramState.AutoPlay;
         }
 

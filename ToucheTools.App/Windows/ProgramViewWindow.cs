@@ -38,21 +38,57 @@ public class ProgramViewWindow : IWindow
         var idx = 0;
         foreach (var (offset, instruction) in _viewSettings.InstructionsView)
         {
-            var currentInstruction = (_activeProgramState.CurrentState?.GetRunningScript()?.Offset ?? -1) == offset;
+            var currentInstruction = (_activeProgramState.LastKnownOffset) == offset;
+            var isBreakpoint = _activeProgramState.Breakpoints.Contains(offset);
             if (currentInstruction)
             {
-                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));
+                if (_activeProgramState.BreakpointHit)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.9f, 0.6f, 0.5f, 1.0f));
+                }
+                else
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.6f, 0.8f, 1.0f));
+                }
+            }
+            else
+            {
+                if (isBreakpoint)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.9f, 0.2f, 0.2f, 1.0f));
+                }
             }
 
             _viewState.OffsetYPos[offset] = ImGui.GetCursorPosY();
             _viewState.OffsetToIndex[offset] = idx;
-            ImGui.Button($"{offset:D5}");
+            if (ImGui.Button($"{offset:D5}"))
+            {
+                if (isBreakpoint)
+                {
+                    _activeProgramState.Breakpoints.RemoveAll(x => x == offset);
+                }
+                else
+                {
+                    _activeProgramState.Breakpoints.Add(offset);
+                }
+            }
             ImGui.SameLine();
             ImGui.Text($" - {instruction}");
             if (currentInstruction)
             {
                 ImGui.PopStyleColor();
-                _viewState.QueueScrollToOffset(offset);
+                if (_activeProgramState.BreakpointHit || _activeProgramState.CurrentState.GetRunningScript()?.Status ==
+                    ActiveProgramState.ProgramState.ScriptStatus.Running)
+                {
+                    _viewState.QueueScrollToOffset(offset);
+                }
+            }
+            else
+            {
+                if (isBreakpoint)
+                {
+                    ImGui.PopStyleColor();
+                }
             }
 
             idx++;
