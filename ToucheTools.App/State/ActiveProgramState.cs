@@ -1501,7 +1501,7 @@ public class ActiveProgramState
                         str = program.Strings[num];
                     }
 
-                    var counter = str.Length / 32 + 20; //from game code
+                    var counter = (int)((str.Length * 16.0f) / 32 + 20); //from game code but with a fixed letter size
                     var keyChar = GetKeyChar(talkingChar);
                     if (keyChar.CurrentAnim != 1)
                     {
