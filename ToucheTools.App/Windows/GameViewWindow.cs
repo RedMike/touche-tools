@@ -32,6 +32,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugBackgroundRects = ShowDebug && true;
     private const bool ShowDebugPointRects = ShowDebug && true;
     private const bool ShowDebugWalkRects = ShowDebug && true;
+    private const bool ShowDebugTalkRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -261,18 +262,17 @@ public class GameViewWindow : BaseWindow
             
             ImGui.SetCursorPos(offset + new Vector2(x, y));
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(paletteCol1.R/255.0f, paletteCol1.G/255.0f, paletteCol1.B/255.0f, 1.0f));
+            ImGui.PushTextWrapPos(tx);
             ImGui.Text(talkEntry.Text);
+            ImGui.PopTextWrapPos();
             ImGui.PopStyleColor();
 
-            // var roomAreaRectTexture = _render.RenderRectangle(1, (int)tx, (int)ty*2,
-            //     (255, 0, 0, 50), (255, 255, 255, 150));
-            // ImGui.SetCursorPos(offset + new Vector2(x, y));
-            // ImGui.Image(roomAreaRectTexture, new Vector2(tx, ty*2));
-            //
-            // var text = $"Text {tIdx}";
-            // var textSize = ImGui.CalcTextSize(text);
-            // ImGui.SetCursorPos(offset + new Vector2(x + tx - textSize.X - 2, y + ty*2 - textSize.Y - 2));
-            // ImGui.Text(text);
+            if (ShowDebugTalkRects)
+            {
+                RenderRectangle(offset, (int)tx, (int)ty * 2, (int)x, (int)y,
+                    $"Text {tIdx}", 1,
+                    255, 0, 0, 50, 255, 255, 255, 150);
+            }
 
             tIdx++;
         }
