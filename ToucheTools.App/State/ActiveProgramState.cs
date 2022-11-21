@@ -448,7 +448,7 @@ public class ActiveProgramState
 
     #region KeyChars
     public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
-    private short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
+    private short CurrentKeyChar { get; set; } = 0;
 
     public KeyChar GetKeyChar(int id)
     {
@@ -585,6 +585,16 @@ public class ActiveProgramState
     private void OnGameTick()
     {
         var program = _model.Programs[_program.Active];
+        
+        #region Random numbers
+        var rndMod = GetFlag(ToucheTools.Constants.Flags.Known.RandomNumberMod);
+        if (rndMod > 0)
+        {
+            var newVal = new Random().Next(0, rndMod);
+            SetFlag(ToucheTools.Constants.Flags.Known.LastRandomNumber, (short)newVal);
+        }
+        #endregion
+        
         #region Walking
         foreach (var (keyCharId, keyChar) in KeyChars)
         {
@@ -1583,14 +1593,18 @@ public class ActiveProgramState
         {
             var val = CurrentState.StackValue;
             SetFlag(setFlag.Flag, val);
-            
-            if (setFlag.Flag == 611 && val != 0)
+
+            if (setFlag.Flag == (short)ToucheTools.Constants.Flags.Known.CurrentKeyChar)
+            {
+                CurrentKeyChar = val;
+            } else  if (setFlag.Flag == (short)ToucheTools.Constants.Flags.Known.QuitGame && val != 0)
             {
                 //TODO: quits game
-            } else if (setFlag.Flag == 612)
+            } else if (setFlag.Flag == (short)ToucheTools.Constants.Flags.Known.RandomNumberMod)
             {
-                var newVal = 999; //TODO: randomly generate
-                SetFlag(setFlag.Flag, (short)newVal);
+                var newVal = new Random().Next(0, val);
+                SetFlag(setFlag.Flag, (short)val);
+                SetFlag(ToucheTools.Constants.Flags.Known.LastRandomNumber, (short)newVal);
             } //TODO: more
         } else if (instruction is SetCharBoxInstruction setCharBox)
         {
