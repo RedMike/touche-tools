@@ -296,13 +296,15 @@ public class ActiveProgramState
         }
     }
 
+    #region Breakpoint/debug
     public List<int> Breakpoints { get; set; } = new List<int>();
     public bool BreakpointHit { get; set; } = false;
     public int LastKnownOffset { get; set; } = -1;
+    #endregion
     
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
-    public DateTime _lastTick = DateTime.MinValue;
+    private DateTime _lastTick = DateTime.MinValue;
     private const int MinimumTimeBetweenTicksInMillis = 50;
     
     #region Talk Entries
@@ -311,7 +313,7 @@ public class ActiveProgramState
         public int TalkingKeyChar { get; set; }
         public int OtherKeyChar { get; set; }
         public int Num { get; set; }
-        public string Text { get; set; }
+        public string Text { get; set; } = "";
         public int Counter { get; set; }
     }
 
@@ -328,14 +330,14 @@ public class ActiveProgramState
     #endregion
     
     #region Inventory
-    public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
-    public short GlobalMoney { get; set; } = 0;
+    private InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
+    private short GlobalMoney { get; set; } = 0;
     #endregion
     
     #region Flags
     public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>();
 
-    public short GetFlag(ushort flag)
+    private short GetFlag(ushort flag)
     {
         if (!Flags.ContainsKey(flag))
         {
@@ -349,12 +351,12 @@ public class ActiveProgramState
         return GetFlag((ushort)known);
     }
 
-    public void SetFlag(ushort flag, short val)
+    private void SetFlag(ushort flag, short val)
     {
         Flags[flag] = val;
     }
 
-    public void SetFlag(Flags.Known known, short val)
+    private void SetFlag(Flags.Known known, short val)
     {
         SetFlag((ushort)known, val);
     }
@@ -362,7 +364,7 @@ public class ActiveProgramState
 
     #region KeyChars
     public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
-    public short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
+    private short CurrentKeyChar => GetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar);
 
     public KeyChar GetKeyChar(int id)
     {
@@ -519,7 +521,6 @@ public class ActiveProgramState
                     }
 
                     var nextPointId = -1;
-                    ProgramDataModel.Point nextPoint;
                     if (keyChar.LastPoint != null && keyChar.TargetPoint == keyChar.LastPoint)
                     {
                         //we're moving back to our last point
@@ -618,7 +619,7 @@ public class ActiveProgramState
                         throw new Exception("No next point");
                     }
 
-                    nextPoint = program.Points[nextPointId];
+                    var nextPoint = program.Points[nextPointId];
 
                     var x = keyChar.PositionX;
                     var y = keyChar.PositionY;
