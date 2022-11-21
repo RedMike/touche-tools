@@ -458,6 +458,30 @@ public class ActiveProgramState
     }
     #endregion
 
+    public string GetString(int num)
+    {
+        var program = _model.Programs[_program.Active];
+        var str = "";
+        if (num < 0)
+        {
+            if (!_model.Text?.Strings.ContainsKey(num) ?? false)
+            {
+                return "";
+            }
+            str = _model.Text?.Strings[-num];
+        }
+        else
+        {
+            if (!program.Strings.ContainsKey(num))
+            {
+                return "";
+            }
+            str = program.Strings[num];
+        }
+
+        return str;
+    }
+    
     private void OnProgramChange()
     {
         Breakpoints = new List<int>();
@@ -1693,23 +1717,7 @@ public class ActiveProgramState
                         }
                     }
 
-                    var str = "";
-                    if (num < 0)
-                    {
-                        if (!_model.Text?.Strings.ContainsKey(num) ?? false)
-                        {
-                            throw new Exception("Missing global string: " + (-num));
-                        }
-                        str = _model.Text?.Strings[-num];
-                    }
-                    else
-                    {
-                        if (!program.Strings.ContainsKey(num))
-                        {
-                            throw new Exception("Missing program string: " + num);
-                        }
-                        str = program.Strings[num];
-                    }
+                    var str = GetString(num);
 
                     var counter = (int)((str.Length * 16.0f) / 32 + 20); //from game code but with a fixed letter size
                     var keyChar = GetKeyChar(talkingChar);

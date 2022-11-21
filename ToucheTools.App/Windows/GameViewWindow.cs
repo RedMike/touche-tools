@@ -10,13 +10,14 @@ namespace ToucheTools.App.Windows;
 
 public class GameViewWindow : BaseWindow
 {
-    private const bool ShowDebug = false;
-    private const bool ShowDebugAreaRects = ShowDebug && true;
-    private const bool ShowDebugBackgroundRects = ShowDebug && true;
-    private const bool ShowDebugPointRects = ShowDebug && true;
-    private const bool ShowDebugWalkRects = ShowDebug && true;
-    private const bool ShowDebugTalkRects = ShowDebug && true;
-    private const bool ShowDebugKeyCharRects = ShowDebug && true;
+    private const bool ShowDebug = true;
+    private const bool ShowDebugAreaRects = ShowDebug && false;
+    private const bool ShowDebugBackgroundRects = ShowDebug && false;
+    private const bool ShowDebugPointRects = ShowDebug && false;
+    private const bool ShowDebugWalkRects = ShowDebug && false;
+    private const bool ShowDebugTalkRects = ShowDebug && false;
+    private const bool ShowDebugKeyCharRects = ShowDebug && false;
+    private const bool ShowDebugHitboxRects = ShowDebug && false;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -58,7 +59,9 @@ public class GameViewWindow : BaseWindow
         RenderBackgroundActiveAreas(offset); //after key chars and areas
 
         RenderPointsDebug(offset);
+        RenderHitboxesDebug(offset);
 
+        RenderHitboxes(offset);
         RenderActiveTalkEntries(offset); //last
 
         ImGui.End();
@@ -224,6 +227,69 @@ public class GameViewWindow : BaseWindow
                 RenderRectangle(offset, pointWidth, pointWidth, x - pointWidth/2, y - pointWidth/2, 
                     $"P{pIdx}", 1,
                     255, 255, 255, 50, 255, 255, 255, 150);
+            }
+            
+            pIdx++;
+        }
+    }
+    
+    private void RenderHitboxesDebug(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        
+        ushort pIdx = 0;
+        foreach (var hitbox in program.Hitboxes)
+        {
+            if (ShowDebugHitboxRects)
+            {
+                if (!hitbox.IsDrawable)
+                {
+                    continue;
+                }
+                var s = _activeProgramState.GetString(hitbox.String);
+
+                var type = "";
+                if (hitbox.IsInventory)
+                {
+                    type += "Inventory ";
+                }
+                if (hitbox.IsOneOff)
+                {
+                    type += "OneOff ";
+                }
+                if (hitbox.IsCharacter)
+                {
+                    type += "Character ";
+                }
+                var msg = $"HB {pIdx} {type}\n{s}";
+                
+                if (hitbox.Rect1.W != 0 && hitbox.Rect1.H != 0)
+                {
+                    RenderRectangle(offset, hitbox.Rect1.W, hitbox.Rect1.H, hitbox.Rect1.X - offsetX,
+                        hitbox.Rect1.Y - offsetY,
+                        msg, 1,
+                        0, 255, 0, 50, 255, 255, 255, 150);
+                }
+
+                if (hitbox.Rect2.W != 0 && hitbox.Rect2.H != 0 &&
+                    (hitbox.Rect1.X != hitbox.Rect2.X || 
+                     hitbox.Rect1.Y != hitbox.Rect2.Y ||
+                     hitbox.Rect1.W != hitbox.Rect2.W ||
+                     hitbox.Rect1.H != hitbox.Rect2.H
+                     )
+                )
+                {
+                    RenderRectangle(offset, hitbox.Rect2.W, hitbox.Rect2.H, hitbox.Rect2.X - offsetX,
+                        hitbox.Rect2.Y - offsetY,
+                        "Click\n" + msg, 1,
+                        255, 0, 255, 50, 255, 255, 255, 150);
+                }
             }
             
             pIdx++;
@@ -400,6 +466,72 @@ public class GameViewWindow : BaseWindow
         if (keyChar.LastWalk != null && keyChar.LastWalk.Value < program.Walks.Count)
         {
             ImGui.PopClipRect();
+        }
+    }
+    
+    private void RenderHitboxes(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+
+        var mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos() - offset + new Vector2(offsetX, offsetY);
+        
+        ushort pIdx = 0;
+        foreach (var hitbox in program.Hitboxes)
+        {
+            if (!hitbox.IsDrawable)
+            {
+                continue;
+            }
+            var s = _activeProgramState.GetString(hitbox.String);
+
+            var type = "";
+            if (hitbox.IsInventory)
+            {
+                type += "Inventory ";
+            }
+            if (hitbox.IsOneOff)
+            {
+                type += "OneOff ";
+            }
+            if (hitbox.IsCharacter)
+            {
+                type += "Character ";
+            }
+            var msg = $"HB {pIdx} {type}\n{s}";
+            
+            if (hitbox.Rect1.W != 0 && hitbox.Rect1.H != 0)
+            {
+                if (mousePos.X >= hitbox.Rect1.X && mousePos.X <= hitbox.Rect1.X + hitbox.Rect1.W &&
+                    mousePos.Y >= hitbox.Rect1.Y && mousePos.Y <= hitbox.Rect1.Y + hitbox.Rect1.H)
+                {
+                    RenderRectangle(offset, hitbox.Rect1.W, hitbox.Rect1.H, hitbox.Rect1.X - offsetX,
+                        hitbox.Rect1.Y - offsetY,
+                        msg, 1,
+                        0, 255, 0, 50, 255, 255, 255, 150);
+                }
+            }
+
+            // if (hitbox.Rect2.W != 0 && hitbox.Rect2.H != 0 &&
+            //     (hitbox.Rect1.X != hitbox.Rect2.X || 
+            //      hitbox.Rect1.Y != hitbox.Rect2.Y ||
+            //      hitbox.Rect1.W != hitbox.Rect2.W ||
+            //      hitbox.Rect1.H != hitbox.Rect2.H
+            //     )
+            //    )
+            // {
+            //     RenderRectangle(offset, hitbox.Rect2.W, hitbox.Rect2.H, hitbox.Rect2.X - offsetX,
+            //         hitbox.Rect2.Y - offsetY,
+            //         "Click\n" + msg, 1,
+            //         255, 0, 255, 50, 255, 255, 255, 150);
+            // }
+            
+            pIdx++;
         }
     }
 

@@ -77,6 +77,11 @@ public class ProgramDataModel
         public int[] Actions { get; set; } //always length 8
         public Rect Rect1 { get; set; }
         public Rect Rect2 { get; set; }
+
+        public bool IsDrawable => (Item & 0x1000) == 0;
+        public bool IsInventory => (Item & 0xF000) == 0x1000;
+        public bool IsOneOff => (Item & 0xF000) == 0x2000;
+        public bool IsCharacter => (Item & 0xF000) == 0x4000;
     }
 
     public class ActionScriptOffset
