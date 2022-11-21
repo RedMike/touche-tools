@@ -9,4 +9,7 @@ public class GameViewState
     public int RightClickCount { get; set; } = 0;
     public bool LeftClicked { get; set; } = false;
     public bool RightClicked { get; set; } = false;
+
+    public Dictionary<int, (int, int, int, int)> KeyCharRenderedRects { get; set; } =
+        new Dictionary<int, (int, int, int, int)>();
 }

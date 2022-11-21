@@ -258,6 +258,7 @@ public class GameViewWindow : BaseWindow
     
     private void RenderHitboxesDebug(Vector2 offset)
     {
+        return;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
@@ -437,12 +438,12 @@ public class GameViewWindow : BaseWindow
 
         DrawSpriteImage(offset, x, y, spriteNum.Value, sequenceNum.Value, character, animId, dirId, frameId, zFactor, out var width, out var height);
 
+        var ox = (int)(x - width / 2.0f);
+        var oy = y - height;
+        width = (int)Math.Ceiling(width * zFactor);
+        height = (int)Math.Ceiling(height * zFactor);
         if (ShowDebugKeyCharRects)
         {
-            width = (int)Math.Ceiling(width * zFactor);
-            height = (int)Math.Ceiling(height * zFactor);
-            var ox = (int)(x - width / 2.0f);
-            var oy = y - height;
             RenderRectangle(offset, width, height, ox, oy, $"{keyCharId}", 1,
                 0, 0, 255, 50, 255, 255, 255, 150);
         }
@@ -451,6 +452,8 @@ public class GameViewWindow : BaseWindow
         {
             ImGui.PopClipRect();
         }
+
+        _viewState.KeyCharRenderedRects[keyCharId] = (ox, oy, width, height);
     }
     
     private void RenderHitboxes(Vector2 offset)
@@ -460,31 +463,56 @@ public class GameViewWindow : BaseWindow
             return;
         }
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
         var mousePos = _viewState.MousePos;
         
         ushort pIdx = 0;
         foreach (var hitbox in program.Hitboxes)
         {
-            // if (!hitbox.IsDrawable)
-            // {
-            //     continue;
-            // }
-            if (hitbox.IsInventory)
+            if (!hitbox.IsDrawable)
             {
                 continue;
             }
-            
-            
-            if (hitbox.Rect1.W != 0 && hitbox.Rect1.H != 0)
+            if (hitbox.IsInventory)
             {
-                if (mousePos.X >= hitbox.Rect1.X && mousePos.X <= hitbox.Rect1.X + hitbox.Rect1.W &&
-                    mousePos.Y >= hitbox.Rect1.Y && mousePos.Y <= hitbox.Rect1.Y + hitbox.Rect1.H)
+                //TODO: check if the inventory item is populated
+                continue;
+            }
+
+            var x = hitbox.Rect1.X;
+            var y = hitbox.Rect1.Y;
+            var w = hitbox.Rect1.W;
+            var h = hitbox.Rect1.H;
+            
+            var s = "";
+            if (hitbox.IsCharacter)
+            {
+                var keyChar = _activeProgramState.GetKeyChar(hitbox.KeyChar);
+                if (keyChar.Initialised)
+                {
+                    //TODO: if keychar had hitbox set change text
+                    (x, y, w, h) = _viewState.KeyCharRenderedRects[hitbox.KeyChar];
+                    x += offsetX;
+                    y += offsetY;
+                }
+            }
+            
+
+            if (w != 0 && h != 0)
+            {
+                if (ShowDebugHitboxRects)
+                {
+                    RenderHitbox(offset, hitbox, pIdx.ToString(), s, x, y, w, h);
+                }
+                
+                if (mousePos.X >= x && mousePos.X <= x + w &&
+                    mousePos.Y >= y && mousePos.Y <= y + h)
                 {
                     if (_viewState.LeftClicked)
                     {
                         _activeProgramState.LeftClicked((int)mousePos.X, (int)mousePos.Y, hitbox.Item);
                     }
-                    RenderHitbox(offset, hitbox, pIdx.ToString());
+                    RenderHitbox(offset, hitbox, pIdx.ToString(), s, x, y, w, h);
                 }
             }
             
@@ -522,11 +550,16 @@ public class GameViewWindow : BaseWindow
         return (w, h);
     }
 
-    private void RenderHitbox(Vector2 offset, ProgramDataModel.Hitbox hitbox, string id)
+    private void RenderHitbox(Vector2 offset, ProgramDataModel.Hitbox hitbox, string id, string str = "", int? x = null, int? y = null, int? w = null, int? h = null)
     {
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
-        var s = _activeProgramState.GetString(hitbox.String);
+        var s = str;
+        if (string.IsNullOrEmpty(str))
+        {
+            s = _activeProgramState.GetString(hitbox.String);
+        }
+
         var clickAso = program.ActionScriptOffsets.Count(aso =>
             aso.Action == -49 && aso.Object1 == hitbox.Item && aso.Object2 == 0) > 0;
 
@@ -535,7 +568,7 @@ public class GameViewWindow : BaseWindow
         {
             type += "Inventory ";
         }
-        if (hitbox.IsOneOff)
+        if (hitbox.IsDisabled)
         {
             type += "OneOff ";
         }
@@ -550,16 +583,21 @@ public class GameViewWindow : BaseWindow
         }
         var msg = $"HB {id}\n{type}\n{s}";
 
-        RenderRectangle(offset, hitbox.Rect1.W, hitbox.Rect1.H, hitbox.Rect1.X - offsetX,
-            hitbox.Rect1.Y - offsetY,
+        x ??= hitbox.Rect1.X;
+        y ??= hitbox.Rect1.Y;
+        w ??= hitbox.Rect1.W;
+        h ??= hitbox.Rect1.H;
+
+        RenderRectangle(offset, w.Value, h.Value, 
+            x.Value - offsetX, y.Value - offsetY,
             "Hover\n" + msg, 1,
             255, 0, 255, 50, 255, 255, 255, 150);
         
         if (hitbox.Rect2.W != 0 && hitbox.Rect2.H != 0 &&
-            (hitbox.Rect1.X != hitbox.Rect2.X || 
-             hitbox.Rect1.Y != hitbox.Rect2.Y ||
-             hitbox.Rect1.W != hitbox.Rect2.W ||
-             hitbox.Rect1.H != hitbox.Rect2.H
+            (x != hitbox.Rect2.X || 
+             y != hitbox.Rect2.Y ||
+             w != hitbox.Rect2.W ||
+             h != hitbox.Rect2.H
             )
            )
         {

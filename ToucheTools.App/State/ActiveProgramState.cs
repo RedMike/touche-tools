@@ -34,8 +34,8 @@ public class ActiveProgramState
     public class KeyChar
     {
         public bool Initialised { get; set; } = false;
-        public bool IsSelectable { get; set; } = false; //unsure?
-        public bool OffScreen { get; set; } = false; //unsure?
+        public bool IsSelectable { get; set; } = false;
+        public bool OffScreen { get; set; } = false;
         public bool IsFollowing { get; set; } = false;
         public uint TextColour { get; set; }
         
@@ -402,7 +402,7 @@ public class ActiveProgramState
     #endregion
     
     #region Inventory
-    private InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
+    public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
     private short GlobalMoney { get; set; } = 0;
     #endregion
     
