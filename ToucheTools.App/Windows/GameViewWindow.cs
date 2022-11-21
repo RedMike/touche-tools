@@ -11,13 +11,13 @@ namespace ToucheTools.App.Windows;
 
 public class GameViewWindow : BaseWindow
 {
-    private const bool ShowDebug = false;
-    private const bool ShowDebugAreaRects = ShowDebug && true;
-    private const bool ShowDebugBackgroundRects = ShowDebug && true;
+    private const bool ShowDebug = true;
+    private const bool ShowDebugAreaRects = ShowDebug && false;
+    private const bool ShowDebugBackgroundRects = ShowDebug && false;
     private const bool ShowDebugPointRects = ShowDebug && true;
     private const bool ShowDebugWalkRects = ShowDebug && true;
-    private const bool ShowDebugTalkRects = ShowDebug && true;
-    private const bool ShowDebugKeyCharRects = ShowDebug && true;
+    private const bool ShowDebugTalkRects = ShowDebug && false;
+    private const bool ShowDebugKeyCharRects = ShowDebug && false;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -55,7 +55,6 @@ public class GameViewWindow : BaseWindow
         RenderRoom(offset);
         RenderActiveAreas(offset); //after background
         RenderKeyChars(offset);
-        RenderActiveWalkAreas(offset); //after key chars
         
         RenderBackgroundActiveAreas(offset); //after key chars and areas
 
@@ -128,45 +127,6 @@ public class GameViewWindow : BaseWindow
             }
 
             idx++;
-        }
-    }
-    
-    private void RenderActiveWalkAreas(Vector2 offset)
-    {
-        if (_activeProgramState.CurrentState.LoadedRoom == null)
-        {
-            return;
-        }
-        var (offsetX, offsetY) = GetLoadedRoomOffset();
-
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
-        
-        foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars.Where(p =>
-                     p.Value.Initialised && !p.Value.OffScreen && p.Value.LastWalk != null))
-        {
-            if (keyChar.LastWalk == null)
-            {
-                throw new Exception("Missing last walk somehow");
-            }
-            if (keyChar.LastWalk.Value >= program.Walks.Count)
-            {
-                continue;
-            }
-            var walk = program.Walks[keyChar.LastWalk.Value];
-            if (walk.Area1 != 0)
-            {
-                foreach (var area in program.Areas.Where(a => a.Id == walk.Area1))
-                {
-                    RenderArea(offset, area, $"Walk {keyCharId} 1 ({area.Id})", ShowDebugWalkRects);
-                }
-            }
-            if (walk.Area2 != 0)
-            {
-                foreach (var area in program.Areas.Where(a => a.Id == walk.Area2))
-                {
-                    RenderArea(offset, area, $"Walk {keyCharId} 1 ({area.Id})", ShowDebugWalkRects);
-                }
-            }
         }
     }
 
@@ -290,6 +250,7 @@ public class GameViewWindow : BaseWindow
         {
             return;
         }
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
         foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
@@ -318,6 +279,32 @@ public class GameViewWindow : BaseWindow
             }
 
             RenderKeyChar(offset, keyCharId, x, y, z);
+
+            //render active walk areas
+            if (keyChar.LastWalk != null)
+            {
+                if (keyChar.LastWalk.Value >= program.Walks.Count)
+                {
+                    continue;
+                }
+
+                var walk = program.Walks[keyChar.LastWalk.Value];
+                if (walk.Area1 != 0)
+                {
+                    foreach (var area in program.Areas.Where(a => a.Id == walk.Area1))
+                    {
+                        RenderArea(offset, area, $"Walk {keyCharId} 1 ({area.Id})", ShowDebugWalkRects);
+                    }
+                }
+
+                if (walk.Area2 != 0)
+                {
+                    foreach (var area in program.Areas.Where(a => a.Id == walk.Area2))
+                    {
+                        RenderArea(offset, area, $"Walk {keyCharId} 1 ({area.Id})", ShowDebugWalkRects);
+                    }
+                }
+            }
         }
     }
 
