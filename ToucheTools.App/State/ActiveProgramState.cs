@@ -384,7 +384,7 @@ public class ActiveProgramState
         rScale = Math.Min(255, Math.Max(0, rScale));
         gScale = Math.Min(255, Math.Max(0, gScale));
         bScale = Math.Min(255, Math.Max(0, bScale));
-        for (var i = fromIdx; i < fromIdx + count; i++)
+        for (var i = fromIdx; i <= fromIdx + count; i++)
         {
             LoadedPaletteScale[i] = (rScale, gScale, bScale);
         }
@@ -1085,15 +1085,15 @@ public class ActiveProgramState
     
     private void OnGraphicalUpdate()
     {
-        #region Random palette update
-        if (GetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette) != 0)
+        #region Fade palette update
+        var increment = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement);
+        if (increment != 0)
         {
             var start = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteFirstColour);
             var count = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteColourCount);
             var scale = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale);
             SetPaletteScale(start, count, scale, scale, scale);
 
-            var increment = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement);
             if (increment > 0)
             {
                 if (scale >= GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMaxScale))
@@ -1927,7 +1927,7 @@ public class ActiveProgramState
             SetPaletteScale(from, count, setPalette.R, setPalette.G, setPalette.B);
         } else if (instruction is StartPaletteFadeInInstruction startPaletteFadeIn)
         {
-            SetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette, 1);
+            SetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteFirstColour, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteColourCount, 255);
@@ -1937,7 +1937,7 @@ public class ActiveProgramState
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement, (short)increment);
         } else if (instruction is StartPaletteFadeOutInstruction startPaletteFadeOut)
         {
-            SetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette, 1);
+            SetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale, 255);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteFirstColour, 0);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteColourCount, 255);
@@ -1959,6 +1959,14 @@ public class ActiveProgramState
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMaxScale, (short)scaleMax);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMinScale, (short)scaleMin);
             SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement, (short)increment);
+        } else if (instruction is StartSoundInstruction)
+        {
+            //nothing to do yet
+        } else if (instruction is SetCharDirectionInstruction setCharDirection)
+        {
+            var keyChar = GetKeyChar(setCharDirection.Character);
+            var dir = setCharDirection.Direction;
+            keyChar.CurrentDirection = dir;
         }
         else
         {

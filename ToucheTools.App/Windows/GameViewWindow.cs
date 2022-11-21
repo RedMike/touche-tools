@@ -11,7 +11,7 @@ namespace ToucheTools.App.Windows;
 
 public class GameViewWindow : BaseWindow
 {
-    private const bool ShowDebug = true;
+    private const bool ShowDebug = false;
     private const bool ShowDebugAreaRects = ShowDebug && true;
     private const bool ShowDebugBackgroundRects = ShowDebug && true;
     private const bool ShowDebugPointRects = ShowDebug && true;
