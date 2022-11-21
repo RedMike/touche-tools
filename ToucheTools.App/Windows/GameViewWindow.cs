@@ -17,7 +17,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugWalkRects = ShowDebug && false;
     private const bool ShowDebugTalkRects = ShowDebug && false;
     private const bool ShowDebugKeyCharRects = ShowDebug && false;
-    private const bool ShowDebugHitboxRects = ShowDebug && true;
+    private const bool ShowDebugHitboxRects = ShowDebug && false;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;

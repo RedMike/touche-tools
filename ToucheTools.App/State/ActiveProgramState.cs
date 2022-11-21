@@ -1366,7 +1366,6 @@ public class ActiveProgramState
     public void LeftClicked(int x, int y, int hitboxItem)
     {
         //if action script offset, start action -49
-        
         var program = _model.Programs[_program.Active];
         var aso = program.ActionScriptOffsets.FirstOrDefault(aso =>
             aso.Action == -49 && aso.Object1 == hitboxItem && aso.Object2 == 0
@@ -1374,7 +1373,7 @@ public class ActiveProgramState
         if (aso == null)
         {
             //no script offset so just walk
-            _log.Error("Walk not implemented yet");
+            WalkTo(x, y);
             return;
         }
 
@@ -1387,6 +1386,39 @@ public class ActiveProgramState
         script.Offset = aso.Offset;
         script.Status = ProgramState.ScriptStatus.Ready;
         //TODO: reset STK?
+    }
+
+    public void WalkTo(int x, int y)
+    {
+        //find closest point
+        var program = _model.Programs[_program.Active];
+        
+        int closestPointIdx = -1;
+        double lowestDistance = int.MaxValue;
+        for (var i = 0; i < program.Points.Count; i++)
+        {
+            var point = program.Points[i];
+            var distance = Math.Sqrt(
+                Math.Pow(x - point.X, 2) +
+                Math.Pow(y - point.Y, 2)
+            ); //ignore Z distance because it'll even out
+            if (distance < lowestDistance)
+            {
+                closestPointIdx = i;
+                lowestDistance = distance;
+            }
+        }
+
+        if (closestPointIdx == -1)
+        {
+            _log.Error("No point to path to");
+            return;
+        }
+
+        var keyChar = GetKeyChar(CurrentKeyChar);
+        keyChar.TargetPoint = (ushort)closestPointIdx;
+        keyChar.IsFollowing = false;
+        _log.Info($"Moving to point {closestPointIdx} at ({program.Points[closestPointIdx].X}, {program.Points[closestPointIdx].Y}, {program.Points[closestPointIdx].Z})");
     }
 
     public void StepUntilPaused(bool allowGameTick = true)
