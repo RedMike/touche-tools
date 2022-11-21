@@ -1308,7 +1308,7 @@ public class ActiveProgramState
         
         if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
         {
-            if (CurrentState.TickCounter != TickCounter || !CurrentState.AreScriptsRemainingInCurrentTick())
+            if (CurrentState.TickCounter != TickCounter)
             {
                 TickCounter = CurrentState.TickCounter;
                 _lastTick = now;
@@ -1317,6 +1317,19 @@ public class ActiveProgramState
             }
             else
             {
+                if (!CurrentState.AreScriptsRemainingInCurrentTick() &&
+                    CurrentState.Scripts.Any(s =>
+                        s.Status == ProgramState.ScriptStatus.Ready || 
+                        s.Status == ProgramState.ScriptStatus.Running ||
+                        s.Status == ProgramState.ScriptStatus.Paused)
+                    )
+                {
+                    TickCounter = CurrentState.TickCounter;
+                    _lastTick = now;
+                    StepUntilPaused(true);
+                    return;
+                }
+
                 StepUntilPaused(false);
             }
         }
