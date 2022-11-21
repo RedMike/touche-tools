@@ -2016,6 +2016,18 @@ public class ActiveProgramState
         {
             var keyChar = GetKeyChar(setCharTextColor.Character);
             keyChar.TextColour = setCharTextColor.Color;
+        } else if (instruction is GetCharPointsDataNumInstruction getCharPoint)
+        {
+            var keyChar = GetKeyChar(getCharPoint.Character);
+            CurrentState.SetStackValue((short)(keyChar.LastPoint ?? 0));
+        } else if (instruction is GetCharCurrentWalkBoxInstruction getCharCurrentWalkBox)
+        {
+            var keyChar = GetKeyChar(getCharCurrentWalkBox.Character);
+            CurrentState.SetStackValue((short)(keyChar.TargetPoint ?? -1));
+        } else if (instruction is GetCharWalkBoxInstruction getCharWalk)
+        {
+            var keyChar = GetKeyChar(getCharWalk.Character);
+            CurrentState.SetStackValue((short)(keyChar.LastWalk ?? -1));
         }
         else
         {
