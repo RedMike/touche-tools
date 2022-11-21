@@ -16,6 +16,8 @@ public class LogData
 
     public List<(bool, string)> List()
     {
-        return _logs;
+        var logs = _logs.ToList();
+        logs.Reverse();
+        return logs;
     }
 }
