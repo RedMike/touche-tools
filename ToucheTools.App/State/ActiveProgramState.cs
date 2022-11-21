@@ -1914,10 +1914,16 @@ public class ActiveProgramState
         } else if (instruction is DrawSpriteOnBackdropInstruction drawSpriteOnBackdrop)
         {
             var spriteId = drawSpriteOnBackdrop.Num;
-            if (!_model.Sprites.ContainsKey(spriteId))
+            if (spriteId >= LoadedSprites.Length)
             {
                 throw new Exception("Unknown sprite referenced");
             }
+
+            if (LoadedSprites[spriteId].SpriteNum == null)
+            {
+                throw new Exception("Referenced sprite not loaded");
+            }
+            
             CurrentState.ActiveRoomSprites.Add((spriteId, drawSpriteOnBackdrop.X, drawSpriteOnBackdrop.Y));
         } else if (instruction is SetPaletteInstruction setPalette)
         {

@@ -41,6 +41,9 @@ public class SpriteViewSettingsWindow : BaseWindow
 
         var origAutoStep = _viewSettings.AutoStepFrame;
         var autoStep = origAutoStep;
+
+        var origShowSheet = _viewSettings.ShowEntireSheet;
+        var showSheet = origShowSheet;
         
         ImGui.SetNextWindowPos(new Vector2(350.0f, 0.0f));
         ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth-500.0f, 200.0f));
@@ -74,7 +77,13 @@ public class SpriteViewSettingsWindow : BaseWindow
         {
             _viewSettings.ShowRoom = showRoom;
         }
-
+        
+        ImGui.Checkbox("Show entire sheet", ref showSheet);
+        if (showSheet != origShowSheet)
+        {
+            _viewSettings.ShowEntireSheet = showSheet;
+        }
+        
         if (showRoom)
         {
             var (_, roomW, roomH, _) = _room.RoomView;

@@ -39,58 +39,73 @@ public class SpriteViewWindow : IWindow
         ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
         ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
-        var contentRegion = ImGui.GetWindowContentRegionMin();
-        var spritePosition = contentRegion + new Vector2(viewW / 2.0f, 3 * viewH / 4.0f);
-        
-        #region Room background
-        if (_viewSettings.ShowRoom)
+        if (_viewSettings.ShowEntireSheet)
         {
-            var ox = _viewSettings.RoomOffsetX;
-            var oy = _viewSettings.RoomOffsetY;
-            var (viewId, roomWidth, roomHeight, bytes) = _room.RoomView;
-        
-            var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
-            var uv1 = new Vector2(ox / (float)roomWidth, oy / (float)roomHeight);
-            var uv2 = new Vector2((ox+viewW) / (float)roomWidth, (oy+viewH) / (float)roomHeight);
-            ImGui.SetCursorPos(contentRegion);
-            var windowOffset = ImGui.GetWindowPos();
-            ImGui.PushClipRect(windowOffset+contentRegion, windowOffset+contentRegion + new Vector2(roomWidth-ox, roomHeight-oy), false); 
-            ImGui.Image(roomTexture, new Vector2(viewW, viewH), uv1, uv2);
-            ImGui.PopClipRect();
+            var contentRegion = ImGui.GetWindowContentRegionMin();
+            var spritePosition = contentRegion;
+            
+            var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _sprite.SpriteView;
+            var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, spriteViewId, spriteWidth, spriteHeight, spriteBytes);
+            
+            ImGui.SetCursorPos(spritePosition);
+            ImGui.Image(spriteTexture, new Vector2(spriteWidth, spriteHeight));
         }
-        #endregion
-        
-        var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _sprite.SpriteView;
-        var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, spriteViewId, spriteWidth, spriteHeight, spriteBytes);
-        var direction = _direction.Elements[_direction.Active];
-        
-        foreach (var (frameIndex, destX, destY, hFlip, vFlip) in _frame.PartsView)
+        else
         {
-            var tileWidthRatio = (float)spriteTileWidth / spriteWidth;
-            var tileHeightRatio = (float)spriteTileHeight / spriteHeight;
-            var tilesPerRow = (int)Math.Floor((float)spriteWidth / spriteTileWidth);
-            var tileX = frameIndex % tilesPerRow;
-            var tileY = (int)Math.Floor((float)frameIndex / tilesPerRow);
-            var spriteUv1 = new Vector2(tileX * tileWidthRatio, tileY * tileHeightRatio);
-            var spriteUv2 = new Vector2((tileX + 1) * tileWidthRatio, (tileY + 1) * tileHeightRatio);
-            if (hFlip)
+            var contentRegion = ImGui.GetWindowContentRegionMin();
+            var spritePosition = contentRegion + new Vector2(viewW / 2.0f, 3 * viewH / 4.0f);
+            
+            #region Room background
+            if (_viewSettings.ShowRoom)
             {
-                (spriteUv1.X, spriteUv2.X) = (spriteUv2.X, spriteUv1.X);
+                var ox = _viewSettings.RoomOffsetX;
+                var oy = _viewSettings.RoomOffsetY;
+                var (viewId, roomWidth, roomHeight, bytes) = _room.RoomView;
+            
+                var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
+                var uv1 = new Vector2(ox / (float)roomWidth, oy / (float)roomHeight);
+                var uv2 = new Vector2((ox+viewW) / (float)roomWidth, (oy+viewH) / (float)roomHeight);
+                ImGui.SetCursorPos(contentRegion);
+                var windowOffset = ImGui.GetWindowPos();
+                ImGui.PushClipRect(windowOffset+contentRegion, windowOffset+contentRegion + new Vector2(roomWidth-ox, roomHeight-oy), false); 
+                ImGui.Image(roomTexture, new Vector2(viewW, viewH), uv1, uv2);
+                ImGui.PopClipRect();
             }
-            if (vFlip)
+            #endregion
+            
+            var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _sprite.SpriteView;
+            var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, spriteViewId, spriteWidth, spriteHeight, spriteBytes);
+            var direction = _direction.Elements[_direction.Active];
+            
+            foreach (var (frameIndex, destX, destY, hFlip, vFlip) in _frame.PartsView)
             {
-                (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
-            }
+                var tileWidthRatio = (float)spriteTileWidth / spriteWidth;
+                var tileHeightRatio = (float)spriteTileHeight / spriteHeight;
+                var tilesPerRow = (int)Math.Floor((float)spriteWidth / spriteTileWidth);
+                var tileX = frameIndex % tilesPerRow;
+                var tileY = (int)Math.Floor((float)frameIndex / tilesPerRow);
+                var spriteUv1 = new Vector2(tileX * tileWidthRatio, tileY * tileHeightRatio);
+                var spriteUv2 = new Vector2((tileX + 1) * tileWidthRatio, (tileY + 1) * tileHeightRatio);
+                if (hFlip)
+                {
+                    (spriteUv1.X, spriteUv2.X) = (spriteUv2.X, spriteUv1.X);
+                }
+                if (vFlip)
+                {
+                    (spriteUv1.Y, spriteUv2.Y) = (spriteUv2.Y, spriteUv1.Y);
+                }
 
-            //fix the position based on the direction
-            var ox = 0;
-            if (direction == 3)
-            {
-                ox = -spriteTileWidth;
+                //fix the position based on the direction
+                var ox = 0;
+                if (direction == 3)
+                {
+                    ox = -spriteTileWidth;
+                }
+                ImGui.SetCursorPos(spritePosition + new Vector2(destX + ox, destY));
+                ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);   
             }
-            ImGui.SetCursorPos(spritePosition + new Vector2(destX + ox, destY));
-            ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);   
         }
+        
         
         ImGui.End();
     }

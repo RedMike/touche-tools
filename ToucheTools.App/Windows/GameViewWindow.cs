@@ -18,7 +18,6 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugWalkRects = ShowDebug && true;
     private const bool ShowDebugTalkRects = ShowDebug && true;
     private const bool ShowDebugKeyCharRects = ShowDebug && true;
-    private const bool ShowDebugRoomSpriteRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -58,7 +57,6 @@ public class GameViewWindow : BaseWindow
         RenderKeyChars(offset);
         RenderActiveWalkAreas(offset); //after key chars
         
-        RenderRoomSprites(offset); //after background and active areas
         RenderBackgroundActiveAreas(offset); //after key chars and areas
 
         RenderPointsDebug(offset);
@@ -89,30 +87,6 @@ public class GameViewWindow : BaseWindow
         }
     }
 
-    private void RenderRoomSprites(Vector2 offset)
-    {
-        if (_activeProgramState.CurrentState.LoadedRoom == null)
-        {
-            return;
-        }
-        var (offsetX, offsetY) = GetLoadedRoomOffset();
-        
-        ushort idx = 0;
-        foreach (var (spriteId, x, y) in _activeProgramState.CurrentState.ActiveRoomSprites)
-        {
-            var (ox, oy) = (x - offsetX, y - offsetY);
-            DrawEntireSpriteSheet(offset, ox, oy, spriteId);
-            var sprite = _model.Sprites[spriteId].Value;
-
-            if (ShowDebugRoomSpriteRects)
-            {
-                RenderRectangle(offset, sprite.Width, sprite.Height, ox, oy, $"Room Sprite {idx}", 1,
-                    0, 0, 255, 50, 255, 255, 255, 150);
-            }
-            idx++;
-        }
-    }
-    
     private void RenderBackgroundActiveAreas(Vector2 offset)
     {
         if (_activeProgramState.CurrentState.LoadedRoom == null)
@@ -142,9 +116,9 @@ public class GameViewWindow : BaseWindow
                 }
                 var x = ox - offsetX;
                 var y = oy - offsetY;
-
+                
                 RenderRoomImageSubsection(offset, x, y, background.SrcX, background.SrcY, background.Rect.W, background.Rect.H, true);
-
+                
                 if (ShowDebugBackgroundRects)
                 {
                     RenderRectangle(offset, background.Rect.W, background.Rect.H, background.Rect.X, background.Rect.Y,
@@ -202,7 +176,6 @@ public class GameViewWindow : BaseWindow
         {
             return;
         }
-        var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
         ushort tIdx = 0;
@@ -605,10 +578,22 @@ public class GameViewWindow : BaseWindow
         var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
         var roomImage = _model.RoomImages[roomImageId].Value;
         var palette = _activeProgramState.GetLoadedPalette();
+
+        var activeRoomSprites = _activeProgramState.CurrentState.ActiveRoomSprites.Select(roomSprite =>
+        {
+            var spriteNum = _activeProgramState.LoadedSprites[roomSprite.Item1].SpriteNum;
+            if (spriteNum == null)
+            {
+                throw new Exception("Sprite not loaded");
+            }
+
+            var sprite = _model.Sprites[spriteNum.Value].Value;
+            return (roomSprite.Item1, sprite, roomSprite.Item2, roomSprite.Item3);
+        }).ToList();
         
         var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, palette,
-            srcX, srcY, w, h, transparency);
-
+            activeRoomSprites, srcX, srcY, w, h, transparency);
+        
         var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, w, h, areaBytes);
 
         ImGui.SetCursorPos(offset + new Vector2(x, y));

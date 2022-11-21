@@ -19,6 +19,7 @@ public class SpriteViewSettings
     public int RoomOffsetX { get; set; }
     public int RoomOffsetY { get; set; }
     public bool AutoStepFrame { get; set; }
+    public bool ShowEntireSheet { get; set; }
     
     public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, ActiveFrame frame, SpriteViewState state)
     {

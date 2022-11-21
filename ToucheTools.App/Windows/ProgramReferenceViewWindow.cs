@@ -587,6 +587,27 @@ public class ProgramReferenceViewWindow : IWindow
         
             ImGui.EndTable();
         }
+        
+        if (ImGui.CollapsingHeader($"Room Sprites"))
+        {
+            ImGui.BeginTable("room_sprites", 3);
+            ImGui.TableSetupColumn("Sprite");
+            ImGui.TableSetupColumn("X");
+            ImGui.TableSetupColumn("Y");
+            ImGui.TableHeadersRow();
+            foreach (var (sprId, x, y) in _activeProgramState.CurrentState.ActiveRoomSprites)
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text($"{sprId} ({_activeProgramState.LoadedSprites[sprId].SpriteNum})");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{x}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{y}");
+                ImGui.TableNextRow();
+            }
+        
+            ImGui.EndTable();
+        }
         #endregion
         
         ImGui.Separator();
