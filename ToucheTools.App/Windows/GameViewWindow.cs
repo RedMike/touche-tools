@@ -465,10 +465,15 @@ public class GameViewWindow : BaseWindow
         ushort pIdx = 0;
         foreach (var hitbox in program.Hitboxes)
         {
-            if (!hitbox.IsDrawable)
+            // if (!hitbox.IsDrawable)
+            // {
+            //     continue;
+            // }
+            if (hitbox.IsInventory)
             {
                 continue;
             }
+            
             
             if (hitbox.Rect1.W != 0 && hitbox.Rect1.H != 0)
             {
