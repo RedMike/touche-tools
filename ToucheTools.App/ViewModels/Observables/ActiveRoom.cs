@@ -31,7 +31,7 @@ public class ActiveRoom : ActiveObservable<int>
         var roomImage = _databaseModel.RoomImages[roomImageId].Value;
         var palette = _databaseModel.Palettes[_palette.Active];
 
-        var (viewId, bytes) = _renderer.RenderRoomImage(roomImageId, roomImage, _palette.Active, palette);
+        var (viewId, bytes) = _renderer.RenderRoomImage(roomImageId, roomImage, palette);
 
         RoomView = (viewId, roomImage.Width, roomImage.Height, bytes);
     }

@@ -12,7 +12,7 @@ public class SpriteSheetRenderer
     {
         width ??= spriteImage.Width;
         height ??= spriteImage.Height;
-        var id = GetId(spriteId, paletteId, offsetX, offsetY, width.Value, height.Value);
+        var id = GetId(spriteId, palette, offsetX, offsetY, width.Value, height.Value);
         if (_cache.ContainsKey(id))
         {
             return (id, _cache[id]);
@@ -24,8 +24,9 @@ public class SpriteSheetRenderer
         return (id, bytes);
     }
     
-    private static string GetId(int spriteId, int paletteId, int offsetX, int offsetY, int width, int height)
+    private static string GetId(int spriteId, PaletteDataModel palette, int offsetX, int offsetY, int width, int height)
     {
+        var paletteId = string.Join("--", palette.Colors.Select(c => $"{c.R}-{c.G}-{c.B}"));
         return $"{spriteId}_{paletteId}_{offsetX}_{offsetY}_{width}_{height}";
     }
 

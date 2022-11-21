@@ -167,6 +167,45 @@ public class ProgramReferenceViewWindow : IWindow
         
         ImGui.Separator();
         
+        #region Palette
+        if (ImGui.CollapsingHeader("Palette"))
+        {
+            ImGui.BeginTable("palette", 4);
+            ImGui.TableSetupColumn("Index");
+            ImGui.TableSetupColumn("R");
+            ImGui.TableSetupColumn("G");
+            ImGui.TableSetupColumn("B");
+            ImGui.TableHeadersRow();
+            for (var i = 0; i < 256; i++)
+            {
+                if (!_activeProgramState.LoadedPalette.ContainsKey(i))
+                {
+                    continue;
+                }
+                var col = _activeProgramState.LoadedPalette[i];
+                var colScale = (0, 0, 0);
+                if (_activeProgramState.LoadedPaletteScale.ContainsKey(i))
+                {
+                    colScale = _activeProgramState.LoadedPaletteScale[i];
+                }
+
+                ImGui.TableNextColumn();
+                ImGui.Text($"{i}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{col.R} ({colScale.Item1}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{col.G} ({colScale.Item2}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{col.B} ({colScale.Item3}");
+                ImGui.TableNextRow();
+            }
+            
+            ImGui.EndTable();
+        }
+        #endregion
+        
+        ImGui.Separator();
+        
         #region Flags
         if (ImGui.CollapsingHeader("Flags"))
         {

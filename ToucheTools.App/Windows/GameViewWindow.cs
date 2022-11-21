@@ -239,8 +239,7 @@ public class GameViewWindow : BaseWindow
 
             var col = keyChar.TextColour;
             var col1 = (int)(col & 0xFF);
-            var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
-            var paletteCol1 = palette.Colors[col1];
+            var paletteCol1 = _activeProgramState.GetLoadedColour(col1);
             
             ImGui.SetCursorPos(offset + new Vector2(x, y));
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(paletteCol1.R/255.0f, paletteCol1.G/255.0f, paletteCol1.B/255.0f, 1.0f));
@@ -501,7 +500,7 @@ public class GameViewWindow : BaseWindow
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
         var sprite = _model.Sprites[spriteNum].Value;
-        var palette = _model.Palettes[activeRoom];
+        var palette = _activeProgramState.GetLoadedPalette();
 
         var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum, sprite, activeRoom, palette);
         var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, viewId, sprite.Width, sprite.Height, bytes);
@@ -523,7 +522,7 @@ public class GameViewWindow : BaseWindow
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
         var sprite = _model.Sprites[spriteNum].Value;
-        var palette = _model.Palettes[activeRoom];
+        var palette = _activeProgramState.GetLoadedPalette();
 
         var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum, sprite, activeRoom, palette);
         var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, viewId, sprite.Width, sprite.Height, bytes);
@@ -605,9 +604,9 @@ public class GameViewWindow : BaseWindow
 
         var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
         var roomImage = _model.RoomImages[roomImageId].Value;
-        var palette = _model.Palettes[activeRoom]; //TODO: palette shifting
+        var palette = _activeProgramState.GetLoadedPalette();
         
-        var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, activeRoom, palette,
+        var (areaViewId, areaBytes) = _roomImageRenderer.RenderRoomImage(roomImageId, roomImage, palette,
             srcX, srcY, w, h, transparency);
 
         var roomAreaTexture = _render.RenderImage(RenderWindow.RenderType.Room, areaViewId, w, h, areaBytes);

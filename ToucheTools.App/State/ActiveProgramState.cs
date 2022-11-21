@@ -294,6 +294,8 @@ public class ActiveProgramState
         {
             LoadedSprites[i] = new LoadedSprite();
         }
+        
+        SetPaletteScale(0, 255, 0, 0, 0);
     }
 
     #region Breakpoint/debug
@@ -306,6 +308,88 @@ public class ActiveProgramState
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
     private const int MinimumTimeBetweenTicksInMillis = 50;
+    
+    #region Palette
+    public Dictionary<int, PaletteDataModel.Rgb> LoadedPalette = new Dictionary<int, PaletteDataModel.Rgb>();
+    public Dictionary<int, (int, int, int)> LoadedPaletteScale = new Dictionary<int, (int, int, int)>();
+    public int PaletteRandomCounter = 0;
+
+    public PaletteDataModel.Rgb GetLoadedColour(int col)
+    {
+        if (col < 0 || col > 255)
+        {
+            throw new Exception("Asking for impossible palette colour");
+        }
+
+        if (!LoadedPalette.ContainsKey(col))
+        {
+            return new PaletteDataModel.Rgb()
+            {
+                R = 255,
+                B = 0,
+                G = 255
+            };
+        }
+
+        var paletteCol = LoadedPalette[col];
+        var paletteScale = (0, 0, 0);
+        if (LoadedPaletteScale.ContainsKey(col))
+        {
+            paletteScale = LoadedPaletteScale[col];
+        }
+
+        return new PaletteDataModel.Rgb()
+        {
+            R = (byte)(paletteCol.R * paletteScale.Item1 / 255),
+            G = (byte)(paletteCol.G * paletteScale.Item2 / 255),
+            B = (byte)(paletteCol.B * paletteScale.Item3 / 255),
+        };
+    }
+
+    public PaletteDataModel GetLoadedPalette()
+    {
+        var cols = new List<PaletteDataModel.Rgb>();
+        for (var i = 0; i < 256; i++)
+        {
+            cols.Add(GetLoadedColour(i));
+        }
+
+        return new PaletteDataModel()
+        {
+            Colors = cols
+        };
+    }
+    
+    public void LoadPalette(PaletteDataModel palette)
+    {
+        if (palette.Colors.Count < 256)
+        {
+            throw new Exception("Palette does not contain enough colours");
+        }
+        
+        LoadedPalette = new Dictionary<int, PaletteDataModel.Rgb>();
+        for (var i = 0; i < 256; i++)
+        {
+            LoadedPalette[i] = new PaletteDataModel.Rgb()
+            {
+                R = palette.Colors[i].R,
+                G = palette.Colors[i].G,
+                B = palette.Colors[i].B
+            };
+        }
+    }
+
+    public void SetPaletteScale(int fromIdx, int count, int rScale, int gScale, int bScale)
+    {
+        rScale = Math.Min(255, Math.Max(0, rScale));
+        gScale = Math.Min(255, Math.Max(0, gScale));
+        bScale = Math.Min(255, Math.Max(0, bScale));
+        for (var i = fromIdx; i < fromIdx + count; i++)
+        {
+            LoadedPaletteScale[i] = (rScale, gScale, bScale);
+        }
+    }
+    #endregion
     
     #region Talk Entries
     public class TalkEntry
@@ -413,10 +497,10 @@ public class ActiveProgramState
             }
         }
 
-        SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColour, 240);
-        SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomRange, 16);
-        SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinDelay, 0);
-        SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomDelay, 1);
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColourScale, 240);
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomExtraColourScale, 16);
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalMinPeriod, 0);
+        SetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomExtraPeriod, 1);
         SetFlag(ToucheTools.Constants.Flags.Known.CurrentKeyChar, 0);
 
         CurrentState.Scripts.Add(new ProgramState.Script()
@@ -954,6 +1038,28 @@ public class ActiveProgramState
 
         #endregion
 
+        #region Palettes
+        if (GetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette) != 0)
+        {
+            if (PaletteRandomCounter != 0)
+            {
+                PaletteRandomCounter--;
+            }
+            else
+            {
+                var rnd = new Random();
+                var minScale = GetFlag(ToucheTools.Constants.Flags.Known.RndPalMinColourScale);
+                var rndScale = GetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomExtraColourScale);
+                var minPeriod = GetFlag(ToucheTools.Constants.Flags.Known.RndPalMinPeriod);
+                var rndPeriod = GetFlag(ToucheTools.Constants.Flags.Known.RndPalRandomExtraPeriod);
+                var scale = minScale + rnd.Next(0, rndScale);
+                var period = minPeriod + rnd.Next(0, rndPeriod);
+                SetPaletteScale(0, 240, scale, scale, scale);
+                PaletteRandomCounter = period;
+            }
+        }
+        #endregion
+        
         #region Counters
 
         SetFlag(ToucheTools.Constants.Flags.Known.GameCycleCounter1,
@@ -979,6 +1085,42 @@ public class ActiveProgramState
     
     private void OnGraphicalUpdate()
     {
+        #region Random palette update
+        if (GetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette) != 0)
+        {
+            var start = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteFirstColour);
+            var count = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteColourCount);
+            var scale = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale);
+            SetPaletteScale(start, count, scale, scale, scale);
+
+            var increment = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement);
+            if (increment > 0)
+            {
+                if (scale >= GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMaxScale))
+                {
+                    SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement, 0);
+                }
+            }
+            else
+            {
+                if (scale <= GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMinScale))
+                {
+                    SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement, 0);
+                }
+            }
+
+            scale += increment;
+            if (scale < 0)
+            {
+                scale = 0;
+            } else if (scale > 255)
+            {
+                scale = 255;
+            }
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale, scale);
+        }
+        #endregion
+        
         #region Room Scrolling
         if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
         {
@@ -1361,6 +1503,8 @@ public class ActiveProgramState
             CurrentState.LoadedRoom = loadRoom.Num;
             
             //from game code
+            var palette = _model.Palettes[loadRoom.Num];
+            LoadPalette(palette);
             LoadedSprites[5].SpriteNum = null;
             LoadedSprites[5].SequenceNum = null;
             LoadedSprites[6].SpriteNum = null;
@@ -1368,6 +1512,16 @@ public class ActiveProgramState
             CurrentState.ActiveRoomAreas = new Dictionary<int, ProgramDataModel.AreaState>();
             CurrentState.BackgroundOffsets = new Dictionary<ushort, (int, int)>();
             CurrentState.ActiveRoomSprites = new List<(int, int, int)>();
+            if (GetFlag(ToucheTools.Constants.Flags.Known.KeepPaletteOnRoomLoad) == 0)
+            {
+                //reset to full scale
+                SetPaletteScale(0, 255, 255, 255, 255);
+            }
+            else
+            {
+                //set scale to 0
+                SetPaletteScale(0, 255, 0, 0, 0);
+            }
         } else if (instruction is SetCharFrameInstruction setCharFrame)
         {
             var keyChar = GetKeyChar(setCharFrame.Character);
@@ -1765,6 +1919,46 @@ public class ActiveProgramState
                 throw new Exception("Unknown sprite referenced");
             }
             CurrentState.ActiveRoomSprites.Add((spriteId, drawSpriteOnBackdrop.X, drawSpriteOnBackdrop.Y));
+        } else if (instruction is SetPaletteInstruction setPalette)
+        {
+            //from game code
+            var from = 0; 
+            var count = 240;
+            SetPaletteScale(from, count, setPalette.R, setPalette.G, setPalette.B);
+        } else if (instruction is StartPaletteFadeInInstruction startPaletteFadeIn)
+        {
+            SetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette, 1);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale, 0);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteFirstColour, 0);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteColourCount, 255);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMaxScale, 255);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMinScale, 0);
+            var increment = startPaletteFadeIn.Num;
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement, (short)increment);
+        } else if (instruction is StartPaletteFadeOutInstruction startPaletteFadeOut)
+        {
+            SetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette, 1);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale, 255);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteFirstColour, 0);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteColourCount, 255);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMaxScale, 255);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMinScale, 0);
+            var increment = startPaletteFadeOut.Num;
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement, (short)(-increment));
+        } else if (instruction is FadePaletteInstruction fadePalette)
+        {
+            var scaleMin = fadePalette.FadeOut ? 255 : 0;
+            var scaleMax = fadePalette.FadeOut ? 0 : 255;
+            var increment = fadePalette.FadeOut ? 2 : -2;
+            var steps = 128;
+            
+            SetFlag(ToucheTools.Constants.Flags.Known.ProcessRandomPalette, 1);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScale, (short)scaleMin);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteFirstColour, 0);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteColourCount, 240);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMaxScale, (short)scaleMax);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteMinScale, (short)scaleMin);
+            SetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement, (short)increment);
         }
         else
         {

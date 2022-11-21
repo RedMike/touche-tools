@@ -24,10 +24,10 @@ public static class Flags
         //...
         
         ProcessRandomPalette = 290,
-        RndPalMinColour = 291, //240 => the scale is at least 240
-        RndPalRandomRange = 292, //16 => the scale is between 240 and 256
-        RndPalMinDelay = 293, //delay next change for at least X frames
-        RndPalRandomDelay = 294, //delay next change for between X, and X+rnd(Y) frames
+        RndPalMinColourScale = 291, //240 => the scale is at least 240
+        RndPalRandomExtraColourScale = 292, //16 => the scale is between 240 and 256
+        RndPalMinPeriod = 293, //set scale for at least X frames
+        RndPalRandomExtraPeriod = 294, //set scale for between X, and X+rnd(Y) frames
         
         GameCycleCounter1 = 295,
         GameCycleCounter2 = 296,
@@ -41,7 +41,7 @@ public static class Flags
         FadePaletteScale = 605,
         DisableInventoryDraw = 606,
         FadePaletteFirstColour = 607,
-        FadePaletteLastColour = 608,
+        FadePaletteColourCount = 608,
         FadePaletteMaxScale = 609,
         FadePaletteMinScale = 610,
         

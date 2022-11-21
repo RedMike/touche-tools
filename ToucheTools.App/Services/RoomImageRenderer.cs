@@ -6,12 +6,12 @@ public class RoomImageRenderer
 {
     private readonly Dictionary<string, byte[]> _cache = new Dictionary<string, byte[]>();
     
-    public (string, byte[]) RenderRoomImage(int roomImageId, RoomImageDataModel roomImage, int paletteId, PaletteDataModel palette, int offsetX = 0,
+    public (string, byte[]) RenderRoomImage(int roomImageId, RoomImageDataModel roomImage, PaletteDataModel palette, int offsetX = 0,
         int offsetY = 0, int? width = null, int? height = null, bool transparency = true)
     {
         width ??= roomImage.Width;
         height ??= roomImage.Height;
-        var id = GetId(roomImageId, paletteId, offsetX, offsetY, width.Value, height.Value, transparency);
+        var id = GetId(roomImageId, palette, offsetX, offsetY, width.Value, height.Value, transparency);
         if (_cache.ContainsKey(id))
         {
             return (id, _cache[id]);
@@ -23,8 +23,9 @@ public class RoomImageRenderer
         return (id, bytes);
     }
 
-    private static string GetId(int roomImageId, int paletteId, int offsetX, int offsetY, int width, int height, bool transparency)
+    private static string GetId(int roomImageId, PaletteDataModel palette, int offsetX, int offsetY, int width, int height, bool transparency)
     {
+        var paletteId = string.Join("--", palette.Colors.Select(c => $"{c.R}-{c.G}-{c.B}"));
         return $"{roomImageId}_{paletteId}_{offsetX}_{offsetY}_{width}_{height}_{(transparency ? "t" : "n")}";
     }
     
