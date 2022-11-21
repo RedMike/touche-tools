@@ -195,7 +195,7 @@ public class ActiveProgramState
         #endregion
 
         #region Room Areas
-        public Dictionary<int, ProgramDataModel.AreaState> ActiveRoomAreas { get; set; } = new Dictionary<int, ProgramDataModel.AreaState>();
+        public List<(int, ProgramDataModel.AreaState)> ActiveRoomAreas { get; set; } = new List<(int, ProgramDataModel.AreaState)>();
         #endregion
         
         #region Room Sprites
@@ -307,7 +307,7 @@ public class ActiveProgramState
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 50;
+    private const int MinimumTimeBetweenTicksInMillis = 27;
     
     #region Palette
     public Dictionary<int, PaletteDataModel.Rgb> LoadedPalette = new Dictionary<int, PaletteDataModel.Rgb>();
@@ -1518,7 +1518,7 @@ public class ActiveProgramState
             LoadedSprites[5].SequenceNum = null;
             LoadedSprites[6].SpriteNum = null;
             LoadedSprites[6].SequenceNum = null;
-            CurrentState.ActiveRoomAreas = new Dictionary<int, ProgramDataModel.AreaState>();
+            CurrentState.ActiveRoomAreas = new List<(int, ProgramDataModel.AreaState)>();
             CurrentState.BackgroundOffsets = new Dictionary<ushort, (int, int)>();
             CurrentState.ActiveRoomSprites = new List<(int, int, int)>();
             if (GetFlag(ToucheTools.Constants.Flags.Known.KeepPaletteOnRoomLoad) == 0)
@@ -1806,7 +1806,18 @@ public class ActiveProgramState
             var val = CurrentState.StackValue;
             CurrentState.MoveStackPointerForwards();
             CurrentState.SetStackValue((short)(CurrentState.StackValue - val));
-        } else if (instruction is TestEqualsInstruction)
+        } else if (instruction is AndInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            CurrentState.SetStackValue((short)(CurrentState.StackValue & val));
+        } else if (instruction is OrInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            CurrentState.SetStackValue((short)(CurrentState.StackValue | val));
+        }
+        else if (instruction is TestEqualsInstruction)
         {
             var val = CurrentState.StackValue;
             CurrentState.MoveStackPointerForwards();
@@ -1906,20 +1917,20 @@ public class ActiveProgramState
             var area = program.Areas.First(a => a.Id == areaId);
             if (CurrentState.ActiveRoomAreas.Count == 199)
             {
-                CurrentState.ActiveRoomAreas = new Dictionary<int, ProgramDataModel.AreaState>();
+                CurrentState.ActiveRoomAreas = new List<(int, ProgramDataModel.AreaState)>();
             }
 
-            CurrentState.ActiveRoomAreas[areaId] = area.InitialState;
+            CurrentState.ActiveRoomAreas.Add((areaId, area.InitialState));
         } else if (instruction is UpdateRoomInstruction updateRoom)
         {
             var areaId = updateRoom.Area;
             var area = program.Areas.First(a => a.Id == areaId);
             if (CurrentState.ActiveRoomAreas.Count == 199)
             {
-                CurrentState.ActiveRoomAreas = new Dictionary<int, ProgramDataModel.AreaState>();
+                CurrentState.ActiveRoomAreas = new List<(int, ProgramDataModel.AreaState)>();
             }
 
-            CurrentState.ActiveRoomAreas[areaId] = area.InitialState;
+            CurrentState.ActiveRoomAreas.Add((areaId, area.InitialState));
         } else if (instruction is DrawSpriteOnBackdropInstruction drawSpriteOnBackdrop)
         {
             var spriteId = drawSpriteOnBackdrop.Num;
@@ -1982,6 +1993,25 @@ public class ActiveProgramState
             var keyChar = GetKeyChar(setCharDirection.Character);
             var dir = setCharDirection.Direction;
             keyChar.CurrentDirection = dir;
+        } else if (instruction is StartMusicInstruction)
+        {
+            //nothing to do yet
+        } else if (instruction is LoadSpeechSegmentInstruction)
+        {
+            //nothing to do yet
+        } else if (instruction is FaceCharInstruction faceChar)
+        {
+            var keyChar1 = GetKeyChar(faceChar.Character1);
+            var keyChar2 = GetKeyChar(faceChar.Character2);
+
+            if (keyChar1.PositionX <= keyChar2.PositionX)
+            {
+                keyChar2.CurrentDirection = 3;
+            }
+            else
+            {
+                keyChar2.CurrentDirection = 0;
+            }
         }
         else
         {
