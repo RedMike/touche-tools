@@ -68,8 +68,7 @@ public class ProgramReferenceViewWindow : IWindow
         #region Scripts
         if (ImGui.CollapsingHeader("Scripts", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGui.BeginTable("scripts", 6);
-            ImGui.TableSetupColumn("Type");
+            ImGui.BeginTable("scripts", 5);
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Offset");
             ImGui.TableSetupColumn("State");
@@ -91,12 +90,6 @@ public class ProgramReferenceViewWindow : IWindow
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.25f, 0.3f, 0.35f, 1.0f));
                 }
-                ImGui.TableNextColumn();
-                if (isRunning)
-                {
-                    ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.GetColorU32(new Vector4(0.3f, 0.6f, 0.8f, 1.0f)));
-                }
-                ImGui.Text($"{script.Type:G}");
                 ImGui.TableNextColumn();
                 if (isRunning)
                 {
@@ -155,7 +148,7 @@ public class ProgramReferenceViewWindow : IWindow
         }
         else
         {
-            ImGui.Text($"Current script: {currentScript.Type:G} {currentScript.Id}");
+            ImGui.Text($"Current script: {currentScript.Id}");
             LabelAndButton($"Current offset: ", currentScript.Offset.ToString("D5"));
         }
         

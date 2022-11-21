@@ -138,7 +138,6 @@ public class ActiveProgramState
         
         public class Script
         {
-            public ScriptType Type { get; set; }
             public int Id { get; set; }
             public int StartOffset { get; set; }
             public int Offset { get; set; }
@@ -152,10 +151,7 @@ public class ActiveProgramState
 
         public Script? GetKeyCharScript(int keyCharId)
         {
-            return Scripts.FirstOrDefault(s =>
-                s.Type == ProgramState.ScriptType.KeyChar &&
-                s.Id == keyCharId
-            );
+            return Scripts.FirstOrDefault(s => s.Id == keyCharId);
         }
         
         public Script? GetRunningScript()
@@ -299,7 +295,7 @@ public class ActiveProgramState
     public ProgramState CurrentState { get; set; } = new ProgramState();
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 27;
+    private const int MinimumTimeBetweenTicksInMillis = 50;
     
     #region Palette
     public Dictionary<int, PaletteDataModel.Rgb> LoadedPalette = new Dictionary<int, PaletteDataModel.Rgb>();
@@ -521,7 +517,6 @@ public class ActiveProgramState
 
         CurrentState.Scripts.Add(new ProgramState.Script()
         {
-            Type = ProgramState.ScriptType.KeyChar,
             Id = CurrentKeyChar,
             Offset = 0,
             StartOffset = 0,
@@ -540,7 +535,6 @@ public class ActiveProgramState
             {
                 CurrentState.Scripts.Add(new ProgramState.Script()
                 {
-                    Type = ProgramState.ScriptType.KeyChar,
                     Id = keyCharId,
                     StartOffset = cso.Offs,
                     Offset = cso.Offs,
@@ -981,40 +975,37 @@ public class ActiveProgramState
                 }
             }
 
-            if (script.Type == ProgramState.ScriptType.KeyChar)
+            if (script.Status == ProgramState.ScriptStatus.Paused && script.Delay == 0)
             {
-                if (script.Status == ProgramState.ScriptStatus.Paused && script.Delay == 0)
+                //no delay was set, so maybe keychar waiting
+                var keyChar = GetKeyChar(script.Id);
+                if (keyChar.WaitForKeyChar != null)
                 {
-                    //no delay was set, so maybe keychar waiting
-                    var keyChar = GetKeyChar(script.Id);
-                    if (keyChar.WaitForKeyChar != null)
+                    var otherKeyChar = GetKeyChar(keyChar.WaitForKeyChar.Value);
+                    if ((
+                            keyChar.WaitForAnimationId != null &&
+                            otherKeyChar.CurrentAnim == keyChar.WaitForAnimationId.Value
+                        ) ||
+                        (
+                            keyChar.WaitForPoint != null &&
+                            otherKeyChar.LastPoint == keyChar.WaitForPoint.Value
+                        ) ||
+                        (
+                            keyChar.WaitForWalk != null &&
+                            otherKeyChar.LastWalk == keyChar.WaitForWalk.Value
+                        )
+                       )
                     {
-                        var otherKeyChar = GetKeyChar(keyChar.WaitForKeyChar.Value);
-                        if ((
-                                keyChar.WaitForAnimationId != null &&
-                                otherKeyChar.CurrentAnim == keyChar.WaitForAnimationId.Value
-                            ) ||
-                            (
-                                keyChar.WaitForPoint != null &&
-                                otherKeyChar.LastPoint == keyChar.WaitForPoint.Value
-                            ) ||
-                            (
-                                keyChar.WaitForWalk != null &&
-                                otherKeyChar.LastWalk == keyChar.WaitForWalk.Value
-                            )
-                           )
-                        {
-                            keyChar.WaitForKeyChar = null;
-                            script.Status = ProgramState.ScriptStatus.Ready;
-                        }
+                        keyChar.WaitForKeyChar = null;
+                        script.Status = ProgramState.ScriptStatus.Ready;
                     }
-                    else
+                }
+                else
+                {
+                    //expecting talk to remove it
+                    if (script.Id != CurrentKeyChar && TalkEntries.All(t => t.OtherKeyChar != script.Id))
                     {
-                        //expecting talk to remove it
-                        if (script.Id != CurrentKeyChar && TalkEntries.All(t => t.OtherKeyChar != script.Id))
-                        {
-                            throw new Exception("Pause waiting for talk with no talk scripts");
-                        }
+                        throw new Exception("Pause waiting for talk with no talk scripts");
                     }
                 }
             }
@@ -1372,6 +1363,32 @@ public class ActiveProgramState
         SetFlag(ToucheTools.Constants.Flags.Known.LastAsciiKeyPress, (short)27);
     }
 
+    public void LeftClicked(int x, int y, int hitboxItem)
+    {
+        //if action script offset, start action -49
+        
+        var program = _model.Programs[_program.Active];
+        var aso = program.ActionScriptOffsets.FirstOrDefault(aso =>
+            aso.Action == -49 && aso.Object1 == hitboxItem && aso.Object2 == 0
+        );
+        if (aso == null)
+        {
+            //no script offset so just walk
+            _log.Error("Walk not implemented yet");
+            return;
+        }
+
+        var script = CurrentState.GetKeyCharScript(CurrentKeyChar);
+        if (script == null)
+        {
+            throw new Exception("Missing key char script");
+        }
+
+        script.Offset = aso.Offset;
+        script.Status = ProgramState.ScriptStatus.Ready;
+        //TODO: reset STK?
+    }
+
     public void StepUntilPaused(bool allowGameTick = true)
     {
         BreakpointHit = false;
@@ -1410,11 +1427,6 @@ public class ActiveProgramState
         var nextScript = CurrentState.GetNextScript();
         if (nextScript != null)
         {
-            if (nextScript.Type != ProgramState.ScriptType.KeyChar)
-            {
-                throw new Exception($"Non-char scripts not implemented yet: {nextScript.Type:G}");
-            }
-
             if (nextScript.Status == ProgramState.ScriptStatus.Ready)
             {
                 nextScript.Status = ProgramState.ScriptStatus.Running;
@@ -1479,7 +1491,7 @@ public class ActiveProgramState
         if (instruction is StopScriptInstruction)
         {
             programPaused = true;
-            if (currentScript.Type != ProgramState.ScriptType.KeyChar || currentScript.Id != CurrentKeyChar)
+            if (currentScript.Id != CurrentKeyChar)
             {
                 //the current keychar script always only pauses
                 programRestart = true;
@@ -1523,7 +1535,6 @@ public class ActiveProgramState
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
             var keyCharScript = CurrentState.Scripts.FirstOrDefault(s => 
-                                                                  s.Type == ProgramState.ScriptType.KeyChar && 
                                                                   s.Id == initCharScript.Character && 
                                                                   s.Status != ProgramState.ScriptStatus.Running &&
                                                                   s.Status != ProgramState.ScriptStatus.Stopped
@@ -1662,7 +1673,7 @@ public class ActiveProgramState
             keyChar.TargetPoint = moveCharToPos.Num;
             keyChar.IsFollowing = false;
 
-            if (currentScript.Type == ProgramState.ScriptType.KeyChar && currentScript.Id == charId)
+            if (currentScript.Id == charId)
             {
                 foreach (var talkEntry in TalkEntries)
                 {
@@ -1684,11 +1695,8 @@ public class ActiveProgramState
             {
                 int talkingChar = startTalk.Character;
                 int num = startTalk.Num;
-                int otherChar = CurrentKeyChar;
-                if (currentScript.Type == ProgramState.ScriptType.KeyChar)
-                {
-                    otherChar = currentScript.Id;
-                }
+                int otherChar = currentScript.Id;
+                
                 if (startTalk.CurrentCharacter)
                 {
                     talkingChar = CurrentKeyChar;
@@ -1743,11 +1751,6 @@ public class ActiveProgramState
             }
         } else if (instruction is SetCharDelayInstruction setCharDelay)
         {
-            if (currentScript.Type != ProgramState.ScriptType.KeyChar)
-            {
-                throw new Exception("Unknown script type for delay");
-            }
-
             currentScript.Delay = setCharDelay.Delay;
             programPaused = true;
         } else if (instruction is SetupWaitingCharInstruction setupWaitingChar)
@@ -1760,11 +1763,6 @@ public class ActiveProgramState
             }
             else
             {
-                if (currentScript.Type != ProgramState.ScriptType.KeyChar)
-                {
-                    throw new Exception("Setup waiting chars outside of keychar script");
-                }
-
                 var keyChar = GetKeyChar(currentScript.Id);
                 keyChar.WaitForPoint = null;
                 keyChar.WaitForAnimationId = null;
@@ -2050,7 +2048,7 @@ public class ActiveProgramState
         
         if (programStopped)
         {
-            _log.Info($"Finished running {currentScript.Type:G} {currentScript.Id}.");
+            _log.Info($"Finished running script {currentScript.Id}.");
 
             currentScript.Status = ProgramState.ScriptStatus.Stopped;
             justJumped = true;
