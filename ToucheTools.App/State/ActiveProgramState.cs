@@ -1418,7 +1418,6 @@ public class ActiveProgramState
         var keyChar = GetKeyChar(CurrentKeyChar);
         keyChar.TargetPoint = (ushort)closestPointIdx;
         keyChar.IsFollowing = false;
-        _log.Info($"Moving to point {closestPointIdx} at ({program.Points[closestPointIdx].X}, {program.Points[closestPointIdx].Y}, {program.Points[closestPointIdx].Z})");
     }
 
     public void StepUntilPaused(bool allowGameTick = true)
