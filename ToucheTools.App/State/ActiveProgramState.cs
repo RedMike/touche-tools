@@ -3,7 +3,6 @@ using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.Constants;
 using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
-using Veldrid;
 
 namespace ToucheTools.App.State;
 
@@ -182,13 +181,6 @@ public class ActiveProgramState
 
         public void TickDone()
         {
-            // if (ScriptsForCurrentTick
-            //         .Count(s => s.Status != ScriptStatus.Stopped && 
-            //                     s.Status != ScriptStatus.NotInit) != 0)
-            // {
-            //     throw new Exception("Scripts not all done in tick");
-            // }
-
             ScriptsForCurrentTick = Scripts.ToList();
             TickCounter++;
         }
