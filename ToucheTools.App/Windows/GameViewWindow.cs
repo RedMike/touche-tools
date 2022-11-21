@@ -52,6 +52,9 @@ public class GameViewWindow : BaseWindow
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0.0f, 0.0f));
         ImGui.Begin("Game View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
+        var (offsetX, offsetY) = GetLoadedRoomOffset();
+        var mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos() - offset + new Vector2(offsetX, offsetY);
+        
         RenderRoom(offset);
         RenderActiveAreas(offset); //after background
         RenderKeyChars(offset);
@@ -61,7 +64,7 @@ public class GameViewWindow : BaseWindow
         RenderPointsDebug(offset);
         RenderHitboxesDebug(offset);
 
-        RenderHitboxes(offset);
+        RenderHitboxes(offset, mousePos);
         RenderActiveTalkEntries(offset); //last
 
         ImGui.End();
@@ -469,7 +472,7 @@ public class GameViewWindow : BaseWindow
         }
     }
     
-    private void RenderHitboxes(Vector2 offset)
+    private void RenderHitboxes(Vector2 offset, Vector2 mousePos)
     {
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
@@ -478,8 +481,6 @@ public class GameViewWindow : BaseWindow
         var (offsetX, offsetY) = GetLoadedRoomOffset();
 
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
-
-        var mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos() - offset + new Vector2(offsetX, offsetY);
         
         ushort pIdx = 0;
         foreach (var hitbox in program.Hitboxes)
