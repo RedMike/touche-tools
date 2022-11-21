@@ -2012,6 +2012,10 @@ public class ActiveProgramState
             {
                 keyChar2.CurrentDirection = 0;
             }
+        } else if (instruction is SetCharTextColorInstruction setCharTextColor)
+        {
+            var keyChar = GetKeyChar(setCharTextColor.Character);
+            keyChar.TextColour = setCharTextColor.Color;
         }
         else
         {
