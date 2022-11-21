@@ -26,8 +26,9 @@ public class GameViewWindow : BaseWindow
     private readonly RoomImageRenderer _roomImageRenderer;
     private readonly SpriteSheetRenderer _spriteSheetRenderer;
     private readonly LogData _log;
+    private readonly GameViewState _viewState;
 
-    public GameViewWindow(DatabaseModel model, RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer, LogData log)
+    public GameViewWindow(DatabaseModel model, RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer, LogData log, GameViewState viewState)
     {
         _model = model;
         _render = render;
@@ -36,6 +37,9 @@ public class GameViewWindow : BaseWindow
         _roomImageRenderer = roomImageRenderer;
         _spriteSheetRenderer = spriteSheetRenderer;
         _log = log;
+        _viewState = viewState;
+        _viewState.LeftClickCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Left);
+        _viewState.RightClickCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Right);
     }
 
     public override void Render()
@@ -54,6 +58,19 @@ public class GameViewWindow : BaseWindow
 
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         var mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos() - offset + new Vector2(offsetX, offsetY);
+        _viewState.MousePos = mousePos;
+        var leftCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Left);
+        var rightCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Right);
+        if (_viewState.LeftClickCount != leftCount)
+        {
+            _viewState.LeftClicked = true;
+            _viewState.LeftClickCount = leftCount;
+        }
+        if (_viewState.RightClickCount != rightCount)
+        {
+            _viewState.RightClicked = true;
+            _viewState.RightClickCount = rightCount;
+        }
         
         RenderRoom(offset);
         RenderActiveAreas(offset); //after background
@@ -64,11 +81,14 @@ public class GameViewWindow : BaseWindow
         RenderPointsDebug(offset);
         RenderHitboxesDebug(offset);
 
-        RenderHitboxes(offset, mousePos);
+        RenderHitboxes(offset);
         RenderActiveTalkEntries(offset); //last
 
         ImGui.End();
         ImGui.PopStyleVar();
+
+        _viewState.LeftClicked = false;
+        _viewState.RightClicked = false;
     }
 
     private void RenderActiveAreas(Vector2 offset)
@@ -472,7 +492,7 @@ public class GameViewWindow : BaseWindow
         }
     }
     
-    private void RenderHitboxes(Vector2 offset, Vector2 mousePos)
+    private void RenderHitboxes(Vector2 offset)
     {
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
@@ -481,6 +501,7 @@ public class GameViewWindow : BaseWindow
         var (offsetX, offsetY) = GetLoadedRoomOffset();
 
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var mousePos = _viewState.MousePos;
         
         ushort pIdx = 0;
         foreach (var hitbox in program.Hitboxes)

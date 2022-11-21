@@ -45,6 +45,7 @@ container.AddSingleton<ProgramViewSettings>();
 container.AddSingleton<ProgramViewState>();
 container.AddSingleton<SpriteViewState>();
 container.AddSingleton<ActiveProgramState>();
+container.AddSingleton<GameViewState>();
 
 container.AddSingleton<RoomImageRenderer>();
 container.AddSingleton<SpriteSheetRenderer>();
