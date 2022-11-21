@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
+﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.Services;
 using ToucheTools.App.State;
@@ -11,13 +10,13 @@ namespace ToucheTools.App.Windows;
 
 public class GameViewWindow : BaseWindow
 {
-    private const bool ShowDebug = true;
-    private const bool ShowDebugAreaRects = ShowDebug && false;
-    private const bool ShowDebugBackgroundRects = ShowDebug && false;
+    private const bool ShowDebug = false;
+    private const bool ShowDebugAreaRects = ShowDebug && true;
+    private const bool ShowDebugBackgroundRects = ShowDebug && true;
     private const bool ShowDebugPointRects = ShowDebug && true;
     private const bool ShowDebugWalkRects = ShowDebug && true;
-    private const bool ShowDebugTalkRects = ShowDebug && false;
-    private const bool ShowDebugKeyCharRects = ShowDebug && false;
+    private const bool ShowDebugTalkRects = ShowDebug && true;
+    private const bool ShowDebugKeyCharRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -176,7 +175,7 @@ public class GameViewWindow : BaseWindow
             
             ImGui.SetCursorPos(offset + new Vector2(x, y));
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(paletteCol1.R/255.0f, paletteCol1.G/255.0f, paletteCol1.B/255.0f, 1.0f));
-            ImGui.PushTextWrapPos(tx);
+            ImGui.PushTextWrapPos(offset.X + x + tx);
             ImGui.Text(talkEntry.Text);
             ImGui.PopTextWrapPos();
             ImGui.PopStyleColor();
@@ -359,7 +358,7 @@ public class GameViewWindow : BaseWindow
             var walk = program.Walks[keyChar.LastWalk.Value];
             var clipRect = program.Rects[walk.ClipRect];
 
-            var windowOffset = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
+            var windowOffset = ImGui.GetWindowPos() + offset;
             ImGui.PushClipRect(windowOffset + new Vector2(clipRect.X - offsetX, clipRect.Y - offsetY),
                 windowOffset + new Vector2(clipRect.X - offsetX + clipRect.W, clipRect.Y - offsetY + clipRect.H),
                 true);

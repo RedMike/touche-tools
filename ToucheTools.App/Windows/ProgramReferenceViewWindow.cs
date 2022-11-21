@@ -56,6 +56,12 @@ public class ProgramReferenceViewWindow : IWindow
             _activeProgramState.BreakpointHit = false;
             _activeProgramState.AutoPlay = !_activeProgramState.AutoPlay;
         }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("Press ESC"))
+        {
+            _activeProgramState.PressEscape();
+        }
 
         ImGui.Separator();
         
@@ -140,6 +146,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
 
         #region Status
+        ImGui.Text("Tick counter: " + _activeProgramState.TickCounter);
         var currentScript = state.GetRunningScript();
         if (currentScript == null)
         {

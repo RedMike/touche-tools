@@ -1000,35 +1000,32 @@ public class ActiveProgramState
 
         if (TalkEntries.Count > 0)
         {
-            var lastTalkEntry = TalkEntries.Last();
+            var lastTalkEntry = TalkEntries.First();
             lastTalkEntry.Counter--;
             if (lastTalkEntry.Counter <= 0)
             {
-                foreach (var talkEntry in TalkEntries)
+                if (lastTalkEntry.OtherKeyChar != -1)
                 {
-                    if (talkEntry.OtherKeyChar != -1)
+                    var script = CurrentState.GetKeyCharScript(lastTalkEntry.OtherKeyChar);
+                    if (script != null)
                     {
-                        var script = CurrentState.GetKeyCharScript(talkEntry.OtherKeyChar);
-                        if (script != null)
+                        if (script.Status == ProgramState.ScriptStatus.Paused)
                         {
-                            if (script.Status == ProgramState.ScriptStatus.Paused)
-                            {
-                                script.Status = ProgramState.ScriptStatus.Ready;
-                            }
+                            script.Status = ProgramState.ScriptStatus.Ready;
                         }
-                    }
-
-                    var keyChar = GetKeyChar(talkEntry.TalkingKeyChar);
-                    if (keyChar.CurrentAnim >= keyChar.Anim1Start &&
-                        keyChar.CurrentAnim < keyChar.Anim1Start + keyChar.Anim1Count)
-                    {
-                        keyChar.CurrentAnim = keyChar.Anim2Start;
-                        keyChar.CurrentAnimCounter = 0;
-                        keyChar.CurrentAnimSpeed = 0;
                     }
                 }
 
-                TalkEntries = new List<TalkEntry>();
+                var keyChar = GetKeyChar(lastTalkEntry.TalkingKeyChar);
+                if (keyChar.CurrentAnim >= keyChar.Anim1Start &&
+                    keyChar.CurrentAnim < keyChar.Anim1Start + keyChar.Anim1Count)
+                {
+                    keyChar.CurrentAnim = keyChar.Anim2Start;
+                    keyChar.CurrentAnimCounter = 0;
+                    keyChar.CurrentAnimSpeed = 0;
+                }
+
+                TalkEntries.RemoveAt(0);
             }
             else
             {
@@ -1289,8 +1286,8 @@ public class ActiveProgramState
         }
         #endregion
     }
-    
-    private int TickCounter = 0;
+
+    public int TickCounter = 0;
     public void Tick()
     {
         if (!AutoPlay)
@@ -1317,20 +1314,17 @@ public class ActiveProgramState
             }
             else
             {
-                if (!CurrentState.AreScriptsRemainingInCurrentTick() &&
-                    CurrentState.Scripts.Any(s =>
-                        s.Status == ProgramState.ScriptStatus.Ready || 
-                        s.Status == ProgramState.ScriptStatus.Running ||
-                        s.Status == ProgramState.ScriptStatus.Paused)
-                    )
+                if (!CurrentState.AreScriptsRemainingInCurrentTick())
                 {
                     TickCounter = CurrentState.TickCounter;
                     _lastTick = now;
+                    
                     StepUntilPaused(true);
-                    return;
                 }
-
-                StepUntilPaused(false);
+                else
+                {
+                    StepUntilPaused(false);
+                }
             }
         }
         else
@@ -1345,6 +1339,11 @@ public class ActiveProgramState
         {
             OnProgramChange();
         }
+    }
+
+    public void PressEscape()
+    {
+        SetFlag(ToucheTools.Constants.Flags.Known.LastAsciiKeyPress, (short)27);
     }
 
     public void StepUntilPaused(bool allowGameTick = true)
@@ -1408,10 +1407,7 @@ public class ActiveProgramState
                 OnGraphicalUpdate();
                 CurrentState.TickDone();
             }
-            else
-            {
-                return true;
-            }
+            return true;
         }
 
         return false;
