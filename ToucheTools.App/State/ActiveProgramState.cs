@@ -1363,8 +1363,14 @@ public class ActiveProgramState
         SetFlag(ToucheTools.Constants.Flags.Known.LastAsciiKeyPress, (short)27);
     }
 
-    public void LeftClicked(int x, int y, int hitboxItem)
+    public void LeftClicked(int x, int y, int hitboxItem = -1)
     {
+        if (hitboxItem == -1)
+        {
+            WalkTo(x, y);
+            return;
+        }
+        
         //if action script offset, start action -49
         var program = _model.Programs[_program.Active];
         var aso = program.ActionScriptOffsets.FirstOrDefault(aso =>

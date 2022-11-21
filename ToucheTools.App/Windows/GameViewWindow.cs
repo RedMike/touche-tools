@@ -87,6 +87,11 @@ public class GameViewWindow : BaseWindow
         ImGui.End();
         ImGui.PopStyleVar();
 
+        if (_viewState.LeftClicked)
+        {
+            _activeProgramState.LeftClicked((int)mousePos.X, (int)mousePos.Y);
+        }
+
         _viewState.LeftClicked = false;
         _viewState.RightClicked = false;
     }
@@ -511,6 +516,7 @@ public class GameViewWindow : BaseWindow
                     if (_viewState.LeftClicked)
                     {
                         _activeProgramState.LeftClicked((int)mousePos.X, (int)mousePos.Y, hitbox.Item);
+                        _viewState.LeftClicked = false;
                     }
                     RenderHitbox(offset, hitbox, pIdx.ToString(), s, x, y, w, h);
                 }
