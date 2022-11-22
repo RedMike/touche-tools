@@ -579,7 +579,6 @@ public class GameViewWindow : BaseWindow
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         var mousePos = _viewState.MousePos;
-        var screenMousePos = _viewState.ScreenMousePos;
         
         ushort pIdx = 0;
         foreach (var hitbox in program.Hitboxes)
@@ -623,11 +622,6 @@ public class GameViewWindow : BaseWindow
                 if (mousePos.X >= x && mousePos.X <= x + w &&
                     mousePos.Y >= y && mousePos.Y <= y + h)
                 {
-                    if (_viewState.LeftClicked)
-                    {
-                        _viewState.LeftClicked = false;
-                        _activeProgramState.LeftClicked((int)screenMousePos.X, (int)screenMousePos.Y, (int)mousePos.X, (int)mousePos.Y, hitbox.Item);
-                    }
                     RenderHitbox(offset, hitbox, pIdx.ToString(), s, x, y, w, h);
                 }
             }

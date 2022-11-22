@@ -1413,13 +1413,15 @@ public class ActiveProgramState
         SetFlag(ToucheTools.Constants.Flags.Known.LastAsciiKeyPress, (short)27);
     }
 
-    public void LeftClicked(int screenX, int screenY, int globalX, int globalY, int hitboxItem = -1)
+    public void LeftClicked(int screenX, int screenY, int globalX, int globalY)
     {
         if (DisabledInputCounter != 0)
         {
             return;
         }
-        if (hitboxItem == -1)
+        var program = _model.Programs[CurrentState.CurrentProgram];
+        
+        if (screenY > Game.RoomHeight)
         {
             //was it within the inventory?
             var inventoryHitbox = -1;
@@ -1539,22 +1541,67 @@ public class ActiveProgramState
                     default:
                         throw new Exception("Not implemented yet");
                 }
+            }
+            return;
+        }
 
-                return;
+        //find any hitbox that was clicked
+        foreach (var hitbox in program.Hitboxes)
+        {
+            if (!hitbox.IsDrawable)
+            {
+                continue;
+            }
+
+            if (hitbox.IsInventory)
+            {
+                //TODO: check if the inventory item is populated
+                continue;
+            }
+
+            var x = hitbox.Rect1.X;
+            var y = hitbox.Rect1.Y;
+            var w = hitbox.Rect1.W;
+            var h = hitbox.Rect1.H;
+
+            if (w == 0 || h == 0)
+            {
+                continue;
             }
             
-            //no, just walk to that point
-            WalkTo(globalX, globalY);
+            if (hitbox.IsCharacter)
+            {
+                var keyChar = GetKeyChar(hitbox.KeyChar);
+                if (keyChar.Initialised)
+                {
+                    var (chX, chY, chZ) = (keyChar.PositionX, keyChar.PositionY, keyChar.PositionZ);
+                    var zFactor = Game.GetZFactor(chZ);
+                    chX = (int)(chX*zFactor);
+                    chY = (int)(chY*zFactor);
+
+                    x = chX;
+                    y = chY;
+                    //TODO: set width/height?
+                }
+            }
+            
+            if (globalX < x || globalX > x + w || globalY < y || globalY > y + h)
+            {
+                continue;
+            }
+            
+            //if there's no action on clicking the hitbox, then just walk
+            if (!TryTriggerAction(Actions.LeftClick, hitbox.Item, 0))
+            {
+                //no script offset so just walk
+                WalkTo(globalX, globalY);                
+            }
+
             return;
         }
         
-        //if there's no action on clicking the hitbox, then just walk
-        if (!TryTriggerAction(Actions.LeftClick, hitboxItem, 0))
-        {
-            //no script offset so just walk
-            WalkTo(globalX, globalY);
-            return;
-        }
+        //no hitboxes
+        WalkTo(globalX, globalY);
     }
 
     private void RemoveGrabbedItem()
