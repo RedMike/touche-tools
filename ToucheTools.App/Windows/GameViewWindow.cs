@@ -315,6 +315,20 @@ public class GameViewWindow : BaseWindow
             ImGui.Text($"{_activeProgramState.RemovedMoney:D}");
             ImGui.PopStyleColor();
         }
+
+        if (_activeProgramState.GrabbedItem != 0)
+        {
+            //grabbed item
+            //draw icon on top of cursor
+            var iconId = _activeProgramState.GrabbedItem;
+            var iconImage = _model.Icons[iconId].Value;
+            var (iconImageId, bytes) = _iconImageRenderer.RenderIconImage(iconId, iconImage, palette);
+                
+            var iconTexture = _render.RenderImage(RenderWindow.RenderType.Icon, iconImageId, iconImage.Width, iconImage.Height, bytes);
+
+            ImGui.SetCursorPos(offset + _viewState.ScreenMousePos - new Vector2(iconImage.Width/2.0f, iconImage.Height/2.0f));
+            ImGui.Image(iconTexture, new Vector2(iconImage.Width, iconImage.Height));
+        }
     }
 
     private void RenderPointsDebug(Vector2 offset)
