@@ -2453,13 +2453,15 @@ public class ActiveProgramState
         } else if (instruction is AndInstruction)
         {
             var val = CurrentState.StackValue;
+            var uVal = BitConverter.ToUInt16(BitConverter.GetBytes(val), 0);//game does it this way
             CurrentState.MoveStackPointerForwards();
-            CurrentState.SetStackValue((short)(CurrentState.StackValue & val));
+            CurrentState.SetStackValue((short)(CurrentState.StackValue & uVal));
         } else if (instruction is OrInstruction)
         {
             var val = CurrentState.StackValue;
+            var uVal = BitConverter.ToUInt16(BitConverter.GetBytes(val), 0);//game does it this way
             CurrentState.MoveStackPointerForwards();
-            CurrentState.SetStackValue((short)(CurrentState.StackValue | val));
+            CurrentState.SetStackValue((short)(CurrentState.StackValue | uVal));
         }
         else if (instruction is TestEqualsInstruction)
         {
