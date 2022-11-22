@@ -49,6 +49,7 @@ container.AddSingleton<GameViewState>();
 
 container.AddSingleton<RoomImageRenderer>();
 container.AddSingleton<SpriteSheetRenderer>();
+container.AddSingleton<IconImageRenderer>();
 #endregion
 
 #region Windows

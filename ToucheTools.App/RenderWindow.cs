@@ -14,6 +14,7 @@ public class RenderWindow : IDisposable
         Room = 1,
         Sprite = 2,
         Primitive = 3,
+        Icon = 4,
     }
     private static readonly Vector3 ClearColor = new Vector3(0.3f, 0.45f, 0.7f);
 

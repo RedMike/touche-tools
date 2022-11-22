@@ -18,6 +18,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugTalkRects = ShowDebug && false;
     private const bool ShowDebugKeyCharRects = ShowDebug && false;
     private const bool ShowDebugHitboxRects = ShowDebug && false;
+    private const bool ShowDebugInventoryRects = ShowDebug && false;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;
@@ -25,10 +26,11 @@ public class GameViewWindow : BaseWindow
     private readonly ActiveProgramState _activeProgramState;
     private readonly RoomImageRenderer _roomImageRenderer;
     private readonly SpriteSheetRenderer _spriteSheetRenderer;
+    private readonly IconImageRenderer _iconImageRenderer;
     private readonly LogData _log;
     private readonly GameViewState _viewState;
 
-    public GameViewWindow(DatabaseModel model, RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer, LogData log, GameViewState viewState)
+    public GameViewWindow(DatabaseModel model, RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer, LogData log, GameViewState viewState, IconImageRenderer iconImageRenderer)
     {
         _model = model;
         _render = render;
@@ -38,6 +40,7 @@ public class GameViewWindow : BaseWindow
         _spriteSheetRenderer = spriteSheetRenderer;
         _log = log;
         _viewState = viewState;
+        _iconImageRenderer = iconImageRenderer;
         _viewState.LeftClickCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Left);
         _viewState.RightClickCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Right);
     }
@@ -239,15 +242,81 @@ public class GameViewWindow : BaseWindow
         var keyCharId = _activeProgramState.CurrentKeyChar;
         if (keyCharId > 1)
         {
-            keyCharId = 1;
+            keyCharId = 1; //prevents showing the valid last inventory list, but game engine code does this
+        }
+
+        var inventoryList = _activeProgramState.InventoryLists[keyCharId];
+        var palette = _activeProgramState.GetLoadedPalette();
+
+        var ox = 0;
+        var oy = Game.RoomHeight;
+        //draw background
+        DrawEntireSpriteSheet(offset, ox, oy, 12 + keyCharId);
+
+        //draw items
+        var x = ox + 245;
+        var y = 353;
+        for (var i = 0; i < 6; i++)
+        {
+            var skipFirstItems = inventoryList.DisplayOffset; //doesn't seem to ever be set to anything but 0; looked up at each iteration
+            var item = inventoryList.Items[skipFirstItems + i];
+            if (item == -1)
+            {
+                throw new Exception("Unexpectedly hit end of list");
+            }
+
+            if (item != 0)
+            {
+                var iconImage = _model.Icons[item].Value;
+                var (iconImageId, bytes) = _iconImageRenderer.RenderIconImage(item, iconImage, palette);
+                
+                var iconTexture = _render.RenderImage(RenderWindow.RenderType.Icon, iconImageId, iconImage.Width, iconImage.Height, bytes);
+
+                ImGui.SetCursorPos(offset + new Vector2(x, y));
+                ImGui.Image(iconTexture, new Vector2(iconImage.Width, iconImage.Height));
+
+                if (ShowDebugInventoryRects)
+                {
+                    RenderRectangle(offset, 32, 32, x, y, "Icon {item}", 1,
+                        255, 255, 0, 50, 255, 255, 255, 150);
+                }
+            }
+
+            x += 58;
         }
         
-        var keyChar = _activeProgramState.GetKeyChar(keyCharId);
-        var inventoryList = _activeProgramState.InventoryLists[keyCharId];
+        //draw money
+        var keyChar = _activeProgramState.GetKeyChar(0); //engine always looks up from key char 0
+        var bgCol = _activeProgramState.GetLoadedColour(210); //from game code
+        var textCol = _activeProgramState.GetLoadedColour(217); //from game code
+        //blank out background
+        RenderRectangle(offset, 40, 16, 74, 354, "", 0, 
+            bgCol.R, bgCol.G, bgCol.B, 255, 0, 0, 0, 0
+            );
+        
+        //draw text
+        ImGui.SetCursorPos(offset + new Vector2(94, 355));
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(textCol.R/255.0f, textCol.G/255.0f, textCol.B/255.0f, 1.0f));
+        ImGui.Text($"{keyChar.Money:D}");
+        ImGui.PopStyleColor();
 
-        var x = 0;
-        var y = Game.RoomHeight;
-        DrawEntireSpriteSheet(offset, x, y, 12 + keyCharId);
+        if (_activeProgramState.GlobalMoney != 0)
+        {
+            //draw icon
+            var iconImage = _model.Icons[1].Value;
+            var (iconImageId, bytes) = _iconImageRenderer.RenderIconImage(1, iconImage, palette);
+                
+            var iconTexture = _render.RenderImage(RenderWindow.RenderType.Icon, iconImageId, iconImage.Width, iconImage.Height, bytes);
+
+            ImGui.SetCursorPos(offset + new Vector2(141, 348));
+            ImGui.Image(iconTexture, new Vector2(iconImage.Width, iconImage.Height));
+            
+            //draw text
+            ImGui.SetCursorPos(offset + new Vector2(170, 378));
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(textCol.R/255.0f, textCol.G/255.0f, textCol.B/255.0f, 1.0f));
+            ImGui.Text($"{_activeProgramState.GlobalMoney:D}");
+            ImGui.PopStyleColor();
+        }
     }
 
     private void RenderPointsDebug(Vector2 offset)

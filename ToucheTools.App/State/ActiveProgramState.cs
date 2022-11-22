@@ -404,7 +404,7 @@ public class ActiveProgramState
     
     #region Inventory
     public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
-    private short GlobalMoney { get; set; } = 0;
+    public short GlobalMoney { get; set; } = 0;
     #endregion
     
     #region Flags
