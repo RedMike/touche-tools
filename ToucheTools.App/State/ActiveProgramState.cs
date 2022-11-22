@@ -2095,6 +2095,16 @@ public class ActiveProgramState
                 newVal = -1;
             }
             CurrentState.SetStackValue(newVal);
+        } else if (instruction is TestNotEqualsInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            short newVal = 0;
+            if (val != CurrentState.StackValue)
+            {
+                newVal = -1;
+            }
+            CurrentState.SetStackValue(newVal);
         } else if (instruction is TestLowerInstruction)
         {
             var val = CurrentState.StackValue;
