@@ -82,13 +82,16 @@ public class GameViewWindow : BaseWindow
         RenderHitboxesDebug(offset);
 
         RenderHitboxes(offset);
-        RenderActiveTalkEntries(offset); //last
+        RenderActiveTalkEntries(offset); //just before inventory
+
+        RenderInventory(offset); //last
 
         ImGui.End();
         ImGui.PopStyleVar();
 
         if (_viewState.LeftClicked)
         {
+            //TODO: check that the click was on the right window
             _activeProgramState.LeftClicked((int)mousePos.X, (int)mousePos.Y);
         }
 
@@ -220,6 +223,31 @@ public class GameViewWindow : BaseWindow
 
             tIdx++;
         }
+    }
+
+    private void RenderInventory(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        if (_activeProgramState.GetFlag(Flags.Known.DisableInventoryDraw) != 0)
+        {
+            return;
+        }
+
+        var keyCharId = _activeProgramState.CurrentKeyChar;
+        if (keyCharId > 1)
+        {
+            keyCharId = 1;
+        }
+        
+        var keyChar = _activeProgramState.GetKeyChar(keyCharId);
+        var inventoryList = _activeProgramState.InventoryLists[keyCharId];
+
+        var x = 0;
+        var y = Game.RoomHeight;
+        DrawEntireSpriteSheet(offset, x, y, 12 + keyCharId);
     }
 
     private void RenderPointsDebug(Vector2 offset)

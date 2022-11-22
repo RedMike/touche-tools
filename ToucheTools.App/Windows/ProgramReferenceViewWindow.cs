@@ -139,6 +139,16 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Separator();
 
         #region Status
+
+        if (_activeProgramState.DisabledInputCounter != 0)
+        {
+            ImGui.Text("Input is disabled.");
+        }
+        else
+        {
+            ImGui.Text("Input is enabled.");
+        }
+
         ImGui.Text("Tick counter: " + _activeProgramState.TickCounter);
         var currentScript = state.GetRunningScript();
         if (currentScript == null)

@@ -293,6 +293,7 @@ public class ActiveProgramState
     #endregion
     
     public ProgramState CurrentState { get; set; } = new ProgramState();
+    public int DisabledInputCounter { get; set; } = 0;
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
     private const int MinimumTimeBetweenTicksInMillis = 50;
@@ -436,7 +437,7 @@ public class ActiveProgramState
 
     #region KeyChars
     public Dictionary<int, KeyChar> KeyChars { get; set; } = new Dictionary<int, KeyChar>();
-    private short CurrentKeyChar { get; set; } = 0;
+    public short CurrentKeyChar { get; set; } = 0;
 
     public KeyChar GetKeyChar(int id)
     {
@@ -543,6 +544,7 @@ public class ActiveProgramState
             }
         }
 
+        DisabledInputCounter = 0;
         CurrentState.TickDone();
     }
 
@@ -1365,6 +1367,10 @@ public class ActiveProgramState
 
     public void LeftClicked(int x, int y, int hitboxItem = -1)
     {
+        if (DisabledInputCounter != 0)
+        {
+            return;
+        }
         if (hitboxItem == -1)
         {
             WalkTo(x, y);
@@ -1652,7 +1658,17 @@ public class ActiveProgramState
             }
         } else if (instruction is EnableInputInstruction)
         {
-            
+            DisabledInputCounter++;
+        } else if (instruction is DisableInputInstruction)
+        {
+            if (DisabledInputCounter < 0)
+            {
+                DisabledInputCounter = 0;
+            }
+            if (DisabledInputCounter > 0)
+            {
+                DisabledInputCounter--;
+            }  
         } else if (instruction is SetFlagInstruction setFlag)
         {
             var val = CurrentState.StackValue;
