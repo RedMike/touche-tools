@@ -41,8 +41,6 @@ public class GameViewWindow : BaseWindow
         _log = log;
         _viewState = viewState;
         _iconImageRenderer = iconImageRenderer;
-        _viewState.LeftClickCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Left);
-        _viewState.RightClickCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Right);
     }
 
     public override void Render()
@@ -60,19 +58,20 @@ public class GameViewWindow : BaseWindow
         ImGui.Begin("Game View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         var (offsetX, offsetY) = GetLoadedRoomOffset();
+        var screenMousePos = ImGui.GetMousePos() - ImGui.GetWindowPos() - offset;
+        _viewState.ScreenMousePos = screenMousePos;
         var mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos() - offset + new Vector2(offsetX, offsetY);
         _viewState.MousePos = mousePos;
         var leftCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Left);
         var rightCount = ImGui.GetMouseClickedCount(ImGuiMouseButton.Right);
-        if (_viewState.LeftClickCount != leftCount)
+        if (leftCount != 0)
         {
+            //TODO: is double-click necessary?
             _viewState.LeftClicked = true;
-            _viewState.LeftClickCount = leftCount;
         }
-        if (_viewState.RightClickCount != rightCount)
+        if (rightCount != 0)
         {
             _viewState.RightClicked = true;
-            _viewState.RightClickCount = rightCount;
         }
         
         RenderRoom(offset);
@@ -94,11 +93,11 @@ public class GameViewWindow : BaseWindow
 
         if (_viewState.LeftClicked)
         {
+            _viewState.LeftClicked = false;
             //TODO: check that the click was on the right window
-            _activeProgramState.LeftClicked((int)mousePos.X, (int)mousePos.Y);
+            _activeProgramState.LeftClicked((int)screenMousePos.X, (int)screenMousePos.Y, (int)mousePos.X, (int)mousePos.Y);
         }
 
-        _viewState.LeftClicked = false;
         _viewState.RightClicked = false;
     }
 
@@ -258,11 +257,10 @@ public class GameViewWindow : BaseWindow
         var y = 353;
         for (var i = 0; i < 6; i++)
         {
-            var skipFirstItems = inventoryList.DisplayOffset; //doesn't seem to ever be set to anything but 0; looked up at each iteration
-            var item = inventoryList.Items[skipFirstItems + i];
+            var item = inventoryList.Items[inventoryList.DisplayOffset + i];
             if (item == -1)
             {
-                throw new Exception("Unexpectedly hit end of list");
+                break;
             }
 
             if (item != 0)
@@ -567,6 +565,7 @@ public class GameViewWindow : BaseWindow
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         var mousePos = _viewState.MousePos;
+        var screenMousePos = _viewState.ScreenMousePos;
         
         ushort pIdx = 0;
         foreach (var hitbox in program.Hitboxes)
@@ -612,8 +611,8 @@ public class GameViewWindow : BaseWindow
                 {
                     if (_viewState.LeftClicked)
                     {
-                        _activeProgramState.LeftClicked((int)mousePos.X, (int)mousePos.Y, hitbox.Item);
                         _viewState.LeftClicked = false;
+                        _activeProgramState.LeftClicked((int)screenMousePos.X, (int)screenMousePos.Y, (int)mousePos.X, (int)mousePos.Y, hitbox.Item);
                     }
                     RenderHitbox(offset, hitbox, pIdx.ToString(), s, x, y, w, h);
                 }

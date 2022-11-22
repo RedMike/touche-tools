@@ -251,6 +251,7 @@ public class ActiveProgramState
     private void OnStartup()
     {
         //from game code
+        #region Inventory Lists
         InventoryLists[0] = new InventoryList()
         {
             DisplayOffset = 0,
@@ -277,6 +278,11 @@ public class ActiveProgramState
             Items = Enumerable.Repeat((short)0, 7).ToList()
         };
         InventoryLists[2].Items[6] = -1;
+        #endregion
+        
+        #region Inventory Hitboxes
+        
+        #endregion
 
         for (var i = 0; i < 7; i++)
         {
@@ -403,6 +409,41 @@ public class ActiveProgramState
     #endregion
     
     #region Inventory
+    public static class InventoryHitboxType
+    {
+        public const int Character = 0;
+        public const int MoneyDisplay = 1;
+        public const int GoldCoins = 2;
+        public const int SilverCoins = 3;
+        public const int Money = 4;
+        public const int Scroller1 = 5;
+        public const int Object1 = 6;
+        public const int Object2 = 7;
+        public const int Object3 = 8;
+        public const int Object4 = 9;
+        public const int Object5 = 10;
+        public const int Object6 = 11;
+        public const int Scroller2 = 12;
+        
+    }
+
+    public static readonly Dictionary<int, (int, int, int, int)> InventoryHitboxes = new Dictionary<int, (int, int, int, int)>
+    {
+        { InventoryHitboxType.Character , (0, 354, 50, 46)},
+        { InventoryHitboxType.MoneyDisplay , (66, 354, 58, 26)},
+        { InventoryHitboxType.GoldCoins , (74, 380, 42, 18)},
+        { InventoryHitboxType.SilverCoins , (116, 380, 42, 18)},
+        { InventoryHitboxType.Money , (144, 354, 44, 26)},
+        { InventoryHitboxType.Scroller1 , (202, 354, 36, 26)},
+        { InventoryHitboxType.Object1 , (242, 354, 58, 26)},
+        { InventoryHitboxType.Object2 , (300, 354, 58, 26)},
+        { InventoryHitboxType.Object3 , (358, 354, 58, 26)},
+        { InventoryHitboxType.Object4 , (416, 354, 58, 26)},
+        { InventoryHitboxType.Object5 , (474, 354, 58, 26)},
+        { InventoryHitboxType.Object6 , (532, 354, 58, 26)},
+        { InventoryHitboxType.Scroller2 , (594, 354, 46, 25)}
+    };
+
     public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
     public short GlobalMoney { get; set; } = 0;
     #endregion
@@ -1365,7 +1406,7 @@ public class ActiveProgramState
         SetFlag(ToucheTools.Constants.Flags.Known.LastAsciiKeyPress, (short)27);
     }
 
-    public void LeftClicked(int x, int y, int hitboxItem = -1)
+    public void LeftClicked(int screenX, int screenY, int globalX, int globalY, int hitboxItem = -1)
     {
         if (DisabledInputCounter != 0)
         {
@@ -1373,7 +1414,80 @@ public class ActiveProgramState
         }
         if (hitboxItem == -1)
         {
-            WalkTo(x, y);
+            //was it within the inventory?
+            var inventoryHitbox = -1;
+            foreach (var (inventoryHitboxId, (hitboxX, hitboxY, hitboxW, hitboxH)) in InventoryHitboxes)
+            {
+                if (screenX < hitboxX || screenX > hitboxX + hitboxW || screenY < hitboxY || screenY > hitboxY + hitboxH)
+                {
+                    continue;
+                }
+
+                inventoryHitbox = inventoryHitboxId;
+                break;
+            }
+
+            if (inventoryHitbox != -1)
+            {
+                var keyChar = GetKeyChar(CurrentKeyChar);
+                var inventoryList = InventoryLists[CurrentKeyChar]; //TODO: this may need to be 0 instead, code uses pointers
+                var firstEmptyItem = inventoryList.Items.FindIndex(i => i == 0);
+                switch (inventoryHitbox)
+                {
+                    case InventoryHitboxType.Character:
+                    case InventoryHitboxType.MoneyDisplay: //in game code this is handled separately?
+                        if (GlobalMoney != 0)
+                        {
+                            keyChar.Money += GlobalMoney;
+                            GlobalMoney = 0;
+                        }
+                        break;
+                    case InventoryHitboxType.GoldCoins:
+                        if (keyChar.Money >= 10)
+                        {
+                            keyChar.Money -= 10;
+                            GlobalMoney += 10;
+                        }
+
+                        break;
+                    case InventoryHitboxType.SilverCoins:
+                        if (keyChar.Money > 0)
+                        {
+                            keyChar.Money -= 1;
+                            GlobalMoney += 1;
+                        }
+                        break;
+                    
+                    case InventoryHitboxType.Scroller1:
+                        if (inventoryList.DisplayOffset <= inventoryList.ItemsPerLine)
+                        {
+                            inventoryList.DisplayOffset = 0;
+                        }
+                        else
+                        {
+                            inventoryList.DisplayOffset -= inventoryList.ItemsPerLine;
+                        }
+                        break;
+                    
+                    case InventoryHitboxType.Scroller2:
+                        if (inventoryList.DisplayOffset + inventoryList.ItemsPerLine + 1 < firstEmptyItem) 
+                        {
+                            inventoryList.DisplayOffset += inventoryList.ItemsPerLine;
+                        }
+                        else
+                        {
+                            inventoryList.DisplayOffset = (short)Math.Max(0, firstEmptyItem - 6 - 1);
+                        }
+                        break;
+
+                    default:
+                        throw new Exception("Not implemented yet");
+                }
+                return;
+            }
+            
+            //no, just walk to that point
+            WalkTo(globalX, globalY);
             return;
         }
         
@@ -1385,7 +1499,7 @@ public class ActiveProgramState
         if (aso == null)
         {
             //no script offset so just walk
-            WalkTo(x, y);
+            WalkTo(globalX, globalY);
             return;
         }
 
