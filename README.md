@@ -38,7 +38,7 @@ was achieved.
 
 ## TODO List
 
-[ ] Debugger: Finish implementing the game engine-specific logic and 
+[x] Debugger: Finish implementing the game engine-specific logic and 
 rendering (inventory, giving items, money, action menu).
 
 [ ] Debugger: Start implementing conversation system.
