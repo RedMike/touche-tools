@@ -294,6 +294,8 @@ public class ActiveProgramState
         }
         
         SetPaletteScale(0, 255, 0, 0, 0);
+
+        SetFlag(ToucheTools.Constants.Flags.Known.TalkFramesEnabled, 1);
     }
 
     #region Breakpoint/debug
@@ -1346,8 +1348,9 @@ public class ActiveProgramState
                             }
                             if (TalkEntries.Count > 0 && 
                                 TalkEntries.Any(t => t.TalkingKeyChar == keyCharId 
-                                                            || t.TalkingKeyChar == id2) && 
-                                GetFlag(901) == 1)
+                                                            || t.TalkingKeyChar == id2) 
+                                && GetFlag(ToucheTools.Constants.Flags.Known.TalkFramesEnabled) == 1
+                                )
                             {
                                 animStart = keyChar.Anim1Start;
                                 animCount = keyChar.Anim1Count;

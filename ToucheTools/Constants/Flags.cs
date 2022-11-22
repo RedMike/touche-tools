@@ -59,6 +59,7 @@ public static class Flags
         
         EnableFrench = 621, //?
         
+        TalkFramesEnabled = 901,
         DebugDrawWalks = 902,
         LoadExternalScripts = 911, //not implemented in ScummVM
     }
