@@ -20,6 +20,12 @@ public class ActiveProgramState
             return Items.Where(i => i > 0).ToList();
         }
 
+        public void RemoveItem(int index)
+        {
+            Items.RemoveAt(index);
+            Items.Add(0);
+        }
+
         public void PrependItem(short item)
         {
             if (Items.All(i => i != 0))
@@ -1520,7 +1526,7 @@ public class ActiveProgramState
                         else
                         {
                             //clicked an item
-                            inventoryList.Items[inventoryList.DisplayOffset + obj] = 0;
+                            inventoryList.RemoveItem(inventoryList.DisplayOffset + obj);
                             
                             RemoveGrabbedItem();
 
