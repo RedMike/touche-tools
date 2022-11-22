@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models.Instructions;
+﻿using ToucheTools.Constants;
+
+namespace ToucheTools.Models.Instructions;
 
 public class AddRoomAreaInstruction : BaseInstruction
 {
@@ -22,6 +24,6 @@ public class AddRoomAreaInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} room {Num} position from flags {Flag}, {Flag+1}";
+        return $"{Opcode:G} background {Num} offset flags {Flags.GetFlagText(Flag)}, {Flags.GetFlagText((ushort)(Flag+1))}";
     }
 }

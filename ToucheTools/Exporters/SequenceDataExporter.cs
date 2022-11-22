@@ -6,7 +6,7 @@ namespace ToucheTools.Exporters;
 
 public class SequenceDataExporter
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(SequenceDataExporter));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(SequenceDataExporter));
     private readonly Stream _stream;
     private readonly BinaryWriter _writer;
     

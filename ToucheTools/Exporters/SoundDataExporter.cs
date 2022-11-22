@@ -6,7 +6,7 @@ namespace ToucheTools.Exporters;
 
 public class SoundDataExporter
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(SoundDataExporter));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(SoundDataExporter));
     private readonly Stream _stream;
     private readonly BinaryWriter _writer;
     

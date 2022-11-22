@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models.Instructions;
+﻿using ToucheTools.Constants;
+
+namespace ToucheTools.Models.Instructions;
 
 public class StartEpisodeInstruction : BaseInstruction
 {

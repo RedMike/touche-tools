@@ -7,7 +7,7 @@ namespace ToucheTools.Loaders;
 
 public class SpriteImageDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(SpriteImageDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(SpriteImageDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;
@@ -27,7 +27,7 @@ public class SpriteImageDataLoader
         ushort rawHeight = _reader.ReadUInt16();
         var initialWidth = (int)rawWidth;
         var initialHeight = (int)rawHeight;
-        _logger.Log(LogLevel.Information, "Sprite image {}: initially {}x{}", number, initialWidth, initialHeight);
+        _logger.Log(LogLevel.Debug, "Sprite image {}: initially {}x{}", number, initialWidth, initialHeight);
 
         var imageData = new byte[initialHeight, initialWidth];
         //RLE compression
@@ -84,7 +84,7 @@ public class SpriteImageDataLoader
 
         if (width != initialWidth || height != initialHeight)
         {
-            _logger.Log(LogLevel.Information, "Sprite image {}: true {}x{}", number, width, height);
+            _logger.Log(LogLevel.Debug, "Sprite image {}: true {}x{}", number, width, height);
         }
 
         var decodedImageData = new byte[initialHeight, initialWidth];

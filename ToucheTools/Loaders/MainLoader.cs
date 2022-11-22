@@ -8,7 +8,7 @@ namespace ToucheTools.Loaders;
 
 public class MainLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(MainLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(MainLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     

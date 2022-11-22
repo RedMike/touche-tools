@@ -4,11 +4,11 @@ public class SetCharFrameInstruction : BaseInstruction
 {
     public enum Type
     {
-        Loop = 0, //anim, ?
-        RandomCountThenStop = 1, //anim, ? 
-        TalkFrames = 2, //anim, ?
-        StartPaused = 3, //anim, ignored (starts on 0)
-        Todo4 = 4 
+        Loop = 0, //val2 => anim2start, anim3start; val3 => anim2count, anim3count
+        RandomCountThenStop = 1, //??
+        TalkFrames = 2, //val2 => anim1start; val3 => anim1count
+        StartPaused = 3, //val2 => currentanim, set speed/count to 0
+        Todo4 = 4 //val2 => anim3start; val3 => anim3count
     }
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharFrame;
     public override int Width => 8;

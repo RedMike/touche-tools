@@ -7,7 +7,7 @@ namespace ToucheTools.Loaders;
 
 public class SequenceDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(SequenceDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(SequenceDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;
@@ -182,10 +182,14 @@ public class SequenceDataLoader
                         lastFrame = true;
                     }
 
-                    var walkDx = reader.ReadUInt16();
-                    var walkDy = reader.ReadUInt16();
-                    var walkDz = reader.ReadUInt16();
-                    var delay = reader.ReadUInt16();
+                    var rawWalkDx = reader.ReadUInt16();
+                    var rawWalkDy = reader.ReadUInt16();
+                    var rawWalkDz = reader.ReadUInt16();
+                    var rawDelay = reader.ReadUInt16();
+                    var walkDx = BitConverter.ToInt16(BitConverter.GetBytes(rawWalkDx), 0);
+                    var walkDy = BitConverter.ToInt16(BitConverter.GetBytes(rawWalkDy), 0);
+                    var walkDz = BitConverter.ToInt16(BitConverter.GetBytes(rawWalkDz), 0);
+                    var delay = BitConverter.ToInt16(BitConverter.GetBytes(rawDelay), 0);
                     frame.WalkDx = walkDx;
                     frame.WalkDy = walkDy;
                     frame.WalkDz = walkDz;

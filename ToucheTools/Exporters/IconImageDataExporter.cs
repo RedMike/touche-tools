@@ -6,7 +6,7 @@ namespace ToucheTools.Exporters;
 
 public class IconImageDataExporter
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(IconImageDataExporter));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(IconImageDataExporter));
     private readonly Stream _stream;
     private readonly BinaryWriter _writer;
 

@@ -8,7 +8,7 @@ namespace ToucheTools.Helpers;
 
 public static class ProgramInstructionHelper
 {
-    private static readonly ILogger Logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(ProgramInstructionHelper));
+    private static readonly ILogger Logger = Logging.Factory.CreateLogger(typeof(ProgramInstructionHelper));
     
     private static readonly Dictionary<ProgramDataModel.Opcode, Type> KnownInstructions =
         new Dictionary<ProgramDataModel.Opcode, Type>();
@@ -34,7 +34,7 @@ public static class ProgramInstructionHelper
                 duplicateOpcodeMappings.Add($"{opcode:G} types {KnownInstructions[opcode]}, {type}");
             }
 
-            Logger.Log(LogLevel.Information, "Bound opcode {} to type {}", opcode, type);
+            Logger.Log(LogLevel.Debug, "Bound opcode {} to type {}", opcode, type);
             KnownInstructions[opcode] = type;
         }
 

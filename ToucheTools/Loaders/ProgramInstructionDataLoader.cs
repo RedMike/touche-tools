@@ -8,7 +8,7 @@ namespace ToucheTools.Loaders;
 
 public class ProgramInstructionDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(ProgramInstructionDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(ProgramInstructionDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     

@@ -7,7 +7,7 @@ namespace ToucheTools.Exporters;
 
 public class ProgramDataExporter
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(ProgramDataExporter));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(ProgramDataExporter));
     private readonly Stream _stream;
     private readonly BinaryWriter _writer;
     
@@ -87,7 +87,7 @@ public class ProgramDataExporter
                 writer.Write((ushort)area.SrcX);
                 writer.Write((ushort)area.SrcY);
                 writer.Write((ushort)area.Id);
-                writer.Write((ushort)area.State);
+                writer.Write((ushort)area.InitialState);
                 writer.Write((ushort)area.AnimationCount);
                 writer.Write((ushort)area.AnimationNext);
             }

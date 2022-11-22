@@ -29,13 +29,20 @@ public class ProgramDataModel
         public int Area2 { get; set; }
     }
 
+    public enum AreaState
+    {
+        Static = 0,
+        Animate = 1,
+        AnimateAndSkip = 2
+    }
+
     public class Area
     {
         public Rect Rect { get; set; }
         public int SrcX { get; set; }
         public int SrcY { get; set; }
         public int Id { get; set; }
-        public int State { get; set; }
+        public AreaState InitialState { get; set; }
         public int AnimationCount { get; set; }
         public int AnimationNext { get; set; }
     }
@@ -49,6 +56,15 @@ public class ProgramDataModel
         public int Offset { get; set; }
         public int ScaleMul { get; set; }
         public int ScaleDiv { get; set; }
+
+        /// <summary>
+        /// If not drawable then only used via adding room area?
+        /// </summary>
+        public bool IsInitiallyDrawable => Rect.Y != 20000;
+        /// <summary>
+        /// Influenced by ScaleMul/ScaleDiv and Offset
+        /// </summary>
+        public bool IsScaled => Type == 4;
     }
 
     public class Hitbox
@@ -61,6 +77,13 @@ public class ProgramDataModel
         public int[] Actions { get; set; } //always length 8
         public Rect Rect1 { get; set; }
         public Rect Rect2 { get; set; }
+
+        public bool IsDrawable => (Item & 0x1000) == 0;
+        public bool IsInventory => (Item & 0xF000) == 0x1000;
+        public int InventoryItem => (Item & ~0x1000);
+        public bool IsDisabled => (Item & 0xF000) == 0x2000;
+        public bool IsCharacter => (Item & 0xF000) == 0x4000;
+        public int KeyChar => (Item & ~0xF000);
     }
 
     public class ActionScriptOffset

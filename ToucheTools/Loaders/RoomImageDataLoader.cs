@@ -7,7 +7,7 @@ namespace ToucheTools.Loaders;
 
 public class RoomImageDataLoader
 {
-    private readonly ILogger _logger = LoggerFactory.Create((builder) => builder.AddSimpleConsole()).CreateLogger(typeof(RoomImageDataLoader));
+    private readonly ILogger _logger = Logging.Factory.CreateLogger(typeof(RoomImageDataLoader));
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly ResourceDataLoader _resourceDataLoader;
@@ -27,7 +27,7 @@ public class RoomImageDataLoader
         ushort rawHeight = _reader.ReadUInt16();
         var initialWidth = (int)rawWidth;
         var initialHeight = (int)rawHeight;
-        _logger.Log(LogLevel.Information, "Room image {}: initially {}x{}", number, initialWidth, initialHeight);
+        _logger.Log(LogLevel.Debug, "Room image {}: initially {}x{}", number, initialWidth, initialHeight);
 
         var imageData = new byte[initialHeight, initialWidth];
         //RLE compression
@@ -61,39 +61,29 @@ public class RoomImageDataLoader
             }
         }
         
-        //find true width and height
-        var height = initialHeight;
-        //TODO: this wasn't correcting the byte array size
-        // for (var i = 0; i < initialHeight; i++)
-        // {
-        //     if (imageData[i, 0] == 64 || imageData[i, 0] == 255)
-        //     {
-        //         height = i;
-        //         break;
-        //     }
-        // }
-
-        var width = initialWidth;
-        //TODO: this wasn't correcting the byte array size
-        // for (var i = 0; i < initialWidth; i++)
-        // {
-        //     if (imageData[0, i] == 64 || imageData[0, i] == 255)
-        //     {
-        //         width = i;
-        //         break;
-        //     }
-        // }
-
-        if (width != initialWidth || height != initialHeight)
+        //find actual room width
+        var roomWidth = initialWidth;
+        for (var i = 0; i < initialWidth; i++)
         {
-            _logger.Log(LogLevel.Information, "Room image {}: true {}x{}", number, width, height);
+            if (imageData[0, i] == 255)
+            {
+                roomWidth = i;
+                imageData[0, i] = 0;
+                break;
+            }
+        }
+
+        if (roomWidth != initialWidth)
+        {
+            _logger.Log(LogLevel.Information, "Room image {}: room {}x{}", number, roomWidth, initialHeight);
         }
 
         roomImage = new RoomImageDataModel()
         {
-            Width = width,
-            Height = height,
-            RawData = imageData
+            Width = initialWidth,
+            Height = initialHeight,
+            RawData = imageData,
+            RoomWidth = roomWidth
         };
     }
 }
