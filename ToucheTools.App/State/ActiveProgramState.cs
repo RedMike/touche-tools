@@ -1442,6 +1442,11 @@ public class ActiveProgramState
                             keyChar.Money += RemovedMoney;
                             RemovedMoney = 0;
                         }
+
+                        if (GrabbedItem == 1)
+                        {
+                            RemoveGrabbedItem();
+                        }
                         break;
                     case InventoryHitboxType.GoldCoins:
                         if (keyChar.Money >= 10)
@@ -1458,7 +1463,14 @@ public class ActiveProgramState
                             RemovedMoney += 1;
                         }
                         break;
-                    
+                    case InventoryHitboxType.Money:
+                        if (RemovedMoney != 0)
+                        {
+                            RemoveGrabbedItem();
+                            
+                            GrabbedItem = 1;
+                        }
+                        break;
                     case InventoryHitboxType.Scroller1:
                         if (inventoryList.DisplayOffset <= inventoryList.ItemsPerLine)
                         {
@@ -1502,15 +1514,7 @@ public class ActiveProgramState
                             //clicked an item onto another item
                             if (TryTriggerAction(Actions.LeftClickItemOntoItem, (item | 0x1000), 0))
                             {
-                                if (GrabbedItem != 0)
-                                {
-                                    if (GrabbedItem != 1)
-                                    {
-                                        //add item to inventory
-                                        AddItemToInventory(CurrentKeyChar, GrabbedItem);
-                                    }
-                                    GrabbedItem = 0;
-                                }
+                                RemoveGrabbedItem();
                             }
                         }
                         else
@@ -1518,17 +1522,7 @@ public class ActiveProgramState
                             //clicked an item
                             inventoryList.Items[inventoryList.DisplayOffset + obj] = 0;
                             
-                            //clear any grabbed item
-                            if (GrabbedItem != 0)
-                            {
-                                if (GrabbedItem != 1)
-                                {
-                                    //add item to inventory
-                                    AddItemToInventory(CurrentKeyChar, GrabbedItem);
-                                }
-
-                                GrabbedItem = 0;
-                            }
+                            RemoveGrabbedItem();
 
                             if (item != 0)
                             {
@@ -1554,6 +1548,20 @@ public class ActiveProgramState
             //no script offset so just walk
             WalkTo(globalX, globalY);
             return;
+        }
+    }
+
+    private void RemoveGrabbedItem()
+    {
+        if (GrabbedItem != 0)
+        {
+            if (GrabbedItem != 1)
+            {
+                //add item to inventory
+                AddItemToInventory(CurrentKeyChar, GrabbedItem);
+            }
+
+            GrabbedItem = 0;
         }
     }
 

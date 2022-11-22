@@ -298,7 +298,7 @@ public class GameViewWindow : BaseWindow
         ImGui.Text($"{keyChar.Money:D}");
         ImGui.PopStyleColor();
 
-        if (_activeProgramState.RemovedMoney != 0)
+        if (_activeProgramState.RemovedMoney != 0 && _activeProgramState.GrabbedItem != 1)
         {
             //draw icon
             var iconImage = _model.Icons[1].Value;
