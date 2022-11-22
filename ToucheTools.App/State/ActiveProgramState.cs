@@ -463,6 +463,31 @@ public class ActiveProgramState
     public short GrabbedItem { get; set; } = 0;
     #endregion
     
+    #region Action Menus
+    public class ActionMenu
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public string Name { get; set; } = "";
+        public List<int> Actions { get; set; } = new List<int>();
+        public int Item { get; set; }
+    }
+
+    public ActionMenu? ActiveMenu { get; set; } = null;
+
+    public void ChooseMenuOption(int action)
+    {
+        if (ActiveMenu == null || !ActiveMenu.Actions.Contains(action))
+        {
+            throw new Exception("Choosing menu option from missing menu");
+        }
+
+        var item = ActiveMenu.Item;
+        ActiveMenu = null;
+        TryTriggerAction(action, item, 0);
+    }
+    #endregion
+    
     #region Flags
     public Dictionary<ushort, short> Flags { get; set; } = new Dictionary<ushort, short>();
 
@@ -517,7 +542,7 @@ public class ActiveProgramState
         var str = "";
         if (num < 0)
         {
-            if (!_model.Text?.Strings.ContainsKey(num) ?? false)
+            if (!_model.Text?.Strings.ContainsKey(-num) ?? false)
             {
                 return "";
             }
@@ -1421,6 +1446,225 @@ public class ActiveProgramState
         SetFlag(ToucheTools.Constants.Flags.Known.LastAsciiKeyPress, (short)27);
     }
 
+    public void RightClicked(int screenX, int screenY, int globalX, int globalY)
+    {
+        if (DisabledInputCounter != 0)
+        {
+            return;
+        }
+
+        var program = _model.Programs[CurrentState.CurrentProgram];
+        if (screenX < 0 || screenX > Constants.GameScreenWidth || screenY < 0 || screenY > Constants.GameScreenHeight)
+        {
+            return;
+        }
+
+        if (screenY > Game.RoomHeight)
+        {
+            //was it within the inventory?
+            var inventoryHitbox = -1;
+            var inventoryHitboxX = -1;
+            foreach (var (inventoryHitboxId, (hitboxX, hitboxY, hitboxW, hitboxH)) in InventoryHitboxes)
+            {
+                if (screenX < hitboxX || screenX > hitboxX + hitboxW || screenY < hitboxY ||
+                    screenY > hitboxY + hitboxH)
+                {
+                    continue;
+                }
+
+                inventoryHitbox = inventoryHitboxId;
+                inventoryHitboxX = hitboxX;
+                break;
+            }
+
+            if (inventoryHitbox != -1)
+            {
+                var keyChar = GetKeyChar(CurrentKeyChar);
+                var inventoryList = InventoryLists[CurrentKeyChar]; //TODO: this may need to be 0 instead, code uses pointers
+                var firstEmptyItem = inventoryList.Items.FindIndex(i => i == 0);
+                switch (inventoryHitbox)
+                {
+                    case InventoryHitboxType.Character:
+                    case InventoryHitboxType.MoneyDisplay: 
+                    case InventoryHitboxType.GoldCoins:
+                    case InventoryHitboxType.SilverCoins:
+                    case InventoryHitboxType.Money:
+                    case InventoryHitboxType.Scroller1:
+                    case InventoryHitboxType.Scroller2:
+                        //nothing happens
+                        break;
+
+                    case InventoryHitboxType.Object1:
+                    case InventoryHitboxType.Object2:
+                    case InventoryHitboxType.Object3:
+                    case InventoryHitboxType.Object4:
+                    case InventoryHitboxType.Object5:
+                    case InventoryHitboxType.Object6:
+                        var obj = (inventoryHitbox - InventoryHitboxType.Object1);
+                        var item = inventoryList.Items[inventoryList.DisplayOffset + obj] | 0x1000;
+                        //find the "hitbox" for the item (stores actions and strings)
+                        foreach (var hitbox in program.Hitboxes)
+                        {
+                            if (hitbox.Item == item)
+                            {
+                                var customActions = false;
+                                var len = 0;
+                                foreach (var action in hitbox.Actions)
+                                {
+                                    if (action == 0)
+                                    {
+                                        break;
+                                    }
+                                    len++;
+
+                                    if (action != Actions.LeftClick && action != Actions.LeftClickWithItem)
+                                    {
+                                        customActions = true;
+                                    }
+                                }
+
+                                if (!customActions)
+                                {
+                                    TryTriggerAction(Actions.DoNothing, item, 0);
+                                    return;
+                                }
+
+                                var actions = hitbox.Actions.Take(len).Where(a =>
+                                    a != Actions.LeftClick && a != Actions.LeftClickWithItem).ToList();
+                                
+                                ActiveMenu = new ActionMenu()
+                                {
+                                    Item = hitbox.Item,
+                                    X = inventoryHitboxX,
+                                    Y = Game.RoomHeight,
+                                    Name = GetString(hitbox.String),
+                                    Actions = actions
+                                };
+                            }
+                        }
+
+                        break;
+                    default:
+                        throw new Exception("Not implemented yet");
+                }
+            }
+            return;
+        }
+        
+        //find any hitbox that was clicked
+        foreach (var hitbox in program.Hitboxes)
+        {
+            if (!hitbox.IsDrawable)
+            {
+                continue;
+            }
+
+            if (hitbox.IsInventory)
+            {
+                var flag = GetInventoryFlag(hitbox.InventoryItem);
+                if (flag != 0x20)
+                {
+                    continue;
+                }
+            }
+
+            var x = hitbox.Rect1.X;
+            var y = hitbox.Rect1.Y;
+            var w = hitbox.Rect1.W;
+            var h = hitbox.Rect1.H;
+
+            if (w == 0 || h == 0)
+            {
+                continue;
+            }
+            
+            if (hitbox.IsCharacter)
+            {
+                var keyChar = GetKeyChar(hitbox.KeyChar);
+                if (keyChar.Initialised)
+                {
+                    if (_viewState.KeyCharRenderedRects.ContainsKey(hitbox.KeyChar))
+                    {
+                        (x, y, w, h) = _viewState.KeyCharRenderedRects[hitbox.KeyChar];
+                    }
+
+                    var offsetX = GetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX);
+                    var offsetY = GetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY);
+                    x += offsetX;
+                    y += offsetY;
+                }
+            }
+            
+            if (globalX < x || globalX > x + w || globalY < y || globalY > y + h)
+            {
+                continue;
+            }
+
+            if (hitbox.IsDisabled)
+            {
+                continue;
+            }
+            
+            if (GrabbedItem != 0)
+            {
+                SetFlag(ToucheTools.Constants.Flags.Known.CurrentCursorObject, GrabbedItem);
+                if (GrabbedItem == 1)
+                {
+                    SetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney, RemovedMoney);
+                    RemovedMoney = 0;
+                }
+
+                InventoryFlags.Remove(GrabbedItem);
+                RemoveGrabbedItem();
+
+                if (true) //TODO: if not giving item?
+                {
+                    if (!TryTriggerAction(Actions.LeftClickWithItem, hitbox.Item, 0))
+                    {
+                        var prevGrabbedItem = GetFlag(ToucheTools.Constants.Flags.Known.CurrentCursorObject);
+                        if (prevGrabbedItem == 1)
+                        {
+                            RemovedMoney = GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
+                        }
+                        else
+                        {
+                            AddItemToInventory(CurrentKeyChar, prevGrabbedItem);
+                        }
+                    }
+                }
+                else
+                {
+                    SetFlag(ToucheTools.Constants.Flags.Known.ItemBeingGiven, (short)(hitbox.Item - 1));
+                    //TODO: set flag 117 to hitbox item - 1, then mark give item -1
+                }
+                
+                if (GrabbedItem != 0)
+                {
+                    RemoveGrabbedItem();
+                }
+
+                return;
+            }
+
+            if (GrabbedItem != 0)
+            {
+                RemoveGrabbedItem();
+            }
+            
+            //if there's no action on clicking the hitbox, then just walk
+            if (!TryTriggerAction(Actions.LeftClick, hitbox.Item, 0))
+            {
+                //no script offset 
+                //TODO:
+            }
+
+            return;
+        }
+        
+        //no hitboxes
+        //TODO:
+    }
+
     public void LeftClicked(int screenX, int screenY, int globalX, int globalY)
     {
         if (DisabledInputCounter != 0)
@@ -1428,6 +1672,10 @@ public class ActiveProgramState
             return;
         }
         var program = _model.Programs[CurrentState.CurrentProgram];
+        if (screenX < 0 || screenX > Constants.GameScreenWidth || screenY < 0 || screenY > Constants.GameScreenHeight)
+        {
+            return;
+        }
         
         if (screenY > Game.RoomHeight)
         {

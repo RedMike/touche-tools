@@ -88,17 +88,22 @@ public class GameViewWindow : BaseWindow
 
         RenderInventory(offset); //last
 
+        RenderActionMenu(offset);
+
         ImGui.End();
         ImGui.PopStyleVar();
 
         if (_viewState.LeftClicked)
         {
             _viewState.LeftClicked = false;
-            //TODO: check that the click was on the right window
             _activeProgramState.LeftClicked((int)screenMousePos.X, (int)screenMousePos.Y, (int)mousePos.X, (int)mousePos.Y);
         }
 
-        _viewState.RightClicked = false;
+        if (_viewState.RightClicked)
+        {
+            _viewState.RightClicked = false;
+            _activeProgramState.RightClicked((int)screenMousePos.X, (int)screenMousePos.Y, (int)mousePos.X, (int)mousePos.Y);
+        }
     }
 
     private void RenderActiveAreas(Vector2 offset)
@@ -329,6 +334,36 @@ public class GameViewWindow : BaseWindow
             ImGui.SetCursorPos(offset + _viewState.ScreenMousePos - new Vector2(iconImage.Width/2.0f, iconImage.Height/2.0f));
             ImGui.Image(iconTexture, new Vector2(iconImage.Width, iconImage.Height));
         }
+    }
+
+    private void RenderActionMenu(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+        
+        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        if (_activeProgramState.ActiveMenu == null)
+        {
+            return;
+        }
+
+        var menu = _activeProgramState.ActiveMenu;
+        var textHeight = ImGui.GetTextLineHeightWithSpacing();
+        ImGui.SetCursorPos(offset + new Vector2(menu.X, menu.Y - textHeight * menu.Actions.Count));
+        ImGui.BeginChild(menu.Name);
+        
+        foreach (var action in menu.Actions)
+        {
+            var str = _activeProgramState.GetString(action);
+            if (ImGui.Button(str))
+            {
+                _activeProgramState.ChooseMenuOption(action);
+            }
+        }
+        
+        ImGui.EndChild();
     }
 
     private void RenderPointsDebug(Vector2 offset)
