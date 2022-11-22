@@ -101,11 +101,11 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             while (true)
             {
-                var x = programReader.ReadUInt16();
-                var y = programReader.ReadUInt16();
-                var w = programReader.ReadUInt16();
-                var h = programReader.ReadUInt16();
-                if (x == ushort.MaxValue)
+                var x = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var y = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var w = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var h = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                if (x == -1)
                 {
                     break;
                 }
@@ -131,11 +131,11 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             while (true)
             {
-                var x = programReader.ReadUInt16();
-                var y = programReader.ReadUInt16();
-                var z = programReader.ReadUInt16();
-                var order = programReader.ReadUInt16();
-                if (x == ushort.MaxValue)
+                var x = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var y = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var z = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var order = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                if (x == -1)
                 {
                     break;
                 }
@@ -161,8 +161,8 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             while (true)
             {
-                var point1 = programReader.ReadUInt16();
-                if (point1 == ushort.MaxValue)
+                var point1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                if (point1 == -1)
                 {
                     break;
                 }
@@ -172,15 +172,15 @@ public class ProgramDataLoader
                     throw new Exception($"Unknown point referenced: {point1} out of {program.Points.Count}");
                 }
 
-                var point2 = programReader.ReadUInt16();
+                var point2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 if (point2 > program.Points.Count)
                 {
                     throw new Exception($"Unknown point referenced: {point2} out of {program.Points.Count}");
                 }
 
-                var clipRect = programReader.ReadUInt16();
-                var area1 = programReader.ReadUInt16();
-                var area2 = programReader.ReadUInt16();
+                var clipRect = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var area1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var area2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 programStream.Seek(12, SeekOrigin.Current); //unused
                 program.Walks.Add(new ProgramDataModel.Walk()
                 {
@@ -204,21 +204,21 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             while (true)
             {
-                var x = programReader.ReadUInt16();
-                if (x == ushort.MaxValue)
+                var x = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                if (x == -1)
                 {
                     break;
                 }
 
-                var y = programReader.ReadUInt16();
-                var w = programReader.ReadUInt16();
-                var h = programReader.ReadUInt16();
-                var srcX = programReader.ReadUInt16();
-                var srcY = programReader.ReadUInt16();
-                var id = programReader.ReadUInt16();
-                var state = programReader.ReadUInt16();
-                var animCount = programReader.ReadUInt16();
-                var animNext = programReader.ReadUInt16();
+                var y = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var w = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var h = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var srcX = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var srcY = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var id = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var state = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var animCount = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var animNext = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
 
                 var rect = new ProgramDataModel.Rect()
                 {
@@ -254,21 +254,21 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             while (true)
             {
-                var x = programReader.ReadUInt16();
-                if (x == ushort.MaxValue)
+                var x = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                if (x == -1)
                 {
                     break;
                 }
 
-                var y = programReader.ReadUInt16();
-                var w = programReader.ReadUInt16();
-                var h = programReader.ReadUInt16();
-                var srcX = programReader.ReadUInt16();
-                var srcY = programReader.ReadUInt16();
-                var type = programReader.ReadUInt16();
-                var bgOffset = programReader.ReadUInt16();
-                var scaleMul = programReader.ReadUInt16();
-                var scaleDiv = programReader.ReadUInt16();
+                var y = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var w = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var h = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var srcX = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var srcY = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var type = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var bgOffset = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var scaleMul = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var scaleDiv = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
 
                 var rect = new ProgramDataModel.Rect()
                 {
@@ -304,32 +304,32 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             while (true)
             {
-                var item = programReader.ReadUInt16();
+                var item = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 if (item == 0) //weirdly it uses 0 instead of maxvalue
                 {
                     break;
                 }
 
-                var talk = programReader.ReadUInt16();
+                var talk = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 var state = programReader.ReadUInt16();
-                var str = programReader.ReadUInt16();
-                var defaultStr = programReader.ReadUInt16();
-                var action1 = programReader.ReadUInt16();
-                var action2 = programReader.ReadUInt16();
-                var action3 = programReader.ReadUInt16();
-                var action4 = programReader.ReadUInt16();
-                var action5 = programReader.ReadUInt16();
-                var action6 = programReader.ReadUInt16();
-                var action7 = programReader.ReadUInt16();
-                var action8 = programReader.ReadUInt16();
-                var x1 = programReader.ReadUInt16();
-                var y1 = programReader.ReadUInt16();
-                var w1 = programReader.ReadUInt16();
-                var h1 = programReader.ReadUInt16();
-                var x2 = programReader.ReadUInt16();
-                var y2 = programReader.ReadUInt16();
-                var w2 = programReader.ReadUInt16();
-                var h2 = programReader.ReadUInt16();
+                var str = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var defaultStr = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action3 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action4 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action5 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action6 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action7 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var action8 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var x1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var y1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var w1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var h1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var x2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var y2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var w2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
+                var h2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 try
                 {
                     programReader.ReadUInt32(); //unused
@@ -391,7 +391,7 @@ public class ProgramDataLoader
                 {
                     break; //seems to be necessary because the game expects it to succeed even if EOS?
                 }
-                var object1 = programReader.ReadUInt16();
+                var object1 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
 
                 if (object1 == 0) //weirdly it uses 0 instead of maxvalue
                 {
@@ -401,12 +401,12 @@ public class ProgramDataLoader
                 {
                     break; //seems to be necessary because the game expects it to succeed even if EOS?
                 }
-                var action = programReader.ReadUInt16();
+                var action = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 if (programStream.Position + 2 >= programStream.Length)
                 {
                     break; //seems to be necessary because the game expects it to succeed even if EOS?
                 }
-                var object2 = programReader.ReadUInt16();
+                var object2 = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 if (programStream.Position + 2 >= programStream.Length)
                 {
                     break; //seems to be necessary because the game expects it to succeed even if EOS?
@@ -442,9 +442,9 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             for (var i = 0; i < count; i++)
             {
-                var num = programReader.ReadUInt16();
+                var num = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 var offs = programReader.ReadUInt16();
-                var msg = programReader.ReadUInt16();
+                var msg = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 
                 program.Conversations.Add(new ProgramDataModel.Conversation()
                 {
@@ -467,7 +467,7 @@ public class ProgramDataLoader
             programStream.Seek(programOffset, SeekOrigin.Begin);
             while(true)
             {
-                var ch = programReader.ReadUInt16();
+                var ch = BitConverter.ToInt16(BitConverter.GetBytes(programReader.ReadUInt16()), 0);
                 if (ch == 0)
                 {
                     break;
