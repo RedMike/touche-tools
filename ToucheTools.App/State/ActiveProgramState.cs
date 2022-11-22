@@ -471,6 +471,7 @@ public class ActiveProgramState
         public string Name { get; set; } = "";
         public List<int> Actions { get; set; } = new List<int>();
         public int Item { get; set; }
+        public int FallbackAction { get; set; }
     }
 
     public ActionMenu? ActiveMenu { get; set; } = null;
@@ -483,8 +484,15 @@ public class ActiveProgramState
         }
 
         var item = ActiveMenu.Item;
+        if (action == 0)
+        {
+            action = ActiveMenu.FallbackAction;
+        }
         ActiveMenu = null;
-        TryTriggerAction(action, item, 0);
+        if (action != 0)
+        {
+            TryTriggerAction(action, item, 0);
+        }
     }
     #endregion
     
@@ -1538,7 +1546,8 @@ public class ActiveProgramState
                                     X = inventoryHitboxX,
                                     Y = Game.RoomHeight,
                                     Name = GetString(hitbox.String),
-                                    Actions = actions
+                                    Actions = actions,
+                                    FallbackAction = 0
                                 };
                             }
                         }
@@ -1604,59 +1613,44 @@ public class ActiveProgramState
             {
                 continue;
             }
-            
-            if (GrabbedItem != 0)
+
+            var customActions = false;
+            var len = 0;
+            foreach (var action in hitbox.Actions)
             {
-                SetFlag(ToucheTools.Constants.Flags.Known.CurrentCursorObject, GrabbedItem);
-                if (GrabbedItem == 1)
+                if (action == 0)
                 {
-                    SetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney, RemovedMoney);
-                    RemovedMoney = 0;
+                    break;
                 }
+                len++;
 
-                InventoryFlags.Remove(GrabbedItem);
-                RemoveGrabbedItem();
+                if (action != Actions.LeftClick && action != Actions.LeftClickWithItem)
+                {
+                    customActions = true;
+                }
+            }
 
-                if (true) //TODO: if not giving item?
-                {
-                    if (!TryTriggerAction(Actions.LeftClickWithItem, hitbox.Item, 0))
-                    {
-                        var prevGrabbedItem = GetFlag(ToucheTools.Constants.Flags.Known.CurrentCursorObject);
-                        if (prevGrabbedItem == 1)
-                        {
-                            RemovedMoney = GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
-                        }
-                        else
-                        {
-                            AddItemToInventory(CurrentKeyChar, prevGrabbedItem);
-                        }
-                    }
-                }
-                else
-                {
-                    SetFlag(ToucheTools.Constants.Flags.Known.ItemBeingGiven, (short)(hitbox.Item - 1));
-                    //TODO: set flag 117 to hitbox item - 1, then mark give item -1
-                }
-                
-                if (GrabbedItem != 0)
-                {
-                    RemoveGrabbedItem();
-                }
-
+            if (!customActions)
+            {
+                TryTriggerAction(Actions.DoNothing, hitbox.Item, 0);
                 return;
             }
 
-            if (GrabbedItem != 0)
+            var actions = hitbox.Actions.Take(len).Where(a =>
+                a != Actions.LeftClick && a != Actions.LeftClickWithItem).ToList();
+                            
+            ActiveMenu = new ActionMenu()
             {
-                RemoveGrabbedItem();
-            }
-            
-            //if there's no action on clicking the hitbox, then just walk
-            if (!TryTriggerAction(Actions.LeftClick, hitbox.Item, 0))
-            {
-                //no script offset 
-                //TODO:
-            }
+                Item = hitbox.Item,
+                X = screenX,
+                Y = screenY,
+                Name = GetString(hitbox.String),
+                Actions = actions,
+                FallbackAction = hitbox.Talk
+            };
+
+            var curKeyChar = GetKeyChar(CurrentKeyChar);
+            curKeyChar.CurrentDirection = (curKeyChar.PositionX < x) ? 0 : 3;
 
             return;
         }
