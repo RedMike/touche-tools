@@ -35,7 +35,7 @@ public class ProgramDataLoader
         program = new ProgramDataModel();
         program.OriginalSize = size;
         uint programOffset = 0;
-        
+
         //text
         if (programStream.Length > 4)
         {
@@ -49,30 +49,31 @@ public class ProgramDataLoader
             }
             programStream.Seek(programOffset, SeekOrigin.Begin);
             var i = 1;
-            
-            while (i*4 < textSize)
+            var done = false;
+            while (i*4 < textSize && !done)
             {
                 programStream.Seek(programOffset + i * 4, SeekOrigin.Begin);
                 var textOffset = programReader.ReadUInt32();
-                if (textOffset == 0)
+                if (textOffset == 0 || (programOffset + textOffset) >= programStream.Length - 4)
                 {
-                    break;
+                    i++;
+                    continue;
                 }
 
-                var nextTextOffset = programReader.ReadUInt32();
-                var strSize = (long)nextTextOffset - (long)textOffset;
-                if (nextTextOffset <= textOffset)
-                {
-                    break;
-                }
                 programStream.Seek(programOffset + textOffset, SeekOrigin.Begin);
                 var s = "";
-                while (s.Length < strSize)
+                while (true)
                 {
                     var chr = programReader.ReadByte();
                     
                     if (chr == 0)
                     {
+                        break;
+                    }
+
+                    if (chr == 1)
+                    {
+                        done = true;
                         break;
                     }
 
