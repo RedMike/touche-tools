@@ -8,6 +8,7 @@ public static class Flags
         
         CurrentKeyChar = 104,
         KeepPaletteOnRoomLoad = 115,
+        ItemBeingGiven = 117,
         CurrentMoney = 118, 
         CurrentCursorObject = 119, 
         KeyCharMaxDirection = 176, 

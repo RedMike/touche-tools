@@ -83,7 +83,7 @@ public class ProgramDataModel
         public int InventoryItem => (Item & ~0x1000);
         public bool IsDisabled => (Item & 0xF000) == 0x2000;
         public bool IsCharacter => (Item & 0xF000) == 0x4000;
-        public int KeyChar => (Item & ~0xF000);
+        public int KeyChar => (Item & ~0x4000);
     }
 
     public class ActionScriptOffset

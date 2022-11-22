@@ -241,12 +241,14 @@ public class ActiveProgramState
     private readonly DatabaseModel _model;
     private readonly ActiveProgram _program;
     private readonly LogData _log;
+    private readonly GameViewState _viewState; //needed to get rendered sprite sizes (from parts)
 
-    public ActiveProgramState(DatabaseModel model, ActiveProgram program, LogData log)
+    public ActiveProgramState(DatabaseModel model, ActiveProgram program, LogData log, GameViewState viewState)
     {
         _model = model;
         _program = program;
         _log = log;
+        _viewState = viewState;
 
         OnStartup();
         
@@ -286,10 +288,6 @@ public class ActiveProgramState
         InventoryLists[2].Items[6] = -1;
         #endregion
         
-        #region Inventory Hitboxes
-        
-        #endregion
-
         for (var i = 0; i < 7; i++)
         {
             LoadedSprites[i] = new LoadedSprite();
@@ -451,6 +449,16 @@ public class ActiveProgramState
     };
 
     public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
+    public Dictionary<int, short> InventoryFlags { get; set; } = new Dictionary<int, short>();
+    public short GetInventoryFlag(int item)
+    {
+        if (!InventoryFlags.ContainsKey(item))
+        {
+            return 0x20;
+        }
+
+        return InventoryFlags[item];
+    }
     public short RemovedMoney { get; set; } = 0;
     public short GrabbedItem { get; set; } = 0;
     #endregion
@@ -1520,7 +1528,7 @@ public class ActiveProgramState
                         if (item != 0 && GrabbedItem != 0)
                         {
                             //clicked an item onto another item
-                            if (TryTriggerAction(Actions.LeftClickItemOntoItem, (item | 0x1000), 0))
+                            if (TryTriggerAction(Actions.LeftClickWithItem, (item | 0x1000), 0))
                             {
                                 RemoveGrabbedItem();
                             }
@@ -1555,8 +1563,11 @@ public class ActiveProgramState
 
             if (hitbox.IsInventory)
             {
-                //TODO: check if the inventory item is populated
-                continue;
+                var flag = GetInventoryFlag(hitbox.InventoryItem);
+                if (flag != 0x20)
+                {
+                    continue;
+                }
             }
 
             var x = hitbox.Rect1.X;
@@ -1574,14 +1585,15 @@ public class ActiveProgramState
                 var keyChar = GetKeyChar(hitbox.KeyChar);
                 if (keyChar.Initialised)
                 {
-                    var (chX, chY, chZ) = (keyChar.PositionX, keyChar.PositionY, keyChar.PositionZ);
-                    var zFactor = Game.GetZFactor(chZ);
-                    chX = (int)(chX*zFactor);
-                    chY = (int)(chY*zFactor);
+                    if (_viewState.KeyCharRenderedRects.ContainsKey(hitbox.KeyChar))
+                    {
+                        (x, y, w, h) = _viewState.KeyCharRenderedRects[hitbox.KeyChar];
+                    }
 
-                    x = chX;
-                    y = chY;
-                    //TODO: set width/height?
+                    var offsetX = GetFlag(ToucheTools.Constants.Flags.Known.RoomScrollX);
+                    var offsetY = GetFlag(ToucheTools.Constants.Flags.Known.RoomScrollY);
+                    x += offsetX;
+                    y += offsetY;
                 }
             }
             
@@ -1589,12 +1601,63 @@ public class ActiveProgramState
             {
                 continue;
             }
+
+            if (hitbox.IsDisabled)
+            {
+                continue;
+            }
+            
+            if (GrabbedItem != 0)
+            {
+                SetFlag(ToucheTools.Constants.Flags.Known.CurrentCursorObject, GrabbedItem);
+                if (GrabbedItem == 1)
+                {
+                    SetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney, RemovedMoney);
+                    RemovedMoney = 0;
+                }
+
+                InventoryFlags.Remove(GrabbedItem);
+                RemoveGrabbedItem();
+
+                if (true) //TODO: if not giving item?
+                {
+                    if (!TryTriggerAction(Actions.LeftClickWithItem, hitbox.Item, 0))
+                    {
+                        var prevGrabbedItem = GetFlag(ToucheTools.Constants.Flags.Known.CurrentCursorObject);
+                        if (prevGrabbedItem == 1)
+                        {
+                            RemovedMoney = GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
+                        }
+                        else
+                        {
+                            AddItemToInventory(CurrentKeyChar, prevGrabbedItem);
+                        }
+                    }
+                }
+                else
+                {
+                    SetFlag(ToucheTools.Constants.Flags.Known.ItemBeingGiven, (short)(hitbox.Item - 1));
+                    //TODO: set flag 117 to hitbox item - 1, then mark give item -1
+                }
+                
+                if (GrabbedItem != 0)
+                {
+                    RemoveGrabbedItem();
+                }
+
+                return;
+            }
+
+            if (GrabbedItem != 0)
+            {
+                RemoveGrabbedItem();
+            }
             
             //if there's no action on clicking the hitbox, then just walk
             if (!TryTriggerAction(Actions.LeftClick, hitbox.Item, 0))
             {
                 //no script offset so just walk
-                WalkTo(globalX, globalY);                
+                WalkTo(globalX, globalY);
             }
 
             return;
@@ -1635,8 +1698,14 @@ public class ActiveProgramState
             {
                 throw new Exception("Adding inventory to non-existent list");
             }
-
+            
             var inventoryList = InventoryLists[ch];
+            InventoryFlags[item] = (short)(ch | 0x10);
+            //don't re-add if it already exists
+            if (inventoryList.Items.Contains(item))
+            {
+                return;
+            }
             inventoryList.PrependItem(item);
         }
     }
@@ -1649,6 +1718,7 @@ public class ActiveProgramState
         );
         if (aso == null)
         {
+            //_log.Error($"Failed to find ASO with action {action} and object {object1}");
             return false;
         }
         
