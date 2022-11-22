@@ -55,7 +55,7 @@ public class GameViewWindow : BaseWindow
         ImGui.SetNextWindowPos(new Vector2(750.0f, 200.0f), ImGuiCond.Once);
         ImGui.SetNextWindowSize(new Vector2(Constants.GameScreenWidth + 2, Constants.GameScreenHeight + 2 + frameHeight));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0.0f, 0.0f));
-        ImGui.Begin("Game View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.Begin("Game View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoMouseInputs);
 
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         var screenMousePos = ImGui.GetMousePos() - ImGui.GetWindowPos() - offset;
@@ -298,7 +298,7 @@ public class GameViewWindow : BaseWindow
         ImGui.Text($"{keyChar.Money:D}");
         ImGui.PopStyleColor();
 
-        if (_activeProgramState.GlobalMoney != 0)
+        if (_activeProgramState.RemovedMoney != 0)
         {
             //draw icon
             var iconImage = _model.Icons[1].Value;
@@ -312,7 +312,7 @@ public class GameViewWindow : BaseWindow
             //draw text
             ImGui.SetCursorPos(offset + new Vector2(170, 378));
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(textCol.R/255.0f, textCol.G/255.0f, textCol.B/255.0f, 1.0f));
-            ImGui.Text($"{_activeProgramState.GlobalMoney:D}");
+            ImGui.Text($"{_activeProgramState.RemovedMoney:D}");
             ImGui.PopStyleColor();
         }
     }

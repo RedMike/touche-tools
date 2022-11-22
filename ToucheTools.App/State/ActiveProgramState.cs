@@ -445,7 +445,8 @@ public class ActiveProgramState
     };
 
     public InventoryList[] InventoryLists { get; set; } = new InventoryList[3];
-    public short GlobalMoney { get; set; } = 0;
+    public short RemovedMoney { get; set; } = 0;
+    public short GrabbedItem { get; set; } = 0;
     #endregion
     
     #region Flags
@@ -1436,17 +1437,17 @@ public class ActiveProgramState
                 {
                     case InventoryHitboxType.Character:
                     case InventoryHitboxType.MoneyDisplay: //in game code this is handled separately?
-                        if (GlobalMoney != 0)
+                        if (RemovedMoney != 0)
                         {
-                            keyChar.Money += GlobalMoney;
-                            GlobalMoney = 0;
+                            keyChar.Money += RemovedMoney;
+                            RemovedMoney = 0;
                         }
                         break;
                     case InventoryHitboxType.GoldCoins:
                         if (keyChar.Money >= 10)
                         {
                             keyChar.Money -= 10;
-                            GlobalMoney += 10;
+                            RemovedMoney += 10;
                         }
 
                         break;
@@ -1454,7 +1455,7 @@ public class ActiveProgramState
                         if (keyChar.Money > 0)
                         {
                             keyChar.Money -= 1;
-                            GlobalMoney += 1;
+                            RemovedMoney += 1;
                         }
                         break;
                     
@@ -1480,9 +1481,65 @@ public class ActiveProgramState
                         }
                         break;
 
+                    case InventoryHitboxType.Object1:
+                    case InventoryHitboxType.Object2:
+                    case InventoryHitboxType.Object3:
+                    case InventoryHitboxType.Object4:
+                    case InventoryHitboxType.Object5:
+                    case InventoryHitboxType.Object6:
+                        var obj = inventoryHitbox - InventoryHitboxType.Object1;
+                        SetFlag(ToucheTools.Constants.Flags.Known.CurrentCursorObject, GrabbedItem);
+                        if (GrabbedItem == 1)
+                        {
+                            keyChar.Money += RemovedMoney;
+                            RemovedMoney = 0;
+                            SetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney, 0);
+                        }
+                        
+                        var item = inventoryList.Items[inventoryList.DisplayOffset + obj];
+                        if (item != 0 && GrabbedItem != 0)
+                        {
+                            //clicked an item onto another item
+                            if (TryTriggerAction(Actions.LeftClickItemOntoItem, (item | 0x1000), 0))
+                            {
+                                if (GrabbedItem != 0)
+                                {
+                                    if (GrabbedItem != 1)
+                                    {
+                                        //add item to inventory
+                                        AddItemToInventory(CurrentKeyChar, GrabbedItem);
+                                    }
+                                    GrabbedItem = 0;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //clicked an item
+                            inventoryList.Items[inventoryList.DisplayOffset + obj] = 0;
+                            
+                            //clear any grabbed item
+                            if (GrabbedItem != 0)
+                            {
+                                if (GrabbedItem != 1)
+                                {
+                                    //add item to inventory
+                                    AddItemToInventory(CurrentKeyChar, GrabbedItem);
+                                }
+
+                                GrabbedItem = 0;
+                            }
+
+                            if (item != 0)
+                            {
+                                GrabbedItem = item;
+                            }
+                        }
+                        break;
                     default:
                         throw new Exception("Not implemented yet");
                 }
+
                 return;
             }
             
@@ -1491,18 +1548,49 @@ public class ActiveProgramState
             return;
         }
         
-        //if action script offset, start action -49
-        var program = _model.Programs[_program.Active];
-        var aso = program.ActionScriptOffsets.FirstOrDefault(aso =>
-            aso.Action == -49 && aso.Object1 == hitboxItem && aso.Object2 == 0
-        );
-        if (aso == null)
+        //if there's no action on clicking the hitbox, then just walk
+        if (!TryTriggerAction(Actions.LeftClick, hitboxItem, 0))
         {
             //no script offset so just walk
             WalkTo(globalX, globalY);
             return;
         }
+    }
 
+    private void AddItemToInventory(int ch, short item)
+    {
+        if (item == 0)
+        {
+            _log.Error("TODO: re-sort inventory items"); //TODO: just re-sort the inventory items
+        } else if (item == 1)
+        {
+            //it's really about money
+            RemovedMoney += GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
+        }
+        else
+        {
+            //it's about adding an item
+            if (ch >= InventoryLists.Length)
+            {
+                throw new Exception("Adding inventory to non-existent list");
+            }
+
+            var inventoryList = InventoryLists[ch];
+            inventoryList.PrependItem(item);
+        }
+    }
+
+    private bool TryTriggerAction(int action, int object1, int object2)
+    {
+        var program = _model.Programs[_program.Active];
+        var aso = program.ActionScriptOffsets.FirstOrDefault(aso =>
+            aso.Action == action && aso.Object1 == object1 && aso.Object2 == object2
+        );
+        if (aso == null)
+        {
+            return false;
+        }
+        
         var script = CurrentState.GetKeyCharScript(CurrentKeyChar);
         if (script == null)
         {
@@ -1512,6 +1600,7 @@ public class ActiveProgramState
         script.Offset = aso.Offset;
         script.Status = ProgramState.ScriptStatus.Ready;
         //TODO: reset STK?
+        return true;
     }
 
     public void WalkTo(int x, int y)
@@ -2040,8 +2129,8 @@ public class ActiveProgramState
             {
                 //first, dump any 'global' money into the current keychar
                 var currentKeyChar = GetKeyChar(CurrentKeyChar);
-                currentKeyChar.Money = GlobalMoney;
-                GlobalMoney = 0;
+                currentKeyChar.Money = RemovedMoney;
+                RemovedMoney = 0;
                 
                 //second, set the keychar money
                 keyChar.Money = val;
@@ -2053,25 +2142,7 @@ public class ActiveProgramState
         } else if (instruction is AddItemToInventoryAndRedrawInstruction addItemToInventory)
         {
             var item = CurrentState.StackValue;
-            if (item == 0)
-            {
-                _log.Error("TODO: re-sort inventory items"); //TODO: just re-sort the inventory items
-            } else if (item == 1)
-            {
-                //it's really about money
-                GlobalMoney += GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
-            }
-            else
-            {
-                //it's about adding an item
-                if (addItemToInventory.Character >= InventoryLists.Length)
-                {
-                    throw new Exception("Adding inventory to non-existent list");
-                }
-
-                var inventoryList = InventoryLists[addItemToInventory.Character];
-                inventoryList.PrependItem(item);
-            }
+            AddItemToInventory(addItemToInventory.Character, item);
         } else if (instruction is StartEpisodeInstruction startEpisode)
         {
             if (CurrentState.QueuedProgram != null)
