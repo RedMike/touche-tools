@@ -1479,52 +1479,6 @@ public class ActiveProgramState
         #endregion
     }
 
-    public int TickCounter = 0;
-    public void Tick()
-    {
-        if (!AutoPlay)
-        {
-            return;
-        }
-
-        if (BreakpointHit && AutoPlay)
-        {
-            AutoPlay = false;
-            return;
-        }
-
-        var now = DateTime.UtcNow;
-        
-        if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
-        {
-            if (CurrentState.TickCounter != TickCounter)
-            {
-                TickCounter = CurrentState.TickCounter;
-                _lastTick = now;
-                
-                StepUntilPaused(true);
-            }
-            else
-            {
-                if (!CurrentState.AreScriptsRemainingInCurrentTick())
-                {
-                    TickCounter = CurrentState.TickCounter;
-                    _lastTick = now;
-                    
-                    StepUntilPaused(true);
-                }
-                else
-                {
-                    StepUntilPaused(false);
-                }
-            }
-        }
-        else
-        {
-            StepUntilPaused(false);
-        }
-    }
-    
     private void Update()
     {
         if (CurrentState.CurrentProgram != _program.Active)
@@ -2017,7 +1971,7 @@ public class ActiveProgramState
         return true;
     }
 
-    public void WalkTo(int x, int y)
+    private void WalkTo(int x, int y)
     {
         //find closest point
         var program = _model.Programs[_program.Active];
@@ -2049,6 +2003,52 @@ public class ActiveProgramState
         keyChar.IsFollowing = false;
     }
 
+    public int TickCounter = 0;
+    public void Tick()
+    {
+        if (!AutoPlay)
+        {
+            return;
+        }
+
+        if (BreakpointHit && AutoPlay)
+        {
+            AutoPlay = false;
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        
+        if ((now - _lastTick).TotalMilliseconds >= MinimumTimeBetweenTicksInMillis)
+        {
+            if (CurrentState.TickCounter != TickCounter)
+            {
+                TickCounter = CurrentState.TickCounter;
+                _lastTick = now;
+                
+                StepUntilPaused(true);
+            }
+            else
+            {
+                if (!CurrentState.AreScriptsRemainingInCurrentTick())
+                {
+                    TickCounter = CurrentState.TickCounter;
+                    _lastTick = now;
+                    
+                    StepUntilPaused(true);
+                }
+                else
+                {
+                    StepUntilPaused(false);
+                }
+            }
+        }
+        else
+        {
+            StepUntilPaused(false);
+        }
+    }
+    
     public void StepUntilPaused(bool allowGameTick = true)
     {
         BreakpointHit = false;
