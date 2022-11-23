@@ -5,21 +5,21 @@ public class SetCharDirectionInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharDirection;
     public override int Width => 4;
     
-    public ushort Character { get; set; }
-    public ushort Direction { get; set; }
+    public short Character { get; set; }
+    public short Direction { get; set; }
 
     public bool CurrentCharacter => Character == 256;
 
     public override void Load(BinaryReader reader)
     {
-        Character = reader.ReadUInt16();
-        Direction = reader.ReadUInt16();
+        Character = reader.ReadInt16();
+        Direction = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Character);
-        writer.Write((ushort)Direction);
+        writer.Write((short)Character);
+        writer.Write((short)Direction);
     }
 
     public override string ToString()

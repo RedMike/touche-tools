@@ -5,19 +5,19 @@ public class SetCharTextColorInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharTextColor;
     public override int Width => 4;
     
-    public ushort Character { get; set; }
+    public short Character { get; set; }
     public ushort Color { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Character = reader.ReadUInt16();
-        Color = reader.ReadUInt16();
+        Character = reader.ReadInt16();
+        Color = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Character);
-        writer.Write((ushort)Color);
+        writer.Write((short)Character);
+        writer.Write(BitConverter.ToInt16(BitConverter.GetBytes(Color), 0));//game does it this way
     }
 
     public override string ToString()

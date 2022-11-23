@@ -7,19 +7,19 @@ public class StartEpisodeInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.StartEpisode;
     public override int Width => 4;
     
-    public ushort Num { get; set; }
-    public ushort Flag { get; set; }
+    public short Num { get; set; }
+    public short Flag { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Num = reader.ReadUInt16();
-        Flag = reader.ReadUInt16();
+        Num = reader.ReadInt16();
+        Flag = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Num);
-        writer.Write((ushort)Flag);
+        writer.Write((short)Num);
+        writer.Write((short)Flag);
     }
 
     public override string ToString()

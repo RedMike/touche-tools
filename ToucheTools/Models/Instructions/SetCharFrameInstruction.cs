@@ -13,10 +13,10 @@ public class SetCharFrameInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharFrame;
     public override int Width => 8;
     
-    public ushort Character { get; set; }
-    public ushort Val1 { get; set; }
-    public ushort Val2 { get; set; }
-    public ushort Val3 { get; set; }
+    public short Character { get; set; }
+    public short Val1 { get; set; }
+    public short Val2 { get; set; }
+    public short Val3 { get; set; }
 
     public Type TransitionType => (Type)Val1;
 
@@ -24,18 +24,18 @@ public class SetCharFrameInstruction : BaseInstruction
 
     public override void Load(BinaryReader reader)
     {
-        Character = reader.ReadUInt16();
-        Val1 = reader.ReadUInt16();
-        Val2 = reader.ReadUInt16();
-        Val3 = reader.ReadUInt16();
+        Character = reader.ReadInt16();
+        Val1 = reader.ReadInt16();
+        Val2 = reader.ReadInt16();
+        Val3 = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Character);
-        writer.Write((ushort)Val1);
-        writer.Write((ushort)Val2);
-        writer.Write((ushort)Val3);
+        writer.Write((short)Character);
+        writer.Write((short)Val1);
+        writer.Write((short)Val2);
+        writer.Write((short)Val3);
     }
 
     public override string ToString()

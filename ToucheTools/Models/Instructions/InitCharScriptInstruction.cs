@@ -5,28 +5,28 @@ public class InitCharScriptInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.InitCharScript;
     public override int Width => 10;
     
-    public ushort Character { get; set; }
-    public ushort Color { get; set; }
-    public ushort SpriteIndex { get; set; }
-    public ushort SequenceIndex { get; set; }
-    public ushort SequenceCharacterId { get; set; }
+    public short Character { get; set; }
+    public short Color { get; set; }
+    public short SpriteIndex { get; set; }
+    public short SequenceIndex { get; set; }
+    public short SequenceCharacterId { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Character = reader.ReadUInt16();
-        Color = reader.ReadUInt16();
-        SpriteIndex = reader.ReadUInt16();
-        SequenceIndex = reader.ReadUInt16();
-        SequenceCharacterId = reader.ReadUInt16();
+        Character = reader.ReadInt16();
+        Color = reader.ReadInt16();
+        SpriteIndex = reader.ReadInt16();
+        SequenceIndex = reader.ReadInt16();
+        SequenceCharacterId = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Character);
-        writer.Write((ushort)Color);
-        writer.Write((ushort)SpriteIndex);
-        writer.Write((ushort)SequenceIndex);
-        writer.Write((ushort)SequenceCharacterId);
+        writer.Write((short)Character);
+        writer.Write((short)Color);
+        writer.Write((short)SpriteIndex);
+        writer.Write((short)SequenceIndex);
+        writer.Write((short)SequenceCharacterId);
     }
 
     public override string ToString()

@@ -142,7 +142,7 @@ public class GameViewWindow : BaseWindow
         var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
-        ushort idx = 0;
+        short idx = 0;
         foreach (var background in program.Backgrounds)
         {
             var ox = background.Rect.X;

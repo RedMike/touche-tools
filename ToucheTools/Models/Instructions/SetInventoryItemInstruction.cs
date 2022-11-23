@@ -5,7 +5,7 @@ public class SetInventoryItemInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetInventoryItem;
     public override int Width => 4;
     
-    public ushort Character { get; set; }
+    public short Character { get; set; }
     public ushort Item { get; set; }
     
     public bool CurrentCharacter => Character == 256;
@@ -13,14 +13,14 @@ public class SetInventoryItemInstruction : BaseInstruction
 
     public override void Load(BinaryReader reader)
     {
-        Character = reader.ReadUInt16();
-        Item = reader.ReadUInt16();
+        Character = reader.ReadInt16();
+        Item = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Character);
-        writer.Write((ushort)Item);
+        writer.Write((short)Character);
+        writer.Write(BitConverter.ToInt16(BitConverter.GetBytes(Item), 0));//game does it this way
     }
 
     public override string ToString()

@@ -39,7 +39,7 @@ public class ProgramViewWindow : IWindow
         foreach (var (offset, instruction) in _viewSettings.InstructionsView)
         {
             var currentInstruction = (_activeProgramState.LastKnownOffset) == offset;
-            var isBreakpoint = _activeProgramState.Breakpoints.Contains(offset);
+            var isBreakpoint = _activeProgramState.Breakpoints.Contains((ushort)offset);
             if (currentInstruction)
             {
                 if (_activeProgramState.BreakpointHit)
@@ -69,7 +69,7 @@ public class ProgramViewWindow : IWindow
                 }
                 else
                 {
-                    _activeProgramState.Breakpoints.Add(offset);
+                    _activeProgramState.Breakpoints.Add((ushort)offset);
                 }
             }
             ImGui.SameLine();

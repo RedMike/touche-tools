@@ -5,20 +5,20 @@ public class SetCharFlagsInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetCharFlags;
     public override int Width => 4;
     
-    public ushort Character { get; set; }
+    public short Character { get; set; }
     public ushort Flags { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Character = reader.ReadUInt16();
-        Flags = reader.ReadUInt16();
+        Character = reader.ReadInt16();
+        Flags = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
         Flags &= 0xFF00;
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Character);
-        writer.Write((ushort)Flags);
+        writer.Write((short)Character);
+        writer.Write(BitConverter.ToUInt16(BitConverter.GetBytes(Flags), 0));//game does it this way
     }
 
     public override string ToString()

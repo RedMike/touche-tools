@@ -5,20 +5,20 @@ public class MoveCharToPosInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.MoveCharToPos;
     public override int Width => TargetingAnotherCharacter ? 6 : 4;
     
-    public ushort Character { get; set; }
-    public ushort Num { get; set; }
-    public ushort TargetCharacter { get; set; }
+    public short Character { get; set; }
+    public short Num { get; set; }
+    public short TargetCharacter { get; set; }
     
     public bool CurrentCharacter => Character == 256;
-    public bool TargetingAnotherCharacter => Num == ushort.MaxValue;
+    public bool TargetingAnotherCharacter => Num == -1;
     
     public override void Load(BinaryReader reader)
     {
-        Character = reader.ReadUInt16();
-        Num = reader.ReadUInt16();
+        Character = reader.ReadInt16();
+        Num = reader.ReadInt16();
         if (TargetingAnotherCharacter)
         {
-            TargetCharacter = reader.ReadUInt16();
+            TargetCharacter = reader.ReadInt16();
         }
     }
     

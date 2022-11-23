@@ -18,12 +18,12 @@ public class ProgramInstructionDataLoader
         _reader = new BinaryReader(_stream, Encoding.ASCII, true);
     }
 
-    public void Read(int offset, out Dictionary<int, BaseInstruction> instructions)
+    public void Read(int offset, out Dictionary<uint, BaseInstruction> instructions)
     {
-        instructions = new Dictionary<int, BaseInstruction>();
+        instructions = new Dictionary<uint, BaseInstruction>();
         
         _stream.Seek(offset, SeekOrigin.Begin);
-        var trackedOffset = 0; //in bytes
+        uint trackedOffset = 0; //in bytes
         while (true)
         {
             var rawOpcode = _reader.ReadByte();
@@ -43,7 +43,7 @@ public class ProgramInstructionDataLoader
             instruction.Load(_reader);
             _logger.Log(LogLevel.Debug, "Instruction: {}", instruction.ToString());
             instructions[trackedOffset] = instruction;
-            trackedOffset += instruction.Width + 1; //extra width plus byte for opcode
+            trackedOffset = (uint)(trackedOffset + instruction.Width + 1); //extra width plus byte for opcode
         }
     }
 }

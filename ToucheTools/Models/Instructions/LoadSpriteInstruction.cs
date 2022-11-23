@@ -5,19 +5,19 @@ public class LoadSpriteInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.LoadSprite;
     public override int Width => 4;
     
-    public ushort Index { get; set; }
-    public ushort Num { get; set; }
+    public short Index { get; set; }
+    public short Num { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Index = reader.ReadUInt16();
-        Num = reader.ReadUInt16();
+        Index = reader.ReadInt16();
+        Num = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Index);
-        writer.Write((ushort)Num);
+        writer.Write((short)Index);
+        writer.Write((short)Num);
     }
 
     public override string ToString()

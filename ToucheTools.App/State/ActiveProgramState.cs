@@ -68,9 +68,9 @@ public class ActiveProgramState
         #endregion
         
         #region Position
-        public ushort? LastWalk { get; set; }
-        public ushort? LastPoint { get; set; }
-        public ushort? TargetPoint { get; set; }
+        public short? LastWalk { get; set; }
+        public short? LastPoint { get; set; }
+        public short? TargetPoint { get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public int PositionZ { get; set; }
@@ -139,8 +139,8 @@ public class ActiveProgramState
         public class Script
         {
             public int Id { get; set; }
-            public int StartOffset { get; set; }
-            public int Offset { get; set; }
+            public uint StartOffset { get; set; }
+            public uint Offset { get; set; }
             public ScriptStatus Status { get; set; }
             public int Delay { get; set; }
         }
@@ -229,7 +229,7 @@ public class ActiveProgramState
 
         public int? LoadedRoom { get; set; } = null;
 
-        public Dictionary<ushort, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<ushort, (int, int)>();
+        public Dictionary<short, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<short, (int, int)>();
         public Dictionary<int, bool> OverwrittenHitboxes { get; set; } = new Dictionary<int, bool>();
     }
 
@@ -294,9 +294,9 @@ public class ActiveProgramState
     }
 
     #region Breakpoint/debug
-    public List<int> Breakpoints { get; set; } = new List<int>();
+    public List<uint> Breakpoints { get; set; } = new List<uint>();
     public bool BreakpointHit { get; set; } = false;
-    public int LastKnownOffset { get; set; } = -1;
+    public uint LastKnownOffset { get; set; } = uint.MaxValue;
     #endregion
     
     public ProgramState CurrentState { get; set; } = new ProgramState();
@@ -665,7 +665,7 @@ public class ActiveProgramState
             throw new Exception("Missing script");
         }
 
-        script.Offset = conversationChoice.Offset;
+        script.Offset = (uint)conversationChoice.Offset;
         script.Status = ProgramState.ScriptStatus.Ready;
         //TODO: reset STK?
     }
@@ -697,9 +697,9 @@ public class ActiveProgramState
     
     private void OnProgramChange()
     {
-        Breakpoints = new List<int>();
+        Breakpoints = new List<uint>();
         BreakpointHit = false;
-        LastKnownOffset = -1;
+        LastKnownOffset = uint.MaxValue;
         
         for (var i = 0; i < 32; i++)
         {
@@ -753,8 +753,8 @@ public class ActiveProgramState
                 CurrentState.Scripts.Add(new ProgramState.Script()
                 {
                     Id = keyCharId,
-                    StartOffset = cso.Offs,
-                    Offset = cso.Offs,
+                    StartOffset = (uint)cso.Offs,
+                    Offset = (uint)cso.Offs,
                     Status = ProgramState.ScriptStatus.NotInit
                 });
             }
@@ -835,7 +835,7 @@ public class ActiveProgramState
             {
                 throw new Exception("Missing script");
             }
-            script.Offset = conversation.Offset;
+            script.Offset = (uint)conversation.Offset;
             script.Status = ProgramState.ScriptStatus.Ready;
             QueuedConversation = null;
         }
@@ -965,7 +965,7 @@ public class ActiveProgramState
                             throw new Exception("No possible path");
                         }
 
-                        keyChar.LastWalk = (ushort)program.Walks.FindIndex(w => w == curWalk);
+                        keyChar.LastWalk = (short)program.Walks.FindIndex(w => w == curWalk);
 
                         nextPointId = curWalk.Point1;
                         if (curWalk.Point1 == keyChar.LastPoint)
@@ -1102,7 +1102,7 @@ public class ActiveProgramState
                                 var rnd = new Random();
                                 keyChar.CurrentAnim = keyChar.Anim2Start + rnd.Next(0, keyChar.Anim2Count);
                             }
-                            keyChar.LastPoint = (ushort)nextPointId;
+                            keyChar.LastPoint = (short)nextPointId;
                             continue;
                         }
 
@@ -1219,7 +1219,7 @@ public class ActiveProgramState
                             keyChar.CurrentAnim = keyChar.Anim2Start + rnd.Next(0, keyChar.Anim2Count);
                         }
 
-                        keyChar.LastPoint = (ushort)nextPointId;
+                        keyChar.LastPoint = (short)nextPointId;
                         continue;
                     }
                 }
@@ -2062,7 +2062,7 @@ public class ActiveProgramState
             throw new Exception("Missing key char script");
         }
 
-        script.Offset = aso.Offset;
+        script.Offset = (uint)aso.Offset;
         script.Status = ProgramState.ScriptStatus.Ready;
         //TODO: reset STK?
         return true;
@@ -2096,7 +2096,7 @@ public class ActiveProgramState
         }
 
         var keyChar = GetKeyChar(CurrentKeyChar);
-        keyChar.TargetPoint = (ushort)closestPointIdx;
+        keyChar.TargetPoint = (short)closestPointIdx;
         keyChar.IsFollowing = false;
     }
 
@@ -2287,7 +2287,7 @@ public class ActiveProgramState
             
             var keyChar = GetKeyChar(initCharScript.Character);
             keyChar.Initialised = true;
-            keyChar.TextColour = initCharScript.Color;
+            keyChar.TextColour = BitConverter.ToUInt16(BitConverter.GetBytes(initCharScript.Color), 0);//game does it this way
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
@@ -2313,7 +2313,7 @@ public class ActiveProgramState
             LoadedSprites[6].SpriteNum = null;
             LoadedSprites[6].SequenceNum = null;
             CurrentState.ActiveRoomAreas = new List<(int, ProgramDataModel.AreaState)>();
-            CurrentState.BackgroundOffsets = new Dictionary<ushort, (int, int)>();
+            CurrentState.BackgroundOffsets = new Dictionary<short, (int, int)>();
             CurrentState.ActiveRoomSprites = new List<(int, int, int)>();
             if (GetFlag(ToucheTools.Constants.Flags.Known.KeepPaletteOnRoomLoad) == 0)
             {
@@ -2409,7 +2409,7 @@ public class ActiveProgramState
             keyChar.PositionZ = point.Z;
             keyChar.LastPoint = setCharBox.Num;
             keyChar.TargetPoint = setCharBox.Num;
-            keyChar.LastWalk = (ushort)program.Walks.FindIndex(w => w.Point1 == setCharBox.Num || w.Point2 == setCharBox.Num);
+            keyChar.LastWalk = (short)program.Walks.FindIndex(w => w.Point1 == setCharBox.Num || w.Point2 == setCharBox.Num);
         } else if (instruction is InitCharInstruction initChar)
         {
             var keyChar = GetKeyChar(initChar.Character);
@@ -2522,7 +2522,7 @@ public class ActiveProgramState
             programPaused = true;
         } else if (instruction is SetupWaitingCharInstruction setupWaitingChar)
         {
-            if (setupWaitingChar.Val1 == ushort.MaxValue)
+            if (setupWaitingChar.Val1 == -1)
             {
                 _log.Error("Some waiting logic not implemented yet"); //TODO:
                 //TODO: waiting logic
@@ -2566,7 +2566,8 @@ public class ActiveProgramState
 
             var x = GetFlag(addRoomArea.Flag);
             var y = GetFlag((ushort)(addRoomArea.Flag + 1));
-            CurrentState.BackgroundOffsets[addRoomArea.Num] = (x, y);
+            var num = BitConverter.ToInt16(BitConverter.GetBytes(addRoomArea.Num), 0);//game does it this way
+            CurrentState.BackgroundOffsets[num] = (x, y);
         } else if (instruction is GetFlagInstruction getFlag)
         {
             var flagVal = GetFlag(getFlag.Flag);
@@ -2630,7 +2631,28 @@ public class ActiveProgramState
                 newVal = -1;
             }
             CurrentState.SetStackValue(newVal);
-        } else if (instruction is JzInstruction jz)
+        } else if (instruction is TestLowerOrEqualsInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            short newVal = 0;
+            if (val <= CurrentState.StackValue)
+            {
+                newVal = -1;
+            }
+            CurrentState.SetStackValue(newVal);
+        } else if (instruction is TestGreaterOrEqualsInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            short newVal = 0;
+            if (val >= CurrentState.StackValue)
+            {
+                newVal = -1;
+            }
+            CurrentState.SetStackValue(newVal);
+        }
+        else if (instruction is JzInstruction jz)
         {
             if (CurrentState.StackValue == 0)
             {

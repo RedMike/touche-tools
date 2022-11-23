@@ -9,7 +9,7 @@ public class JzInstruction : BaseInstruction
 
     public override void Load(BinaryReader reader)
     {
-        NewOffset = reader.ReadUInt16();
+        NewOffset = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)

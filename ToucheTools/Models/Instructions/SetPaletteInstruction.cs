@@ -5,22 +5,22 @@ public class SetPaletteInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetPalette;
     public override int Width => 6;
     
-    public ushort R { get; set; }
-    public ushort G { get; set; }
-    public ushort B { get; set; }
+    public short R { get; set; }
+    public short G { get; set; }
+    public short B { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        R = reader.ReadUInt16();
-        G = reader.ReadUInt16();
-        B = reader.ReadUInt16();
+        R = reader.ReadInt16();
+        G = reader.ReadInt16();
+        B = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)R);
-        writer.Write((ushort)G);
-        writer.Write((ushort)B);
+        writer.Write((short)R);
+        writer.Write((short)G);
+        writer.Write((short)B);
     }
 
     public override string ToString()

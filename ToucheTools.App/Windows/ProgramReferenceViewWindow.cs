@@ -476,7 +476,7 @@ public class ProgramReferenceViewWindow : IWindow
             ImGui.TableSetupColumn("SX", ImGuiTableColumnFlags.WidthFixed, 25.0f);
             ImGui.TableSetupColumn("SY", ImGuiTableColumnFlags.WidthFixed, 25.0f);
             ImGui.TableHeadersRow();
-            ushort idx = 0;
+            short idx = 0;
             foreach (var background in program.Backgrounds)
             {
                 var destX = background.Rect.X;

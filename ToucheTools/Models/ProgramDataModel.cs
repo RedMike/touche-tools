@@ -91,20 +91,20 @@ public class ProgramDataModel
         public int Object1 { get; set; }
         public int Action { get; set; }
         public int Object2 { get; set; }
-        public int Offset { get; set; }
+        public ushort Offset { get; set; }
     }
 
     public class Conversation
     {
         public int Num { get; set; }
-        public int Offset { get; set; }
+        public ushort Offset { get; set; }
         public int Message { get; set; }
     }
 
     public class CharScriptOffset
     {
         public int Character { get; set; }
-        public int Offs { get; set; }
+        public ushort Offs { get; set; }
     }
 
     public enum Opcode
@@ -220,7 +220,7 @@ public class ProgramDataModel
     public List<Conversation> Conversations { get; set; } = new List<Conversation>();
     public List<CharScriptOffset> CharScriptOffsets { get; set; } = new List<CharScriptOffset>();
 
-    public Dictionary<int, BaseInstruction> Instructions { get; set; } = new Dictionary<int, BaseInstruction>();
+    public Dictionary<uint, BaseInstruction> Instructions { get; set; } = new Dictionary<uint, BaseInstruction>();
 
     public Dictionary<int, string> Strings { get; set; } = new Dictionary<int, string>();
     

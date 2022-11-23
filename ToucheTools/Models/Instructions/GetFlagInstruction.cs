@@ -11,7 +11,7 @@ public class GetFlagInstruction : BaseInstruction
 
     public override void Load(BinaryReader reader)
     {
-        Flag = reader.ReadUInt16();
+        Flag = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)

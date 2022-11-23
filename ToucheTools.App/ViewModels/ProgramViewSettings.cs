@@ -103,7 +103,7 @@ public class ProgramViewSettings
     private void GenerateView()
     {
         var program = _databaseModel.Programs[_program.Active];
-        InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => (pair.Key, pair.Value.ToString())).ToList();
+        InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => ((int)pair.Key, pair.Value.ToString())).ToList();
 
         var programData = new ProgramData();
         var stateByInstruction = new Dictionary<int, ProgramState>();
@@ -115,7 +115,7 @@ public class ProgramViewSettings
         //    if something runs from multiple branches, store an identifier and store as a list?
         foreach (var pair in program.Instructions.OrderBy(pair => pair.Key))
         {
-            if (stateByInstruction.ContainsKey(pair.Key))
+            if (stateByInstruction.ContainsKey((int)pair.Key))
             {
                 throw new Exception("Processed same instruction twice");
             }
@@ -286,15 +286,15 @@ public class ProgramViewSettings
                 }
             }
 
-            stateByInstruction.Add(pair.Key, state);
+            stateByInstruction.Add((int)pair.Key, state);
             prevState = state;
         }
         StateByInstruction = stateByInstruction;
         Data = programData;
 
         //TODO: this can collide
-        CharacterScriptOffsetView = program.CharScriptOffsets.ToDictionary(c => c.Character, c => c.Offs);
+        CharacterScriptOffsetView = program.CharScriptOffsets.ToDictionary(c => c.Character, c => (int)c.Offs);
         //TODO: this can collide
-        ActionScriptOffsetView = program.ActionScriptOffsets.ToDictionary(a => (a.Action, a.Object1, a.Object2), a => a.Offset);
+        ActionScriptOffsetView = program.ActionScriptOffsets.ToDictionary(a => (a.Action, a.Object1, a.Object2), a => (int)a.Offset);
     }
 }

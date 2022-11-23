@@ -5,22 +5,22 @@ public class DrawSpriteOnBackdropInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.DrawSpriteOnBackdrop;
     public override int Width => 6;
     
-    public ushort Num { get; set; }
-    public ushort X { get; set; }
-    public ushort Y { get; set; }
+    public short Num { get; set; }
+    public short X { get; set; }
+    public short Y { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Num = reader.ReadUInt16();
-        X = reader.ReadUInt16();
-        Y = reader.ReadUInt16();
+        Num = reader.ReadInt16();
+        X = reader.ReadInt16();
+        Y = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Num);
-        writer.Write((ushort)X);
-        writer.Write((ushort)Y);
+        writer.Write((short)Num);
+        writer.Write((short)X);
+        writer.Write((short)Y);
     }
 
     public override string ToString()
