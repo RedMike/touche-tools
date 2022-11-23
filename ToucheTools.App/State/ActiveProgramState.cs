@@ -2499,7 +2499,9 @@ public class ActiveProgramState
             var val = CurrentState.StackValue;
             var uVal = BitConverter.ToUInt16(BitConverter.GetBytes(val), 0);//game does it this way
             CurrentState.MoveStackPointerForwards();
+#pragma warning disable CS0675
             CurrentState.SetStackValue((short)(CurrentState.StackValue | uVal));
+#pragma warning restore CS0675
         }
         else if (instruction is TestEqualsInstruction)
         {
