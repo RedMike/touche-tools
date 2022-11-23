@@ -93,6 +93,7 @@ public class GameViewWindow : BaseWindow
         RenderActiveTalkEntries(offset); //just before inventory
 
         RenderInventory(offset); //last
+        RenderConversation(offset); //also last
 
         RenderActionMenu(offset);
 
@@ -248,6 +249,10 @@ public class GameViewWindow : BaseWindow
         {
             return;
         }
+        if (_activeProgramState.CurrentConversation != null)
+        {
+            return;
+        }
 
         var keyCharId = _activeProgramState.CurrentKeyChar;
         if (keyCharId > 1)
@@ -340,6 +345,43 @@ public class GameViewWindow : BaseWindow
             ImGui.SetCursorPos(offset + _viewState.ScreenMousePos - new Vector2(iconImage.Width/2.0f, iconImage.Height/2.0f));
             ImGui.Image(iconTexture, new Vector2(iconImage.Width, iconImage.Height));
         }
+    }
+    
+    private void RenderConversation(Vector2 offset)
+    {
+        if (_activeProgramState.CurrentState.LoadedRoom == null)
+        {
+            return;
+        }
+
+        if (_activeProgramState.CurrentConversation == null)
+        {
+            return;
+        }
+
+        //TODO: correctly render background
+        var bgCol = new PaletteDataModel.Rgb()
+        {
+            R = 50,
+            G = 50,
+            B = 50
+        };
+        //blank out background
+        RenderRectangle(offset, Constants.GameScreenWidth, Constants.GameScreenHeight-Constants.RoomHeight, 0, Constants.RoomHeight, "", 0, 
+            bgCol.R, bgCol.G, bgCol.B, 255, 0, 0, 0, 0
+        );
+
+        ImGui.SetCursorPos(offset + new Vector2(0.0f, Constants.RoomHeight));
+        ImGui.BeginChild($"conversation{_activeProgramState.CurrentConversation.Value}", new Vector2(Constants.GameScreenWidth, Constants.GameScreenHeight - Constants.RoomHeight));
+        foreach (var choice in _activeProgramState.CurrentConversationChoices)
+        {
+            if (ImGui.Button(choice.Item2))
+            {
+                _activeProgramState.ChooseConversationChoice(choice.Item1);
+                break;
+            }
+        }
+        ImGui.EndChild();
     }
 
     private void RenderActionMenu(Vector2 offset)

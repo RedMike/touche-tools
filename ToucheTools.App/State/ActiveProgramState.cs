@@ -612,6 +612,70 @@ public class ActiveProgramState
     }
     #endregion
 
+    #region Conversations
+    public int? QueuedConversation { get; set; }
+    public int? CurrentConversation { get; set; }
+    public List<(int, string)> CurrentConversationChoices { get; set; }
+
+    private void AddConversationChoice(int num)
+    {
+        var program = _model.Programs[_program.Active];
+        if (CurrentConversation == null)
+        {
+            throw new Exception("Missing conversation");
+        }
+
+        var idx = program.Conversations.FindIndex(c => c.Num == CurrentConversation.Value);
+        var choice = program.Conversations[idx + num];
+        if (choice == null)
+        {
+            throw new Exception("Missing conversation choice");
+        }
+
+        var msg = GetString(choice.Message);
+
+        if (CurrentConversationChoices.Any(c => c.Item2 == msg))
+        {
+            //already in list
+            return;
+        }
+
+        CurrentConversationChoices.Add((num, msg));
+    }
+
+    private void RemoveConversationChoice(int num)
+    {
+        CurrentConversationChoices.RemoveAll(x => x.Item1 == num);
+    }
+
+    public void ChooseConversationChoice(int num)
+    {
+        var program = _model.Programs[_program.Active];
+        if (CurrentConversation == null)
+        {
+            throw new Exception("Missing conversation");
+        }
+        RemoveConversationChoice(num);
+
+        var idx = program.Conversations.FindIndex(c => c.Num == CurrentConversation.Value);
+        var conversationChoice = program.Conversations[idx + num];
+        if (conversationChoice == null)
+        {
+            throw new Exception("Missing conversation");
+        }
+        
+        var script = CurrentState.GetKeyCharScript(CurrentKeyChar);
+        if (script == null)
+        {
+            throw new Exception("Missing script");
+        }
+
+        script.Offset = conversationChoice.Offset;
+        script.Status = ProgramState.ScriptStatus.Ready;
+        //TODO: reset STK?
+    }
+    #endregion
+    
     public string GetString(int num)
     {
         var program = _model.Programs[_program.Active];
@@ -754,6 +818,44 @@ public class ActiveProgramState
     private void OnGameTick()
     {
         var program = _model.Programs[_program.Active];
+
+        #region Conversations
+        if (QueuedConversation != null)
+        {
+            if (CurrentConversation != null)
+            {
+                throw new Exception("Queued conversation when already current");
+            }
+
+            CurrentConversation = QueuedConversation.Value;
+            CurrentConversationChoices = new List<(int, string)>();
+            var conversation = program.Conversations.FirstOrDefault(c => c.Num == CurrentConversation.Value);
+            if (conversation == null)
+            {
+                throw new Exception("Unknown conversation");
+            }
+
+            var script = CurrentState.GetKeyCharScript(CurrentKeyChar); //TODO: this may not be the right approach?
+            if (script == null)
+            {
+                throw new Exception("Missing script");
+            }
+            script.Offset = conversation.Offset;
+            script.Status = ProgramState.ScriptStatus.Ready;
+            QueuedConversation = null;
+        }
+        else
+        {
+            //if we're already in a conversation and it's ended
+            if (CurrentConversation != null)
+            {
+                if (CurrentConversationChoices.Count == 0)
+                {
+                    CurrentConversation = null;
+                }
+            }
+        }
+        #endregion
         
         #region Random numbers
         var rndMod = GetFlag(ToucheTools.Constants.Flags.Known.RandomNumberMod);
@@ -2711,6 +2813,24 @@ public class ActiveProgramState
         {
             var keyChar = GetKeyChar(getCharWalk.Character);
             CurrentState.SetStackValue((short)(keyChar.LastWalk ?? -1));
+        } else if (instruction is SetConversationInstruction setConversation)
+        {
+            QueuedConversation = setConversation.Num;
+        } else if (instruction is ClearConversationChoicesInstruction)
+        {
+            CurrentConversationChoices = new List<(int, string)>();
+        } else if (instruction is AddConversationChoiceInstruction addConversationChoice)
+        {
+            AddConversationChoice(addConversationChoice.Num);
+        } else if (instruction is RemoveConversationChoiceInstruction removeConversationChoice)
+        {
+            RemoveConversationChoice(removeConversationChoice.Num);
+        } else if (instruction is EndConversationInstruction)
+        {
+            CurrentConversationChoices = new List<(int, string)>();
+            programPaused = true;
+            programRestart = true;
+            DisabledInputCounter = 0;
         }
         else
         {
