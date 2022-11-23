@@ -1926,6 +1926,29 @@ public class ActiveProgramState
         }
     }
 
+    private void RemoveItemFromInventory(int ch, short item)
+    {
+        if (item == 1)
+        {
+            //it's really about money
+            RemovedMoney = 0;
+        }
+        else
+        {
+            //it's about removing an item
+            if (ch >= InventoryLists.Length)
+            {
+                throw new Exception("Removing inventory to non-existent list");
+            }
+            var inventoryList = InventoryLists[ch];
+            InventoryFlags.Remove(item);
+            if (inventoryList.Items.Contains(item))
+            {
+                inventoryList.RemoveItem(inventoryList.Items.FindIndex(x => x == item));
+            }
+        }
+    }
+    
     private void AddItemToInventory(int ch, short item)
     {
         if (item == 0)
@@ -2531,7 +2554,12 @@ public class ActiveProgramState
         {
             var item = CurrentState.StackValue;
             AddItemToInventory(addItemToInventory.Character, item);
-        } else if (instruction is StartEpisodeInstruction startEpisode)
+        } else if (instruction is RemoveItemFromInventoryInstruction removeItemFromInventory)
+        {
+            var item = CurrentState.StackValue;
+            RemoveItemFromInventory(removeItemFromInventory.Character, item);
+        }
+        else if (instruction is StartEpisodeInstruction startEpisode)
         {
             if (CurrentState.QueuedProgram != null)
             {

@@ -67,11 +67,17 @@ public class GameViewWindow : BaseWindow
         if (leftCount != 0)
         {
             //TODO: is double-click necessary?
-            _viewState.LeftClicked = true;
+            if (_activeProgramState.ActiveMenu == null)
+            {
+                _viewState.LeftClicked = true;
+            }
         }
         if (rightCount != 0)
         {
-            _viewState.RightClicked = true;
+            if (_activeProgramState.ActiveMenu == null)
+            {
+                _viewState.RightClicked = true;
+            }
         }
         
         RenderRoom(offset);
