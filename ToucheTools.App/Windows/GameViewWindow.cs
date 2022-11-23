@@ -528,7 +528,7 @@ public class GameViewWindow : BaseWindow
             RenderKeyChar(offset, keyCharId, x, y, z);
 
             //render active walk areas
-            if (keyChar.LastWalk != null)
+            if (keyChar.LastWalk != null && keyChar.LastWalk >= 0)
             {
                 if (keyChar.LastWalk.Value >= program.Walks.Count)
                 {
@@ -601,7 +601,7 @@ public class GameViewWindow : BaseWindow
 
         var zFactor = Game.GetZFactor(z);
 
-        if (keyChar.LastWalk != null && keyChar.LastWalk.Value < program.Walks.Count)
+        if (keyChar.LastWalk != null && keyChar.LastWalk.Value >= 0 && keyChar.LastWalk.Value < program.Walks.Count)
         {
             var walk = program.Walks[keyChar.LastWalk.Value];
             var clipRect = program.Rects[walk.ClipRect];
@@ -645,7 +645,7 @@ public class GameViewWindow : BaseWindow
                 0, 0, 255, 50, 255, 255, 255, 150);
         }
         
-        if (keyChar.LastWalk != null && keyChar.LastWalk.Value < program.Walks.Count)
+        if (keyChar.LastWalk != null && keyChar.LastWalk.Value >= 0 && keyChar.LastWalk.Value < program.Walks.Count)
         {
             ImGui.PopClipRect();
         }
