@@ -2917,6 +2917,10 @@ public class ActiveProgramState
             {
                 CurrentState.OverwrittenHitboxes[setHitboxText.Hitbox] = true;
             }
+        } else if (instruction is GetCharCurrentAnimInstruction getCharCurrentAnim)
+        {
+            var keyChar = GetKeyChar(getCharCurrentAnim.Character);
+            CurrentState.SetStackValue((short)(keyChar.CurrentAnim));
         }
         else
         {
