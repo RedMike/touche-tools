@@ -1,6 +1,7 @@
 ﻿using ToucheTools.App.ViewModels;
 using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.Constants;
+using ToucheTools.Helpers;
 using ToucheTools.Models;
 using ToucheTools.Models.Instructions;
 
@@ -2287,7 +2288,7 @@ public class ActiveProgramState
             
             var keyChar = GetKeyChar(initCharScript.Character);
             keyChar.Initialised = true;
-            keyChar.TextColour = BitConverter.ToUInt16(BitConverter.GetBytes(initCharScript.Color), 0);//game does it this way
+            keyChar.TextColour = initCharScript.Color.AsUshort();//game does it this way
             keyChar.SpriteIndex = initCharScript.SpriteIndex;
             keyChar.SequenceIndex = initCharScript.SequenceIndex;
             keyChar.Character = initCharScript.SequenceCharacterId;
@@ -2588,17 +2589,15 @@ public class ActiveProgramState
             CurrentState.SetStackValue((short)(CurrentState.StackValue - val));
         } else if (instruction is AndInstruction)
         {
-            var val = CurrentState.StackValue;
-            var uVal = BitConverter.ToUInt16(BitConverter.GetBytes(val), 0);//game does it this way
+            var val = CurrentState.StackValue.AsUshort();//game does it this way
             CurrentState.MoveStackPointerForwards();
-            CurrentState.SetStackValue((short)(CurrentState.StackValue & uVal));
+            CurrentState.SetStackValue((short)(CurrentState.StackValue & val));
         } else if (instruction is OrInstruction)
         {
-            var val = CurrentState.StackValue;
-            var uVal = BitConverter.ToUInt16(BitConverter.GetBytes(val), 0);//game does it this way
+            var val = CurrentState.StackValue.AsUshort();//game does it this way
             CurrentState.MoveStackPointerForwards();
 #pragma warning disable CS0675
-            CurrentState.SetStackValue((short)(CurrentState.StackValue | uVal));
+            CurrentState.SetStackValue((short)(CurrentState.StackValue | val));
 #pragma warning restore CS0675
         }
         else if (instruction is TestEqualsInstruction)

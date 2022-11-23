@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models.Instructions;
+﻿using ToucheTools.Helpers;
+
+namespace ToucheTools.Models.Instructions;
 
 public class SetCharTextColorInstruction : BaseInstruction
 {
@@ -11,13 +13,13 @@ public class SetCharTextColorInstruction : BaseInstruction
     public override void Load(BinaryReader reader)
     {
         Character = reader.ReadInt16();
-        Color = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
+        Color = reader.ReadInt16().AsUshort(); //game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
         writer.Write((short)Character);
-        writer.Write(BitConverter.ToInt16(BitConverter.GetBytes(Color), 0));//game does it this way
+        writer.Write(Color.AsShort());//game does it this way
     }
 
     public override string ToString()
