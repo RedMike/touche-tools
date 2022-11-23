@@ -44,6 +44,7 @@ public class ActiveProgramState
         public bool OffScreen { get; set; } = false;
         public bool IsFollowing { get; set; } = false;
         public uint TextColour { get; set; }
+        public bool OverwrittenName { get; set; } = false;
         
         #region Graphics
         public int? SpriteIndex { get; set; }
@@ -91,6 +92,7 @@ public class ActiveProgramState
         {
             Initialised = false;
             TextColour = 253;
+            OverwrittenName = false;
             CurrentDirection = 0;
             CurrentAnim = 0;
             CurrentAnimSpeed = 0;
@@ -124,14 +126,6 @@ public class ActiveProgramState
     public class ProgramState
     {
         #region Scripts
-        public enum ScriptType
-        {
-            Unknown = 0,
-            KeyChar = 1, //includes initial main loop
-            Action = 2,
-            Conversation = 3,
-        }
-
         public enum ScriptStatus
         {
             Unknown = 0,
@@ -236,6 +230,7 @@ public class ActiveProgramState
         public int? LoadedRoom { get; set; } = null;
 
         public Dictionary<ushort, (int, int)> BackgroundOffsets { get; set; } = new Dictionary<ushort, (int, int)>();
+        public Dictionary<int, bool> OverwrittenHitboxes { get; set; } = new Dictionary<int, bool>();
     }
 
     private readonly DatabaseModel _model;
@@ -675,7 +670,7 @@ public class ActiveProgramState
         //TODO: reset STK?
     }
     #endregion
-    
+
     public string GetString(int num)
     {
         var program = _model.Programs[_program.Active];
@@ -2831,6 +2826,21 @@ public class ActiveProgramState
             programPaused = true;
             programRestart = true;
             DisabledInputCounter = 0;
+        } else if (instruction is IsCharActiveInstruction isCharActive)
+        {
+            var keyChar = GetKeyChar(isCharActive.Character);
+            CurrentState.SetStackValue((short)(keyChar.Initialised ? 1 : 0));
+        } else if (instruction is SetHitboxTextInstruction setHitboxText)
+        {
+            if (setHitboxText.IsCharacterHitbox)
+            {
+                var keyChar = GetKeyChar(setHitboxText.Hitbox);
+                keyChar.OverwrittenName = true;
+            }
+            else
+            {
+                CurrentState.OverwrittenHitboxes[setHitboxText.Hitbox] = true;
+            }
         }
         else
         {

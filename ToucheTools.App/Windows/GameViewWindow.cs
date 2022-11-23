@@ -687,10 +687,23 @@ public class GameViewWindow : BaseWindow
                 var keyChar = _activeProgramState.GetKeyChar(hitbox.KeyChar);
                 if (keyChar.Initialised)
                 {
-                    //TODO: if keychar had hitbox set change text
+                    if (keyChar.OverwrittenName)
+                    {
+                        s = _activeProgramState.GetString(hitbox.DefaultString);
+                    }
                     (x, y, w, h) = _viewState.KeyCharRenderedRects[hitbox.KeyChar];
                     x += offsetX;
                     y += offsetY;
+                }
+            }
+            else
+            {
+                if (_activeProgramState.CurrentState.OverwrittenHitboxes.ContainsKey(hitbox.Item))
+                {
+                    if (_activeProgramState.CurrentState.OverwrittenHitboxes[hitbox.Item])
+                    {
+                        s = _activeProgramState.GetString(hitbox.DefaultString);
+                    }
                 }
             }
             

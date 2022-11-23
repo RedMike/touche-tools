@@ -5,16 +5,16 @@ public class FetchScriptWordInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.FetchScriptWord;
     public override int Width => 2;
     
-    public ushort Val { get; set; }
+    public short Val { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Val = reader.ReadUInt16();
+        Val = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Val);
+        writer.Write((short)Val);
     }
 
     public override string ToString()
