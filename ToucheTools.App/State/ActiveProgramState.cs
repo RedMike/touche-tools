@@ -65,7 +65,7 @@ public class ActiveProgramState
         public int Anim2Count { get; set; }
         public int Anim3Start { get; set; }
         public int Anim3Count { get; set; }
-        public List<int> QueuedAnimations { get; set; }
+        public List<int> QueuedAnimations { get; set; } = new List<int>();
         #endregion
         
         #region Position
@@ -146,6 +146,9 @@ public class ActiveProgramState
             public int Delay { get; set; }
 
             public uint? QueuedOffset { get; set; } = null;
+            
+            public ushort StackPointer { get; set; } = 39;
+            public short[] Stack { get; set; } = new short[40];
         }
 
         public List<Script> Scripts { get; set; } = new List<Script>();
@@ -198,35 +201,58 @@ public class ActiveProgramState
         public int? QueuedProgram { get; set; } = null;
         
         #region STK
-        public ushort StackPointer { get; private set; } = 0;
-
         public void MoveStackPointerForwards()
         {
-            StackPointer++;
-            if (StackPointer >= Stack.Length)
+            var runningScript = GetRunningScript();
+            if (runningScript == null)
             {
-                StackPointer = 0;
+                throw new Exception("No running script");
+            }
+
+            runningScript.StackPointer++;
+            if (runningScript.StackPointer >= runningScript.Stack.Length)
+            {
+                throw new Exception("STK overflow");
             }
         }
         public void MoveStackPointerBackwards()
         {
-            StackPointer--;
-            if (StackPointer >= Stack.Length)
+            var runningScript = GetRunningScript();
+            if (runningScript == null)
             {
-                StackPointer = (ushort)(Stack.Length - 1);
+                throw new Exception("No running script");
+            }
+
+            runningScript.StackPointer--;
+            if (runningScript.StackPointer <= 0)
+            {
+                throw new Exception("STK underflow");
             }
         }
-        private short[] Stack { get; set; } = new short[500];
-        public short StackValue => Stack[StackPointer];
-        public void SetStackValue(short val)
+        
+        public short StackValue
         {
-            Stack[StackPointer] = val;
+            get
+            {
+                var runningScript = GetRunningScript();
+                if (runningScript == null)
+                {
+                    throw new Exception("No running script");
+                }
+
+                return runningScript.Stack[runningScript.StackPointer];
+            }
         }
 
-        public Dictionary<ushort, short> GetFullStackValues()
+        public void SetStackValue(short val)
         {
-            return Stack.Select((val, idx) => (idx, val)).Where(pair => pair.val != 0 || pair.idx == StackPointer)
-                .ToDictionary(pair => (ushort)pair.idx, pair => pair.val);
+            var runningScript = GetRunningScript();
+            if (runningScript == null)
+            {
+                throw new Exception("No running script");
+            }
+
+            runningScript.Stack[runningScript.StackPointer] = val;
         }
         #endregion
 
@@ -740,7 +766,9 @@ public class ActiveProgramState
             Id = CurrentKeyChar,
             Offset = 0,
             StartOffset = 0,
-            Status = ProgramState.ScriptStatus.Running
+            Status = ProgramState.ScriptStatus.Running,
+            Stack = new short[500],
+            StackPointer = 499
         });
         foreach (var (keyCharId, keyChar) in KeyChars)
         {
@@ -749,8 +777,8 @@ public class ActiveProgramState
             if (script != null)
             {
                 script.Delay = 0;
-                //script.Offset = 0;
-                //TODO: clear STK
+                script.QueuedOffset = 0;
+                script.StackPointer = (ushort)(script.Stack.Length-1);
             }
             if (keyCharId == CurrentKeyChar)
             {
@@ -2447,8 +2475,8 @@ public class ActiveProgramState
             if (script != null)
             {
                 script.Delay = 0;
-                //script.Offset = 0;
-                //TODO: clear STK
+                script.QueuedOffset = 0;
+                script.StackPointer = (ushort)(script.Stack.Length-1);
             }
         } else if (instruction is MoveCharToPosInstruction moveCharToPos)
         {
