@@ -2556,19 +2556,19 @@ public class ActiveProgramState
         }
         else if (instruction is AddRoomAreaInstruction addRoomArea)
         {
-            if (!Flags.ContainsKey(addRoomArea.Flag))
+            var flag = addRoomArea.Flag.AsShort(); //game does it this way
+            if (!Flags.ContainsKey((ushort)flag))
             {
-                _log.Error($"Flag {addRoomArea.Flag} value required but not known");
+                _log.Error($"Flag {flag} value required but not known");
             }
-            if (!Flags.ContainsKey((ushort)(addRoomArea.Flag + 1)))
+            if (!Flags.ContainsKey((ushort)(flag + 1)))
             {
-                _log.Error($"Flag {(addRoomArea.Flag + 1)} value required but not known");
+                _log.Error($"Flag {(flag + 1)} value required but not known");
             }
 
-            var x = GetFlag(addRoomArea.Flag);
-            var y = GetFlag((ushort)(addRoomArea.Flag + 1));
-            var num = BitConverter.ToInt16(BitConverter.GetBytes(addRoomArea.Num), 0);//game does it this way
-            CurrentState.BackgroundOffsets[num] = (x, y);
+            var x = GetFlag((ushort)flag);
+            var y = GetFlag((ushort)(flag + 1));
+            CurrentState.BackgroundOffsets[addRoomArea.Num] = (x, y);
         } else if (instruction is GetFlagInstruction getFlag)
         {
             var flagVal = GetFlag(getFlag.Flag);

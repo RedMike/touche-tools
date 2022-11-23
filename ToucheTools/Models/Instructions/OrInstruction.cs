@@ -7,6 +7,6 @@ public class OrInstruction : BaseInstruction
     
     public override string ToString()
     {
-        return Opcode.ToString("G") + $" get STK value, move STK position forwards by one, set STK value to old value bitwise OR new one";
+        return Opcode.ToString("G") + $" STK val by STK+1 val";
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models.Instructions;
+﻿using ToucheTools.Helpers;
+
+namespace ToucheTools.Models.Instructions;
 
 public class UnsetCharFlagsInstruction : BaseInstruction
 {
@@ -11,14 +13,14 @@ public class UnsetCharFlagsInstruction : BaseInstruction
     public override void Load(BinaryReader reader)
     {
         Character = reader.ReadInt16();
-        Flags = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
+        Flags = reader.ReadInt16().AsUshort();//game does it this way
         Flags &= 0xFF00;
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
         writer.Write((short)Character);
-        writer.Write(BitConverter.ToUInt16(BitConverter.GetBytes(Flags), 0));//game does it this way
+        writer.Write(Flags.AsShort());
     }
 
     public override string ToString()

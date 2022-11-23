@@ -31,6 +31,6 @@ public class InitCharScriptInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} {Character} {Color} {SpriteIndex} {SequenceIndex} {SequenceCharacterId}";
+        return $"{Opcode:G} {Character} color {Color} sprite {SpriteIndex} seq {SequenceIndex} char {SequenceCharacterId}";
     }
 }

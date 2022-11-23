@@ -25,6 +25,6 @@ public class DrawSpriteOnBackdropInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} sprite {Num} at {X}, {Y}";
+        return $"{Opcode:G} index {Num} at {X}, {Y}";
     }
 }

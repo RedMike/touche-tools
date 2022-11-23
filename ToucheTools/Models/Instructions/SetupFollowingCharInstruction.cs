@@ -5,19 +5,19 @@ public class SetupFollowingCharInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.SetupFollowingChar;
     public override int Width => 4;
     
-    public ushort Val { get; set; }
-    public ushort Character { get; set; }
+    public short Val { get; set; }
+    public short Character { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Val = reader.ReadUInt16();
-        Character = reader.ReadUInt16();
+        Val = reader.ReadInt16();
+        Character = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Val);
-        writer.Write((ushort)Character);
+        writer.Write((short)Val);
+        writer.Write((short)Character);
     }
 
     public override string ToString()

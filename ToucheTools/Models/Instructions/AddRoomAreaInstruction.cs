@@ -1,4 +1,5 @@
 ﻿using ToucheTools.Constants;
+using ToucheTools.Helpers;
 
 namespace ToucheTools.Models.Instructions;
 
@@ -13,17 +14,17 @@ public class AddRoomAreaInstruction : BaseInstruction
     public override void Load(BinaryReader reader)
     {
         Num = reader.ReadInt16();
-        Flag = reader.ReadUInt16();
+        Flag = reader.ReadInt16().AsUshort(); //game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
         writer.Write((short)Num);
-        writer.Write((ushort)Flag);
+        writer.Write(Flag.AsShort());
     }
 
     public override string ToString()
     {
-        return $"{Opcode:G} background {Num} offset flags {Flags.GetFlagText(Flag)}, {Flags.GetFlagText((ushort)(Flag+1))}";
+        return $"{Opcode:G} {Num} offset from flags {Flag}, {(Flag+1)}";
     }
 }

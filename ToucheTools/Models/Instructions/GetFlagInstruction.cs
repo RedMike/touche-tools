@@ -1,4 +1,5 @@
 ﻿using ToucheTools.Constants;
+using ToucheTools.Helpers;
 
 namespace ToucheTools.Models.Instructions;
 
@@ -11,16 +12,16 @@ public class GetFlagInstruction : BaseInstruction
 
     public override void Load(BinaryReader reader)
     {
-        Flag = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
+        Flag = reader.ReadInt16().AsUshort(); //game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Flag);
+        writer.Write(Flag.AsShort());
     }
 
     public override string ToString()
     {
-        return $"{Opcode:G} set STK value to flag {Flags.GetFlagText(Flag)}";
+        return $"{Opcode:G} STK val now {Flags.GetFlagText(Flag)}";
     }
 }

@@ -7,6 +7,6 @@ public class PushInstruction : BaseInstruction
     
     public override string ToString()
     {
-        return Opcode.ToString("G") + $" move STK back one and set value to 0";
+        return Opcode.ToString("G") + $" STK-1 val set to 0";
     }
 }

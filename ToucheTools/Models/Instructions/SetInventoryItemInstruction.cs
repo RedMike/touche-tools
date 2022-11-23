@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models.Instructions;
+﻿using ToucheTools.Helpers;
+
+namespace ToucheTools.Models.Instructions;
 
 public class SetInventoryItemInstruction : BaseInstruction
 {
@@ -14,17 +16,17 @@ public class SetInventoryItemInstruction : BaseInstruction
     public override void Load(BinaryReader reader)
     {
         Character = reader.ReadInt16();
-        Item = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way
+        Item = reader.ReadInt16().AsUshort();//game does it this way
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
         writer.Write((short)Character);
-        writer.Write(BitConverter.ToInt16(BitConverter.GetBytes(Item), 0));//game does it this way
+        writer.Write(Item.AsShort());
     }
 
     public override string ToString()
     {
-        return $"{Opcode:G} set {(CurrentCharacter ? "current" : Character)}'s {(MoneyItem ? "money" : Item)} to STK value";
+        return $"{Opcode:G} set {(CurrentCharacter ? "current" : Character)}'s {(MoneyItem ? "money" : Item)} to STK val";
     }
 }

@@ -7,6 +7,6 @@ public class AddInstruction : BaseInstruction
     
     public override string ToString()
     {
-        return Opcode.ToString("G") + $" take STK value, move STK position forwards 1, then add to STK value";
+        return Opcode.ToString("G") + $" STK val to STK+1 val";
     }
 }

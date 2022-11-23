@@ -21,6 +21,6 @@ public class IsCharActiveInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} {(CurrentCharacter ? "current" : Character)} active (1) or not (0) loaded into STK value";
+        return $"{Opcode:G} {(CurrentCharacter ? "current" : Character)} init'd to STK value";
     }
 }

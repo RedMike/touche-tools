@@ -5,20 +5,20 @@ public class GetInventoryItemFlagsInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.GetInventoryItemFlags;
     public override int Width => 2;
     
-    public ushort Item { get; set; }
+    public short Item { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Item = reader.ReadUInt16();
+        Item = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Item);
+        writer.Write((short)Item);
     }
 
     public override string ToString()
     {
-        return $"{Opcode:G} load flags for item {Item} into STK value";
+        return $"{Opcode:G} inventory of {Item} to STK val";
     }
 }

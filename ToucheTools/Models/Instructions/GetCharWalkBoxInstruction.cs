@@ -21,6 +21,6 @@ public class GetCharWalkBoxInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} {(CurrentCharacter ? "current" : Character)}'s walk box number loaded into STK value";
+        return $"{Opcode:G} {(CurrentCharacter ? "current" : Character)} current walk to STK val";
     }
 }

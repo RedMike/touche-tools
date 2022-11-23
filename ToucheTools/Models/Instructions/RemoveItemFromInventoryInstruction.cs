@@ -21,6 +21,6 @@ public class RemoveItemFromInventoryInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} remove item of STK value from {(CurrentCharacter ? "current" : Character)}";
+        return $"{Opcode:G} remove STK val item from {(CurrentCharacter ? "current" : Character)}";
     }
 }

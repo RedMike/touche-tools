@@ -21,6 +21,6 @@ public class GetCharPointsDataNumInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} {(CurrentCharacter ? "current" : Character)}'s points data num loaded into STK value";
+        return $"{Opcode:G} {(CurrentCharacter ? "current" : Character)} current point to STK val";
     }
 }

@@ -19,7 +19,7 @@ public class SetCharTextColorInstruction : BaseInstruction
     protected override void ExportInternal(BinaryWriter writer)
     {
         writer.Write((short)Character);
-        writer.Write(Color.AsShort());//game does it this way
+        writer.Write(Color.AsShort());
     }
 
     public override string ToString()

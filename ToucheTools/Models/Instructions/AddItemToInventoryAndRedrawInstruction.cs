@@ -21,6 +21,6 @@ public class AddItemToInventoryAndRedrawInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} add item of STK value to {(CurrentCharacter ? "current" : Character)}";
+        return $"{Opcode:G} add STK val item to {(CurrentCharacter ? "current" : Character)}";
     }
 }

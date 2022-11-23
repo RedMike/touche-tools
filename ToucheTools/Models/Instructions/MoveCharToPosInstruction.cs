@@ -24,11 +24,11 @@ public class MoveCharToPosInstruction : BaseInstruction
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Character);
-        writer.Write((ushort)Num);
+        writer.Write((short)Character);
+        writer.Write((short)Num);
         if (TargetingAnotherCharacter)
         {
-            writer.Write((ushort)TargetCharacter);
+            writer.Write((short)TargetCharacter);
         }
     }
 

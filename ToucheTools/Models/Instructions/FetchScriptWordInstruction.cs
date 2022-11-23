@@ -19,6 +19,6 @@ public class FetchScriptWordInstruction : BaseInstruction
 
     public override string ToString()
     {
-        return $"{Opcode:G} set STK value to {Val}";
+        return $"{Opcode:G} STK val now {Val}";
     }
 }

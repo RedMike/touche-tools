@@ -7,7 +7,6 @@ public class TestLowerOrEqualsInstruction : BaseInstruction
     
     public override string ToString()
     {
-        return Opcode.ToString("G") + $" get STK value, move STK position forwards one, check prev value lower or equals; " +
-               $"set STK value to -1 if yes, 0 if no";
+        return Opcode.ToString("G") + $" STK val against STK+1 val, set STK+1 val -1 yes, 0 no";
     }
 }

@@ -5,19 +5,19 @@ public class LockWalkPathInstruction : BaseInstruction
     public override ProgramDataModel.Opcode Opcode => ProgramDataModel.Opcode.LockWalkPath;
     public override int Width => 4;
     
-    public ushort Num1 { get; set; }
-    public ushort Num2 { get; set; }
+    public short Num1 { get; set; }
+    public short Num2 { get; set; }
 
     public override void Load(BinaryReader reader)
     {
-        Num1 = reader.ReadUInt16();
-        Num2 = reader.ReadUInt16();
+        Num1 = reader.ReadInt16();
+        Num2 = reader.ReadInt16();
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)Num1);
-        writer.Write((ushort)Num2);
+        writer.Write((short)Num1);
+        writer.Write((short)Num2);
     }
 
     public override string ToString()

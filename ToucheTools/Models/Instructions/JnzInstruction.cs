@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.Models.Instructions;
+﻿using ToucheTools.Helpers;
+
+namespace ToucheTools.Models.Instructions;
 
 public class JnzInstruction : BaseInstruction
 {
@@ -9,16 +11,16 @@ public class JnzInstruction : BaseInstruction
 
     public override void Load(BinaryReader reader)
     {
-        NewOffset = BitConverter.ToUInt16(BitConverter.GetBytes(reader.ReadInt16()), 0);//game does it this way;
+        NewOffset = reader.ReadInt16().AsUshort();//game does it this way;
     }
     
     protected override void ExportInternal(BinaryWriter writer)
     {
-        writer.Write((ushort)NewOffset);
+        writer.Write(NewOffset.AsShort());
     }
 
     public override string ToString()
     {
-        return $"{Opcode:G} if STK value is not 0, jump to {NewOffset}";
+        return $"{Opcode:G} if STK val not 0, jump to {NewOffset}";
     }
 }
