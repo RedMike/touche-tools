@@ -463,6 +463,72 @@ public class ActiveProgramState
     }
     public short RemovedMoney { get; set; } = 0;
     public short GrabbedItem { get; set; } = 0;
+    
+    private void RemoveGrabbedItem()
+    {
+        if (GrabbedItem != 0)
+        {
+            if (GrabbedItem != 1)
+            {
+                //add item to inventory
+                AddItemToInventory(CurrentKeyChar, GrabbedItem);
+            }
+
+            GrabbedItem = 0;
+        }
+    }
+
+    private void RemoveItemFromInventory(int ch, short item)
+    {
+        if (item == 1)
+        {
+            //it's really about money
+            RemovedMoney = 0;
+        }
+        else
+        {
+            //it's about removing an item
+            if (ch >= InventoryLists.Length)
+            {
+                throw new Exception("Removing inventory to non-existent list");
+            }
+            var inventoryList = InventoryLists[ch];
+            InventoryFlags.Remove(item);
+            if (inventoryList.Items.Contains(item))
+            {
+                inventoryList.RemoveItem(inventoryList.Items.FindIndex(x => x == item));
+            }
+        }
+    }
+    
+    private void AddItemToInventory(int ch, short item)
+    {
+        if (item == 0)
+        {
+            _log.Error("TODO: re-sort inventory items"); //TODO: just re-sort the inventory items
+        } else if (item == 1)
+        {
+            //it's really about money
+            RemovedMoney += GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
+        }
+        else
+        {
+            //it's about adding an item
+            if (ch >= InventoryLists.Length)
+            {
+                throw new Exception("Adding inventory to non-existent list");
+            }
+            
+            var inventoryList = InventoryLists[ch];
+            InventoryFlags[item] = (short)(ch | 0x10);
+            //don't re-add if it already exists
+            if (inventoryList.Items.Contains(item))
+            {
+                return;
+            }
+            inventoryList.PrependItem(item);
+        }
+    }
     #endregion
     
     #region Action Menus
@@ -1910,72 +1976,6 @@ public class ActiveProgramState
         
         //no hitboxes
         WalkTo(globalX, globalY);
-    }
-
-    private void RemoveGrabbedItem()
-    {
-        if (GrabbedItem != 0)
-        {
-            if (GrabbedItem != 1)
-            {
-                //add item to inventory
-                AddItemToInventory(CurrentKeyChar, GrabbedItem);
-            }
-
-            GrabbedItem = 0;
-        }
-    }
-
-    private void RemoveItemFromInventory(int ch, short item)
-    {
-        if (item == 1)
-        {
-            //it's really about money
-            RemovedMoney = 0;
-        }
-        else
-        {
-            //it's about removing an item
-            if (ch >= InventoryLists.Length)
-            {
-                throw new Exception("Removing inventory to non-existent list");
-            }
-            var inventoryList = InventoryLists[ch];
-            InventoryFlags.Remove(item);
-            if (inventoryList.Items.Contains(item))
-            {
-                inventoryList.RemoveItem(inventoryList.Items.FindIndex(x => x == item));
-            }
-        }
-    }
-    
-    private void AddItemToInventory(int ch, short item)
-    {
-        if (item == 0)
-        {
-            _log.Error("TODO: re-sort inventory items"); //TODO: just re-sort the inventory items
-        } else if (item == 1)
-        {
-            //it's really about money
-            RemovedMoney += GetFlag(ToucheTools.Constants.Flags.Known.CurrentMoney);
-        }
-        else
-        {
-            //it's about adding an item
-            if (ch >= InventoryLists.Length)
-            {
-                throw new Exception("Adding inventory to non-existent list");
-            }
-            
-            var inventoryList = InventoryLists[ch];
-            InventoryFlags[item] = (short)(ch | 0x10);
-            //don't re-add if it already exists
-            if (inventoryList.Items.Contains(item))
-            {
-                return;
-            }
-            inventoryList.PrependItem(item);
-        }
     }
 
     private bool TryTriggerAction(int action, int object1, int object2)
