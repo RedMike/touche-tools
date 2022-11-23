@@ -902,8 +902,23 @@ public class ActiveProgramState
                     var tx = nextPoint.X;
                     var ty = nextPoint.Y;
                     var tz = nextPoint.Z;
+                    
+                    if (keyChar.SequenceIndex == null)
+                    {
+                        throw new Exception("Missing sequence");
+                    }
 
                     var sequenceNum = LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum;
+                    if (sequenceNum == null)
+                    {
+                        throw new Exception("Missing sequence num");
+                    }
+
+                    if (keyChar.Character == null)
+                    {
+                        throw new Exception("Missing character");
+                    }
+                    
                     var frames = _model.Sequences[sequenceNum.Value]
                         .Characters[keyChar.Character.Value]
                         .Animations[keyChar.CurrentAnim]
