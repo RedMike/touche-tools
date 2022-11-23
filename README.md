@@ -41,7 +41,7 @@ was achieved.
 [x] Debugger: Finish implementing the game engine-specific logic and 
 rendering (inventory, giving items, money, action menu).
 
-[ ] Debugger: Start implementing conversation system.
+[x] Debugger: Start implementing conversation system.
 
 [ ] Library: Start figuring out bare-bones set of data based on 
 knowledge from GUI application.
