@@ -141,6 +141,11 @@ public class SequenceDataLoader
                             }
 
                             var partOffOff = rawFrameFlag & 0x7FFF;
+                            if (partStartOff + partOffOff * 2 >= memStream.Length)
+                            {
+                                //TODO: why does this happen?
+                                break;
+                            }
                             memStream.Seek(partStartOff + partOffOff * 2, SeekOrigin.Begin);
                             var partOff = reader.ReadUInt16();
                             if (partOff == 0)
@@ -156,6 +161,11 @@ public class SequenceDataLoader
                             sequence.PartMappings[(characterId, animationId, dirId, frameId)] = partOff;
 
                             frameId++;
+                        }
+                        //TODO: why is this necessary
+                        if (!sequence.PartMappings.ContainsKey((characterId, animationId, dirId, 0)))
+                        {
+                            sequence.FrameMappings.Remove((characterId, animationId, dirId));
                         }
                     }
 
@@ -210,6 +220,11 @@ public class SequenceDataLoader
                     var part = new SequenceDataModel.PartInformation();
                     memStream.Seek(partOff + partId * 6, SeekOrigin.Begin);
 
+                    if (partOff + partId * 6 >= memStream.Length)
+                    {
+                        //TODO: why does this happen?
+                        break;
+                    }
                     var rawDstX = reader.ReadUInt16();
                     var dstX = BitConverter.ToInt16(BitConverter.GetBytes(rawDstX), 0);
                     if (dstX == 10000)
