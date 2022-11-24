@@ -30,11 +30,10 @@ A GUI-based (ImGUI/Veldrid) application has been created to display
 this data, as well as provide a debugger to allow playback
 of the logic. This application is not feature-complete by any means.
 
-Exporting the database file is only somewhat implemented currently.
-The process through which the data is exported into a small enough
-file (due to strict limit in game engine loading) needs improvement
-and there is no original source to reference for information on how it
-was achieved.
+Exporting a loaded database file has been implemented and the 
+resulting new DAT file is playable in the original game engine
+as well as in the debugger. There are likely minor bugs in the 
+exported version, but generally it should match pretty closely.
 
 ## TODO List
 
@@ -43,8 +42,15 @@ rendering (inventory, giving items, money, action menu).
 
 [x] Debugger: Start implementing conversation system.
 
-[ ] Library: Start figuring out bare-bones set of data based on 
+[x] Library: Implement 1-to-1 export that re-creates a usable file
+from the original game TOUCHE.DAT.
+
+[ ] Library: Start figuring out bare-bones set of data based on
 knowledge from GUI application.
 
-[ ] Library: Implement 1-to-1 export that re-creates a usable file
-from the original game TOUCHE.DAT.
+[ ] Library: Set up sample "game" with a set of data that forms a very
+basic game setup (multiple rooms, characters, items, conversation)
+
+[ ] Editor: Begin implementing higher-level tools to create/import
+assets to generate databases (image processing into palettes, 
+basic scripting language, walk point definition, etc)
