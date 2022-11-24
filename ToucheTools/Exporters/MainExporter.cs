@@ -99,7 +99,7 @@ public class MainExporter
         _writer.Write((ushort)db.Backdrop.Width);
         _writer.Write((ushort)db.Backdrop.Height);
         
-        for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count-1; i++)
+        for (var i = 0; i < Resources.DataInfo[Resource.Sequence].Count; i++)
         {
             //also save resources we don't have, as null offsets
             if (!db.Sequences.ContainsKey(i))
@@ -124,6 +124,7 @@ public class MainExporter
             //now save the offset for it
             _resourceExporter.Export(Resource.Sequence, id, offset);
         }
+        _resourceExporter.Export(Resource.Sequence, db.Sequences.Keys.Max() + 1, AllocateAndReturnOffset(0));
 
         //also save resources we don't have, as null offsets
         for (var i = 1; i <= Resources.DataInfo[Resource.RoomInfo].Count; i++)
@@ -166,9 +167,10 @@ public class MainExporter
             //now save the offset for it
             _resourceExporter.Export(Resource.RoomInfo, id, offset);
         }
+        _resourceExporter.Export(Resource.RoomInfo, db.Rooms.Keys.Max() + 1, AllocateAndReturnOffset(0));
 
         //also save resources we don't have, as null offsets
-        for (var i = 0; i <= Resources.DataInfo[Resource.SpriteImage].Count-1; i++)
+        for (var i = 0; i <= Resources.DataInfo[Resource.SpriteImage].Count; i++)
         {
             if (!db.Sprites.ContainsKey(i))
             {
@@ -192,6 +194,7 @@ public class MainExporter
             _logger.LogError("sprite: {} to {}", id, offset);
             _resourceExporter.Export(Resource.SpriteImage, id, offset);
         }
+        _resourceExporter.Export(Resource.SpriteImage, db.Sprites.Keys.Max() + 1, AllocateAndReturnOffset(0));
         
         //also save resources we don't have, as null offsets
         for (var i = 0; i <= Resources.DataInfo[Resource.IconImage].Count-1; i++)
@@ -217,6 +220,7 @@ public class MainExporter
             //now save the offset for it
             _resourceExporter.Export(Resource.IconImage, id, offset);
         }
+        _resourceExporter.Export(Resource.IconImage, db.Icons.Keys.Max() + 1, AllocateAndReturnOffset(0));
 
         //also save programs that are empty so that the size calculations work, and an additional final program
         for (var i = 0; i <= Resources.DataInfo[Resource.Program].Count; i++)
@@ -242,6 +246,7 @@ public class MainExporter
                 _resourceExporter.Export(Resource.Program, id, offset);
             }
         }
+        _resourceExporter.Export(Resource.Program, db.Programs.Keys.Max() + 1, AllocateAndReturnOffset(0));
         
         //also save resources we don't have, as null offsets
         for (var i = 0; i <= Resources.DataInfo[Resource.Music].Count; i++)
