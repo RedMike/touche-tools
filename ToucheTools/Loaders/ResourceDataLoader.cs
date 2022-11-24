@@ -35,12 +35,16 @@ public class ResourceDataLoader
         _logger.Log(LogLevel.Debug, "Resource {} {}: offset {}", resource.ToString("G"), number, offset);
         
         uint nextOffset = _reader.ReadUInt32();
-        size = (int)(nextOffset - offset);
-        if (size <= 0)
+        size = 0;
+        if (nextOffset != 0)
         {
-            throw new UnknownResourceException();
+            size = (int)(nextOffset - offset);
+            if (size <= 0)
+            {
+                throw new UnknownResourceException();
+            }
         }
-        
+
         if (!includeSize)
         {
             size = 0;
