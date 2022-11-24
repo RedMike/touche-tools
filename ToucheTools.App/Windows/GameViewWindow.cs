@@ -13,7 +13,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebug = true;
     private const bool ShowDebugAreaRects = ShowDebug && false;
     private const bool ShowDebugBackgroundRects = ShowDebug && false;
-    private const bool ShowDebugPointRects = ShowDebug && false;
+    private const bool ShowDebugPointRects = ShowDebug && true;
     private const bool ShowDebugWalkRects = ShowDebug && false;
     private const bool ShowDebugTalkRects = ShowDebug && false;
     private const bool ShowDebugKeyCharRects = ShowDebug && false;
@@ -67,14 +67,14 @@ public class GameViewWindow : BaseWindow
         if (leftCount != 0)
         {
             //TODO: is double-click necessary?
-            if (_activeProgramState.ActiveMenu == null)
+            if (_activeProgramState.ActiveMenu == null && _activeProgramState.CurrentConversation == null)
             {
                 _viewState.LeftClicked = true;
             }
         }
         if (rightCount != 0)
         {
-            if (_activeProgramState.ActiveMenu == null)
+            if (_activeProgramState.ActiveMenu == null && _activeProgramState.CurrentConversation == null)
             {
                 _viewState.RightClicked = true;
             }

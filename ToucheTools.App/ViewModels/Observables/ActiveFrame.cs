@@ -11,6 +11,7 @@ public class ActiveFrame : ActiveObservable<int>
     private readonly ActiveDirection _direction;
 
     public List<(int, int, int, bool, bool)> PartsView { get; private set; } = null!;
+    public ((int, int, int), int)? FrameView { get; private set; } = null!;
 
     public ActiveFrame(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction)
     {
@@ -41,7 +42,8 @@ public class ActiveFrame : ActiveObservable<int>
         {
             SetActive(Elements.First());
         }
-        
+
+        FrameView = ((frames[Active].WalkDx, frames[Active].WalkDy, frames[Active].WalkDz), frames[Active].Delay);
         PartsView = frames[Active].Parts.Select(p => 
                 ((int)p.FrameIndex, p.DestX, p.DestY, p.HFlipped, p.VFlipped)
             )

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
+using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.App.ViewModels.Observables;
 
@@ -14,8 +15,9 @@ public class SpriteViewWindow : IWindow
     private readonly ActiveSprite _sprite;
     private readonly ActiveFrame _frame;
     private readonly ActiveDirection _direction;
+    private readonly SpriteViewState _viewState;
 
-    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite, ActiveFrame frame, ActiveDirection direction)
+    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite, ActiveFrame frame, ActiveDirection direction, SpriteViewState viewState)
     {
         _render = render;
         _windowSettings = windowSettings;
@@ -24,6 +26,7 @@ public class SpriteViewWindow : IWindow
         _sprite = sprite;
         _frame = frame;
         _direction = direction;
+        _viewState = viewState;
     }
 
     public void Render()
@@ -35,6 +38,7 @@ public class SpriteViewWindow : IWindow
         
         var viewW = Constants.MainWindowWidth;
         var viewH = 600.0f;
+        var movementOffset = Vector2.Zero;
         ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
         ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
         ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
@@ -53,7 +57,10 @@ public class SpriteViewWindow : IWindow
         else
         {
             var contentRegion = ImGui.GetWindowContentRegionMin();
-            var spritePosition = contentRegion + new Vector2(viewW / 2.0f, 3 * viewH / 4.0f);
+            var (movementOffsetX, movementOffsetY, movementOffsetZ) = _viewState.PositionOffset;
+            movementOffset = new Vector2(movementOffsetX, movementOffsetY + movementOffsetZ);
+            
+            var spritePosition = contentRegion + new Vector2(viewW / 2.0f, 3 * viewH / 4.0f) + movementOffset;
             
             #region Room background
             if (_viewSettings.ShowRoom)
@@ -102,8 +109,13 @@ public class SpriteViewWindow : IWindow
                     ox = -spriteTileWidth;
                 }
                 ImGui.SetCursorPos(spritePosition + new Vector2(destX + ox, destY));
-                ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);   
+                ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);
             }
+
+            var ((dx, dy, dz), delay) = _frame.FrameView.Value;
+            var text = $"Walk ({dx} X, {dy} Y, {dz} Z)\nDelay {delay}";
+            ImGui.SetCursorPos(spritePosition + new Vector2(0, 50.0f) - movementOffset);
+            ImGui.Text(text);
         }
         
         

@@ -36,6 +36,7 @@ public class SpriteViewSettings
     {
         if (!AutoStepFrame)
         {
+            _state.PositionOffset = (0, 0, 0);
             return;
         }
 
@@ -52,6 +53,9 @@ public class SpriteViewSettings
         {
             nextFrameId = 0;
         }
+
+        _state.PositionOffset = (curFrame.WalkDx * nextFrameId * (_direction.Active == 3 ? -1 : 1), curFrame.WalkDy * nextFrameId,
+            curFrame.WalkDz * nextFrameId);
 
         var delay = MinimumFrameStepInMillis;
         if (curFrame.Delay != 0)
