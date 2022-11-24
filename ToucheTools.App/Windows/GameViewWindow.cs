@@ -16,7 +16,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugPointRects = ShowDebug && false;
     private const bool ShowDebugWalkRects = ShowDebug && false;
     private const bool ShowDebugTalkRects = ShowDebug && false;
-    private const bool ShowDebugKeyCharRects = ShowDebug && false;
+    private const bool ShowDebugKeyCharRects = ShowDebug && true;
     private const bool ShowDebugHitboxRects = ShowDebug && false;
     private const bool ShowDebugInventoryRects = ShowDebug && false;
     
@@ -635,19 +635,19 @@ public class GameViewWindow : BaseWindow
 
         DrawSpriteImage(offset, x, y, spriteNum.Value, sequenceNum.Value, character, animId, dirId, frameId, zFactor, out var width, out var height);
 
-        var ox = (int)(x - width / 2.0f);
-        var oy = y - height;
+        if (keyChar.LastWalk != null && keyChar.LastWalk.Value >= 0 && keyChar.LastWalk.Value < program.Walks.Count)
+        {
+            ImGui.PopClipRect();
+        }
+        
         width = (int)Math.Ceiling(width * zFactor);
         height = (int)Math.Ceiling(height * zFactor);
+        var ox = (int)(x - width / 2.0f);
+        var oy = y - height;
         if (ShowDebugKeyCharRects)
         {
             RenderRectangle(offset, width, height, ox, oy, $"{keyCharId}", 1,
                 0, 0, 255, 50, 255, 255, 255, 150);
-        }
-        
-        if (keyChar.LastWalk != null && keyChar.LastWalk.Value >= 0 && keyChar.LastWalk.Value < program.Walks.Count)
-        {
-            ImGui.PopClipRect();
         }
 
         _viewState.KeyCharRenderedRects[keyCharId] = (ox, oy, width, height);
