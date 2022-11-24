@@ -32,6 +32,10 @@ public class RoomImageDataExporter
             for (var j = 0; j < room.Width; j++)
             {
                 byte color = room.RawData[i, j];
+                if (i == 0 && j == room.RoomWidth)
+                {
+                    color = 255;
+                }
                 if (compressing && 
                     (
                         color != compressingColor || //we're done compressing
