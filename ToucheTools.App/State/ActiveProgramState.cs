@@ -887,6 +887,7 @@ public class ActiveProgramState
             }
             script.QueuedOffset = (uint)conversation.Offset;
             script.Status = ProgramState.ScriptStatus.Ready;
+            script.StackPointer = 39;
             QueuedConversation = null;
         }
         else
@@ -1050,6 +1051,29 @@ public class ActiveProgramState
                     var ty = nextPoint.Y;
                     var tz = nextPoint.Z;
                     
+                    if (Math.Abs(x-tx) <= 1 && Math.Abs(y-ty) <= 1 && Math.Abs(z-tz) <= 1)
+                    {
+                        //workaround to int maths being slightly off compared to C version
+                        keyChar.PositionX = tx;
+                        keyChar.PositionY = ty;
+                        keyChar.PositionZ = tz;
+                        
+                        if (keyChar.CurrentAnim == 1)
+                        {
+                            keyChar.CurrentAnimCounter = 0;
+                            keyChar.CurrentAnimSpeed = 0;
+                            var rnd = new Random();
+                            keyChar.CurrentAnim = keyChar.Anim2Start + rnd.Next(0, keyChar.Anim2Count);
+                        }
+
+                        keyChar.LastPoint = (short)nextPointId;
+                        if (nextPoint == targetPoint)
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    
                     if (keyChar.SequenceIndex == null)
                     {
                         throw new Exception("Missing sequence");
@@ -1138,28 +1162,23 @@ public class ActiveProgramState
                         //not a walk animation, so just cancel out the dy/dz movement
                         if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
                         {
-                            dx = tx - keyChar.PositionX; //exact movement
+                            keyChar.PositionX = tx;
+                        }
+                        else
+                        {
+                            keyChar.PositionX = (int)(keyChar.PositionX - dx);
                         }
 
-                        keyChar.PositionX = (int)(x - dx);
                         if (keyChar.PositionX == nextPoint.X && keyChar.PositionY == nextPoint.Y &&
                             keyChar.PositionZ == nextPoint.Z)
                         {
-                            if (keyChar.CurrentAnim == 1)
-                            {
-                                keyChar.CurrentAnimCounter = 0;
-                                keyChar.CurrentAnimSpeed = 0;
-                                var rnd = new Random();
-                                keyChar.CurrentAnim = keyChar.Anim2Start + rnd.Next(0, keyChar.Anim2Count);
-                            }
                             keyChar.LastPoint = (short)nextPointId;
-                            continue;
                         }
 
-                        break;
+                        continue;
                     }
 
-                    var direction = GetDirection(x, y, z, tx, ty, tz);
+                    var direction = GetDirection(keyChar.PositionX, keyChar.PositionY, keyChar.PositionZ, tx, ty, tz);
                     if (direction < 0)
                     {
                         direction = keyChar.CurrentDirection;
@@ -1186,66 +1205,75 @@ public class ActiveProgramState
                     var ddx = nextPoint.X - lastX;
                     var ddy = nextPoint.Y - lastY;
                     var ddz = nextPoint.Z - lastZ;
-
-                    if (keyChar.CurrentDirection == 0 || keyChar.CurrentDirection == 3)
+                    if (Math.Abs(ddx) <= 1 && Math.Abs(ddy) <= 1 && Math.Abs(ddz) <= 1)
                     {
-                        //x movement only
-                        if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
-                        {
-                            keyChar.PositionX = tx;
-                        }
-                        else
-                        {
-                            keyChar.PositionX = (int)(keyChar.PositionX - dx);
-                            //if the path moves along x at all, then
-                            if (ddx != 0)
-                            {
-                                //adjust y/z based on x change
-                                keyChar.PositionY = ddy * (keyChar.PositionX - lastX) / ddx + lastY;
-                                keyChar.PositionZ = ddz * (keyChar.PositionX - lastX) / ddx + lastZ;
-                            }
-                        }
+                        //workaround to int maths being slightly off compared to C version
+                        keyChar.PositionX = tx;
+                        keyChar.PositionY = ty;
+                        keyChar.PositionZ = tz;
                     }
                     else
                     {
-                        //y/z movement
-                        if (nextPoint.Z != keyChar.PositionZ)
+                        if (keyChar.CurrentDirection == 0 || keyChar.CurrentDirection == 3)
                         {
-                            //first move along z, 
-                            if (Math.Abs(tz - z) < Math.Abs(dz))
+                            //x movement only
+                            if (Math.Abs(tx - keyChar.PositionX) < Math.Abs(dx))
                             {
-                                keyChar.PositionZ = tz;
+                                keyChar.PositionX = tx;
                             }
                             else
                             {
-                                keyChar.PositionZ = (int)(keyChar.PositionZ - dz);
-                                //if the path moves along z at all, then
-                                if (ddz != 0)
+                                keyChar.PositionX = (int)(keyChar.PositionX - dx);
+                                //if the path moves along x at all, then
+                                if (ddx != 0)
                                 {
-                                    //adjust x/y based on z change
-                                    keyChar.PositionX = ddx * (keyChar.PositionZ - lastZ) / ddz + lastX;
-                                    keyChar.PositionY = ddy * (keyChar.PositionZ - lastZ) / ddz + lastY;
+                                    //adjust y/z based on x change
+                                    keyChar.PositionY = ddy * (keyChar.PositionX - lastX) / ddx + lastY;
+                                    keyChar.PositionZ = ddz * (keyChar.PositionX - lastX) / ddx + lastZ;
                                 }
                             }
                         }
                         else
                         {
-                            //then move along y
-                            if (Math.Abs(ty - y) < Math.Abs(dz))
+                            //y/z movement
+                            if (nextPoint.Z != keyChar.PositionZ)
                             {
-                                keyChar.PositionY = ty;
+                                //first move along z, 
+                                if (Math.Abs(tz - keyChar.PositionZ) <= Math.Abs(dz))
+                                {
+                                    keyChar.PositionZ = tz;
+                                }
+                                else
+                                {
+                                    keyChar.PositionZ = (int)(keyChar.PositionZ - dz);
+                                    //if the path moves along z at all, then
+                                    if (ddz != 0)
+                                    {
+                                        //adjust x/y based on z change
+                                        keyChar.PositionX = ddx * (keyChar.PositionZ - lastZ) / ddz + lastX;
+                                        keyChar.PositionY = ddy * (keyChar.PositionZ - lastZ) / ddz + lastY;
+                                    }
+                                }
                             }
                             else
                             {
-                                keyChar.PositionY =
-                                    (int)(keyChar.PositionY -
-                                          dz); //intentional that it uses dz! so y isn't actually used
-                                //if the path moves along y at all, then
-                                if (ddy != 0)
+                                //then move along y
+                                if (Math.Abs(ty - keyChar.PositionY) <= Math.Abs(dz))
                                 {
-                                    //adjust x/z based on y change
-                                    keyChar.PositionX = ddx * (keyChar.PositionY - lastY) / ddy + lastX;
-                                    keyChar.PositionZ = ddz * (keyChar.PositionY - lastY) / ddy + lastZ;
+                                    keyChar.PositionY = ty;
+                                }
+                                else
+                                {
+                                    keyChar.PositionY =
+                                        (int)(keyChar.PositionY -
+                                              dz); //intentional that it uses dz! so y isn't actually used
+                                    //if the path moves along y at all, then
+                                    if (ddy != 0)
+                                    {
+                                        //adjust x/z based on y change
+                                        keyChar.PositionX = ddx * (keyChar.PositionY - lastY) / ddy + lastX;
+                                        keyChar.PositionZ = ddz * (keyChar.PositionY - lastY) / ddy + lastZ;
+                                    }
                                 }
                             }
                         }
@@ -1255,8 +1283,6 @@ public class ActiveProgramState
                     {
                         throw new Exception("No movement");
                     }
-                    
-                    //TODO: when moving from an intermediate point to the next one there's a slight hitch
 
                     if (keyChar.PositionX == nextPoint.X && keyChar.PositionY == nextPoint.Y &&
                         keyChar.PositionZ == nextPoint.Z)
@@ -2140,6 +2166,7 @@ public class ActiveProgramState
 
         script.QueuedOffset = (uint)aso.Offset;
         script.Status = ProgramState.ScriptStatus.Ready;
+        script.StackPointer = 39;
         return true;
     }
 
@@ -2271,7 +2298,16 @@ public class ActiveProgramState
                     nextScript.Offset = nextScript.QueuedOffset.Value;
                     nextScript.QueuedOffset = null;
                 }
-                nextScript.Status = ProgramState.ScriptStatus.Running;
+
+                if (nextScript.Offset == 0 && nextScript.Id != CurrentKeyChar)
+                {
+                    //should not be running
+                    nextScript.Status = ProgramState.ScriptStatus.Stopped;
+                }
+                else
+                {
+                    nextScript.Status = ProgramState.ScriptStatus.Running;
+                }
             }
             else
             {
