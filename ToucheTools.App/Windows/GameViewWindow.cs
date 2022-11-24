@@ -16,7 +16,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugPointRects = ShowDebug && false;
     private const bool ShowDebugWalkRects = ShowDebug && false;
     private const bool ShowDebugTalkRects = ShowDebug && false;
-    private const bool ShowDebugKeyCharRects = ShowDebug && true;
+    private const bool ShowDebugKeyCharRects = ShowDebug && false;
     private const bool ShowDebugHitboxRects = ShowDebug && false;
     private const bool ShowDebugInventoryRects = ShowDebug && false;
     
@@ -381,6 +381,7 @@ public class GameViewWindow : BaseWindow
                 break;
             }
         }
+
         ImGui.EndChild();
     }
 
