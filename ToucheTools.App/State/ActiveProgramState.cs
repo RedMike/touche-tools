@@ -87,6 +87,7 @@ public class ActiveProgramState
         public int? WaitForAnimationId { get; set; } = null;
         public int? WaitForPoint { get; set; } = null;
         public int? WaitForWalk { get; set; } = null;
+        public (int, int)? WaitForOtherKeyCharAnim { get; set; } = null;
         #endregion
         
         public void OnProgramChange()
@@ -332,7 +333,7 @@ public class ActiveProgramState
     public int DisabledInputCounter { get; set; } = 0;
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 50;
+    private const int MinimumTimeBetweenTicksInMillis = 10;
     
     #region Palette
     public Dictionary<int, PaletteDataModel.Rgb> LoadedPalette = new Dictionary<int, PaletteDataModel.Rgb>();
@@ -1322,10 +1323,27 @@ public class ActiveProgramState
                 }
                 else
                 {
-                    //expecting talk to remove it
-                    if (script.Id != CurrentKeyChar && TalkEntries.All(t => t.OtherKeyChar != script.Id))
+                    if (keyChar.WaitForOtherKeyCharAnim != null)
                     {
-                        throw new Exception("Pause waiting for talk with no talk scripts");
+                        var (keyCharId1, keyCharId2) = keyChar.WaitForOtherKeyCharAnim.Value;
+                        var keyChar1 = GetKeyChar(keyCharId1);
+                        var keyChar2 = GetKeyChar(keyCharId2);
+                        if (keyChar1.CurrentAnim == keyChar1.Anim2Start && keyChar1.CurrentAnimCounter == 0)
+                        {
+                            if (keyChar2.CurrentAnim == keyChar2.Anim2Start && keyChar2.CurrentAnimCounter == 0)
+                            {
+                                keyChar.WaitForOtherKeyCharAnim = null;
+                                script.Status = ProgramState.ScriptStatus.Ready;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //expecting talk to remove it
+                        if (script.Id != CurrentKeyChar && TalkEntries.All(t => t.OtherKeyChar != script.Id))
+                        {
+                            throw new Exception("Pause waiting for talk with no talk scripts");
+                        }
                     }
                 }
             }
@@ -2122,7 +2140,6 @@ public class ActiveProgramState
 
         script.QueuedOffset = (uint)aso.Offset;
         script.Status = ProgramState.ScriptStatus.Ready;
-        //TODO: reset STK?
         return true;
     }
 
@@ -2608,8 +2625,8 @@ public class ActiveProgramState
         {
             if (setupWaitingChar.Val1 == -1)
             {
-                _log.Error("Some waiting logic not implemented yet"); //TODO:
-                //TODO: waiting logic
+                var keyChar = GetKeyChar(currentScript.Id);
+                keyChar.WaitForOtherKeyCharAnim = (setupWaitingChar.Character, setupWaitingChar.Val2);
                 programPaused = true;
             }
             else
