@@ -1175,7 +1175,7 @@ public class ActiveProgramState
                             keyChar.LastPoint = (short)nextPointId;
                         }
 
-                        continue;
+                        break;
                     }
 
                     var direction = GetDirection(keyChar.PositionX, keyChar.PositionY, keyChar.PositionZ, tx, ty, tz);
