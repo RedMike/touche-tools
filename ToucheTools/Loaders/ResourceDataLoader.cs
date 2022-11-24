@@ -23,6 +23,7 @@ public class ResourceDataLoader
         {
             throw new UnknownResourceException();
         }
+
         _stream.Seek(Resources.DataInfo[resource].Offset + number * 4, SeekOrigin.Begin);
         uint rawOffset = _reader.ReadUInt32();
         if (rawOffset == 0)
@@ -33,18 +34,19 @@ public class ResourceDataLoader
         offset = (int)rawOffset;
         _logger.Log(LogLevel.Debug, "Resource {} {}: offset {}", resource.ToString("G"), number, offset);
         
+        uint nextOffset = _reader.ReadUInt32();
+        size = (int)(nextOffset - offset);
+        if (size <= 0)
+        {
+            throw new UnknownResourceException();
+        }
+        
         if (!includeSize)
         {
             size = 0;
         }
         else
         {
-            uint nextOffset = _reader.ReadUInt32();
-            size = (int)(nextOffset - offset);
-            if (size <= 0)
-            {
-                throw new UnknownResourceException();
-            }
             _logger.Log(LogLevel.Debug, "Resource {} {}: size {}", resource.ToString("G"), number, size);
         }
     }
