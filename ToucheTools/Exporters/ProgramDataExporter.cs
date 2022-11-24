@@ -43,6 +43,11 @@ public class ProgramDataExporter
                     s = program.Strings[i];
                 }
 
+                if (string.IsNullOrEmpty(s))
+                {
+                    s = "~";
+                }
+
                 var chars = s.ToCharArray();
 
                 var textOffset = nextOffset;
