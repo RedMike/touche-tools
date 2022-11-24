@@ -137,7 +137,7 @@ public class MainLoader
         object lockObj = new object(); //for lazy loading
         
         //sprites
-        for (var i = 0; i < Resources.DataInfo[Resource.SpriteImage].Count; i++)
+        for (var i = 0; i <= Resources.DataInfo[Resource.SpriteImage].Count; i++)
         {
             try
             {
