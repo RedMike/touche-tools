@@ -118,6 +118,17 @@ if (db.FailedIcons.Any())
     errors.AddRange(db.FailedIcons.Select(pair => $"Icon {pair.Key} - {pair.Value}"));
 }
 
+// foreach (var (seqId, seq) in db.Sequences)
+// {
+//     File.WriteAllBytes($"seq{seqId}.bytes", seq.Bytes);
+// }
+//
+// foreach (var (programId, program) in db.Programs)
+// {
+//     var lines = program.Instructions.Select(p => $"{p.Key:D5} - {p.Value.ToString()}");
+//     File.WriteAllLines($"p{programId}.txt", lines);
+// }
+
 var logData = serviceProvider.GetService<LogData>() ?? throw new InvalidOperationException();
 foreach (var err in errors)
 {
