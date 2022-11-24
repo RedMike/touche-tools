@@ -639,17 +639,22 @@ public class ActiveProgramState
     #region Conversations
     public int? QueuedConversation { get; set; }
     public int? CurrentConversation { get; set; }
-    public List<(int, string)> CurrentConversationChoices { get; set; }
+    public List<(int, string)> CurrentConversationChoices { get; set; } = new List<(int, string)>(); 
 
     private void AddConversationChoice(int num)
     {
         var program = _model.Programs[_program.Active];
-        if (CurrentConversation == null)
+        var curConvo = CurrentConversation;
+        if (curConvo == null)
         {
-            throw new Exception("Missing conversation");
+            curConvo = QueuedConversation;
+            if (curConvo == null)
+            {
+                throw new Exception("Missing conversation");
+            }
         }
 
-        var idx = program.Conversations.FindIndex(c => c.Num == CurrentConversation.Value);
+        var idx = program.Conversations.FindIndex(c => c.Num == curConvo.Value);
         var choice = program.Conversations[idx + num];
         if (choice == null)
         {
@@ -675,13 +680,18 @@ public class ActiveProgramState
     public void ChooseConversationChoice(int num)
     {
         var program = _model.Programs[_program.Active];
-        if (CurrentConversation == null)
+        var curConvo = CurrentConversation;
+        if (curConvo == null)
         {
-            throw new Exception("Missing conversation");
+            curConvo = QueuedConversation;
+            if (curConvo == null)
+            {
+                throw new Exception("Missing conversation");
+            }
         }
         RemoveConversationChoice(num);
 
-        var idx = program.Conversations.FindIndex(c => c.Num == CurrentConversation.Value);
+        var idx = program.Conversations.FindIndex(c => c.Num == curConvo.Value);
         var conversationChoice = program.Conversations[idx + num];
         if (conversationChoice == null)
         {
@@ -777,7 +787,8 @@ public class ActiveProgramState
             if (script != null)
             {
                 script.Delay = 0;
-                script.QueuedOffset = 0;
+                script.Offset = 0;
+                script.QueuedOffset = null;
                 script.StackPointer = (ushort)(script.Stack.Length-1);
             }
             if (keyCharId == CurrentKeyChar)
@@ -860,8 +871,8 @@ public class ActiveProgramState
                 throw new Exception("Queued conversation when already current");
             }
 
-            CurrentConversation = QueuedConversation.Value;
             CurrentConversationChoices = new List<(int, string)>();
+            CurrentConversation = QueuedConversation.Value;
             var conversation = program.Conversations.FirstOrDefault(c => c.Num == CurrentConversation.Value);
             if (conversation == null)
             {
@@ -2309,7 +2320,7 @@ public class ActiveProgramState
             {
                 //the current keychar script always only pauses
                 programRestart = true;
-                currentScript.QueuedOffset = currentScript.StartOffset;
+                currentScript.Offset = currentScript.StartOffset;
             }
             justJumped = true;
         } else if (instruction is NoopInstruction)
@@ -2355,7 +2366,17 @@ public class ActiveProgramState
             );
             if (keyCharScript != null)
             {
-                keyCharScript.QueuedOffset = keyCharScript.StartOffset;
+                if (keyCharScript.Status == ProgramState.ScriptStatus.Ready ||
+                    keyCharScript.Status == ProgramState.ScriptStatus.Running)
+                {
+                    keyCharScript.QueuedOffset = keyCharScript.StartOffset;
+                }
+                else
+                {
+                    keyCharScript.Offset = keyCharScript.StartOffset;
+                    keyCharScript.QueuedOffset = null;
+                }
+
                 keyCharScript.Status = ProgramState.ScriptStatus.Ready;
             }
         } else if (instruction is LoadRoomInstruction loadRoom)
@@ -2475,7 +2496,14 @@ public class ActiveProgramState
             if (script != null)
             {
                 script.Delay = 0;
-                script.QueuedOffset = 0;
+                if (initChar.Character == 0)
+                {
+                    script.QueuedOffset = 0;
+                }
+                else
+                {
+                    script.Status = ProgramState.ScriptStatus.Stopped;
+                }
                 script.StackPointer = (ushort)(script.Stack.Length-1);
             }
         } else if (instruction is MoveCharToPosInstruction moveCharToPos)
@@ -2695,7 +2723,18 @@ public class ActiveProgramState
                 newVal = -1;
             }
             CurrentState.SetStackValue(newVal);
-        } else if (instruction is TestGreaterOrEqualsInstruction)
+        } else if (instruction is TestGreaterInstruction)
+        {
+            var val = CurrentState.StackValue;
+            CurrentState.MoveStackPointerForwards();
+            short newVal = 0;
+            if (val > CurrentState.StackValue)
+            {
+                newVal = -1;
+            }
+            CurrentState.SetStackValue(newVal);
+        }
+        else if (instruction is TestGreaterOrEqualsInstruction)
         {
             var val = CurrentState.StackValue;
             CurrentState.MoveStackPointerForwards();
@@ -2710,10 +2749,18 @@ public class ActiveProgramState
         {
             if (CurrentState.StackValue == 0)
             {
-                currentScript.QueuedOffset = jz.NewOffset;
+                currentScript.Offset = jz.NewOffset;
                 justJumped = true;
             }
-        } else if (instruction is GetInventoryItemInstruction getInventoryItem)
+        } else if (instruction is JnzInstruction jnz)
+        {
+            if (CurrentState.StackValue != 0)
+            {
+                currentScript.Offset = jnz.NewOffset;
+                justJumped = true;
+            }
+        }
+        else if (instruction is GetInventoryItemInstruction getInventoryItem)
         {
             var keyChar = GetKeyChar(getInventoryItem.Character);
             var val = keyChar.Money;
@@ -2949,7 +2996,7 @@ public class ActiveProgramState
         if (!justJumped)
         {
             idx += 1;
-            currentScript.QueuedOffset = instructionOffsets[idx];
+            currentScript.Offset = instructionOffsets[idx];
         }
 
         return programPaused || programStopped;
