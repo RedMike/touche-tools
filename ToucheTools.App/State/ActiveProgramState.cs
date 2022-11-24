@@ -2985,6 +2985,31 @@ public class ActiveProgramState
         {
             var keyChar = GetKeyChar(getCharCurrentAnim.Character);
             CurrentState.SetStackValue((short)(keyChar.CurrentAnim));
+        } else if (instruction is StopCharScriptInstruction stopCharScript)
+        {
+            var script = CurrentState.GetKeyCharScript(stopCharScript.Character);
+            if (script != null)
+            {
+                script.Status = ProgramState.ScriptStatus.Stopped;
+            }
+        } else if (instruction is RestartCharScriptInstruction restartCharScript)
+        {
+            var script = CurrentState.GetKeyCharScript(restartCharScript.Character);
+            if (script != null)
+            {
+                if (script.Id == currentScript.Id)
+                {
+                    script.QueuedOffset = script.StartOffset;
+                }
+                else
+                {
+                    script.Offset = script.StartOffset;
+                    script.QueuedOffset = null;
+                }
+
+                script.StackPointer = 39;
+                script.Status = ProgramState.ScriptStatus.Ready;
+            }
         }
         else
         {
