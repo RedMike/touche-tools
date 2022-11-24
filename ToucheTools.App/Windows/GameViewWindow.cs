@@ -13,7 +13,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebug = true;
     private const bool ShowDebugAreaRects = ShowDebug && false;
     private const bool ShowDebugBackgroundRects = ShowDebug && false;
-    private const bool ShowDebugPointRects = ShowDebug && true;
+    private const bool ShowDebugPointRects = ShowDebug && false;
     private const bool ShowDebugWalkRects = ShowDebug && false;
     private const bool ShowDebugTalkRects = ShowDebug && false;
     private const bool ShowDebugKeyCharRects = ShowDebug && false;
