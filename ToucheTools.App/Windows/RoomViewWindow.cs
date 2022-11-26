@@ -57,13 +57,21 @@ public class RoomViewWindow : IWindow
         ImGui.SetNextWindowPos(new Vector2(0.0f, 200.0f));
         ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth, 600.0f));
         ImGui.Begin("Room View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysHorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
+        
+        var contentRegion = ImGui.GetWindowContentRegionMin();
+        var contentRegionMax = ImGui.GetWindowContentRegionMax();
+        var blankRect = _render.RenderRectangle(0, (int)(contentRegionMax - contentRegion).X,
+            (int)(contentRegionMax - contentRegion).Y,
+            (70, 0, 70, 255), (0, 0, 0, 0)
+        );
+        ImGui.SetCursorPos(new Vector2(contentRegion.X, contentRegion.Y));
+        ImGui.Image(blankRect, contentRegionMax-contentRegion);
 
         var (viewId, roomWidth, roomHeight, bytes) = _room.RoomView;
         var areaOffsetX = _viewSettings.AreaOffsetX;
         var areaOffsetY = _viewSettings.AreaOffsetY;
     
         var roomTexture = _render.RenderImage(RenderWindow.RenderType.Room, viewId, roomWidth, roomHeight, bytes);
-        var contentRegion = ImGui.GetWindowContentRegionMin();
         ImGui.SetCursorPos(new Vector2(contentRegion.X, contentRegion.Y));
         ImGui.Image(roomTexture, new Vector2(roomWidth, roomHeight));
 

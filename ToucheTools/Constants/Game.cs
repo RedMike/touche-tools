@@ -3,6 +3,8 @@
 public static class Game
 {
     public const int RoomHeight = 352;
+    public const int ScreenWidth = 640;
+    public const int ScreenHeight = 400;
     public const int StartupEpisode = 90;
     public const int MaxProgramDataSize = 61440;
     public const int ZDepthEven = 160;

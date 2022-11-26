@@ -33,9 +33,14 @@ public class ProgramDataExporter
             var memStream = new MemoryStream();
             var writer = new BinaryWriter(memStream);
             
-            var programOffset = allocate((program.Strings.Keys.Max()+3)*4);
+            var stringMax = 0;
+            if (program.Strings.Count > 0)
+            {
+                stringMax = program.Strings.Keys.Max();
+            }
+            var programOffset = allocate((stringMax+3)*4);
             
-            for (var i = 0; i < program.Strings.Keys.Max()+2; i++) //1-indexed
+            for (var i = 0; i < stringMax+2; i++) //1-indexed
             {
                 var s = "";
                 if (program.Strings.ContainsKey(i))

@@ -7,6 +7,7 @@ using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.App.ViewModels.Observables;
 using ToucheTools.App.Windows;
+using ToucheTools.Exporters;
 using ToucheTools.Loaders;
 using ToucheTools.Models;
 
@@ -69,21 +70,36 @@ foreach (var type in windowTypes)
 #endregion
 
 #region Load data
-container.AddSingleton<DatabaseModel>(provider =>
+
+var sample = true;
+if (!sample)
 {
-    var fileToLoad = "../../../../sample/TOUCHE.DAT";
-    if (!File.Exists(fileToLoad))
+    container.AddSingleton<DatabaseModel>(provider =>
     {
-        throw new Exception("File not found: " + fileToLoad);
-    }
-    var fileBytes = File.ReadAllBytes(fileToLoad);
-    var memStream = new MemoryStream(fileBytes); //not disposed
-    
-    Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
-    var mainLoader = new MainLoader(memStream);
-    mainLoader.Load(out var db);
-    return db;
-});
+        var fileToLoad = "../../../../sample/TOUCHE_TEST2.DAT";
+        if (!File.Exists(fileToLoad))
+        {
+            throw new Exception("File not found: " + fileToLoad);
+        }
+
+        var fileBytes = File.ReadAllBytes(fileToLoad);
+        var memStream = new MemoryStream(fileBytes); //not disposed
+
+        Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
+        var mainLoader = new MainLoader(memStream);
+        mainLoader.Load(out var db);
+        return db;
+    });
+}
+else
+{
+    container.AddSingleton<DatabaseModel>(provider =>
+    {
+        Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
+        return Sample.Model();
+    });
+}
+
 #endregion
 
 #region Render setup
@@ -116,6 +132,14 @@ if (db.FailedSprites.Any())
 if (db.FailedIcons.Any())
 {
     errors.AddRange(db.FailedIcons.Select(pair => $"Icon {pair.Key} - {pair.Value}"));
+}
+
+if (sample)
+{
+    var memStream = new MemoryStream();
+    var exporter = new MainExporter(memStream);
+    exporter.Export(db);
+    File.WriteAllBytes("../../../../sample/TOUCHE_TEST2.DAT", memStream.ToArray());
 }
 
 // foreach (var (seqId, seq) in db.Sequences)

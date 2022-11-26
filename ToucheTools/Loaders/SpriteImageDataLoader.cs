@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using ToucheTools.Constants;
+using ToucheTools.Helpers;
 using ToucheTools.Models;
 
 namespace ToucheTools.Loaders;
@@ -25,8 +26,8 @@ public class SpriteImageDataLoader
         _stream.Seek(offset, SeekOrigin.Begin);
         ushort rawWidth = _reader.ReadUInt16();
         ushort rawHeight = _reader.ReadUInt16();
-        var initialWidth = (int)rawWidth;
-        var initialHeight = (int)rawHeight;
+        var initialWidth = rawWidth.AsShort();
+        var initialHeight = rawHeight.AsShort();
         _logger.Log(LogLevel.Debug, "Sprite image {}: initially {}x{}", number, initialWidth, initialHeight);
 
         var imageData = new byte[initialHeight, initialWidth];
@@ -63,7 +64,7 @@ public class SpriteImageDataLoader
         
         //find true width and height
         var height = initialHeight;
-        for (var i = 0; i < initialHeight; i++)
+        for (short i = 0; i < initialHeight; i++)
         {
             if (imageData[i, 0] == 64 || imageData[i, 0] == 255)
             {
@@ -73,7 +74,7 @@ public class SpriteImageDataLoader
         }
 
         var width = initialWidth;
-        for (var i = 0; i < initialWidth; i++)
+        for (short i = 0; i < initialWidth; i++)
         {
             if (imageData[0, i] == 64 || imageData[0, i] == 255)
             {

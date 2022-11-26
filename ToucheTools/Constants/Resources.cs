@@ -22,6 +22,9 @@ public class OffsetCount
 
 public static class Resources
 {
+    public static int BackdropWidth = 544;
+    public static int BackdropHeight = 1996;
+    
     public static Dictionary<Resource, OffsetCount> DataInfo = new Dictionary<Resource, OffsetCount>()
     {
         {

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
+using ToucheTools.Helpers;
 using ToucheTools.Models;
 
 namespace ToucheTools.Exporters;
@@ -21,8 +22,8 @@ public class SpriteImageDataExporter
         _logger.LogInformation("Saving sprite of size {}x{} (individual {}x{})", sprite.Width, sprite.Height, sprite.SpriteWidth, sprite.SpriteHeight);
         
         _stream.Seek(0, SeekOrigin.Begin);
-        _writer.Write((ushort)sprite.Width);
-        _writer.Write((ushort)sprite.Height);
+        _writer.Write(sprite.Width.AsUshort());
+        _writer.Write(sprite.Height.AsUshort());
 
         var addedHeightMeasure = false;
         var addedWidthMeasure = false;

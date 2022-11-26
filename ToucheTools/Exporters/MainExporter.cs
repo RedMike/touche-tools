@@ -220,7 +220,13 @@ public class MainExporter
             //now save the offset for it
             _resourceExporter.Export(Resource.IconImage, id, offset);
         }
-        _resourceExporter.Export(Resource.IconImage, db.Icons.Keys.Max() + 1, AllocateAndReturnOffset(0));
+
+        var iconMax = 0;
+        if (db.Icons.Count > 0)
+        {
+            iconMax = db.Icons.Keys.Max();
+        }
+        _resourceExporter.Export(Resource.IconImage, iconMax + 1, AllocateAndReturnOffset(0));
 
         //also save programs that are empty so that the size calculations work, and an additional final program
         for (var i = 0; i <= Resources.DataInfo[Resource.Program].Count; i++)

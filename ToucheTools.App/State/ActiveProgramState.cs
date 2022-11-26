@@ -333,7 +333,7 @@ public class ActiveProgramState
     public int DisabledInputCounter { get; set; } = 0;
     public bool AutoPlay { get; set; } = false;
     private DateTime _lastTick = DateTime.MinValue;
-    private const int MinimumTimeBetweenTicksInMillis = 10;
+    private const int MinimumTimeBetweenTicksInMillis = 30;
     
     #region Palette
     public Dictionary<int, PaletteDataModel.Rgb> LoadedPalette = new Dictionary<int, PaletteDataModel.Rgb>();

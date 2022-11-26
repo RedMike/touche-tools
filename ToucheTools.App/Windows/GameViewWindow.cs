@@ -11,14 +11,14 @@ namespace ToucheTools.App.Windows;
 public class GameViewWindow : BaseWindow
 {
     private const bool ShowDebug = true;
-    private const bool ShowDebugAreaRects = ShowDebug && false;
-    private const bool ShowDebugBackgroundRects = ShowDebug && false;
-    private const bool ShowDebugPointRects = ShowDebug && false;
-    private const bool ShowDebugWalkRects = ShowDebug && false;
-    private const bool ShowDebugTalkRects = ShowDebug && false;
-    private const bool ShowDebugKeyCharRects = ShowDebug && false;
-    private const bool ShowDebugHitboxRects = ShowDebug && false;
-    private const bool ShowDebugInventoryRects = ShowDebug && false;
+    private const bool ShowDebugAreaRects = ShowDebug && true;
+    private const bool ShowDebugBackgroundRects = ShowDebug && true;
+    private const bool ShowDebugPointRects = ShowDebug && true;
+    private const bool ShowDebugWalkRects = ShowDebug && true;
+    private const bool ShowDebugTalkRects = ShowDebug && true;
+    private const bool ShowDebugKeyCharRects = ShowDebug && true;
+    private const bool ShowDebugHitboxRects = ShowDebug && true;
+    private const bool ShowDebugInventoryRects = ShowDebug && true;
     
     private readonly DatabaseModel _model;
     private readonly RenderWindow _render;

@@ -43,9 +43,17 @@ public class SpriteViewWindow : IWindow
         ImGui.SetNextWindowSize(new Vector2(viewW, viewH));
         ImGui.Begin("Sprite View", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
+        var contentRegion = ImGui.GetWindowContentRegionMin();
+        var contentRegionMax = ImGui.GetWindowContentRegionMax();
+        var blankRect = _render.RenderRectangle(0, (int)(contentRegionMax - contentRegion).X,
+            (int)(contentRegionMax - contentRegion).Y,
+            (70, 0, 70, 255), (0, 0, 0, 0)
+        );
+        ImGui.SetCursorPos(new Vector2(contentRegion.X, contentRegion.Y));
+        ImGui.Image(blankRect, contentRegionMax-contentRegion);
+        
         if (_viewSettings.ShowEntireSheet)
         {
-            var contentRegion = ImGui.GetWindowContentRegionMin();
             var spritePosition = contentRegion;
             
             var (spriteViewId, spriteWidth, spriteHeight, spriteTileWidth, spriteTileHeight, spriteBytes) = _sprite.SpriteView;
@@ -56,7 +64,6 @@ public class SpriteViewWindow : IWindow
         }
         else
         {
-            var contentRegion = ImGui.GetWindowContentRegionMin();
             var (movementOffsetX, movementOffsetY, movementOffsetZ) = _viewState.PositionOffset;
             movementOffset = new Vector2(movementOffsetX, movementOffsetY + movementOffsetZ);
             
