@@ -11,136 +11,179 @@ using ToucheTools.Exporters;
 using ToucheTools.Loaders;
 using ToucheTools.Models;
 
-#region Setup
-IServiceCollection container = new ServiceCollection();
-container.AddLogging(o => o
-    .ClearProviders()
-    .SetMinimumLevel(LogLevel.Information)
-    .AddConsole()
-);
-#endregion
-
-#region Data setup
-container.AddSingleton<LogData>();
-
-container.AddSingleton<ActivePalette>();
-container.AddSingleton<ActiveRoom>();
-container.AddSingleton<ActiveSprite>();
-container.AddSingleton<ActiveProgram>();
-container.AddSingleton<ActiveSequence>();
-container.AddSingleton<ActiveCharacter>();
-container.AddSingleton<ActiveAnimation>();
-container.AddSingleton<ActiveDirection>();
-container.AddSingleton<ActiveFrame>();
-container.AddSingleton<ActiveProgram>();
-container.AddSingleton<MultiActiveRects>();
-container.AddSingleton<MultiActiveBackgrounds>();
-container.AddSingleton<MultiActiveAreas>();
-container.AddSingleton<MultiActivePoints>();
-
-container.AddSingleton<WindowSettings>();
-container.AddSingleton<RoomViewSettings>();
-container.AddSingleton<SpriteViewSettings>();
-container.AddSingleton<ProgramViewSettings>();
-
-container.AddSingleton<ProgramViewState>();
-container.AddSingleton<SpriteViewState>();
-container.AddSingleton<ActiveProgramState>();
-container.AddSingleton<GameViewState>();
-
-container.AddSingleton<RoomImageRenderer>();
-container.AddSingleton<SpriteSheetRenderer>();
-container.AddSingleton<IconImageRenderer>();
-#endregion
-
-#region Windows
-var windowTypes = AppDomain.CurrentDomain
-    .GetAssemblies().SelectMany(a => 
-        a.GetTypes().Where(t => 
-            t.IsClass &&
-            !t.IsAbstract &&
-            !t.ContainsGenericParameters &&
-            typeof(IWindow).IsAssignableFrom(t)
-        )
+{
+    IServiceCollection container = new ServiceCollection();
+    container.AddLogging(o => o
+        .ClearProviders()
+        .SetMinimumLevel(LogLevel.Information)
+        .AddConsole()
     );
-foreach (var type in windowTypes)
-{
-    container.AddSingleton(type);
-}
-#endregion
 
-#region Load data
+    var viewModel = new PackageViewModel("../../../../sample/assets");
+    container.AddSingleton<PackageViewModel>(viewModel);
 
-var sample = true;
-if (!sample)
-{
-    container.AddSingleton<DatabaseModel>(provider =>
+    container.AddSingleton<PackageWindow>();
+    
+    using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
+    container.AddSingleton(window);
+
+    var sp = container.BuildServiceProvider();
+    
+    while (window.IsOpen())
     {
-        var fileToLoad = "../../../../sample/TOUCHE_TEST2.DAT";
-        if (!File.Exists(fileToLoad))
+        window.ProcessInput();
+        if (!window.IsOpen())
         {
-            throw new Exception("File not found: " + fileToLoad);
+            break;
         }
 
-        var fileBytes = File.ReadAllBytes(fileToLoad);
-        var memStream = new MemoryStream(fileBytes); //not disposed
+        sp.GetService<PackageWindow>()?.Render();
 
-        Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
-        var mainLoader = new MainLoader(memStream);
-        mainLoader.Load(out var db);
-        return db;
-    });
+        window.Render();
+    }
+
+    return;
 }
-else
+
 {
-    container.AddSingleton<DatabaseModel>(provider =>
+    #region Setup
+
+    IServiceCollection container = new ServiceCollection();
+    container.AddLogging(o => o
+        .ClearProviders()
+        .SetMinimumLevel(LogLevel.Information)
+        .AddConsole()
+    );
+
+    #endregion
+
+    #region Data setup
+
+    container.AddSingleton<LogData>();
+
+    container.AddSingleton<ActivePalette>();
+    container.AddSingleton<ActiveRoom>();
+    container.AddSingleton<ActiveSprite>();
+    container.AddSingleton<ActiveProgram>();
+    container.AddSingleton<ActiveSequence>();
+    container.AddSingleton<ActiveCharacter>();
+    container.AddSingleton<ActiveAnimation>();
+    container.AddSingleton<ActiveDirection>();
+    container.AddSingleton<ActiveFrame>();
+    container.AddSingleton<ActiveProgram>();
+    container.AddSingleton<MultiActiveRects>();
+    container.AddSingleton<MultiActiveBackgrounds>();
+    container.AddSingleton<MultiActiveAreas>();
+    container.AddSingleton<MultiActivePoints>();
+
+    container.AddSingleton<WindowSettings>();
+    container.AddSingleton<RoomViewSettings>();
+    container.AddSingleton<SpriteViewSettings>();
+    container.AddSingleton<ProgramViewSettings>();
+
+    container.AddSingleton<ProgramViewState>();
+    container.AddSingleton<SpriteViewState>();
+    container.AddSingleton<ActiveProgramState>();
+    container.AddSingleton<GameViewState>();
+
+    container.AddSingleton<RoomImageRenderer>();
+    container.AddSingleton<SpriteSheetRenderer>();
+    container.AddSingleton<IconImageRenderer>();
+
+    #endregion
+
+    #region Windows
+
+    var windowTypes = AppDomain.CurrentDomain
+        .GetAssemblies().SelectMany(a =>
+            a.GetTypes().Where(t =>
+                t.IsClass &&
+                !t.IsAbstract &&
+                !t.ContainsGenericParameters &&
+                typeof(IWindow).IsAssignableFrom(t)
+            )
+        );
+    foreach (var type in windowTypes)
     {
-        Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
-        return Sample.Model();
-    });
-}
+        container.AddSingleton(type);
+    }
 
-#endregion
+    #endregion
 
-#region Render setup
-using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
-container.AddSingleton(window);
-#endregion
+    #region Load data
 
-var serviceProvider = container.BuildServiceProvider();
-var windows = container
-    .Where(s => typeof(IWindow).IsAssignableFrom(s.ServiceType))
-    .Select(s => (IWindow)(serviceProvider.GetService(s.ServiceType) ?? throw new Exception("Null service")))
-    .ToList();
-var errors = new List<string>();
-var db = serviceProvider.GetService<DatabaseModel>() ?? throw new InvalidOperationException();
-if (db.FailedPrograms.Any())
-{
-    errors.AddRange(db.FailedPrograms.Select(pair => $"Program {pair.Key} - {pair.Value}"));
-}
+    var sample = true;
+    if (!sample)
+    {
+        container.AddSingleton<DatabaseModel>(provider =>
+        {
+            var fileToLoad = "../../../../sample/TOUCHE_TEST2.DAT";
+            if (!File.Exists(fileToLoad))
+            {
+                throw new Exception("File not found: " + fileToLoad);
+            }
 
-if (db.FailedRooms.Any())
-{
-    errors.AddRange(db.FailedRooms.Select(pair => $"Room {pair.Key} - {pair.Value}"));
-}
+            var fileBytes = File.ReadAllBytes(fileToLoad);
+            var memStream = new MemoryStream(fileBytes); //not disposed
 
-if (db.FailedSprites.Any())
-{
-    errors.AddRange(db.FailedSprites.Select(pair => $"Sprite {pair.Key} - {pair.Value}"));
-}
+            Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
+            var mainLoader = new MainLoader(memStream);
+            mainLoader.Load(out var db);
+            return db;
+        });
+    }
+    else
+    {
+        container.AddSingleton<DatabaseModel>(provider =>
+        {
+            Logging.SetUp(provider.GetService<ILoggerFactory>() ?? throw new InvalidOperationException());
+            return Sample.Model();
+        });
+    }
 
-if (db.FailedIcons.Any())
-{
-    errors.AddRange(db.FailedIcons.Select(pair => $"Icon {pair.Key} - {pair.Value}"));
-}
+    #endregion
 
-if (sample)
-{
-    var memStream = new MemoryStream();
-    var exporter = new MainExporter(memStream);
-    exporter.Export(db);
-    File.WriteAllBytes("../../../../sample/TOUCHE_TEST2.DAT", memStream.ToArray());
-}
+    #region Render setup
+
+    using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
+    container.AddSingleton(window);
+
+    #endregion
+
+    var serviceProvider = container.BuildServiceProvider();
+    var windows = container
+        .Where(s => typeof(IWindow).IsAssignableFrom(s.ServiceType))
+        .Select(s => (IWindow)(serviceProvider.GetService(s.ServiceType) ?? throw new Exception("Null service")))
+        .ToList();
+    var errors = new List<string>();
+    var db = serviceProvider.GetService<DatabaseModel>() ?? throw new InvalidOperationException();
+    if (db.FailedPrograms.Any())
+    {
+        errors.AddRange(db.FailedPrograms.Select(pair => $"Program {pair.Key} - {pair.Value}"));
+    }
+
+    if (db.FailedRooms.Any())
+    {
+        errors.AddRange(db.FailedRooms.Select(pair => $"Room {pair.Key} - {pair.Value}"));
+    }
+
+    if (db.FailedSprites.Any())
+    {
+        errors.AddRange(db.FailedSprites.Select(pair => $"Sprite {pair.Key} - {pair.Value}"));
+    }
+
+    if (db.FailedIcons.Any())
+    {
+        errors.AddRange(db.FailedIcons.Select(pair => $"Icon {pair.Key} - {pair.Value}"));
+    }
+
+    if (sample)
+    {
+        var memStream = new MemoryStream();
+        var exporter = new MainExporter(memStream);
+        exporter.Export(db);
+        File.WriteAllBytes("../../../../sample/TOUCHE_TEST2.DAT", memStream.ToArray());
+    }
 
 // foreach (var (seqId, seq) in db.Sequences)
 // {
@@ -153,25 +196,27 @@ if (sample)
 //     File.WriteAllLines($"p{programId}.txt", lines);
 // }
 
-var logData = serviceProvider.GetService<LogData>() ?? throw new InvalidOperationException();
-foreach (var err in errors)
-{
-    logData.Error(err);
-}
-logData.Info($"Finished loading {db.Programs.Count} programs, {db.Rooms.Count} rooms, {db.Sprites.Count} sprites.");
+    var logData = serviceProvider.GetService<LogData>() ?? throw new InvalidOperationException();
+    foreach (var err in errors)
+    {
+        logData.Error(err);
+    }
 
-while (window.IsOpen())
-{
-    window.ProcessInput();
-    if (!window.IsOpen())
+    logData.Info($"Finished loading {db.Programs.Count} programs, {db.Rooms.Count} rooms, {db.Sprites.Count} sprites.");
+
+    while (window.IsOpen())
     {
-        break;
+        window.ProcessInput();
+        if (!window.IsOpen())
+        {
+            break;
+        }
+
+        foreach (var win in windows)
+        {
+            win.Render();
+        }
+
+        window.Render();
     }
-    
-    foreach (var win in windows)
-    {
-        win.Render();
-    }
-    
-    window.Render();
 }
