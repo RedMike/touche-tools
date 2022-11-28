@@ -102,7 +102,7 @@ public class PackageWindow : BaseWindow
                 {
                     var cursorPos = ImGui.GetCursorPos();
                     
-                    var (texture, width, height) = GetPaletteImage(images[i]);
+                    var (texture, width, height) = GetPaletteImage(i);
                     var background = _render.RenderCheckerboardRectangle(10, width, height,
                         (75, 75, 75, 255), (50, 50, 50, 255)
                     );
@@ -193,17 +193,17 @@ public class PackageWindow : BaseWindow
         return (img, width, height);
     }
 
-    private (IntPtr, int, int) GetPaletteImage(string room)
+    private (IntPtr, int, int) GetPaletteImage(int roomId)
     {
-        var id = $"room_{room}";
+        var id = $"room_{roomId}";
         if (_textures.ContainsKey(id))
         {
             return _textures[id];
         }
         
-        var palette = _paletteViewModel.GetPalette(room);
+        var palette = _paletteViewModel.GetPalette(roomId);
         var bytes = new byte[PaletteImageWidth * PaletteImageHeight * 4];
-        for (var i = 0; i < 255; i++)
+        for (var i = 0; i < 256; i++)
         {
             var x = i % PaletteTilesPerColumn;
             var y = i / PaletteTilesPerColumn;
@@ -236,7 +236,7 @@ public class PackageWindow : BaseWindow
             }
         }
         
-        var img = _render.RenderImage(RenderWindow.RenderType.Primitive, room, PaletteImageWidth, PaletteImageHeight, bytes);
+        var img = _render.RenderImage(RenderWindow.RenderType.Primitive, id, PaletteImageWidth, PaletteImageHeight, bytes);
         _textures[id] = (img, PaletteImageWidth, PaletteImageHeight);
         return (img, PaletteImageWidth, PaletteImageHeight);
     }

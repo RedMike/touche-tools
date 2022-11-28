@@ -2,6 +2,7 @@
 
 public static class Palettes
 {
+    public const int RoomColorCount = StartOfSpriteColors - 3; //not including 0, 64, 192
     public const int SpriteColorCount = 62; //the number of colours reserved for sprites after the start of it
     public const int StartOfSpriteColors = 193; //this colour and everything after is used for decoding sprites (1 becomes 193, ...)
     public const int TransparencyColor = 0;

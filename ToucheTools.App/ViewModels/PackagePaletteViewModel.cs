@@ -6,7 +6,8 @@ public class PackagePaletteViewModel
 {
     private readonly PackageViewModel _package;
     private List<PaletteDataModel.Rgb> _spritePalette = new List<PaletteDataModel.Rgb>();
-
+    private Dictionary<int, List<PaletteDataModel.Rgb>> _roomPalettes = new Dictionary<int, List<PaletteDataModel.Rgb>>();
+    
     public PackagePaletteViewModel(PackageViewModel package)
     {
         _package = package;
@@ -15,7 +16,7 @@ public class PackagePaletteViewModel
         Update();
     }
 
-    public Dictionary<int, PaletteDataModel.Rgb> GetPalette(string room)
+    public Dictionary<int, PaletteDataModel.Rgb> GetPalette(int roomId)
     {
         var palette = new Dictionary<int, PaletteDataModel.Rgb>();
         palette[ToucheTools.Constants.Palettes.TransparencyColor] = new PaletteDataModel.Rgb()
@@ -27,18 +28,40 @@ public class PackagePaletteViewModel
         palette[ToucheTools.Constants.Palettes.TransparentRoomMarkerColor] = new PaletteDataModel.Rgb()
         {
             R = 100,
-            G = 100,
+            G = 0,
             B = 100
         };
         palette[ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor] = new PaletteDataModel.Rgb()
         {
-            R = 150,
-            G = 150,
-            B = 150
+            R = 250,
+            G = 0,
+            B = 250
         };
         for (var i = 0; i < _spritePalette.Count; i++)
         {
             palette[ToucheTools.Constants.Palettes.StartOfSpriteColors + i] = _spritePalette[i];
+        }
+
+        if (!_roomPalettes.ContainsKey(roomId))
+        {
+            throw new Exception($"No palette for room: {roomId}");
+        }
+
+        var roomPalette = _roomPalettes[roomId];
+        var colIdx = 0;
+        for (var i = 0; i < roomPalette.Count; i++)
+        {
+            if (colIdx == ToucheTools.Constants.Palettes.TransparencyColor)
+            {
+                colIdx++;
+            }
+            if (colIdx == ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor)
+            {
+                colIdx++;
+            }
+
+            palette[colIdx] = roomPalette[i];
+            colIdx++;
         }
 
         return palette;
@@ -47,6 +70,7 @@ public class PackagePaletteViewModel
     private void Update()
     {
         _spritePalette = new List<PaletteDataModel.Rgb>();
+        _roomPalettes = new Dictionary<int, List<PaletteDataModel.Rgb>>();
         
         var images = _package.GetImages();
         for (var i = 0; i < images.Length; i++)
@@ -63,6 +87,15 @@ public class PackagePaletteViewModel
                     .ThenBy(c => c.G)
                     .ThenBy(c => c.B)
                     .ToList();
+            } else if (type == PackageViewModel.FileType.Room)
+            {
+                var uniqueColours = GetUniqueColoursFromImage(width, height, bytes);
+                _roomPalettes[i] = uniqueColours
+                    .DistinctBy(c => $"{c.R}_{c.G}_{c.B}")
+                    .OrderBy(c => c.R)
+                    .ThenBy(c => c.G)
+                    .ThenBy(c => c.B)
+                    .ToList();
             }
         }
 
@@ -70,7 +103,14 @@ public class PackagePaletteViewModel
         {
             throw new Exception("Too many unique sprite colours: " + _spritePalette.Count);
         }
-        
+
+        foreach (var (roomId, roomPalette) in _roomPalettes)
+        {
+            if (roomPalette.Count > ToucheTools.Constants.Palettes.RoomColorCount)
+            {
+                throw new Exception($"Too many unique room colours in room {roomId}: {roomPalette.Count}");
+            }
+        }
     }
 
     private List<PaletteDataModel.Rgb> GetUniqueColoursFromImage(int width, int height, byte[] bytes)
@@ -91,7 +131,7 @@ public class PackagePaletteViewModel
 
                 if (r == 255 && g == 0 && b == 255 && a == 255)
                 {
-                    //it's the sprite transparency colour
+                    //it's the sprite/room transparency colour
                     continue;
                 }
 
