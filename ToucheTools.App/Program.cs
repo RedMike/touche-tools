@@ -11,6 +11,8 @@ using ToucheTools.Exporters;
 using ToucheTools.Loaders;
 using ToucheTools.Models;
 
+var editor = true;
+if (editor)
 {
     IServiceCollection container = new ServiceCollection();
     container.AddLogging(o => o
@@ -45,7 +47,7 @@ using ToucheTools.Models;
 
     return;
 }
-
+else
 {
     #region Setup
 
@@ -113,12 +115,12 @@ using ToucheTools.Models;
 
     #region Load data
 
-    var sample = true;
+    var sample = false;
     if (!sample)
     {
         container.AddSingleton<DatabaseModel>(provider =>
         {
-            var fileToLoad = "../../../../sample/TOUCHE_TEST2.DAT";
+            var fileToLoad = "../../../../sample/TOUCHE_PACKAGE.DAT";
             if (!File.Exists(fileToLoad))
             {
                 throw new Exception("File not found: " + fileToLoad);

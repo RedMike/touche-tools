@@ -1,11 +1,12 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.ViewModels;
+using ToucheTools.Exporters;
 using ToucheTools.Models;
 
 namespace ToucheTools.App.Windows;
 
-public class PackageWindow : BaseWindow
+public class PackageWindow
 {
     private readonly PackageViewModel _viewModel;
     private readonly RenderWindow _render;
@@ -20,7 +21,193 @@ public class PackageWindow : BaseWindow
         _paletteViewModel = paletteViewModel;
     }
 
-    public override void Render()
+    #region Publishing
+    private void Publish()
+    {
+        var db = new DatabaseModel()
+        {
+            Text = Sample.Text(),
+            Backdrop = new BackdropDataModel()
+            {
+                Width = ToucheTools.Constants.Resources.BackdropWidth,
+                Height = ToucheTools.Constants.Resources.BackdropHeight
+            },
+            Icons = Sample.Icons(),
+            Sprites = Sample.Sprites(),
+            Palettes = new Dictionary<int, PaletteDataModel>()
+            {
+            },
+            Rooms = new Dictionary<int, RoomInfoDataModel>()
+            {
+            },
+            RoomImages = new Dictionary<int, Lazy<RoomImageDataModel>>()
+            {
+            },
+            Sequences = Sample.Sequences(),
+            Programs = Sample.Programs(),
+        };
+
+        var files = _viewModel.GetImages();
+        Dictionary<int, PaletteDataModel.Rgb>? anyPalette = null;
+        for (var i = 0; i < files.Length; i++)
+        {
+            var type = _viewModel.GetFileType(i);
+            var index = _viewModel.GetFileIndex(i) + 1;
+            if (type == PackageViewModel.FileType.Room)
+            {
+                var palette = _paletteViewModel.GetPalette(i);
+                anyPalette = palette;
+                var colors = new List<PaletteDataModel.Rgb>(256);
+                for (var c = 0; c < 256; c++)
+                {
+                    if (palette.ContainsKey(c))
+                    {
+                        colors.Add(palette[c]);
+                    }
+                    else
+                    {
+                        colors.Add(new PaletteDataModel.Rgb()
+                        {
+                            R = 255,
+                            G = 0,
+                            B = 255
+                        });
+                    }
+                }
+
+                db.Palettes[index] = new PaletteDataModel()
+                {
+                    Colors = colors
+                };
+
+                db.Rooms[index] = new RoomInfoDataModel()
+                {
+                    RoomImageNum = index
+                };
+
+                var (roomWidth, roomHeight, roomBytes) = _viewModel.GetImage(i);
+                var roomImage = new RoomImageDataModel()
+                {
+                    Width = roomWidth,
+                    Height = roomHeight,
+                    RoomWidth = roomWidth,
+                    RawData = new byte[roomHeight, roomWidth]
+                };
+                for (var y = 0; y < roomHeight; y++)
+                {
+                    for (var x = 0; x < roomWidth; x++)
+                    {
+                        var r = roomBytes[(y * roomWidth + x) * 4 + 0];
+                        var g = roomBytes[(y * roomWidth + x) * 4 + 1];
+                        var b = roomBytes[(y * roomWidth + x) * 4 + 2];
+                        var a = roomBytes[(y * roomWidth + x) * 4 + 3];
+                        if (r == 255 && g == 0 && b == 255 && a == 255 && y == 0)
+                        {
+                            //it's the room width marker
+                            roomImage.RoomWidth = x;
+                            roomImage.RawData[y, x] = ToucheTools.Constants.Palettes.TransparentRoomMarkerColor;
+                            continue;
+                        }
+
+                        if (a < 255)
+                        {
+                            roomImage.RawData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                            continue;
+                        }
+
+                        var roomCol = palette.First(p => p.Key < ToucheTools.Constants.Palettes.StartOfSpriteColors &&
+                                                         p.Value.R == r && p.Value.G == g && p.Value.B == b).Key;
+                        roomImage.RawData[y, x] = (byte)roomCol;
+                    }
+                }
+
+                db.RoomImages[index] = new Lazy<RoomImageDataModel>(roomImage);
+            }
+        }
+
+        if (anyPalette == null)
+        {
+            throw new Exception("No palette found");
+        }
+        
+        for (var i = 0; i < files.Length; i++)
+        {
+            var type = _viewModel.GetFileType(i);
+            var index = _viewModel.GetFileIndex(i) + 1;
+            if (type == PackageViewModel.FileType.Sprite)
+            {
+                var (spriteWidth, spriteHeight, spriteBytes) = _viewModel.GetImage(i);
+                var sprite = new SpriteImageDataModel()
+                {
+                    Width = (short)spriteWidth,
+                    Height = (short)spriteHeight,
+                    SpriteWidth = (short)spriteWidth,
+                    SpriteHeight = (short)spriteHeight,
+                    RawData = new byte[spriteHeight, spriteWidth],
+                    DecodedData = new byte[spriteHeight, spriteWidth],
+                };
+                var foundWidth = false;
+                var foundHeight = false;
+                for (var y = 0; y < spriteHeight; y++)
+                {
+                    for (var x = 0; x < spriteWidth; x++)
+                    {
+                        var r = spriteBytes[(y * spriteWidth + x) * 4 + 0];
+                        var g = spriteBytes[(y * spriteWidth + x) * 4 + 1];
+                        var b = spriteBytes[(y * spriteWidth + x) * 4 + 2];
+                        var a = spriteBytes[(y * spriteWidth + x) * 4 + 3];
+                        if (r == 255 && g == 0 && b == 255 && a == 255 && y == 0 && !foundWidth)
+                        {
+                            //it's the sprite width marker
+                            foundWidth = true;
+                            sprite.SpriteWidth = (short)x;
+                            sprite.RawData[y, x] = ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor;
+                            sprite.DecodedData[y, x] = ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor; 
+                            continue;
+                        }
+                        if (r == 255 && g == 0 && b == 255 && a == 255 && x == 0 && !foundHeight)
+                        {
+                            //it's the sprite height marker
+                            foundHeight = true;
+                            sprite.SpriteHeight = (short)y;
+                            sprite.RawData[y, x] = ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor;
+                            sprite.DecodedData[y, x] = ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor;
+                            continue;
+                        }
+
+                        if (r == 255 && g == 0 && b == 255 && a == 255)
+                        {
+                            sprite.RawData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                            sprite.DecodedData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                            continue;
+                        }
+
+                        if (a < 255)
+                        {
+                            sprite.RawData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                            sprite.DecodedData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                            continue;
+                        }
+
+                        var spriteCol = anyPalette.First(p => p.Key >= ToucheTools.Constants.Palettes.StartOfSpriteColors &&
+                                                         p.Value.R == r && p.Value.G == g && p.Value.B == b).Key - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+                        sprite.RawData[y, x] = (byte)spriteCol;
+                        sprite.DecodedData[y, x] = (byte)(spriteCol + ToucheTools.Constants.Palettes.StartOfSpriteColors - 1);
+                    }
+                }
+
+                db.Sprites[index] = new Lazy<SpriteImageDataModel>(sprite);
+            }
+        }
+
+        var memoryStream = new MemoryStream();
+        var exporter = new MainExporter(memoryStream);
+        exporter.Export(db);
+        File.WriteAllBytes("../../../../sample/TOUCHE_PACKAGE.DAT", memoryStream.ToArray());
+    }
+    #endregion
+
+    public void Render()
     {
         {
             ImGui.Begin("Loaded Folder");
@@ -83,6 +270,11 @@ public class PackageWindow : BaseWindow
                 {
                     _viewModel.SetFileIndex(i, index);
                 }
+            }
+
+            if (ImGui.Button("Publish"))
+            {
+                Publish();
             }
 
             ImGui.End();
@@ -151,6 +343,11 @@ public class PackageWindow : BaseWindow
                     var spriteRectTextSize = ImGui.CalcTextSize(spriteRectText);
                     ImGui.SetCursorPos(cursorPos + spriteRectOffset + spriteRectSize - spriteRectTextSize);
                     ImGui.Text(spriteRectText);
+
+                    // foreach (var (colId, col) in _paletteViewModel.GetPalette(i))
+                    // {
+                    //     ImGui.Text($"{colId} - {col.R}, {col.G}, {col.B}");
+                    // }
                     
                     ImGui.TreePop();
                 }

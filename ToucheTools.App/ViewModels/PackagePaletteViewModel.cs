@@ -120,10 +120,10 @@ public class PackagePaletteViewModel
         {
             for (var j = 0; j < height; j++)
             {
-                var r = bytes[(j * height + i) * 4 + 0];
-                var g = bytes[(j * height + i) * 4 + 1];
-                var b = bytes[(j * height + i) * 4 + 2];
-                var a = bytes[(j * height + i) * 4 + 3];
+                var r = bytes[(i * height + j) * 4 + 0];
+                var g = bytes[(i * height + j) * 4 + 1];
+                var b = bytes[(i * height + j) * 4 + 2];
+                var a = bytes[(i * height + j) * 4 + 3];
                 if (a == 0)
                 {
                     continue;

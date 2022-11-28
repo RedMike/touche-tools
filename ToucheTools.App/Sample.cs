@@ -18,9 +18,6 @@ public static class Sample
             },
             Icons = Icons(),
             Sprites = Sprites(),
-            Palettes = Palettes(),
-            Rooms = Rooms(),
-            RoomImages = RoomImages(),
             Sequences = Sequences(),
             Programs = Programs(),
         };
@@ -28,7 +25,7 @@ public static class Sample
     
     #region Icons
 
-    private static IconImageDataModel Cursor()
+    public static IconImageDataModel Cursor()
     {
         var w = ToucheTools.Constants.Icons.Width;
         var h = ToucheTools.Constants.Icons.Height;
@@ -51,7 +48,7 @@ public static class Sample
     private const int Sprite1TileWidth = 100;
     private const int Sprite1TileHeight = 60;
     
-    private static SpriteImageDataModel Sprite1()
+    public static SpriteImageDataModel Sprite1()
     {
         var lines = (int)Math.Ceiling((float)Sprite1Frames / Sprite1FramesPerLine);
 
@@ -88,7 +85,7 @@ public static class Sample
         };
     }
     
-    private static SpriteImageDataModel ActionMenu()
+    public static SpriteImageDataModel ActionMenu()
     {
         var w = ToucheTools.Constants.Sprites.ActionMenuWidth;
         var h = ToucheTools.Constants.Sprites.ActionMenuHeight;
@@ -108,7 +105,7 @@ public static class Sample
         };
     }
 
-    private static SpriteImageDataModel ConversationMenu()
+    public static SpriteImageDataModel ConversationMenu()
     {
         //TODO: load image from file
         return new SpriteImageDataModel()
@@ -122,7 +119,7 @@ public static class Sample
         };
     }
     
-    private static SpriteImageDataModel InventoryBackground1()
+    public static SpriteImageDataModel InventoryBackground1()
     {
         //TODO: load image from file
         return new SpriteImageDataModel()
@@ -136,7 +133,7 @@ public static class Sample
         };
     }
     
-    private static SpriteImageDataModel InventoryBackground2()
+    public static SpriteImageDataModel InventoryBackground2()
     {
         //TODO: load image from file
         return new SpriteImageDataModel()
@@ -150,7 +147,7 @@ public static class Sample
         };
     }
     
-    private static SpriteImageDataModel InventoryBackground3()
+    public static SpriteImageDataModel InventoryBackground3()
     {
         //TODO: load image from file
         return new SpriteImageDataModel()
@@ -166,7 +163,7 @@ public static class Sample
     #endregion
 
     #region Rooms
-    private static List<PaletteDataModel.Rgb> Colours()
+    public static List<PaletteDataModel.Rgb> Colours()
     {
         var list = new List<PaletteDataModel.Rgb>()
         {
@@ -216,7 +213,7 @@ public static class Sample
         return list;
     }
 
-    private static RoomImageDataModel Room1()
+    public static RoomImageDataModel Room1()
     {
         var b = GetImage(1400, 600, 0);
         b = AddRectangle(b, 1400, 600, 200, 200, 450, 220, 150);
@@ -233,7 +230,7 @@ public static class Sample
     #endregion
     
     #region Sequences
-    private static SequenceDataModel Sequence1()
+    public static SequenceDataModel Sequence1()
     {
         return new SequenceDataModel()
         {
@@ -241,14 +238,57 @@ public static class Sample
             {
                 {0, 0}
             },
-            //frame 1 is idle
-            //frames 20 is walk right
-            //frames 21 is walk left
-            //frames 30 is walk up/down
+            //frame 1 is idle right,
+            //frame 2 is idle down,
+            //frame 3 is idle up,
+            //frame 4 is idle left,
+            //frame 20 is walk right
+            //frame 21 is walk down
+            //frame 22 is walk up
+            //frame 23 is walk left
             Frames = new Dictionary<int, List<SequenceDataModel.FrameInformation>>()
             {
                 {
                     1, new List<SequenceDataModel.FrameInformation>()
+                    {
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            
+                            WalkDx = 0,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 0
+                        }
+                    }
+                },
+                {
+                    2, new List<SequenceDataModel.FrameInformation>()
+                    {
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            
+                            WalkDx = 0,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 0
+                        }
+                    }
+                },
+                {
+                    3, new List<SequenceDataModel.FrameInformation>()
+                    {
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            
+                            WalkDx = 0,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 0
+                        }
+                    }
+                },
+                {
+                    4, new List<SequenceDataModel.FrameInformation>()
                     {
                         new SequenceDataModel.FrameInformation()
                         {
@@ -275,73 +315,188 @@ public static class Sample
                             WalkDx = 8,
                             WalkDy = 0,
                             WalkDz = 0,
-                            Delay = 0
+                            Delay = 2
                         },
                         new SequenceDataModel.FrameInformation()
                         {
                             WalkDx = 8,
                             WalkDy = 0,
                             WalkDz = 0,
-                            Delay = 0
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = 8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = 8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 3
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = 8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 2
                         }
                     }
                 },
-                
                 {
                     21, new List<SequenceDataModel.FrameInformation>()
                     {
                         new SequenceDataModel.FrameInformation()
                         {
-                            WalkDx = -8,
+                            WalkDx = 0,
                             WalkDy = 0,
-                            WalkDz = 0,
+                            WalkDz = 8,
                             Delay = 2
                         },
                         new SequenceDataModel.FrameInformation()
                         {
-                            WalkDx = -8,
+                            WalkDx = 0,
                             WalkDy = 0,
-                            WalkDz = 0,
-                            Delay = 0
+                            WalkDz = 8,
+                            Delay = 2
                         },
                         new SequenceDataModel.FrameInformation()
                         {
-                            WalkDx = -8,
+                            WalkDx = 0,
                             WalkDy = 0,
-                            WalkDz = 0,
-                            Delay = 0
+                            WalkDz = 8,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = 0,
+                            WalkDy = 0,
+                            WalkDz = 8,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = 0,
+                            WalkDy = 0,
+                            WalkDz = 8,
+                            Delay = 3
                         }
                     }
                 },
                 {
-                    30, new List<SequenceDataModel.FrameInformation>()
+                    22, new List<SequenceDataModel.FrameInformation>()
                     {
                         new SequenceDataModel.FrameInformation()
                         {
                             WalkDx = 0,
                             WalkDy = 0,
-                            WalkDz = 8,
+                            WalkDz = -8,
                             Delay = 2
                         },
                         new SequenceDataModel.FrameInformation()
                         {
                             WalkDx = 0,
                             WalkDy = 0,
-                            WalkDz = 8,
-                            Delay = 0
+                            WalkDz = -8,
+                            Delay = 2
                         },
                         new SequenceDataModel.FrameInformation()
                         {
                             WalkDx = 0,
                             WalkDy = 0,
-                            WalkDz = 8,
-                            Delay = 0
+                            WalkDz = -8,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = 0,
+                            WalkDy = 0,
+                            WalkDz = -8,
+                            Delay = 3
+                        }
+                    }
+                },
+                {
+                    23, new List<SequenceDataModel.FrameInformation>()
+                    {
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = -8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = -8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = -8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = -8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 2
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = -8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 3
+                        },
+                        new SequenceDataModel.FrameInformation()
+                        {
+                            WalkDx = -8,
+                            WalkDy = 0,
+                            WalkDz = 0,
+                            Delay = 2
                         }
                     }
                 },
             },
-            //part 1 is stand frame
-            //parts 2, 3, 4 are walk frames
+            //part 1 is stand right
+            //part 2 is stand down
+            //part 3 is stand up
+            //part 4 is stand left
+            
+            //part 10 is walk right 1
+            //part 11 is walk right 2
+            //part 12 is walk right 3
+            //part 13 is walk right 4
+            //part 14 is walk right 5
+            //part 15 is walk right 6
+            
+            //part 20 is walk down 1
+            //part 21 is walk down 2
+            //part 22 is walk down 3
+            //part 23 is walk down 4
+            //part 24 is walk down 5
+            
+            //part 30 is walk up 1
+            //part 31 is walk up 2
+            //part 32 is walk up 3
+            //part 33 is walk up 4
+            
+            //part 40 is walk left 1
+            //part 41 is walk left 2
+            //part 42 is walk left 3
+            //part 43 is walk left 4
+            //part 44 is walk left 5
+            //part 45 is walk left 6
             Parts = new Dictionary<int, List<SequenceDataModel.PartInformation>>()
             {
                 {
@@ -349,9 +504,15 @@ public static class Sample
                     {
                         new SequenceDataModel.PartInformation()
                         {
-                            RawFrameIndex = 0,
-                            DestX = -Sprite1TileWidth/2,
-                            DestY = -Sprite1TileHeight
+                            RawFrameIndex = 1,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
                         }
                     }
                 },
@@ -360,9 +521,15 @@ public static class Sample
                     {
                         new SequenceDataModel.PartInformation()
                         {
-                            RawFrameIndex = 1,
-                            DestX = -Sprite1TileWidth/2,
-                            DestY = -Sprite1TileHeight - 3
+                            RawFrameIndex = 0,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 3,
+                            DestX = 0,
+                            DestY = -50
                         }
                     }
                 },
@@ -372,8 +539,14 @@ public static class Sample
                         new SequenceDataModel.PartInformation()
                         {
                             RawFrameIndex = 2,
-                            DestX = -Sprite1TileWidth/2,
-                            DestY = -Sprite1TileHeight
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 5,
+                            DestX = 0,
+                            DestY = -50
                         }
                     }
                 },
@@ -383,43 +556,425 @@ public static class Sample
                         new SequenceDataModel.PartInformation()
                         {
                             RawFrameIndex = 1,
-                            DestX = -Sprite1TileWidth/2,
-                            DestY = -Sprite1TileHeight
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50,
+                        }
+                    }
+                },
+                
+                {
+                    10, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 11,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    11, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 12,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    12, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 13,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    13, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 14,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    14, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 15,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    15, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 16,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                
+                
+                {
+                    20, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 6,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 3,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    21, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 7,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 3,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    22, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 8,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 3,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    23, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 9,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 3,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    24, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 10,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 3,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                
+                
+                {
+                    30, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 17,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 5,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    31, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 18,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 5,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    32, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 19,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 5,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    33, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 20,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 5,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                
+                
+                {
+                    40, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 11,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    41, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 12,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    42, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 13,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -52
+                        }
+                    }
+                },
+                {
+                    43, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 14,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    44, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 15,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
+                        }
+                    }
+                },
+                {
+                    45, new List<SequenceDataModel.PartInformation>()
+                    {
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 16,
+                            DestX = 0,
+                            DestY = 0
+                        },
+                        new SequenceDataModel.PartInformation()
+                        {
+                            RawFrameIndex = 4,
+                            DestX = 0,
+                            DestY = -50
                         }
                     }
                 },
             },
             FrameMappings = new Dictionary<(int, int, int), int>()
             {
-                { (0, 0, 0), 1},
-                { (0, 0, 1), 1},
-                { (0, 0, 2), 1},
-                { (0, 0, 3), 1},
+                { (0, 0, Directions.Right), 1},
+                { (0, 0, Directions.Down), 2},
+                { (0, 0, Directions.Up), 3},
+                { (0, 0, Directions.Left), 4},
                 
-                { (0, 1, 0), 30},
-                { (0, 1, 1), 20},
-                { (0, 1, 2), 30},
-                { (0, 1, 3), 21},
+                { (0, 1, Directions.Right), 20},
+                { (0, 1, Directions.Down), 21},
+                { (0, 1, Directions.Up), 22},
+                { (0, 1, Directions.Left), 23},
             },
             PartMappings = new Dictionary<(int, int, int, int), int>()
             {
-                { (0, 0, 0, 0), 1 },
-                { (0, 0, 1, 0), 1 },
-                { (0, 0, 2, 0), 1 },
-                { (0, 0, 3, 0), 1 },
+                { (0, 0, Directions.Right, 0), 1 },
+                { (0, 0, Directions.Down, 0), 2 },
+                { (0, 0, Directions.Up, 0), 3 },
+                { (0, 0, Directions.Left, 0), 4 },
                 
-                { (0, 1, 0, 0), 2 },
-                { (0, 1, 0, 1), 3 },
-                { (0, 1, 0, 2), 4 },
-                { (0, 1, 1, 0), 2 },
-                { (0, 1, 1, 1), 3 },
-                { (0, 1, 1, 2), 4 },
-                { (0, 1, 2, 0), 2 },
-                { (0, 1, 2, 1), 3 },
-                { (0, 1, 2, 2), 4 },
-                { (0, 1, 3, 0), 2 },
-                { (0, 1, 3, 1), 3 },
-                { (0, 1, 3, 2), 4 },
+                { (0, 1, Directions.Right, 0), 10 },
+                { (0, 1, Directions.Right, 1), 11 },
+                { (0, 1, Directions.Right, 2), 12 },
+                { (0, 1, Directions.Right, 3), 13 },
+                { (0, 1, Directions.Right, 4), 14 },
+                { (0, 1, Directions.Right, 5), 15 },
+                
+                { (0, 1, Directions.Down, 0), 20 },
+                { (0, 1, Directions.Down, 1), 21 },
+                { (0, 1, Directions.Down, 2), 22 },
+                { (0, 1, Directions.Down, 3), 23 },
+                { (0, 1, Directions.Down, 4), 24 },
+                
+                { (0, 1, Directions.Up, 0), 30 },
+                { (0, 1, Directions.Up, 1), 31 },
+                { (0, 1, Directions.Up, 2), 32 },
+                { (0, 1, Directions.Up, 3), 33 },
+                
+                { (0, 1, Directions.Left, 0), 40 },
+                { (0, 1, Directions.Left, 1), 41 },
+                { (0, 1, Directions.Left, 2), 42 },
+                { (0, 1, Directions.Left, 3), 43 },
+                { (0, 1, Directions.Left, 4), 44 },
+                { (0, 1, Directions.Left, 5), 45 },
             }
         };
     }
@@ -427,7 +982,7 @@ public static class Sample
     
     #region Programs
     #region Startup
-    private static List<ProgramDataModel.Rect> StartupRects()
+    public static List<ProgramDataModel.Rect> StartupRects()
     {
         return new List<ProgramDataModel.Rect>()
         {
@@ -442,7 +997,7 @@ public static class Sample
             }
         };
     } 
-    private static List<ProgramDataModel.Point> StartupPoints()
+    public static List<ProgramDataModel.Point> StartupPoints()
     {
         //0 1 2   4
         //      3
@@ -491,7 +1046,7 @@ public static class Sample
         };
     }
 
-    private static List<ProgramDataModel.Walk> StartupWalks()
+    public static List<ProgramDataModel.Walk> StartupWalks()
     {
         return new List<ProgramDataModel.Walk>()
         {
@@ -548,7 +1103,7 @@ public static class Sample
         };
     }
 
-    private static Dictionary<uint, BaseInstruction> StartupInstructions()
+    public static Dictionary<uint, BaseInstruction> StartupInstructions()
     {
         return new Dictionary<uint, BaseInstruction>()
         {
@@ -644,7 +1199,7 @@ public static class Sample
                 74,
                 new SetCharDelayInstruction()
                 {
-                    Delay = 80
+                    Delay = 40
                 }
             },
             {
@@ -676,7 +1231,7 @@ public static class Sample
     }
     #endregion
 
-    private static ProgramDataModel StartupEpisode()
+    public static ProgramDataModel StartupEpisode()
     {
         return new ProgramDataModel()
         {
@@ -688,7 +1243,7 @@ public static class Sample
     }
     #endregion
 
-    private static Dictionary<int, Lazy<IconImageDataModel>> Icons()
+    public static Dictionary<int, Lazy<IconImageDataModel>> Icons()
     {
         return new Dictionary<int, Lazy<IconImageDataModel>>()
         {
@@ -696,11 +1251,10 @@ public static class Sample
         };
     }
     
-    private static Dictionary<int, Lazy<SpriteImageDataModel>> Sprites()
+    public static Dictionary<int, Lazy<SpriteImageDataModel>> Sprites()
     {
         return new Dictionary<int, Lazy<SpriteImageDataModel>>()
         {
-            { 1, new Lazy<SpriteImageDataModel>(Sprite1) },
             { ToucheTools.Constants.Sprites.ActionMenu, new Lazy<SpriteImageDataModel>(ActionMenu) },
             { ToucheTools.Constants.Sprites.ConversationMenu, new Lazy<SpriteImageDataModel>(ConversationMenu) },
             { ToucheTools.Constants.Sprites.InventoryBackground1, new Lazy<SpriteImageDataModel>(InventoryBackground1) },
@@ -708,41 +1262,8 @@ public static class Sample
             { ToucheTools.Constants.Sprites.InventoryBackground3, new Lazy<SpriteImageDataModel>(InventoryBackground3) },
         };
     }
-    
-    private static Dictionary<int, PaletteDataModel> Palettes()
-    {
-        return new Dictionary<int, PaletteDataModel>()
-        {
-            {1, new PaletteDataModel()
-                {
-                    Colors = Colours()
-                }
-            }
-        };
-    }
 
-    private static Dictionary<int, RoomInfoDataModel> Rooms()
-    {
-        return new Dictionary<int, RoomInfoDataModel>()
-        {
-            {
-                1, new RoomInfoDataModel()
-                {
-                    RoomImageNum = 1
-                }
-            }
-        };
-    }
-
-    private static Dictionary<int, Lazy<RoomImageDataModel>> RoomImages()
-    {
-        return new Dictionary<int, Lazy<RoomImageDataModel>>()
-        {
-            {1, new Lazy<RoomImageDataModel>(Room1)}
-        };
-    }
-
-    private static Dictionary<int, SequenceDataModel> Sequences()
+    public static Dictionary<int, SequenceDataModel> Sequences()
     {
         return new Dictionary<int, SequenceDataModel>()
         {
@@ -750,7 +1271,7 @@ public static class Sample
         };
     }
 
-    private static Dictionary<int, ProgramDataModel> Programs()
+    public static Dictionary<int, ProgramDataModel> Programs()
     {
         return new Dictionary<int, ProgramDataModel>()
         {
@@ -758,7 +1279,7 @@ public static class Sample
         };
     }
 
-    private static TextDataModel Text()
+    public static TextDataModel Text()
     {
         return new TextDataModel()
         {
@@ -771,7 +1292,7 @@ public static class Sample
         };
     }
 
-    private static byte[,] GetImage(int w, int h, byte col)
+    public static byte[,] GetImage(int w, int h, byte col)
     {
         var b = new byte[h, w];
         for (var i = 0; i < h; i++)
@@ -785,7 +1306,7 @@ public static class Sample
         return b;
     }
 
-    private static byte[,] AddRectangle(byte[,] b, int w, int h, int cw, int ch, int cx, int cy, byte col)
+    public static byte[,] AddRectangle(byte[,] b, int w, int h, int cw, int ch, int cx, int cy, byte col)
     {
         var b2 = new byte[h, w];
 
@@ -815,7 +1336,7 @@ public static class Sample
         return b2;
     }
     
-    private static byte[,] GetDecodedImage(byte[,] b, int w, int h)
+    public static byte[,] GetDecodedImage(byte[,] b, int w, int h)
     {
         var bd = new byte[h, w];
         for (var i = 0; i < h; i++)
