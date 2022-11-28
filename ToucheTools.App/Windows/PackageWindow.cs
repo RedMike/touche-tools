@@ -59,6 +59,7 @@ public class PackageWindow : BaseWindow
                 var origFileTypeId = types.FindIndex(s => s == _viewModel.GetFileType(i));
                 var fileTypeId = origFileTypeId;
                 ImGui.PushID($"Type {i}");
+                ImGui.SetNextItemWidth(100.0f);
                 ImGui.Combo("", ref fileTypeId, types
                     .OrderBy(t => t)
                     .Select(t => t.ToString("G"))
@@ -67,6 +68,20 @@ public class PackageWindow : BaseWindow
                 if (fileTypeId != origFileTypeId)
                 {
                     _viewModel.SetFileType(i, types[fileTypeId]);
+                }
+                
+                ImGui.SameLine();
+
+                var indexes = Enumerable.Range(0, 100).ToArray();
+                var origIndex = _viewModel.GetFileIndex(i);
+                var index = origIndex;
+                ImGui.PushID($"Index {i}");
+                ImGui.SetNextItemWidth(50.0f);
+                ImGui.Combo("", ref index, indexes.Select(q => $"{q}").ToArray(), indexes.Length);
+                ImGui.PopID();
+                if (index != origIndex)
+                {
+                    _viewModel.SetFileIndex(i, index);
                 }
             }
 
