@@ -21,6 +21,7 @@ using ToucheTools.Models;
 
     var viewModel = new PackageViewModel("../../../../sample/assets");
     container.AddSingleton<PackageViewModel>(viewModel);
+    container.AddSingleton<PackagePaletteViewModel>();
 
     container.AddSingleton<PackageWindow>();
     
