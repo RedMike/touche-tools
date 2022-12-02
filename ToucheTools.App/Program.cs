@@ -21,11 +21,9 @@ if (editor)
         .AddConsole()
     );
 
-    var viewModel = new PackageViewModel("../../../../sample/assets");
-    container.AddSingleton<PackageViewModel>(viewModel);
-    container.AddSingleton<PackagePaletteViewModel>();
+    container.AddSingleton<OpenedPackage>();
 
-    container.AddSingleton<PackageWindow>();
+    container.AddSingleton<MainMenuWindow>();
     
     using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
     container.AddSingleton(window);
@@ -40,7 +38,7 @@ if (editor)
             break;
         }
 
-        sp.GetService<PackageWindow>()?.Render();
+        sp.GetService<MainMenuWindow>()?.Render();
 
         window.Render();
     }
