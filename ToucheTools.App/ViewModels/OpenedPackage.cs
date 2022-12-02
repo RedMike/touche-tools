@@ -12,6 +12,14 @@ public class OpenedPackage : Observable<string>
         Room = 2,
         Icon = 3,
     }
+
+    public static List<string> ImageTypeAsList()
+    {
+        return Enum.GetValues<ImageType>()
+            .OrderBy(i => i)
+            .Select(i => i.ToString("G"))
+            .ToList();
+    }
     
     public class Image
     {
@@ -135,6 +143,10 @@ public class OpenedPackage : Observable<string>
         }
 
         if (path.Contains("sprite"))
+        {
+            return ImageType.Sprite;
+        }
+        if (path.Contains("char"))
         {
             return ImageType.Sprite;
         }

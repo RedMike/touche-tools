@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using ImGuiNET;
+﻿using ImGuiNET;
 using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;

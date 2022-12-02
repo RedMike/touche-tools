@@ -24,6 +24,7 @@ if (editor)
     container.AddSingleton<OpenedPackage>();
 
     container.AddSingleton<MainMenuWindow>();
+    container.AddSingleton<ImageManagementWindow>();
     
     using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
     container.AddSingleton(window);
@@ -37,8 +38,10 @@ if (editor)
         {
             break;
         }
-
+        
         sp.GetService<MainMenuWindow>()?.Render();
+        sp.GetService<ImageManagementWindow>()?.Render();
+        
 
         window.Render();
     }
