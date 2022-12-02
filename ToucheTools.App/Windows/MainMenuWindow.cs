@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.Numerics;
+using ImGuiNET;
 using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;
@@ -15,6 +16,7 @@ public class MainMenuWindow : BaseWindow
     public override void Render()
     {
         ImGui.BeginMainMenuBar();
+        
         if (ImGui.BeginMenu("File"))
         {
             if (!_openedPackage.IsLoaded())
@@ -37,6 +39,13 @@ public class MainMenuWindow : BaseWindow
             }
             
             ImGui.EndMenu();
+        }
+
+        var text = $"Loaded: '{_openedPackage.Value}'";
+        ImGui.SetCursorPos(ImGui.GetWindowContentRegionMax() - ImGui.CalcTextSize(text));
+        if (ImGui.BeginMenu(text, false))
+        {
+            //TODO: info about loaded package and deltas
         }
         ImGui.EndMainMenuBar();
     }
