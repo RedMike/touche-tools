@@ -24,7 +24,10 @@ public class ImageManagementWindow : BaseWindow
         ImGui.Begin("Images", ImGuiWindowFlags.NoCollapse);
         foreach (var (path, image) in _package.LoadedManifest.Images)
         {
-            ImGui.Text(path);
+            if (ImGui.Button(path))
+            {
+                //TODO: show image in preview window
+            }
             ImGui.SameLine();
 
             var types = OpenedPackage.ImageTypeAsList();
@@ -51,6 +54,11 @@ public class ImageManagementWindow : BaseWindow
             {
                 //TODO: change image index
             }
+        }
+
+        if (ImGui.Button("Refresh Images"))
+        {
+            //TODO: add any new images to list
         }
         ImGui.End();
     }
