@@ -56,7 +56,7 @@ public class ImagePreviewWindow : BaseWindow
         //background
         var imgOffset = ImGui.GetWindowContentRegionMin();
         var blankRect = _render.RenderCheckerboardRectangle(20, width, height,
-            (70, 70, 70, 255), (170, 170, 170, 255)
+            (40, 30, 40, 255), (50, 40, 50, 255)
         );
         ImGui.SetCursorPos(imgOffset);
         ImGui.Image(blankRect, new Vector2(width, height));
