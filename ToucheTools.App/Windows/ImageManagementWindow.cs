@@ -35,19 +35,8 @@ public class ImageManagementWindow : BaseWindow
         {
             if (ImGui.Button(path))
             {
-                if (image.Type == OpenedPackage.ImageType.Room)
-                {
-                    _previewState.SelectedRoomImage = path;
-                    _previewState.RoomImagePreviewOpen = true;
-                } else if (image.Type == OpenedPackage.ImageType.Sprite)
-                {
-                    _previewState.SelectedSpriteImage = path;
-                    _previewState.SpriteImagePreviewOpen = true;
-                }
-                else
-                {
-                    throw new Exception("Unknown image type to preview");
-                }
+                _previewState.SelectedImage = path;
+                _previewState.ImagePreviewOpen = true;
             }
             ImGui.SameLine();
 

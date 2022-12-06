@@ -5,7 +5,7 @@ using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;
 
-public class RoomImagePreviewWindow : BaseWindow
+public class ImagePreviewWindow : BaseWindow
 {
     private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
@@ -15,7 +15,7 @@ public class RoomImagePreviewWindow : BaseWindow
 
     private readonly Dictionary<string, (IntPtr, int, int)> _textures = new Dictionary<string, (IntPtr, int, int)>();
     
-    public RoomImagePreviewWindow(OpenedPackage package, MainWindowState state, PreviewInfoState previewState, RenderWindow render, PackageImages images)
+    public ImagePreviewWindow(OpenedPackage package, MainWindowState state, PreviewInfoState previewState, RenderWindow render, PackageImages images)
     {
         _package = package;
         _state = state;
@@ -32,30 +32,26 @@ public class RoomImagePreviewWindow : BaseWindow
             return;
         }
 
-        if (!_previewState.RoomImagePreviewOpen)
+        if (!_previewState.ImagePreviewOpen)
         {
             return;
         }
 
-        if (_previewState.SelectedRoomImage == null)
+        if (_previewState.SelectedImage == null)
         {
             return;
         }
 
-        if (!_package.LoadedManifest.Images.ContainsKey(_previewState.SelectedRoomImage))
+        if (!_package.LoadedManifest.Images.ContainsKey(_previewState.SelectedImage))
         {
             //error?
             return;
         }
 
-        var image = _package.LoadedManifest.Images[_previewState.SelectedRoomImage];
-        if (image.Type != OpenedPackage.ImageType.Room)
-        {
-            throw new Exception("Wrong image type");
-        }
-        var (texture, width, height) = GetTexture(_previewState.SelectedRoomImage);
+        var image = _package.LoadedManifest.Images[_previewState.SelectedImage];
+        var (texture, width, height) = GetTexture(_previewState.SelectedImage);
         
-        ImGui.Begin("Room Image Preview", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysHorizontalScrollbar);
+        ImGui.Begin("Image Preview", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysHorizontalScrollbar);
         
         //background
         var imgOffset = ImGui.GetWindowContentRegionMin();
@@ -71,7 +67,7 @@ public class RoomImagePreviewWindow : BaseWindow
 
         if (ImGui.Button("Close preview"))
         {
-            _previewState.RoomImagePreviewOpen = false;
+            _previewState.ImagePreviewOpen = false;
         }
         
         ImGui.End();
