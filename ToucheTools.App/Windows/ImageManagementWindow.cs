@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
+using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;
@@ -7,15 +8,21 @@ namespace ToucheTools.App.Windows;
 public class ImageManagementWindow : BaseWindow
 {
     private readonly OpenedPackage _package;
+    private readonly MainWindowState _state;
 
-    public ImageManagementWindow(OpenedPackage package)
+    public ImageManagementWindow(OpenedPackage package, MainWindowState state)
     {
         _package = package;
+        _state = state;
     }
 
     public override void Render()
     {
         if (!_package.IsLoaded())
+        {
+            return;
+        }
+        if (_state.State != MainWindowState.States.ImageManagement)
         {
             return;
         }

@@ -21,6 +21,7 @@ if (editor)
         .AddConsole()
     );
 
+    container.AddSingleton<MainWindowState>();
     container.AddSingleton<OpenedPackage>();
 
     container.AddSingleton<MainMenuWindow>();
