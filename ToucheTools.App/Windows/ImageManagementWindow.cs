@@ -33,10 +33,19 @@ public class ImageManagementWindow : BaseWindow
         ImGui.Begin("Images", ImGuiWindowFlags.NoCollapse);
         foreach (var (path, image) in _package.LoadedManifest.Images)
         {
+            var isSelected = _previewState.ImagePreviewOpen && _previewState.SelectedImage == path;
+            if (isSelected)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.7f, 1.0f));
+            }
             if (ImGui.Button(path))
             {
                 _previewState.SelectedImage = path;
                 _previewState.ImagePreviewOpen = true;
+            }
+            if (isSelected)
+            {
+                ImGui.PopStyleColor();
             }
             ImGui.SameLine();
 
