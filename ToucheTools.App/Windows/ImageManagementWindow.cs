@@ -9,11 +9,13 @@ public class ImageManagementWindow : BaseWindow
 {
     private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
+    private readonly PreviewInfoState _previewState;
 
-    public ImageManagementWindow(OpenedPackage package, MainWindowState state)
+    public ImageManagementWindow(OpenedPackage package, MainWindowState state, PreviewInfoState previewState)
     {
         _package = package;
         _state = state;
+        _previewState = previewState;
     }
 
     public override void Render()
@@ -33,7 +35,19 @@ public class ImageManagementWindow : BaseWindow
         {
             if (ImGui.Button(path))
             {
-                //TODO: show image in preview window
+                if (image.Type == OpenedPackage.ImageType.Room)
+                {
+                    _previewState.SelectedRoomImage = path;
+                    _previewState.RoomImagePreviewOpen = true;
+                } else if (image.Type == OpenedPackage.ImageType.Sprite)
+                {
+                    _previewState.SelectedSpriteImage = path;
+                    _previewState.SpriteImagePreviewOpen = true;
+                }
+                else
+                {
+                    throw new Exception("Unknown image type to preview");
+                }
             }
             ImGui.SameLine();
 

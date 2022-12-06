@@ -22,10 +22,13 @@ if (editor)
     );
 
     container.AddSingleton<MainWindowState>();
+    container.AddSingleton<PreviewInfoState>();
     container.AddSingleton<OpenedPackage>();
+    container.AddSingleton<PackageImages>();
 
     container.AddSingleton<MainMenuWindow>();
     container.AddSingleton<ImageManagementWindow>();
+    container.AddSingleton<RoomImagePreviewWindow>();
     
     using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
     container.AddSingleton(window);
@@ -42,6 +45,7 @@ if (editor)
         
         sp.GetService<MainMenuWindow>()?.Render();
         sp.GetService<ImageManagementWindow>()?.Render();
+        sp.GetService<RoomImagePreviewWindow>()?.Render();
         
 
         window.Render();
