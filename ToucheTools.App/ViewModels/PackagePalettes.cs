@@ -59,9 +59,9 @@ public class PackagePalettes
                     //we've exhausted the room colours, so fill out with nothing
                     palette[i] = new PaletteDataModel.Rgb()
                     {
-                        R = 0,
+                        R = 200,
                         G = 0,
-                        B = 0,
+                        B = 200,
                     };
                 }
                 else
@@ -105,9 +105,9 @@ public class PackagePalettes
                     //we've exhausted the sprite colours, so fill out with nothing
                     palette[i] = new PaletteDataModel.Rgb()
                     {
-                        R = 0,
+                        R = 255,
                         G = 0,
-                        B = 0,
+                        B = 255,
                     };
                 }
                 else

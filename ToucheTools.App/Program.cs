@@ -21,6 +21,8 @@ if (editor)
         .AddConsole()
     );
 
+    container.AddSingleton<PackagePublishService>();
+
     container.AddSingleton<MainWindowState>();
     container.AddSingleton<PreviewInfoState>();
     container.AddSingleton<OpenedPackage>();
@@ -69,6 +71,14 @@ else
 
     #region Data setup
 
+    container.AddSingleton<PackagePublishService>();
+
+    container.AddSingleton<MainWindowState>();
+    container.AddSingleton<PreviewInfoState>();
+    container.AddSingleton<OpenedPackage>();
+    container.AddSingleton<PackageImages>();
+    container.AddSingleton<PackagePalettes>();
+    
     container.AddSingleton<LogData>();
 
     container.AddSingleton<ActivePalette>();

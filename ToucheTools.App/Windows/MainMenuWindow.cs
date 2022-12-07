@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using ToucheTools.App.Services;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 
@@ -8,11 +9,13 @@ public class MainMenuWindow : BaseWindow
 {
     private readonly OpenedPackage _openedPackage;
     private readonly MainWindowState _state;
+    private readonly PackagePublishService _publishService;
 
-    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state)
+    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService)
     {
         _openedPackage = openedPackage;
         _state = state;
+        _publishService = publishService;
     }
 
     public override void Render()
@@ -42,7 +45,7 @@ public class MainMenuWindow : BaseWindow
 
             if (ImGui.MenuItem("Publish"))
             {
-                //TODO: trigger publish
+                _publishService.Publish();
             }
             
             ImGui.EndMenu();
