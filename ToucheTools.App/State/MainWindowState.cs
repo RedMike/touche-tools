@@ -6,8 +6,9 @@ public class MainWindowState
     {
         Idle = 0,
         ImageManagement = 1,
-        //animations, rooms, programs
+        AnimationManagement = 2,
+        //rooms, programs
     }
 
-    public States State { get; set; } = States.ImageManagement; //TODO: better default
+    public States State { get; set; } = States.AnimationManagement; //TODO: better default
 }

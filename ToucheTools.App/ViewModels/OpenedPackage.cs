@@ -27,10 +27,16 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         public int Index { get; set; } = -1;
     }
 
+    public class Animation
+    {
+        public int Index { get; set; } = -1;
+    }
+
     public class Manifest
     {
         public HashSet<string> IncludedFiles { get; set; } = new HashSet<string>();
         public Dictionary<string, Image> Images { get; set; } = new Dictionary<string, Image>();
+        public Dictionary<string, Animation> Animations { get; set; } = new Dictionary<string, Animation>();
 
         public void ExcludeFile(string path)
         {
@@ -38,6 +44,10 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             if (Images.ContainsKey(path))
             {
                 Images.Remove(path);
+            }
+            if (Animations.ContainsKey(path))
+            {
+                Animations.Remove(path);
             }
         }
 
@@ -49,6 +59,13 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                 Images.Add(path, new Image()
                 {
                     Type = GetDefaultType(path),
+                    Index = -1
+                });
+            }
+            if (path.EndsWith(".anim.json"))
+            {
+                Animations.Add(path, new Animation()
+                {
                     Index = -1
                 });
             }
@@ -102,6 +119,16 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         return Value.Images;
     }
 
+    public IEnumerable<string> GetAllAnimations()
+    {
+        return Files.Where(f => f.EndsWith(".anim.json"));
+    }
+
+    public Dictionary<string, Animation> GetIncludedAnimations()
+    {
+        return Value.Animations;
+    }
+
     public void IncludeFile(string path)
     {
         Value.IncludeFile(path);
@@ -146,7 +173,16 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                             Type = GetDefaultType(f),
                             Index = -1
                         }
-                    )
+                    ),
+                Animations = Files
+                    .Where(f => f.EndsWith(".anim.json"))
+                    .ToDictionary(
+                        f => f,
+                        f => new Animation()
+                        {
+                            Index = -1
+                        }
+                    ),
             };
         }
         else
@@ -154,6 +190,15 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             //manifest exists, load it
             var manifestRaw = File.ReadAllText(ManifestPath);
             manifest = JsonConvert.DeserializeObject<Manifest>(manifestRaw);
+
+            foreach (var file in manifest.IncludedFiles)
+            {
+                if (!Files.Contains(file))
+                {
+                    //TODO: warning about why
+                    manifest.ExcludeFile(file);
+                }
+            }
         }
         
         SetValue(manifest);
@@ -168,14 +213,33 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             if (!imageCounters.ContainsKey(image.Type))
             {
                 imageCounters[image.Type] = 1;
+                if (Value.Images.Any(i => i.Value.Type == image.Type && i.Value.Index >= 0))
+                {
+                    imageCounters[image.Type] = Value.Images.Where(i => i.Value.Type == image.Type && i.Value.Index >= 0)
+                        .Select(i => i.Value.Index)
+                        .Max();
+                }
             }
-                
-            if (image.Index == -1)
+
+            if (image.Index < 0)
             {
                 image.Index = imageCounters[image.Type];
+                imageCounters[image.Type]++;
             }
-                
-            imageCounters[image.Type]++;
+        }
+
+        var animCounter = 1;
+        if (Value.Animations.Any(a => a.Value.Index >= 0))
+        {
+            animCounter = Value.Animations.Select(a => a.Value.Index).Max() + 1;
+        }
+        foreach (var (_, anim) in Value.Animations)
+        {
+            if (anim.Index < 0)
+            {
+                anim.Index = animCounter;
+                animCounter++;
+            }
         }
     }
 
@@ -183,6 +247,11 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     {
         //images
         if (path.EndsWith(".png"))
+        {
+            return true;
+        }
+        //animations
+        if (path.EndsWith(".anim.json"))
         {
             return true;
         }
