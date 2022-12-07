@@ -54,7 +54,27 @@ public class AnimationManagementWindow : BaseWindow
             }
             ImGui.SameLine();
 
-            ImGui.Button(path);
+            if (ImGui.Button(path))
+            {
+                //TODO: open animation for editing                
+            }
+            
+            if (isIncluded)
+            {
+                ImGui.SameLine();
+                //image index
+                var indexes = Enumerable.Range(1, 99).ToList();
+                var origIndex = includedAnimations[path].Index - 1;
+                var index = origIndex;
+                ImGui.PushID($"{path}_index");
+                ImGui.SetNextItemWidth(60.0f);
+                ImGui.Combo("", ref index, indexes.Select(i => i.ToString()).ToArray(), indexes.Count);
+                ImGui.PopID();
+                if (index != origIndex)
+                {
+                    _package.Value.Animations[path].Index = index + 1;
+                }
+            }
         }
 
         if (ImGui.Button("Refresh Animations"))
