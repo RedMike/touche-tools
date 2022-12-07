@@ -22,6 +22,7 @@ if (editor)
     );
 
     container.AddSingleton<PackagePublishService>();
+    container.AddSingleton<SpriteSheetRenderer>();
 
     container.AddSingleton<MainWindowState>();
     container.AddSingleton<ImageManagementState>();
