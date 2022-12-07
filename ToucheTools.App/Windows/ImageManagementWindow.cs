@@ -84,7 +84,7 @@ public class ImageManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (selectedType != origSelectedType)
                 {
-                    _package.LoadedManifest.Images[path].Type = Enum.Parse<OpenedPackage.ImageType>(types[selectedType]);
+                    _package.Value.Images[path].Type = Enum.Parse<OpenedPackage.ImageType>(types[selectedType]);
                 }
                 ImGui.SameLine();
                 
@@ -98,7 +98,7 @@ public class ImageManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (index != origIndex)
                 {
-                    _package.LoadedManifest.Images[path].Index = index + 1;
+                    _package.Value.Images[path].Index = index + 1;
                 }
             }
         }

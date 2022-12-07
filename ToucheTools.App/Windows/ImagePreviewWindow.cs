@@ -42,13 +42,12 @@ public class ImagePreviewWindow : BaseWindow
             return;
         }
 
-        if (!_package.LoadedManifest.Images.ContainsKey(_previewState.SelectedImage))
+        if (!_package.Value.Images.ContainsKey(_previewState.SelectedImage))
         {
             //error?
             return;
         }
 
-        var image = _package.LoadedManifest.Images[_previewState.SelectedImage];
         var (texture, width, height) = GetTexture(_previewState.SelectedImage);
         
         ImGui.Begin("Image Preview", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysHorizontalScrollbar);

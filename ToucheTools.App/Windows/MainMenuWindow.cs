@@ -69,7 +69,7 @@ public class MainMenuWindow : BaseWindow
             ImGui.EndMenu();
         }
         
-        var text = $"Loaded: '{_openedPackage.Value}'";
+        var text = $"Loaded: '{_openedPackage.GetLoadedPath()}'";
         ImGui.SetCursorPos(ImGui.GetWindowContentRegionMax() - ImGui.CalcTextSize(text));
         if (ImGui.BeginMenu(text, false))
         {

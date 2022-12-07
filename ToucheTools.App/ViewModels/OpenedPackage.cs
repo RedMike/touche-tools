@@ -3,7 +3,7 @@ using ToucheTools.App.ViewModels.Observables;
 
 namespace ToucheTools.App.ViewModels;
 
-public class OpenedPackage : Observable<string>
+public class OpenedPackage : Observable<OpenedPackage.Manifest>
 {
     public enum ImageType
     {
@@ -56,20 +56,24 @@ public class OpenedPackage : Observable<string>
     }
 
     public HashSet<string> Files { get; set; } = null!;
-    public Manifest LoadedManifest { get; set; } = null!;
     
-    public string ManifestPath => Value + "/manifest.json";
+    private readonly string _path = "../../../../sample/assets"; //TODO: different default value
+    public string ManifestPath => _path + "/manifest.json";
     
     public OpenedPackage()
     {
         Observe(Update);
-        
-        SetValue("../../../../sample/assets");//TODO: different default value
+        Load();
     }
     
     public bool IsLoaded()
     {
-        return !string.IsNullOrEmpty(Value);
+        return true;
+    }
+
+    public string GetLoadedPath()
+    {
+        return _path;
     }
 
     public void SaveManifest()
@@ -79,12 +83,12 @@ public class OpenedPackage : Observable<string>
             return;
         }
 
-        if (!Directory.Exists(Value))
+        if (!Directory.Exists(_path))
         {
-            Directory.CreateDirectory(Value);
+            Directory.CreateDirectory(_path);
         }
 
-        var manifestJson = JsonConvert.SerializeObject(LoadedManifest, Formatting.Indented);
+        var manifestJson = JsonConvert.SerializeObject(Value, Formatting.Indented);
         File.WriteAllText(ManifestPath, manifestJson);
     }
 
@@ -95,43 +99,42 @@ public class OpenedPackage : Observable<string>
 
     public Dictionary<string, Image> GetIncludedImages()
     {
-        return LoadedManifest.Images;
+        return Value.Images;
     }
 
     public void IncludeFile(string path)
     {
-        LoadedManifest.IncludeFile(path);
-        SaveManifest(); //TODO: shouldn't need to save?
-        Update();
+        Value.IncludeFile(path);
+        SetValue(Value);
         
     }
 
     public void ExcludeFile(string path)
     {
-        LoadedManifest.ExcludeFile(path);
-        SaveManifest(); //TODO: shouldn't need to save?
-        Update();
+        Value.ExcludeFile(path);
+        SetValue(Value);
     }
 
-    private void Update()
+    private void Load()
     {
         if (!IsLoaded())
         {
             return;
         }
 
-        if (!Directory.Exists(Value))
+        if (!Directory.Exists(_path))
         {
             return;
         }
 
-        Files = Directory.EnumerateFiles(Value)
+        Files = Directory.EnumerateFiles(_path)
             .Where(FilterFiles)
             .ToHashSet();
+        Manifest manifest;
         if (!File.Exists(ManifestPath))
         {
             //no manifest, generate one
-            LoadedManifest = new Manifest()
+            manifest = new Manifest()
             {
                 IncludedFiles = Files,
                 Images = Files
@@ -150,12 +153,17 @@ public class OpenedPackage : Observable<string>
         {
             //manifest exists, load it
             var manifestRaw = File.ReadAllText(ManifestPath);
-            LoadedManifest = JsonConvert.DeserializeObject<Manifest>(manifestRaw);
+            manifest = JsonConvert.DeserializeObject<Manifest>(manifestRaw);
         }
         
+        SetValue(manifest);
+    }
+
+    private void Update()
+    {
         //recalculate indexes
         var imageCounters = new Dictionary<ImageType, int>();
-        foreach (var (_, image) in LoadedManifest.Images)
+        foreach (var (_, image) in Value.Images)
         {
             if (!imageCounters.ContainsKey(image.Type))
             {
