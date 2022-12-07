@@ -3,5 +3,6 @@
 public class ImageManagementState
 {
     public string? SelectedImage { get; set; } = null;
-    public bool ImagePreviewOpen { get; set; } = false;
+    public bool PreviewOpen { get; set; } = false;
+    public bool EditorOpen { get; set; } = false;
 }

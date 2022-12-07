@@ -25,6 +25,7 @@ if (editor)
 
     container.AddSingleton<MainWindowState>();
     container.AddSingleton<ImageManagementState>();
+    container.AddSingleton<AnimationManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();

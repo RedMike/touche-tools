@@ -57,7 +57,7 @@ public class ImageManagementWindow : BaseWindow
             ImGui.SameLine();
 
             //button to select for preview
-            var isSelected = _imageManagementState.ImagePreviewOpen && _imageManagementState.SelectedImage == path;
+            var isSelected = _imageManagementState.SelectedImage == path;
             if (isSelected)
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.7f, 1.0f));
@@ -65,7 +65,8 @@ public class ImageManagementWindow : BaseWindow
             if (ImGui.Button(path))
             {
                 _imageManagementState.SelectedImage = path;
-                _imageManagementState.ImagePreviewOpen = true;
+                _imageManagementState.PreviewOpen = true;
+                _imageManagementState.EditorOpen = true;
             }
             if (isSelected)
             {

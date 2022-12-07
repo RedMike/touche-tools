@@ -32,7 +32,7 @@ public class ImagePreviewWindow : BaseWindow
             return;
         }
 
-        if (!_imageManagementState.ImagePreviewOpen)
+        if (!_imageManagementState.PreviewOpen)
         {
             return;
         }
@@ -66,7 +66,7 @@ public class ImagePreviewWindow : BaseWindow
 
         if (ImGui.Button("Close preview"))
         {
-            _imageManagementState.ImagePreviewOpen = false;
+            _imageManagementState.PreviewOpen = false;
         }
         
         ImGui.End();

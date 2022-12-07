@@ -9,11 +9,13 @@ public class AnimationManagementWindow : BaseWindow
 {
     private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
+    private readonly AnimationManagementState _animationManagementState;
 
-    public AnimationManagementWindow(OpenedPackage package, MainWindowState state)
+    public AnimationManagementWindow(OpenedPackage package, MainWindowState state, AnimationManagementState animationManagementState)
     {
         _package = package;
         _state = state;
+        _animationManagementState = animationManagementState;
     }
 
     public override void Render()
@@ -54,9 +56,21 @@ public class AnimationManagementWindow : BaseWindow
             }
             ImGui.SameLine();
 
+            //button to select for preview
+            var isSelected = _animationManagementState.SelectedAnimation == path;
+            if (isSelected)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.7f, 1.0f));
+            }
             if (ImGui.Button(path))
             {
-                //TODO: open animation for editing                
+                _animationManagementState.SelectedAnimation = path;
+                _animationManagementState.PreviewOpen = true;
+                _animationManagementState.EditorOpen = true;
+            }
+            if (isSelected)
+            {
+                ImGui.PopStyleColor();
             }
             
             if (isIncluded)
