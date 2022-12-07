@@ -31,6 +31,28 @@ public class OpenedPackage : Observable<string>
     {
         public HashSet<string> IncludedFiles { get; set; } = new HashSet<string>();
         public Dictionary<string, Image> Images { get; set; } = new Dictionary<string, Image>();
+
+        public void ExcludeFile(string path)
+        {
+            IncludedFiles.Remove(path);
+            if (Images.ContainsKey(path))
+            {
+                Images.Remove(path);
+            }
+        }
+
+        public void IncludeFile(string path)
+        {
+            IncludedFiles.Add(path);
+            if (path.EndsWith(".png"))
+            {
+                Images.Add(path, new Image()
+                {
+                    Type = GetDefaultType(path),
+                    Index = -1
+                });
+            }
+        }
     }
 
     public HashSet<string> Files { get; set; } = null!;
@@ -64,6 +86,31 @@ public class OpenedPackage : Observable<string>
 
         var manifestJson = JsonConvert.SerializeObject(LoadedManifest, Formatting.Indented);
         File.WriteAllText(ManifestPath, manifestJson);
+    }
+
+    public IEnumerable<string> GetAllImages()
+    {
+        return Files.Where(f => f.EndsWith(".png"));
+    }
+
+    public Dictionary<string, Image> GetIncludedImages()
+    {
+        return LoadedManifest.Images;
+    }
+
+    public void IncludeFile(string path)
+    {
+        LoadedManifest.IncludeFile(path);
+        SaveManifest(); //TODO: shouldn't need to save?
+        Update();
+        
+    }
+
+    public void ExcludeFile(string path)
+    {
+        LoadedManifest.ExcludeFile(path);
+        SaveManifest(); //TODO: shouldn't need to save?
+        Update();
     }
 
     private void Update()

@@ -20,7 +20,7 @@ public class PackageImages
     {
         _images = new Dictionary<string, (int, int, byte[])>();
 
-        foreach (var (path, _) in _package.LoadedManifest.Images)
+        foreach (var path in _package.GetAllImages())
         {
             var stream = File.Open(path, FileMode.Open);
             var bitmap = SKBitmap.Decode(stream);
