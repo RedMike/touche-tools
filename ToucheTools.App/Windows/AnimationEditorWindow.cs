@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
+using ToucheTools.Constants;
 
 namespace ToucheTools.App.Windows;
 
@@ -135,7 +136,7 @@ public class AnimationEditorWindow : BaseWindow
             animations.Add(animations.Max());
         }
         var animationList = animations.Select((a, i) => $"{DisplayAnimation(a)}{((i == animations.Count - 1) ? " (new)" : "")}").ToArray();
-        var origSelectedAnimation = _animationManagementState.SelectedCharacter;
+        var origSelectedAnimation = _animationManagementState.SelectedAnimation;
         var selectedAnimation = origSelectedAnimation;
         ImGui.PushID("AnimationAnimation");
         ImGui.SetNextItemWidth(windowSize.X/3.0f);
@@ -143,6 +144,26 @@ public class AnimationEditorWindow : BaseWindow
         if (selectedAnimation != origSelectedAnimation)
         {
             _animationManagementState.SelectedAnimation = animations[selectedAnimation];
+        }
+        ImGui.PopID();
+        
+        //direction field
+        var directions = new List<int>()
+        {
+            Directions.Right,
+            Directions.Down,
+            Directions.Up,
+            Directions.Left
+        };
+        var directionList = directions.Select(d => $"{DisplayDirection(d)}").ToArray();
+        var origSelectedDirection = _animationManagementState.SelectedDirection;
+        var selectedDirection = origSelectedDirection;
+        ImGui.PushID("AnimationDirection");
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        ImGui.Combo("", ref selectedDirection, directionList, directionList.Length);
+        if (selectedDirection != origSelectedDirection)
+        {
+            _animationManagementState.SelectedDirection = directions[selectedDirection];
         }
         ImGui.PopID();
         
@@ -182,5 +203,10 @@ public class AnimationEditorWindow : BaseWindow
             return $"Move animation";
         }
         return $"Animation {animation}";
+    }
+
+    private static string DisplayDirection(int direction)
+    {
+        return $"{Directions.DirectionName(direction)}";
     }
 }
