@@ -3,6 +3,7 @@ using ImGuiNET;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Constants;
+using ToucheTools.Models;
 
 namespace ToucheTools.App.Windows;
 
@@ -167,6 +168,35 @@ public class AnimationEditorWindow : BaseWindow
         }
         ImGui.PopID();
         
+        //frame field
+        var startFrameId = 1;
+        if (animation.Frames.Count > 0)
+        {
+            startFrameId = animation.Frames.Keys.Max() + 1;
+        }
+        var frameIdentifier = (characters[selectedCharacter], animations[selectedAnimation],
+            directions[selectedDirection]);
+        if (animation.FrameMappings.ContainsKey(frameIdentifier))
+        {
+            startFrameId = animation.FrameMappings[frameIdentifier];
+        }
+        var frames = new List<int>() { 0 };
+        if (animation.Frames.ContainsKey(startFrameId))
+        {
+            frames = Enumerable.Range(0, animation.Frames[startFrameId].Count + 1).ToList();
+        }
+        var frameList = frames.Select((f, i) => $"{DisplayFrame(f)}{((i == frames.Count - 1) ? " (new)" : "")}").ToArray();
+        var origSelectedFrame = _animationManagementState.SelectedFrame;
+        var selectedFrame = origSelectedFrame;
+        ImGui.PushID("AnimationFrame");
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        ImGui.Combo("", ref selectedFrame, frameList, frameList.Length);
+        if (selectedFrame != origSelectedFrame)
+        {
+            _animationManagementState.SelectedFrame = frames[selectedFrame];
+        }
+        ImGui.PopID();
+        
         //image
         var w = (int)(windowSize.X / 3);
         var h = w;
@@ -208,5 +238,10 @@ public class AnimationEditorWindow : BaseWindow
     private static string DisplayDirection(int direction)
     {
         return $"{Directions.DirectionName(direction)}";
+    }
+
+    private static string DisplayFrame(int frameId)
+    {
+        return $"Frame {frameId}";
     }
 }

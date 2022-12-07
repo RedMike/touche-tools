@@ -14,4 +14,5 @@ public class AnimationManagementState
     public int SelectedCharacter { get; set; }
     public int SelectedAnimation { get; set; }
     public int SelectedDirection { get; set; }
+    public int SelectedFrame { get; set; }
 }
