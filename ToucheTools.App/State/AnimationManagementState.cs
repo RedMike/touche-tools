@@ -6,7 +6,11 @@ public class AnimationManagementState
     public int SelectedPaletteIndex { get; set; }
     
     
-    public string? SelectedAnimation { get; set; } = null;
+    public string? SelectedAnimationPath { get; set; } = null;
     public bool PreviewOpen { get; set; } = false;
     public bool EditorOpen { get; set; } = false;
+    
+    
+    public int SelectedCharacter { get; set; }
+    public int SelectedAnimation { get; set; }
 }

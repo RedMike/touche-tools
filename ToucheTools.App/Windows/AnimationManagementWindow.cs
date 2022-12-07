@@ -57,14 +57,14 @@ public class AnimationManagementWindow : BaseWindow
             ImGui.SameLine();
 
             //button to select for preview
-            var isSelected = _animationManagementState.SelectedAnimation == path;
+            var isSelected = _animationManagementState.SelectedAnimationPath == path;
             if (isSelected)
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.7f, 1.0f));
             }
             if (ImGui.Button(path))
             {
-                _animationManagementState.SelectedAnimation = path;
+                _animationManagementState.SelectedAnimationPath = path;
                 _animationManagementState.PreviewOpen = true;
                 _animationManagementState.EditorOpen = true;
             }

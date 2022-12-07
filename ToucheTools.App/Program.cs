@@ -29,6 +29,7 @@ if (editor)
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
+    container.AddSingleton<PackageAnimations>();
 
     container.AddSingleton<MainMenuWindow>();
     container.AddSingleton<ImageManagementWindow>();
