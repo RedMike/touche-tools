@@ -16,9 +16,13 @@ public class PackageImages
         Update();
     }
 
-    public void Update()
+    private void Update()
     {
         _images = new Dictionary<string, (int, int, byte[])>();
+        if (!_package.IsLoaded())
+        {
+            return;
+        }
 
         foreach (var path in _package.GetAllImages())
         {

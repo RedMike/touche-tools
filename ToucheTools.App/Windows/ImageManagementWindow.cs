@@ -10,12 +10,14 @@ public class ImageManagementWindow : BaseWindow
     private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
     private readonly PreviewInfoState _previewState;
+    private readonly PackagePalettes _palettes;
 
-    public ImageManagementWindow(OpenedPackage package, MainWindowState state, PreviewInfoState previewState)
+    public ImageManagementWindow(OpenedPackage package, MainWindowState state, PreviewInfoState previewState, PackagePalettes palettes)
     {
         _package = package;
         _state = state;
         _previewState = previewState;
+        _palettes = palettes;
     }
 
     public override void Render()
@@ -103,6 +105,21 @@ public class ImageManagementWindow : BaseWindow
             }
         }
 
+        ImGui.Separator();
+
+        //TODO: turn this into an image/better representation
+        foreach (var (roomIdx, palette) in _palettes.GetPalettes())
+        {
+            if (ImGui.TreeNodeEx($"Room {roomIdx} Palette"))
+            {
+                foreach (var (colId, col) in palette.OrderBy(p => p.Key))
+                {
+                    ImGui.Text($"{colId} - ({col.R}, {col.G}, {col.B})");
+                }
+                ImGui.TreePop();
+            }
+        }
+        
         ImGui.Separator();
         if (ImGui.Button("Refresh Images"))
         {
