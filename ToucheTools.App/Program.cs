@@ -24,7 +24,7 @@ if (editor)
     container.AddSingleton<PackagePublishService>();
 
     container.AddSingleton<MainWindowState>();
-    container.AddSingleton<PreviewInfoState>();
+    container.AddSingleton<ImageManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
@@ -76,7 +76,7 @@ else
     container.AddSingleton<PackagePublishService>();
 
     container.AddSingleton<MainWindowState>();
-    container.AddSingleton<PreviewInfoState>();
+    container.AddSingleton<ImageManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();

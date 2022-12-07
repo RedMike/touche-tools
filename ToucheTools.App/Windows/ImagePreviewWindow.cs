@@ -9,17 +9,17 @@ public class ImagePreviewWindow : BaseWindow
 {
     private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
-    private readonly PreviewInfoState _previewState;
+    private readonly ImageManagementState _imageManagementState;
     private readonly RenderWindow _render;
     private readonly PackageImages _images;
 
     private readonly Dictionary<string, (IntPtr, int, int)> _textures = new Dictionary<string, (IntPtr, int, int)>();
     
-    public ImagePreviewWindow(OpenedPackage package, MainWindowState state, PreviewInfoState previewState, RenderWindow render, PackageImages images)
+    public ImagePreviewWindow(OpenedPackage package, MainWindowState state, ImageManagementState imageManagementState, RenderWindow render, PackageImages images)
     {
         _package = package;
         _state = state;
-        _previewState = previewState;
+        _imageManagementState = imageManagementState;
         _render = render;
         _images = images;
     }
@@ -32,23 +32,23 @@ public class ImagePreviewWindow : BaseWindow
             return;
         }
 
-        if (!_previewState.ImagePreviewOpen)
+        if (!_imageManagementState.ImagePreviewOpen)
         {
             return;
         }
 
-        if (_previewState.SelectedImage == null)
+        if (_imageManagementState.SelectedImage == null)
         {
             return;
         }
 
-        if (!_package.Value.Images.ContainsKey(_previewState.SelectedImage))
+        if (!_package.Value.Images.ContainsKey(_imageManagementState.SelectedImage))
         {
             //error?
             return;
         }
 
-        var (texture, width, height) = GetTexture(_previewState.SelectedImage);
+        var (texture, width, height) = GetTexture(_imageManagementState.SelectedImage);
         
         ImGui.Begin("Image Preview", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysHorizontalScrollbar);
         
@@ -66,7 +66,7 @@ public class ImagePreviewWindow : BaseWindow
 
         if (ImGui.Button("Close preview"))
         {
-            _previewState.ImagePreviewOpen = false;
+            _imageManagementState.ImagePreviewOpen = false;
         }
         
         ImGui.End();

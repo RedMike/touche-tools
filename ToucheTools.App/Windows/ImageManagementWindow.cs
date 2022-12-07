@@ -9,14 +9,14 @@ public class ImageManagementWindow : BaseWindow
 {
     private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
-    private readonly PreviewInfoState _previewState;
+    private readonly ImageManagementState _imageManagementState;
     private readonly PackagePalettes _palettes;
 
-    public ImageManagementWindow(OpenedPackage package, MainWindowState state, PreviewInfoState previewState, PackagePalettes palettes)
+    public ImageManagementWindow(OpenedPackage package, MainWindowState state, ImageManagementState imageManagementState, PackagePalettes palettes)
     {
         _package = package;
         _state = state;
-        _previewState = previewState;
+        _imageManagementState = imageManagementState;
         _palettes = palettes;
     }
 
@@ -57,15 +57,15 @@ public class ImageManagementWindow : BaseWindow
             ImGui.SameLine();
 
             //button to select for preview
-            var isSelected = _previewState.ImagePreviewOpen && _previewState.SelectedImage == path;
+            var isSelected = _imageManagementState.ImagePreviewOpen && _imageManagementState.SelectedImage == path;
             if (isSelected)
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.7f, 1.0f));
             }
             if (ImGui.Button(path))
             {
-                _previewState.SelectedImage = path;
-                _previewState.ImagePreviewOpen = true;
+                _imageManagementState.SelectedImage = path;
+                _imageManagementState.ImagePreviewOpen = true;
             }
             if (isSelected)
             {
