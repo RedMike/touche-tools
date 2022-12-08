@@ -343,7 +343,17 @@ public class AnimationEditorWindow : BaseWindow
         ImGui.Combo("", ref selectedPartIndex, partIndexList, partIndexList.Length);
         if (selectedPartIndex != origSelectedPartIndex)
         {
-            selectedPartInformation.RawFrameIndex = (short)partIndexes[selectedPartIndex]; //TODO: h-flip/v-flip/etc
+            var wasHFlipped = selectedPartInformation.HFlipped;
+            var wasVFlipped = selectedPartInformation.VFlipped;
+            selectedPartInformation.RawFrameIndex = (short)partIndexes[selectedPartIndex];
+            if (wasVFlipped)
+            {
+                selectedPartInformation.RawFrameIndex = (short)(selectedPartInformation.RawFrameIndex | 0x4000);
+            }
+            if (wasHFlipped)
+            {
+                selectedPartInformation.RawFrameIndex = (short)(selectedPartInformation.RawFrameIndex | 0x8000);
+            }
             frameChanged = true;
         }
         ImGui.PopID();
@@ -368,6 +378,44 @@ public class AnimationEditorWindow : BaseWindow
         if (destY != origDestY)
         {
             selectedPartInformation.DestY = destY;
+            frameChanged = true;
+        }
+        ImGui.PopID();
+        
+        ImGui.PushID("AnimationPartHFlip");
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        var origHFlipped = selectedPartInformation.HFlipped;
+        var hFlipped = origHFlipped;
+        ImGui.Checkbox("Horizontal Flip", ref hFlipped);
+        if (hFlipped != origHFlipped)
+        {
+            if (hFlipped)
+            {
+                selectedPartInformation.RawFrameIndex = (short)(selectedPartInformation.RawFrameIndex | 0x8000);
+            }
+            else
+            {
+                selectedPartInformation.RawFrameIndex = (short)(selectedPartInformation.RawFrameIndex & ~0x8000);
+            }
+            frameChanged = true;
+        }
+        ImGui.PopID();
+        
+        ImGui.PushID("AnimationPartVFlip");
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        var origVFlipped = selectedPartInformation.VFlipped;
+        var vFlipped = origVFlipped;
+        ImGui.Checkbox("Vertical Flip", ref vFlipped);
+        if (vFlipped != origVFlipped)
+        {
+            if (vFlipped)
+            {
+                selectedPartInformation.RawFrameIndex = (short)(selectedPartInformation.RawFrameIndex | 0x4000);
+            }
+            else
+            {
+                selectedPartInformation.RawFrameIndex = (short)(selectedPartInformation.RawFrameIndex & ~0x4000);
+            }
             frameChanged = true;
         }
         ImGui.PopID();
