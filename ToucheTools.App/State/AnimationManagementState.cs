@@ -1,4 +1,6 @@
-﻿namespace ToucheTools.App.State;
+﻿using ToucheTools.Models;
+
+namespace ToucheTools.App.State;
 
 public class AnimationManagementState
 {
@@ -16,4 +18,6 @@ public class AnimationManagementState
     public int SelectedDirection { get; set; }
     public int SelectedFrame { get; set; }
     public int SelectedPart { get; set; }
+
+    public List<SequenceDataModel.PartInformation>? CopiedParts { get; set; } = null;
 }

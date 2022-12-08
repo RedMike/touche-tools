@@ -420,6 +420,29 @@ public class AnimationEditorWindow : BaseWindow
         }
         ImGui.PopID();
 
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        if (ImGui.Button("Copy Frame"))
+        {
+            _animationManagementState.CopiedParts = partInformation.Select(p => new SequenceDataModel.PartInformation()
+            {
+                DestX = p.DestX,
+                DestY = p.DestY,
+                RawFrameIndex = p.RawFrameIndex
+            }).ToList();
+        }
+
+        var hasCopied = _animationManagementState.CopiedParts != null;
+        if (hasCopied)
+        {
+            ImGui.SetNextItemWidth(windowSize.X / 3.0f);
+            if (ImGui.Button("Paste Frame"))
+            {
+                partInformation = _animationManagementState.CopiedParts;
+                _animationManagementState.CopiedParts = null;
+                frameChanged = true;
+            }
+        }
+
         if (frameChanged)
         {
             if (isNew)
