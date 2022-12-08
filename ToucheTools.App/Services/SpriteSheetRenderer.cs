@@ -5,7 +5,7 @@ namespace ToucheTools.App.Services;
 public class SpriteSheetRenderer
 {
     private readonly Dictionary<string, byte[]> _cache = new Dictionary<string, byte[]>();
-
+    
     public (string, byte[]) RenderSpriteSheet(int spriteId, SpriteImageDataModel spriteImage, int paletteId,
         PaletteDataModel palette, int offsetX = 0,
         int offsetY = 0, int? width = null, int? height = null)

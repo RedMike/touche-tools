@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="ImGui.NET" Version="1.88.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
       <PackageReference Include="SkiaSharp" Version="2.88.3" />
       <PackageReference Include="Veldrid" Version="4.8.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.8.0" />

@@ -68,39 +68,77 @@ public class AnimationEditorWindow : BaseWindow
         }
         var selectedSprite = origSelectedSprite;
         ImGui.PushID("AnimationSprite");
-        ImGui.SetNextItemWidth(windowSize.X/2.0f);
+        ImGui.SetNextItemWidth(windowSize.X);
         ImGui.Combo("", ref selectedSprite, spriteList, spriteList.Length);
         if (selectedSprite != origSelectedSprite)
         {
             _animationManagementState.SelectedSpriteIndex = sprites[selectedSprite].Index;
         }
         ImGui.PopID();
-        var (spriteWidth, spriteHeight, spriteBytes) = _images.GetImage(sprites[selectedSprite].Key);
-        var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, sprites[selectedSprite].Key, spriteWidth, spriteHeight, spriteBytes);
-        
-        //palette selection
-        ImGui.SameLine();
-        var palettes = _package.GetIncludedImages()
-            .Where(p => p.Value.Type == OpenedPackage.ImageType.Room)
-            .Select(p => (p.Key, p.Value.Index))
-            .ToList();
-        var paletteList = palettes.Select(s => $"Room {s.Index} ({s.Key})").ToArray();
-        var origSelectedPalette = palettes.FindIndex(p => p.Index == _animationManagementState.SelectedPaletteIndex);
-        if (origSelectedPalette == -1)
-        {
-            origSelectedPalette = 0;
-        }
-        var selectedPalette = origSelectedPalette;
-        ImGui.PushID("AnimationPalette");
-        ImGui.SetNextItemWidth(windowSize.X/2.0f);
-        ImGui.Combo("", ref selectedPalette, paletteList, paletteList.Length);
-        if (selectedPalette != origSelectedPalette)
-        {
-            _animationManagementState.SelectedPaletteIndex = palettes[selectedPalette].Index;
-        }
-        ImGui.PopID();
         
         ImGui.Separator();
+        //set up sprite image
+        var (spriteWidth, spriteHeight, spriteBytes) = _images.GetImage(sprites[selectedSprite].Key);
+        var spriteProcessedBytes = new byte[spriteHeight * spriteWidth * 4];
+        var spriteTileWidth = spriteWidth;
+        var spriteTileHeight = spriteHeight;
+        for (var x = 0; x < spriteWidth; x++)
+        {
+            var r = spriteBytes[x * 4 + 0];
+            var g = spriteBytes[x * 4 + 1];
+            var b = spriteBytes[x * 4 + 2];
+            var a = spriteBytes[x * 4 + 3];
+            if (r == 255 && g == 0 && b == 255 && a == 255)
+            {
+                spriteTileWidth = x;
+                break;
+            }
+        }
+        for (var y = 0; y < spriteHeight; y++)
+        {
+            var r = spriteBytes[(y * spriteWidth) * 4 + 0];
+            var g = spriteBytes[(y * spriteWidth) * 4 + 1];
+            var b = spriteBytes[(y * spriteWidth) * 4 + 2];
+            var a = spriteBytes[(y * spriteWidth) * 4 + 3];
+            if (r == 255 && g == 0 && b == 255 && a == 255)
+            {
+                spriteTileHeight = y;
+                break;
+            }
+        }
+
+        for (var x = 0; x < spriteWidth; x++)
+        {
+            for (var y = 0; y < spriteHeight; y++)
+            {
+                var r = spriteBytes[(y * spriteWidth + x) * 4 + 0];
+                var g = spriteBytes[(y * spriteWidth + x) * 4 + 1];
+                var b = spriteBytes[(y * spriteWidth + x) * 4 + 2];
+                var a = spriteBytes[(y * spriteWidth + x) * 4 + 3];
+                if (a < 255)
+                {
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                    a = 0;
+                }
+
+                if (r == 255 && g == 0 && b == 255 && a == 255)
+                {
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                    a = 0;
+                }
+
+                spriteProcessedBytes[(y * spriteWidth + x) * 4 + 0] = r;
+                spriteProcessedBytes[(y * spriteWidth + x) * 4 + 1] = g;
+                spriteProcessedBytes[(y * spriteWidth + x) * 4 + 2] = b;
+                spriteProcessedBytes[(y * spriteWidth + x) * 4 + 3] = a;
+            }
+        }
+        var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, sprites[selectedSprite].Key, spriteWidth, spriteHeight, spriteProcessedBytes);
+        
         var isNew = false;
         var imagePos = ImGui.GetCursorPos() + new Vector2(windowSize.X / 2.0f, 0.0f);
         var animation = _animations.GetAnimation(_animationManagementState.SelectedAnimationPath);
@@ -295,10 +333,17 @@ public class AnimationEditorWindow : BaseWindow
         }
         
         ImGui.Text("");
-        ImGui.PushID("AnimationPartFromSheet");
-        if (ImGui.Button("Grab From Sheet"))
+        //TODO: select part from sprite sheet
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        ImGui.PushID("AnimationPartIndex");
+        var partIndexes = Enumerable.Range(0, (spriteWidth / spriteTileWidth) * (spriteHeight / spriteTileHeight)).ToList();
+        var partIndexList = partIndexes.Select(p => $"{DisplayPartIndex(p, spriteWidth, spriteTileWidth)}").ToArray();
+        var origSelectedPartIndex = (int)selectedPartInformation.FrameIndex;
+        var selectedPartIndex = origSelectedPartIndex;
+        ImGui.Combo("", ref selectedPartIndex, partIndexList, partIndexList.Length);
+        if (selectedPartIndex != origSelectedPartIndex)
         {
-            //TODO: select part from sprite sheet
+            selectedPartInformation.RawFrameIndex = (short)partIndexes[selectedPartIndex]; //TODO: h-flip/v-flip/etc
             frameChanged = true;
         }
         ImGui.PopID();
@@ -307,7 +352,7 @@ public class AnimationEditorWindow : BaseWindow
         ImGui.SetNextItemWidth(windowSize.X/3.0f);
         var origDestX = selectedPartInformation.DestX;
         var destX = origDestX;
-        ImGui.SliderInt("", ref destX, -100, 100, "Dest X {0}");
+        ImGui.SliderInt("", ref destX, -100, 100, $"Dest X {destX}");
         if (destX != origDestX)
         {
             selectedPartInformation.DestX = destX;
@@ -319,7 +364,7 @@ public class AnimationEditorWindow : BaseWindow
         ImGui.SetNextItemWidth(windowSize.X/3.0f);
         var origDestY = selectedPartInformation.DestY;
         var destY = origDestY;
-        ImGui.SliderInt("", ref destY, -100, 100, "Dest Y {0}");
+        ImGui.SliderInt("", ref destY, -100, 100, $"Dest Y {destY}");
         if (destY != origDestY)
         {
             selectedPartInformation.DestY = destY;
@@ -375,8 +420,6 @@ public class AnimationEditorWindow : BaseWindow
         ImGui.SetCursorPos(imagePos);
         ImGui.Image(blankBackground, new Vector2(w, h));
 
-        var spriteTileWidth = spriteWidth / 5;
-        var spriteTileHeight = spriteHeight / 5;
         var spritePos = imagePos + new Vector2(w / 2.0f - spriteTileWidth/2.0f, h / 2.0f - spriteTileHeight/2.0f);
         foreach (var partToDraw in partInformation)
         {
@@ -408,6 +451,11 @@ public class AnimationEditorWindow : BaseWindow
 
         ImGui.SetCursorPos(new Vector2(0.0f, imagePos.Y + h));
         ImGui.Separator();
+        
+        if (ImGui.Button("Save"))
+        {
+            _animations.SaveAnimation(_animationManagementState.SelectedAnimationPath);
+        }
         
         if (ImGui.Button("Close editor"))
         {
@@ -449,5 +497,11 @@ public class AnimationEditorWindow : BaseWindow
     private static string DisplayPart(int partId)
     {
         return $"Part {partId}";
+    }
+
+    private static string DisplayPartIndex(int partIndex, int spriteWidth, int spriteTileWidth)
+    {
+        var cols = (int)Math.Ceiling((float)spriteWidth / spriteTileWidth);
+        return $"Sprite part {partIndex} ({(partIndex % cols)}, {(partIndex / cols)})";
     }
 }

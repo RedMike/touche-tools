@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ToucheTools;
 using ToucheTools.App;
@@ -14,6 +15,10 @@ using ToucheTools.Models;
 var editor = true;
 if (editor)
 {
+    TypeDescriptor.AddAttributes(typeof((Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32>)));
+    TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32>)));
+    TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32, Int32>)));
+    
     IServiceCollection container = new ServiceCollection();
     container.AddLogging(o => o
         .ClearProviders()
