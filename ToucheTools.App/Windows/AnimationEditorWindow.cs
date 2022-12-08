@@ -308,6 +308,28 @@ public class AnimationEditorWindow : BaseWindow
         
         //controls
         var frameChanged = false;
+
+        var frameInformation = new List<SequenceDataModel.FrameInformation>()
+        {
+        };
+        if (animation.Frames.ContainsKey(startFrameId))
+        {
+            frameInformation = animation.Frames[startFrameId];
+        }
+        else
+        {
+            isNew = true;
+        }
+        var selectedFrameInformation = new SequenceDataModel.FrameInformation();
+        if (frameInformation.Count > frames[selectedFrame])
+        {
+            selectedFrameInformation = frameInformation[frames[selectedFrame]];
+        }
+        else
+        {
+            frameInformation.Add(selectedFrameInformation);
+            isNew = true;
+        }
         
         var partInformation = new List<SequenceDataModel.PartInformation>()
         {
@@ -332,6 +354,44 @@ public class AnimationEditorWindow : BaseWindow
             isNew = true;
         }
         
+        //frame controls
+        ImGui.Text("");
+        ImGui.PushID("AnimationFrameDx");
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        var origWalkDx = selectedFrameInformation.WalkDx;
+        var walkDx = origWalkDx;
+        ImGui.SliderInt("", ref walkDx, -20, 20, $"Walk DX {walkDx}");
+        if (walkDx != origWalkDx)
+        {
+            selectedFrameInformation.WalkDx = walkDx;
+            frameChanged = true;
+        }
+        ImGui.PopID();
+        //TODO: should Y even be included if it's not really used in the game?
+        ImGui.PushID("AnimationFrameDz");
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        var origWalkDz = selectedFrameInformation.WalkDz;
+        var walkDz = origWalkDz;
+        ImGui.SliderInt("", ref walkDz, -20, 20, $"Walk DZ {walkDz}");
+        if (walkDz != origWalkDz)
+        {
+            selectedFrameInformation.WalkDz = walkDz;
+            frameChanged = true;
+        }
+        ImGui.PopID();
+        ImGui.PushID("AnimationFrameDelay");
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        var origDelay = selectedFrameInformation.Delay;
+        var delay = origDelay;
+        ImGui.SliderInt("", ref delay, 0, 20, $"Delay {delay}");
+        if (delay != origDelay)
+        {
+            selectedFrameInformation.Delay = delay;
+            frameChanged = true;
+        }
+        ImGui.PopID();
+        
+        //part controls
         ImGui.Text("");
         //TODO: select part from sprite sheet
         ImGui.SetNextItemWidth(windowSize.X/3.0f);
@@ -453,16 +513,16 @@ public class AnimationEditorWindow : BaseWindow
                     animation.CharToFrameFlag[characters[selectedCharacter]] = (ushort)0;
                 }
 
-                if (!animation.Frames.ContainsKey(frames[selectedFrame]))
+                if (!animation.Frames.ContainsKey(startFrameId))
                 {
-                    animation.Frames[frames[selectedFrame]] = new List<SequenceDataModel.FrameInformation>()
+                    animation.Frames[startFrameId] = new List<SequenceDataModel.FrameInformation>()
                     {
                         new SequenceDataModel.FrameInformation()
                     };
                 }
                 if (!animation.FrameMappings.ContainsKey(frameIdentifier))
                 {
-                    animation.FrameMappings[frameIdentifier] = frames[selectedFrame];
+                    animation.FrameMappings[frameIdentifier] = startFrameId;
                 }
 
                 if (!animation.Parts.ContainsKey(startPartId))
@@ -480,6 +540,7 @@ public class AnimationEditorWindow : BaseWindow
             }
 
             animation.Parts[startPartId] = partInformation;
+            animation.Frames[startFrameId] = frameInformation;
         }
         
         //image background
