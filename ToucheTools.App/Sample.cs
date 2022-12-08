@@ -30,7 +30,15 @@ public static class Sample
         var w = ToucheTools.Constants.Icons.Width;
         var h = ToucheTools.Constants.Icons.Height;
         var b = GetImage(w, h, 0);
-        b[h / 2, w / 2] = 255;
+        b[h / 2, w / 2] = 197;
+        b[h / 2 - 1, w / 2] = 197;
+        b[h / 2 - 2, w / 2] = 197;
+        b[h / 2 + 1, w / 2] = 197;
+        b[h / 2 + 2, w / 2] = 197;
+        b[h / 2, w / 2 - 1] = 197;
+        b[h / 2, w / 2 - 2] = 197;
+        b[h / 2, w / 2 + 1] = 197;
+        b[h / 2, w / 2 + 2] = 197;
 
         return new IconImageDataModel()
         {
@@ -1220,6 +1228,13 @@ public static class Sample
                 }
             },
             {
+                86,
+                new SetCharDelayInstruction()
+                {
+                    Delay = 40
+                }
+            },
+            {
                 92,
                 new MoveCharToPosInstruction()
                 {
@@ -1228,7 +1243,34 @@ public static class Sample
                 }
             },
             {
+                94,
+                new SetCharDelayInstruction()
+                {
+                    Delay = 40
+                }
+            },
+            {
+                96,
+                new EnableInputInstruction()
+                {
+                }
+            },
+            {
+                97,
+                new FetchScriptWordInstruction()
+                {
+                    Val = 0
+                }
+            },
+            {
                 98,
+                new SetFlagInstruction()
+                {
+                    Flag = (ushort)Flags.Known.HideCursor
+                }
+            },
+            {
+                99,
                 new StopScriptInstruction()
             },
             {
