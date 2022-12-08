@@ -1007,7 +1007,7 @@ public static class Sample
                 new ProgramDataModel.Point()
                 {
                     X = 300,
-                    Y = 250,
+                    Y = 350,
                     Z = 160
                 }
             },
@@ -1015,7 +1015,7 @@ public static class Sample
                 new ProgramDataModel.Point()
                 {
                     X = 340,
-                    Y = 250,
+                    Y = 350,
                     Z = 160
                 }
             },
@@ -1023,7 +1023,7 @@ public static class Sample
                 new ProgramDataModel.Point()
                 {
                     X = 380,
-                    Y = 250,
+                    Y = 350,
                     Z = 160
                 }
             },
@@ -1031,7 +1031,7 @@ public static class Sample
                 new ProgramDataModel.Point()
                 {
                     X = 440,
-                    Y = 350,
+                    Y = 450,
                     Z = 110
                 }
             },
@@ -1039,7 +1039,7 @@ public static class Sample
                 new ProgramDataModel.Point()
                 {
                     X = 480,
-                    Y = 250,
+                    Y = 350,
                     Z = 160
                 }
             }
@@ -1221,10 +1221,18 @@ public static class Sample
             },
             {
                 92,
+                new MoveCharToPosInstruction()
+                {
+                    Character = 0,
+                    Num = 1
+                }
+            },
+            {
+                98,
                 new StopScriptInstruction()
             },
             {
-                94,
+                100,
                 new StopScriptInstruction()
             }
         };

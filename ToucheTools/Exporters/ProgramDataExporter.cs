@@ -290,14 +290,13 @@ public class ProgramDataExporter
         {
             var memStream = new MemoryStream();
             var writer = new BinaryWriter(memStream);
-            foreach (var instruction in program.Instructions)
+            var trackedOffset = 0;
+            foreach (var instruction in program.Instructions.OrderBy(p => p.Key))
             {
-                memStream.Seek(instruction.Key, SeekOrigin.Begin);
-                instruction.Value.Export(writer);
+                memStream.Seek(trackedOffset, SeekOrigin.Begin);
+                trackedOffset += instruction.Value.Export(writer);
             }
-
-            var lastInstruction = program.Instructions.MaxBy(p => p.Key);
-            memStream.Seek(lastInstruction.Key + lastInstruction.Value.Width + 1, SeekOrigin.Begin);
+            memStream.Seek(trackedOffset, SeekOrigin.Begin);
             writer.Write(byte.MaxValue);
 
             var bytes = memStream.ToArray();

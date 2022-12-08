@@ -422,7 +422,7 @@ public class AnimationEditorWindow : BaseWindow
         ImGui.SetNextItemWidth(windowSize.X/3.0f);
         var origDestX = selectedPartInformation.DestX;
         var destX = origDestX;
-        ImGui.SliderInt("", ref destX, -100, 100, $"Dest X {destX}");
+        ImGui.SliderInt("", ref destX, -150, 150, $"Dest X {destX}");
         if (destX != origDestX)
         {
             selectedPartInformation.DestX = destX;
@@ -434,7 +434,7 @@ public class AnimationEditorWindow : BaseWindow
         ImGui.SetNextItemWidth(windowSize.X/3.0f);
         var origDestY = selectedPartInformation.DestY;
         var destY = origDestY;
-        ImGui.SliderInt("", ref destY, -100, 100, $"Dest Y {destY}");
+        ImGui.SliderInt("", ref destY, -150, 150, $"Dest Y {destY}");
         if (destY != origDestY)
         {
             selectedPartInformation.DestY = destY;
@@ -563,12 +563,12 @@ public class AnimationEditorWindow : BaseWindow
         ImGui.SetCursorPos(imagePos);
         ImGui.Image(blankBackground, new Vector2(w, h));
 
-        var spritePos = imagePos + new Vector2(w / 2.0f - spriteTileWidth/2.0f, h / 2.0f - spriteTileHeight/2.0f);
+        var spritePos = imagePos + new Vector2(w / 2.0f, h / 2.0f);
+        var tileWidthRatio = (float)spriteTileWidth / spriteWidth;
+        var tileHeightRatio = (float)spriteTileHeight / spriteHeight;
+        var tilesPerRow = (int)Math.Floor((float)spriteWidth / spriteTileWidth);
         foreach (var partToDraw in partInformation)
         {
-            var tileWidthRatio = (float)spriteTileWidth / spriteWidth;
-            var tileHeightRatio = (float)spriteTileHeight / spriteHeight;
-            var tilesPerRow = (int)Math.Floor((float)spriteWidth / spriteTileWidth);
             var tileX = partToDraw.FrameIndex % tilesPerRow;
             var tileY = (int)Math.Floor((float)partToDraw.FrameIndex / tilesPerRow);
             var spriteUv1 = new Vector2(tileX * tileWidthRatio, tileY * tileHeightRatio);
@@ -584,13 +584,19 @@ public class AnimationEditorWindow : BaseWindow
         
             //fix the position based on the direction
             var ox = 0;
-            if (directions[selectedDirection] == ToucheTools.Constants.Directions.Left)
-            {
-                ox = -spriteTileWidth;
-            }
+            // if (directions[selectedDirection] == ToucheTools.Constants.Directions.Left)
+            // {
+            //     ox = -spriteTileWidth;
+            // }
             ImGui.SetCursorPos(spritePos + new Vector2(partToDraw.DestX + ox, partToDraw.DestY));
             ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);
         }
+        
+        var anchorW = 10;
+        var anchorRect = _render.RenderRectangle(1, anchorW, anchorW,
+            (255, 255, 255, 50), (255, 255, 255, 255));
+        ImGui.SetCursorPos(spritePos + new Vector2(-anchorW/2.0f, -anchorW/2.0f));
+        ImGui.Image(anchorRect, new Vector2(anchorW, anchorW));
 
         if (ImGui.GetCursorPos().Y < imagePos.Y + h)
         {

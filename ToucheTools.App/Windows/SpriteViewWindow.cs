@@ -119,6 +119,12 @@ public class SpriteViewWindow : IWindow
                 ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);
             }
 
+            var anchorW = 10;
+            var anchorRect = _render.RenderRectangle(1, anchorW, anchorW,
+                (255, 255, 255, 50), (255, 255, 255, 255));
+            ImGui.SetCursorPos(spritePosition + new Vector2(-anchorW/2.0f, -anchorW/2.0f));
+            ImGui.Image(anchorRect, new Vector2(anchorW, anchorW));
+
             var ((dx, dy, dz), delay) = _frame.FrameView.Value;
             var text = $"Walk ({dx} X, {dy} Y, {dz} Z)\nDelay {delay}";
             ImGui.SetCursorPos(spritePosition + new Vector2(0, 50.0f) - movementOffset);
