@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using ToucheTools.App.Services;
 using ToucheTools.Models;
 
 namespace ToucheTools.App.ViewModels;
@@ -26,7 +25,7 @@ public class PackageAnimations
     public void SaveAnimation(string path)
     {
         var animation = _animations[path];
-        var data = JsonConvert.SerializeObject(animation);
+        var data = JsonConvert.SerializeObject(animation, Formatting.Indented);
         File.WriteAllText(path, data);
     }
     

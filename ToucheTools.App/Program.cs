@@ -13,12 +13,12 @@ using ToucheTools.Loaders;
 using ToucheTools.Models;
 
 var editor = true;
+TypeDescriptor.AddAttributes(typeof((Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32>)));
+TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32>)));
+TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32, Int32>)));
+
 if (editor)
 {
-    TypeDescriptor.AddAttributes(typeof((Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32>)));
-    TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32>)));
-    TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32, Int32>)));
-    
     IServiceCollection container = new ServiceCollection();
     container.AddLogging(o => o
         .ClearProviders()
@@ -87,9 +87,11 @@ else
 
     container.AddSingleton<MainWindowState>();
     container.AddSingleton<ImageManagementState>();
+    container.AddSingleton<AnimationManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
+    container.AddSingleton<PackageAnimations>();
     
     container.AddSingleton<LogData>();
 

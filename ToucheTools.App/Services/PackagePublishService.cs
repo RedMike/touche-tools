@@ -9,12 +9,14 @@ public class PackagePublishService
     private readonly OpenedPackage _package;
     private readonly PackageImages _images;
     private readonly PackagePalettes _palettes;
+    private readonly PackageAnimations _animations;
 
-    public PackagePublishService(OpenedPackage package, PackageImages images, PackagePalettes palettes)
+    public PackagePublishService(OpenedPackage package, PackageImages images, PackagePalettes palettes, PackageAnimations animations)
     {
         _package = package;
         _images = images;
         _palettes = palettes;
+        _animations = animations;
     }
 
     public void Publish()
@@ -43,15 +45,17 @@ public class PackagePublishService
             RoomImages = new Dictionary<int, Lazy<RoomImageDataModel>>()
             {
             },
-            Sequences = Sample.Sequences(),
+            Sequences = new Dictionary<int, SequenceDataModel>()
+            {
+            },
             Programs = Sample.Programs(),
         };
         var images = _package.GetIncludedImages();
         var rooms = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Room);
         var sprites = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Sprite);
         var palettes = _palettes.GetPalettes();
-        
-        
+        var animations = _package.GetIncludedAnimations();
+
         foreach (var (roomPath, roomImageData) in rooms)
         {
             var roomId = roomImageData.Index;
@@ -172,6 +176,12 @@ public class PackagePublishService
             }
 
             db.Sprites[spriteId] = new Lazy<SpriteImageDataModel>(sprite);
+        }
+
+        foreach (var (animationPath, animation) in animations)
+        {
+            var sequence = _animations.GetAnimation(animationPath);
+            db.Sequences[animation.Index] = sequence;
         }
         
         var memoryStream = new MemoryStream();

@@ -479,6 +479,17 @@ public class AnimationEditorWindow : BaseWindow
             frameChanged = true;
         }
         ImGui.PopID();
+        
+        ImGui.SetNextItemWidth(windowSize.X/3.0f);
+        if (_animationManagementState.SelectedFrame != 0)
+        {
+            if (ImGui.Button("Delete Frame"))
+            {
+                _animationManagementState.SelectedFrame--;
+                frameInformation.Remove(selectedFrameInformation);
+                frameChanged = true;
+            }
+        }
 
         ImGui.SetNextItemWidth(windowSize.X/3.0f);
         if (ImGui.Button("Copy Frame"))
@@ -581,7 +592,11 @@ public class AnimationEditorWindow : BaseWindow
             ImGui.Image(spriteTexture, new Vector2(spriteTileWidth, spriteTileHeight), spriteUv1, spriteUv2);
         }
 
-        ImGui.SetCursorPos(new Vector2(0.0f, imagePos.Y + h));
+        if (ImGui.GetCursorPos().Y < imagePos.Y + h)
+        {
+            ImGui.SetCursorPos(new Vector2(0.0f, imagePos.Y + h));
+        }
+
         ImGui.Separator();
         
         if (ImGui.Button("Save"))
