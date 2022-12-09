@@ -1227,10 +1227,6 @@ public static class Sample
                 }
             },
             {
-                60,
-                new EnableInputInstruction()
-            },
-            {
                 62,
                 new SetCharFlagsInstruction()
                 {
@@ -1247,98 +1243,11 @@ public static class Sample
                 }
             },
             // {
-            //     69,
-            //     new SetCharBoxInstruction()
+            //     99,
+            //     new DisableInputInstruction()
             //     {
-            //         Character = 1,
-            //         Num = 1
             //     }
             // },
-            {
-                74,
-                new SetCharDelayInstruction()
-                {
-                    Delay = 40
-                }
-            },
-            {
-                78,
-                new MoveCharToPosInstruction()
-                {
-                    Character = 0,
-                    Num = 9
-                }
-            },
-            {
-                84,
-                new SetupWaitingCharInstruction()
-                {
-                    Character = 0, //actually ignored
-                    Val1 = 1,
-                    Val2 = 9
-                }
-            },
-            {
-                86,
-                new SetCharDelayInstruction()
-                {
-                    Delay = 40
-                }
-            },
-            {
-                92,
-                new MoveCharToPosInstruction()
-                {
-                    Character = 0,
-                    Num = 13
-                }
-            },
-            {
-                93,
-                new SetupWaitingCharInstruction()
-                {
-                    Character = 0, //actually ignored
-                    Val1 = 1,
-                    Val2 = 13
-                }
-            },
-            {
-                94,
-                new SetCharDelayInstruction()
-                {
-                    Delay = 40
-                }
-            },
-            {
-                95,
-                new MoveCharToPosInstruction()
-                {
-                    Character = 0,
-                    Num = 15
-                }
-            },
-            {
-                96,
-                new SetupWaitingCharInstruction()
-                {
-                    Character = 0, //actually ignored
-                    Val1 = 1,
-                    Val2 = 15
-                }
-            },
-            {
-                97,
-                new SetCharDelayInstruction()
-                {
-                    Delay = 40
-                }
-            },
-            {
-                99,
-                new EnableInputInstruction()
-                {
-                }
-            },
             {
                 110,
                 new FetchScriptWordInstruction()
@@ -1353,6 +1262,7 @@ public static class Sample
                     Flag = (ushort)Flags.Known.HideCursor
                 }
             },
+            
             {
                 120,
                 new StopScriptInstruction()
