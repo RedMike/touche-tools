@@ -17,6 +17,16 @@ public class StopCharScriptInstruction : BaseInstruction
     {
         writer.Write((short)Character);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        Character = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

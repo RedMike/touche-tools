@@ -19,6 +19,18 @@ public class SetRoomAreaStateInstruction : BaseInstruction
         writer.Write((short)Num);
         writer.Write((short)Val);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num},{Val}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Num = short.Parse(parts[0]);
+        Val = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

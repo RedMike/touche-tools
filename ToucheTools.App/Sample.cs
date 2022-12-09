@@ -1307,7 +1307,7 @@ public static class Sample
     {
         return new Dictionary<int, Lazy<SpriteImageDataModel>>()
         {
-            { ToucheTools.Constants.Sprites.ActionMenu, new Lazy<SpriteImageDataModel>(ActionMenu) },
+            //{ ToucheTools.Constants.Sprites.ActionMenu, new Lazy<SpriteImageDataModel>(ActionMenu) },
             { ToucheTools.Constants.Sprites.ConversationMenu, new Lazy<SpriteImageDataModel>(ConversationMenu) },
             { ToucheTools.Constants.Sprites.InventoryBackground1, new Lazy<SpriteImageDataModel>(InventoryBackground1) },
             { ToucheTools.Constants.Sprites.InventoryBackground2, new Lazy<SpriteImageDataModel>(InventoryBackground2) },

@@ -23,6 +23,18 @@ public class StartTalkInstruction : BaseInstruction
         writer.Write((short)Character);
         writer.Write((short)Num);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Num}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Num = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

@@ -16,6 +16,16 @@ public class GetInventoryItemFlagsInstruction : BaseInstruction
     {
         writer.Write((short)Item);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Item}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        Item = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

@@ -22,6 +22,18 @@ public class SetCharFlagsInstruction : BaseInstruction
         writer.Write((short)Character);
         writer.Write(Flags.AsShort());
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Flags}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Flags = ushort.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

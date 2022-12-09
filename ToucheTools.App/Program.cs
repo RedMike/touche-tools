@@ -159,7 +159,7 @@ else
     {
         container.AddSingleton<DatabaseModel>(provider =>
         {
-            var fileToLoad = "../../../../sample/TOUCHE_PACKAGE.DAT";
+            var fileToLoad = "../../../../sample/TOUCHE.DAT";
             if (!File.Exists(fileToLoad))
             {
                 throw new Exception("File not found: " + fileToLoad);

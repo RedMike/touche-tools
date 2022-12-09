@@ -19,6 +19,18 @@ public class StartAnimationInstruction : BaseInstruction
         writer.Write((short)Character);
         writer.Write((short)Position);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Position}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Position = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

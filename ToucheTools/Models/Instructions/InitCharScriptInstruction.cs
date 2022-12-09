@@ -28,6 +28,21 @@ public class InitCharScriptInstruction : BaseInstruction
         writer.Write((short)SequenceIndex);
         writer.Write((short)SequenceCharacterId);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Color},{SpriteIndex},{SequenceIndex},{SequenceCharacterId}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Color = short.Parse(parts[1]);
+        SpriteIndex = short.Parse(parts[2]);
+        SequenceIndex = short.Parse(parts[3]);
+        SequenceCharacterId = short.Parse(parts[4]);
+    }
 
     public override string ToString()
     {

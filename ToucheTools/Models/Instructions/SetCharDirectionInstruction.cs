@@ -21,6 +21,18 @@ public class SetCharDirectionInstruction : BaseInstruction
         writer.Write((short)Character);
         writer.Write((short)Direction);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Direction}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Direction = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

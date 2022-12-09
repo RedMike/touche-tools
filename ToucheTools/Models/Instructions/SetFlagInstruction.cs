@@ -19,6 +19,16 @@ public class SetFlagInstruction : BaseInstruction
     {
         writer.Write(Flag.AsShort());
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Flag}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        Flag = ushort.Parse(remainder);
+    }
 
     public override string ToString()
     {

@@ -22,6 +22,18 @@ public class AddRoomAreaInstruction : BaseInstruction
         writer.Write((short)Num);
         writer.Write(Flag.AsShort());
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num},{Flag}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Num = short.Parse(parts[0]);
+        Flag = ushort.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

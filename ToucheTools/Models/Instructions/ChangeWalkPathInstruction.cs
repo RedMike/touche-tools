@@ -22,6 +22,19 @@ public class ChangeWalkPathInstruction : BaseInstruction
         writer.Write((short)Num2);
         writer.Write((short)Val);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num1},{Num2},{Val}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Num1 = short.Parse(parts[0]);
+        Num2 = short.Parse(parts[1]);
+        Val = short.Parse(parts[2]);
+    }
 
     public override string ToString()
     {

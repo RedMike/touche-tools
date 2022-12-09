@@ -21,6 +21,18 @@ public class SetCharTextColorInstruction : BaseInstruction
         writer.Write((short)Character);
         writer.Write(Color.AsShort());
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Color}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Color = ushort.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

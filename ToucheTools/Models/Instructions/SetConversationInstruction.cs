@@ -16,6 +16,16 @@ public class SetConversationInstruction : BaseInstruction
     {
         writer.Write((short)Num);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        Num = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

@@ -17,6 +17,16 @@ public class SleepInstruction : BaseInstruction
     {
         writer.Write((short)RawCycles);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{RawCycles}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        RawCycles = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

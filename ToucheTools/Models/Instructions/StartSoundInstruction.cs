@@ -19,6 +19,18 @@ public class StartSoundInstruction : BaseInstruction
         writer.Write((short)Num);
         writer.Write((short)Delay);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num},{Delay}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Num = short.Parse(parts[0]);
+        Delay = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

@@ -22,5 +22,28 @@ public abstract class BaseInstruction
         
     }
 
+    public string Serialise()
+    {
+        return $"{Opcode:G} {SerialiseInternal()}";
+    }
+
+    public static (ProgramDataModel.Opcode, string) DeserialiseOpcode(string s)
+    {
+        var index = s.IndexOf(' ');
+        var opcode = s.Substring(0, index);
+        var remainder = s.Substring(index);
+        return (Enum.Parse<ProgramDataModel.Opcode>(opcode), remainder);
+    }
+
+    protected virtual string SerialiseInternal()
+    {
+        return "";
+    }
+
+    public virtual void DeserialiseRemainder(string remainder)
+    {
+        
+    }
+
     public abstract override string ToString();
 }

@@ -16,6 +16,16 @@ public class FetchScriptWordInstruction : BaseInstruction
     {
         writer.Write((short)Val);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Val}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        Val = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

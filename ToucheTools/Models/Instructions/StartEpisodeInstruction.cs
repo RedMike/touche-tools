@@ -21,6 +21,18 @@ public class StartEpisodeInstruction : BaseInstruction
         writer.Write((short)Num);
         writer.Write((short)Flag);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num},{Flag}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Num = short.Parse(parts[0]);
+        Flag = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

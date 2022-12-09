@@ -19,6 +19,18 @@ public class LockWalkPathInstruction : BaseInstruction
         writer.Write((short)Num1);
         writer.Write((short)Num2);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num1},{Num2}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Num1 = short.Parse(parts[0]);
+        Num2 = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

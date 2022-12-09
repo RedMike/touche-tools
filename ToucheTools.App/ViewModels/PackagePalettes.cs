@@ -144,27 +144,27 @@ public class PackagePalettes
         };
         palette[ToucheTools.Constants.Palettes.InventoryMoneyTextColor] = new PaletteDataModel.Rgb()
         {
-            R = 90,
-            G = 50,
-            B = 230
+            R = 50,
+            G = 56,
+            B = 122
         };
         palette[ToucheTools.Constants.Palettes.ActionMenuTextColor] = new PaletteDataModel.Rgb()
         {
-            R = 120,
-            G = 70,
-            B = 230
+            R = 50,
+            G = 56,
+            B = 122
         };
         palette[ToucheTools.Constants.Palettes.ActionMenuBackgroundColor] = new PaletteDataModel.Rgb()
         {
-            R = 200,
-            G = 200,
-            B = 200
+            R = 92,
+            G = 100,
+            B = 188
         };
         palette[ToucheTools.Constants.Palettes.ConversationTextColor] = new PaletteDataModel.Rgb()
         {
-            R = 150,
-            G = 90,
-            B = 250
+            R = 60,
+            G = 66,
+            B = 142
         };
         return palette;
     }

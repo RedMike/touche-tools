@@ -16,6 +16,16 @@ public class UpdateRoomInstruction : BaseInstruction
     {
         writer.Write((short)Area);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Area}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        Area = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

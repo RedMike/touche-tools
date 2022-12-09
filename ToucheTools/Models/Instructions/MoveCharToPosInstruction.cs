@@ -31,6 +31,19 @@ public class MoveCharToPosInstruction : BaseInstruction
             writer.Write((short)TargetCharacter);
         }
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Num},{TargetCharacter}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Num = short.Parse(parts[1]);
+        TargetCharacter = short.Parse(parts[2]);
+    }
 
     public override string ToString()
     {

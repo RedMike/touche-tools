@@ -19,6 +19,18 @@ public class LoadSequenceInstruction : BaseInstruction
         writer.Write((short)Index);
         writer.Write((short)Num);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Index},{Num}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Index = short.Parse(parts[0]);
+        Num = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

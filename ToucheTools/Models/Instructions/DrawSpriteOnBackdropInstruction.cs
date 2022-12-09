@@ -22,6 +22,19 @@ public class DrawSpriteOnBackdropInstruction : BaseInstruction
         writer.Write((short)X);
         writer.Write((short)Y);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Num},{X},{Y}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Num = short.Parse(parts[0]);
+        X = short.Parse(parts[1]);
+        Y = short.Parse(parts[2]);
+    }
 
     public override string ToString()
     {

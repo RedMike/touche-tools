@@ -22,6 +22,19 @@ public class SetPaletteInstruction : BaseInstruction
         writer.Write((short)G);
         writer.Write((short)B);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{R},{G},{B}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        R = short.Parse(parts[0]);
+        G = short.Parse(parts[1]);
+        B = short.Parse(parts[2]);
+    }
 
     public override string ToString()
     {

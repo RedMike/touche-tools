@@ -18,6 +18,16 @@ public class JzInstruction : BaseInstruction
     {
         writer.Write(NewOffset.AsShort());
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{NewOffset}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        NewOffset = ushort.Parse(remainder);
+    }
 
     public override string ToString()
     {

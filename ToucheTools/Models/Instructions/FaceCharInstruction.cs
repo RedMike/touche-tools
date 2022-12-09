@@ -21,6 +21,18 @@ public class FaceCharInstruction : BaseInstruction
         writer.Write((short)Character1);
         writer.Write((short)Character2);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character1},{Character2}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character1 = short.Parse(parts[0]);
+        Character2 = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

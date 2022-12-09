@@ -18,6 +18,16 @@ public class FadePaletteInstruction : BaseInstruction
     {
         writer.Write((short)FadeOutRaw);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{FadeOutRaw}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        FadeOutRaw = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

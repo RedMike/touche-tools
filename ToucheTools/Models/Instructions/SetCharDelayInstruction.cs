@@ -16,6 +16,16 @@ public class SetCharDelayInstruction : BaseInstruction
     {
         writer.Write((short)Delay);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Delay}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        Delay = short.Parse(remainder);
+    }
 
     public override string ToString()
     {

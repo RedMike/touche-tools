@@ -24,6 +24,18 @@ public class GetInventoryItemInstruction : BaseInstruction
         writer.Write((short)Character);
         writer.Write(Item.AsShort());
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Item}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Item = ushort.Parse(parts[1]);
+    }
 
     public override string ToString()
     {

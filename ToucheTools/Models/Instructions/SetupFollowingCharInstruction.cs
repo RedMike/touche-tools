@@ -19,6 +19,18 @@ public class SetupFollowingCharInstruction : BaseInstruction
         writer.Write((short)Val);
         writer.Write((short)Character);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Val},{Character}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Val = short.Parse(parts[0]);
+        Character = short.Parse(parts[1]);
+    }
 
     public override string ToString()
     {
