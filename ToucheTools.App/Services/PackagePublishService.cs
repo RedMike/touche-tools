@@ -196,6 +196,9 @@ public class PackagePublishService
         program.Points = new List<ProgramDataModel.Point>();
         program.Walks = new List<ProgramDataModel.Walk>();
         program.Rects = new List<ProgramDataModel.Rect>();
+        program.Hitboxes = new List<ProgramDataModel.Hitbox>();
+        program.Strings = new Dictionary<int, string>();
+        var stringCounter = 1;
         //rect showing room size
         program.Rects.Add(new ProgramDataModel.Rect()
         {
@@ -233,6 +236,52 @@ public class PackagePublishService
                 ClipRect = clipRect,
                 Area1 = area1,
                 Area2 = area2
+            });
+        }
+
+        foreach (var hitbox in room.Hitboxes)
+        {
+            var item = hitbox.Item;
+            if (hitbox.Displayed)
+            {
+                item = item & ~0x1000;
+            }
+
+            var stringId = stringCounter;
+            if (program.Strings.Any(p => p.Value == hitbox.Label))
+            {
+                stringId = program.Strings.First(p => p.Value == hitbox.Label).Key;
+            }
+            else
+            {
+                program.Strings[stringId] = hitbox.Label;
+                stringCounter++;
+            }
+            
+            var secStringId = stringCounter;
+            if (program.Strings.Any(p => p.Value == hitbox.SecondaryLabel))
+            {
+                secStringId = program.Strings.First(p => p.Value == hitbox.SecondaryLabel).Key;
+            }
+            else
+            {
+                program.Strings[secStringId] = hitbox.SecondaryLabel;
+                stringCounter++;
+            }
+            program.Hitboxes.Add(new ProgramDataModel.Hitbox()
+            {
+                Item = item,
+                String = stringId,
+                DefaultString = secStringId,
+                Actions = new int[8],
+                Rect1 = new ProgramDataModel.Rect()
+                {
+                    X = hitbox.X,
+                    Y = hitbox.Y,
+                    W = hitbox.W,
+                    H = hitbox.H
+                },
+                Rect2 = new ProgramDataModel.Rect()
             });
         }
 

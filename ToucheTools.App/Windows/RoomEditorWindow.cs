@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
+using ToucheTools.App.Models;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Constants;
@@ -196,6 +197,92 @@ public class RoomEditorWindow : BaseWindow
             ImGui.TreePop();
         }
 
+        if (ImGui.TreeNodeEx("Hitboxes"))
+        {
+            foreach (var hitbox in room.Hitboxes)
+            {
+                if (ImGui.TreeNodeEx($"{hitbox.Item}"))
+                {
+                    var displayed = hitbox.Displayed;
+                    ImGui.Checkbox("Displayed", ref displayed);
+                    if (displayed != hitbox.Displayed)
+                    {
+                        hitbox.Displayed = true;
+                    }
+
+                    var label = hitbox.Label;
+                    ImGui.InputText("Label", ref label, 32);
+                    if (label != hitbox.Label)
+                    {
+                        hitbox.Label = label;
+                    }
+                    
+                    var secondaryLabel = hitbox.SecondaryLabel;
+                    ImGui.InputText("Secondary Label", ref secondaryLabel, 32);
+                    if (secondaryLabel != hitbox.SecondaryLabel)
+                    {
+                        hitbox.SecondaryLabel = secondaryLabel;
+                    }
+
+                    var x = hitbox.X;
+                    ImGui.PushID($"Hitbox{hitbox.Item}X");
+                    ImGui.SliderInt("", ref x, 0, roomWidth, $"X {x}");
+                    if (x != hitbox.X)
+                    {
+                        hitbox.X = x;
+                    }
+                    ImGui.PopID();
+                    
+                    var y = hitbox.Y;
+                    ImGui.PushID($"Hitbox{hitbox.Item}Y");
+                    ImGui.SliderInt("", ref y, 0, roomHeight, $"Y {y}");
+                    if (y != hitbox.Y)
+                    {
+                        hitbox.Y = y;
+                    }
+                    ImGui.PopID();
+                    
+                    var w = hitbox.W;
+                    ImGui.PushID($"Hitbox{hitbox.Item}W");
+                    ImGui.SliderInt("", ref w, 0, roomWidth, $"W {w}");
+                    if (w != hitbox.W)
+                    {
+                        hitbox.W = w;
+                    }
+                    ImGui.PopID();
+                    
+                    var h = hitbox.H;
+                    ImGui.PushID($"Hitbox{hitbox.Item}H");
+                    ImGui.SliderInt("", ref h, 0, roomHeight, $"H {h}");
+                    if (h != hitbox.H)
+                    {
+                        hitbox.H = h;
+                    }
+                    ImGui.PopID();
+                        
+                    ImGui.TreePop();
+                }
+            }
+            
+            ImGui.SetNextItemWidth(childWidowWidth);
+            if (ImGui.Button("Add Hitbox"))
+            {
+                var newId = 1;
+                if (room.Hitboxes.Count > 0)
+                {
+                    newId = room.Hitboxes.Select(h => h.Item).Max() + 1;
+                }
+
+                room.Hitboxes.Add(new HitboxModel()
+                {
+                    Item = newId,
+                    Displayed = false
+                });
+            }
+            
+            ImGui.TreePop();
+        }
+
         ImGui.Separator();
         if (ImGui.Button("Save"))
         {
@@ -254,6 +341,32 @@ public class RoomEditorWindow : BaseWindow
                 var (p2X, p2Y, _) = room.WalkablePoints[point2];
                 var curPos = ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY()) + imagePos;
                 drawList.AddLine(curPos + new Vector2(p1X, p1Y), curPos + new Vector2(p2X, p2Y), ImGui.GetColorU32(new Vector4(0.7f, 0.9f, 0.6f, 1.0f)), 1.0f);
+            }
+            
+            //hitboxes
+            foreach (var hitbox in room.Hitboxes)
+            {
+                if (hitbox.W == 0 || hitbox.H == 0)
+                {
+                    continue;
+                }
+
+                (byte, byte, byte, byte) col = (255, 0, 0, 50);
+                var rectTexture = _render.RenderRectangle(1, hitbox.W, hitbox.H,
+                    col, (255, 255, 255, 255));
+                
+                ImGui.SetCursorPos(imagePos + new Vector2(hitbox.X, hitbox.Y));
+                ImGui.Image(rectTexture, new Vector2(hitbox.W, hitbox.H));
+
+                var type = "";
+                if (hitbox.Displayed)
+                {
+                    type = "Displayed";
+                }
+
+                var rectText = $"{hitbox.Label} ({hitbox.SecondaryLabel})\n{type}";
+                ImGui.SetCursorPos(imagePos + new Vector2(hitbox.X, hitbox.Y));
+                ImGui.Text(rectText);
             }
         }
         ImGui.EndChild();
