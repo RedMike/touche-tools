@@ -40,7 +40,8 @@ public class PackageAnimations
         foreach (var path in _package.GetAllAnimations())
         {
             var data = File.ReadAllText(path);
-            var sequence = JsonConvert.DeserializeObject<SequenceDataModel>(data);
+            var sequence = JsonConvert.DeserializeObject<SequenceDataModel>(data) ??
+                           throw new Exception("Failed to parse animation data");
             _animations[path] = sequence;
         }
     }
