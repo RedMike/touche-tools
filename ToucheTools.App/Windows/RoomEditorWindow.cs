@@ -68,6 +68,67 @@ public class RoomEditorWindow : BaseWindow
         }
         ImGui.PopID();
 
+        var roomWidth = 0;
+        var roomHeight = 0;
+        if (room.RoomImageIndex != null)
+        {
+            var roomImagePath = _package.GetIncludedImages().First(p =>
+                p.Value.Type == OpenedPackage.ImageType.Room && p.Value.Index == room.RoomImageIndex).Key;
+            (roomWidth, roomHeight, _) = _images.GetImage(roomImagePath);
+        }
+        
+        ImGui.Separator();
+
+        ImGui.Text("Walkable points: ");
+        foreach (var (walkablePointId, (origX, origY, origZ)) in room.WalkablePoints)
+        {
+            ImGui.Text($"{walkablePointId} - ");
+            ImGui.SameLine();
+            var x = origX;
+            var y = origY;
+            var z = origZ;
+            
+            ImGui.PushID($"RoomWalkPoints{walkablePointId}X");
+            ImGui.SetNextItemWidth(childWidowWidth/4.0f);
+            ImGui.SliderInt("", ref x, 0, roomWidth, $"X {x}");
+            if (x != origX)
+            {
+                room.WalkablePoints[walkablePointId] = (x, y, z);
+            }
+            ImGui.PopID();
+            ImGui.SameLine();
+            
+            ImGui.PushID($"RoomWalkPoints{walkablePointId}Y");
+            ImGui.SetNextItemWidth(childWidowWidth/4.0f);
+            ImGui.SliderInt("", ref y, 0, roomWidth, $"Y {y}");
+            if (y != origY)
+            {
+                room.WalkablePoints[walkablePointId] = (x, y, z);
+            }
+            ImGui.PopID();
+            ImGui.SameLine();
+            
+            ImGui.PushID($"RoomWalkPoints{walkablePointId}Z");
+            ImGui.SetNextItemWidth(childWidowWidth/4.0f);
+            ImGui.SliderInt("", ref z, 0, roomWidth, $"Z {z}");
+            if (z != origZ)
+            {
+                room.WalkablePoints[walkablePointId] = (x, y, z);
+            }
+            ImGui.PopID();
+        }
+
+        ImGui.SetNextItemWidth(childWidowWidth);
+        if (ImGui.Button("Add Walkable Point"))
+        {
+            var newId = 1;
+            if (room.WalkablePoints.Count > 0)
+            {
+                newId = room.WalkablePoints.Select(p => p.Key).Max() + 1;
+            }
+            room.WalkablePoints.Add(newId, (0, 0, 0));
+        }
+
         ImGui.Separator();
         if (ImGui.Button("Save"))
         {
