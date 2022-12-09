@@ -1007,10 +1007,18 @@ public static class Sample
     } 
     public static List<ProgramDataModel.Point> StartupPoints()
     {
-        //0 1 2   4
-        //      3
+        //1 2 3   5
+        //      4
         return new List<ProgramDataModel.Point>()
         {
+            { //not used
+                new ProgramDataModel.Point()
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0
+                }
+            },
             {
                 new ProgramDataModel.Point()
                 {
@@ -1039,8 +1047,8 @@ public static class Sample
                 new ProgramDataModel.Point()
                 {
                     X = 440,
-                    Y = 450,
-                    Z = 110
+                    Y = 380,
+                    Z = 190
                 }
             },
             {
@@ -1058,16 +1066,6 @@ public static class Sample
     {
         return new List<ProgramDataModel.Walk>()
         {
-            {
-                new ProgramDataModel.Walk()
-                {
-                    Point1 = 0,
-                    Point2 = 1,
-                    ClipRect = 0,
-                    Area1 = -1,
-                    Area2 = -1
-                }
-            },
             {
                 new ProgramDataModel.Walk()
                 {
@@ -1101,8 +1099,18 @@ public static class Sample
             {
                 new ProgramDataModel.Walk()
                 {
-                    Point1 = 2,
-                    Point2 = 4,
+                    Point1 = 4,
+                    Point2 = 5,
+                    ClipRect = 0,
+                    Area1 = -1,
+                    Area2 = -1
+                }
+            },
+            {
+                new ProgramDataModel.Walk()
+                {
+                    Point1 = 3,
+                    Point2 = 5,
                     ClipRect = 0,
                     Area1 = -1,
                     Area2 = -1
@@ -1134,6 +1142,14 @@ public static class Sample
                     Num = 1
                 }
             },
+            // {
+            //     7,
+            //     new LoadSpriteInstruction()
+            //     {
+            //         Index = 1,
+            //         Num = 1
+            //     }
+            // },
             {
                 12,
                 new LoadSequenceInstruction()
@@ -1142,6 +1158,14 @@ public static class Sample
                     Num = 1
                 }
             },
+            // {
+            //     13,
+            //     new LoadSequenceInstruction()
+            //     {
+            //         Index = 1,
+            //         Num = 1
+            //     }
+            // },
             {
                 18,
                 new InitCharScriptInstruction()
@@ -1153,6 +1177,25 @@ public static class Sample
                     SequenceCharacterId = 0
                 }
             },
+            // {
+            //     19,
+            //     new InitCharScriptInstruction()
+            //     {
+            //         Character = 1,
+            //         Color = 255,
+            //         SpriteIndex = 1,
+            //         SequenceIndex = 1,
+            //         SequenceCharacterId = 0
+            //     }
+            // },
+            // {
+            //     20,
+            //     new SetCharFlagsInstruction()
+            //     {
+            //         Character = 1,
+            //         Flags = 32768
+            //     }
+            // },
             {
                 30,
                 new SetCharFrameInstruction()
@@ -1200,9 +1243,17 @@ public static class Sample
                 new SetCharBoxInstruction()
                 {
                     Character = 0,
-                    Num = 1
+                    Num = 2
                 }
             },
+            // {
+            //     69,
+            //     new SetCharBoxInstruction()
+            //     {
+            //         Character = 1,
+            //         Num = 1
+            //     }
+            // },
             {
                 74,
                 new SetCharDelayInstruction()
@@ -1215,7 +1266,7 @@ public static class Sample
                 new MoveCharToPosInstruction()
                 {
                     Character = 0,
-                    Num = 4
+                    Num = 5
                 }
             },
             {
@@ -1224,7 +1275,7 @@ public static class Sample
                 {
                     Character = 0, //actually ignored
                     Val1 = 1,
-                    Val2 = 4
+                    Val2 = 5
                 }
             },
             {
@@ -1250,31 +1301,46 @@ public static class Sample
                 }
             },
             {
+                95,
+                new MoveCharToPosInstruction()
+                {
+                    Character = 0,
+                    Num = 4
+                }
+            },
+            {
                 96,
+                new SetCharDelayInstruction()
+                {
+                    Delay = 40
+                }
+            },
+            {
+                97,
                 new EnableInputInstruction()
                 {
                 }
             },
             {
-                97,
+                98,
                 new FetchScriptWordInstruction()
                 {
                     Val = 0
                 }
             },
             {
-                98,
+                99,
                 new SetFlagInstruction()
                 {
                     Flag = (ushort)Flags.Known.HideCursor
                 }
             },
             {
-                99,
+                100,
                 new StopScriptInstruction()
             },
             {
-                100,
+                101,
                 new StopScriptInstruction()
             }
         };
@@ -1288,7 +1354,15 @@ public static class Sample
             Rects = StartupRects(),
             Points = StartupPoints(),
             Walks = StartupWalks(),
-            Instructions = StartupInstructions()
+            Instructions = StartupInstructions(),
+            CharScriptOffsets = new List<ProgramDataModel.CharScriptOffset>()
+            {
+                new ProgramDataModel.CharScriptOffset()
+                {
+                    Character = 1,
+                    Offs = 122
+                }
+            }
         };
     }
     #endregion
