@@ -2,15 +2,19 @@
 
 public class HitboxModel
 {
+    public enum HitboxType
+    {
+        Unknown = 0,
+        Normal = 1, //clickable area on the screen
+        Inventory = 2, //represents an item in the inventory
+        Disabled = 3, //does nothing?
+        KeyChar = 4, //position is taken from a key character
+    }
+    
     //TODO: redraw rect
-    //TODO: fallback action?
-    /// <summary>
-    /// For inventory hitboxes, it's the item | 0x1000
-    /// For characters it's the keychar | 0x4000
-    /// For others it's an ID
-    /// </summary>
+    //TODO: actions
     public int Item { get; set; }
-    public bool Displayed { get; set; }
+    public HitboxType Type { get; set; } = HitboxType.Unknown;
     public string Label { get; set; } = "~~~";
     public string SecondaryLabel { get; set; } = "~~~~";
     public int X { get; set; }

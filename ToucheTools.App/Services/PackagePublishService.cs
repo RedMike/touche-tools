@@ -1,4 +1,5 @@
-﻿using ToucheTools.App.ViewModels;
+﻿using ToucheTools.App.Models;
+using ToucheTools.App.ViewModels;
 using ToucheTools.Exporters;
 using ToucheTools.Models;
 
@@ -242,9 +243,24 @@ public class PackagePublishService
         foreach (var hitbox in room.Hitboxes)
         {
             var item = hitbox.Item;
-            if (hitbox.Displayed)
+            if (hitbox.Type == HitboxModel.HitboxType.Unknown)
             {
-                item = item & ~0x1000;
+                //TODO: warning
+                continue;
+            }
+            if (hitbox.Type == HitboxModel.HitboxType.Inventory)
+            {
+                item = item | 0x1000;
+            }
+
+            if (hitbox.Type == HitboxModel.HitboxType.Disabled)
+            {
+                item = item | 0x2000;
+            }
+
+            if (hitbox.Type == HitboxModel.HitboxType.KeyChar)
+            {
+                item = item | 0x4000;
             }
 
             var stringId = stringCounter;

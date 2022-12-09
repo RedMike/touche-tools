@@ -132,9 +132,9 @@ public class PackagePalettes
         };
         palette[ToucheTools.Constants.Palettes.TransparentRoomMarkerColor] = new PaletteDataModel.Rgb()
         {
-            R = 100,
-            G = 0,
-            B = 100
+            R = 255,
+            G = 255,
+            B = 255
         };
         palette[ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor] = new PaletteDataModel.Rgb()
         {

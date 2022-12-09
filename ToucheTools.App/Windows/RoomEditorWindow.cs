@@ -203,12 +203,18 @@ public class RoomEditorWindow : BaseWindow
             {
                 if (ImGui.TreeNodeEx($"{hitbox.Item}"))
                 {
-                    var displayed = hitbox.Displayed;
-                    ImGui.Checkbox("Displayed", ref displayed);
-                    if (displayed != hitbox.Displayed)
+                    var types = Enum.GetValues<HitboxModel.HitboxType>().ToList();
+                    var typeList = types.Select(t => $"{t:G}").ToArray();
+                    var origType = types.FindIndex(t => t == hitbox.Type);
+                    var type = origType;
+                    
+                    ImGui.PushID($"Hitbox{hitbox.Item}Type");
+                    ImGui.Combo("", ref type, typeList, typeList.Length);
+                    if (type != origType)
                     {
-                        hitbox.Displayed = true;
+                        hitbox.Type = types[type];
                     }
+                    ImGui.PopID();
 
                     var label = hitbox.Label;
                     ImGui.InputText("Label", ref label, 32);
@@ -275,8 +281,7 @@ public class RoomEditorWindow : BaseWindow
 
                 room.Hitboxes.Add(new HitboxModel()
                 {
-                    Item = newId,
-                    Displayed = false
+                    Item = newId
                 });
             }
             
@@ -358,13 +363,14 @@ public class RoomEditorWindow : BaseWindow
                 ImGui.SetCursorPos(imagePos + new Vector2(hitbox.X, hitbox.Y));
                 ImGui.Image(rectTexture, new Vector2(hitbox.W, hitbox.H));
 
-                var type = "";
-                if (hitbox.Displayed)
+                var type = $"\n{hitbox.Type:G}";
+                var secondary = "";
+                if (!string.IsNullOrEmpty(hitbox.SecondaryLabel))
                 {
-                    type = "Displayed";
+                    secondary = $"\n({hitbox.SecondaryLabel})";
                 }
-
-                var rectText = $"{hitbox.Label} ({hitbox.SecondaryLabel})\n{type}";
+                
+                var rectText = $"{hitbox.Label}{secondary}{type}";
                 ImGui.SetCursorPos(imagePos + new Vector2(hitbox.X, hitbox.Y));
                 ImGui.Text(rectText);
             }

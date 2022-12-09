@@ -116,6 +116,11 @@ public class ImageManagementWindow : BaseWindow
                 foreach (var (colId, col) in palette.OrderBy(p => p.Key))
                 {
                     ImGui.Text($"{colId} - ({col.R}, {col.G}, {col.B})");
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Button,
+                        new Vector4(col.R / 255.0f, col.G / 255.0f, col.B / 255.0f, 1.0f));
+                    ImGui.Button($"Example");
+                    ImGui.PopStyleColor();
                 }
                 ImGui.TreePop();
             }
