@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
+using ToucheTools.Constants;
 
 namespace ToucheTools.App.Windows;
 
@@ -79,54 +80,63 @@ public class RoomEditorWindow : BaseWindow
         
         ImGui.Separator();
 
-        ImGui.Text("Walkable points: ");
-        foreach (var (walkablePointId, (origX, origY, origZ)) in room.WalkablePoints)
+        if (ImGui.TreeNodeEx("WalkablePoints"))
         {
-            ImGui.Text($"{walkablePointId} - ");
-            ImGui.SameLine();
-            var x = origX;
-            var y = origY;
-            var z = origZ;
-            
-            ImGui.PushID($"RoomWalkPoints{walkablePointId}X");
-            ImGui.SetNextItemWidth(childWidowWidth/4.0f);
-            ImGui.SliderInt("", ref x, 0, roomWidth, $"X {x}");
-            if (x != origX)
+            foreach (var (walkablePointId, (origX, origY, origZ)) in room.WalkablePoints)
             {
-                room.WalkablePoints[walkablePointId] = (x, y, z);
-            }
-            ImGui.PopID();
-            ImGui.SameLine();
-            
-            ImGui.PushID($"RoomWalkPoints{walkablePointId}Y");
-            ImGui.SetNextItemWidth(childWidowWidth/4.0f);
-            ImGui.SliderInt("", ref y, 0, roomWidth, $"Y {y}");
-            if (y != origY)
-            {
-                room.WalkablePoints[walkablePointId] = (x, y, z);
-            }
-            ImGui.PopID();
-            ImGui.SameLine();
-            
-            ImGui.PushID($"RoomWalkPoints{walkablePointId}Z");
-            ImGui.SetNextItemWidth(childWidowWidth/4.0f);
-            ImGui.SliderInt("", ref z, 0, roomWidth, $"Z {z}");
-            if (z != origZ)
-            {
-                room.WalkablePoints[walkablePointId] = (x, y, z);
-            }
-            ImGui.PopID();
-        }
+                ImGui.Text($"{walkablePointId} -");
+                ImGui.SameLine();
+                var x = origX;
+                var y = origY;
+                var z = origZ;
 
-        ImGui.SetNextItemWidth(childWidowWidth);
-        if (ImGui.Button("Add Walkable Point"))
-        {
-            var newId = 1;
-            if (room.WalkablePoints.Count > 0)
-            {
-                newId = room.WalkablePoints.Select(p => p.Key).Max() + 1;
+                ImGui.PushID($"RoomWalkPoints{walkablePointId}X");
+                ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+                ImGui.SliderInt("", ref x, 0, roomWidth, $"X {x}");
+                if (x != origX)
+                {
+                    room.WalkablePoints[walkablePointId] = (x, y, z);
+                }
+
+                ImGui.PopID();
+                ImGui.SameLine();
+
+                ImGui.PushID($"RoomWalkPoints{walkablePointId}Y");
+                ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+                ImGui.SliderInt("", ref y, 0, roomHeight, $"Y {y}");
+                if (y != origY)
+                {
+                    room.WalkablePoints[walkablePointId] = (x, y, z);
+                }
+
+                ImGui.PopID();
+                ImGui.SameLine();
+
+                ImGui.PushID($"RoomWalkPoints{walkablePointId}Z");
+                ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+                ImGui.SliderInt("", ref z, ToucheTools.Constants.Game.ZDepthMin, ToucheTools.Constants.Game.ZDepthMax,
+                    $"Z {z}");
+                if (z != origZ)
+                {
+                    room.WalkablePoints[walkablePointId] = (x, y, z);
+                }
+
+                ImGui.PopID();
             }
-            room.WalkablePoints.Add(newId, (0, 0, 0));
+
+            ImGui.SetNextItemWidth(childWidowWidth);
+            if (ImGui.Button("Add Walkable Point"))
+            {
+                var newId = 1;
+                if (room.WalkablePoints.Count > 0)
+                {
+                    newId = room.WalkablePoints.Select(p => p.Key).Max() + 1;
+                }
+
+                room.WalkablePoints.Add(newId, (0, 0, ToucheTools.Constants.Game.ZDepthEven));
+            }
+            
+            ImGui.TreePop();
         }
 
         ImGui.Separator();
@@ -150,15 +160,34 @@ public class RoomEditorWindow : BaseWindow
                     p.Value.Type == OpenedPackage.ImageType.Room && p.Value.Index == room.RoomImageIndex).Key;
             var (roomImageWidth, roomImageHeight, roomImageBytes) = _images.GetImage(roomImagePath);
 
+            //blank texture
             var blankTexture = _render.RenderCheckerboardRectangle(25, roomImageWidth, roomImageHeight,
                 (40, 30, 40, 255), (50, 40, 50, 255));
             ImGui.SetCursorPos(imagePos);
             ImGui.Image(blankTexture, new Vector2(roomImageWidth, roomImageHeight));
 
+            //room texture
             var roomTexture = _render.RenderImage(RenderWindow.RenderType.Primitive, roomImagePath, roomImageWidth,
                 roomImageHeight, roomImageBytes);
             ImGui.SetCursorPos(imagePos);
             ImGui.Image(roomTexture, new Vector2(roomImageWidth, roomImageHeight));
+            
+            //points
+            var pw = 10;
+            var pointTexture = _render.RenderRectangle(1, pw, pw,
+                (255, 255, 255, 50), (255, 255, 255, 255));
+            foreach (var (pointId, (x, y, z)) in room.WalkablePoints)
+            {
+                var zFactor = Game.GetZFactor(z);
+                var ow = pw * zFactor;
+                var ox = x;
+                var oy = y;
+                ImGui.SetCursorPos(imagePos + new Vector2(ox - ow/2, oy - ow/2));
+                ImGui.Image(pointTexture, new Vector2(ow, ow));
+                
+                ImGui.SetCursorPos(imagePos + new Vector2(ox, oy));
+                ImGui.Text($"{pointId}");
+            }
         }
         ImGui.EndChild();
         
