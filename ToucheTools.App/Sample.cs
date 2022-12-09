@@ -30,15 +30,15 @@ public static class Sample
         var w = ToucheTools.Constants.Icons.Width;
         var h = ToucheTools.Constants.Icons.Height;
         var b = GetImage(w, h, 0);
-        b[h / 2, w / 2] = 197;
-        b[h / 2 - 1, w / 2] = 197;
-        b[h / 2 - 2, w / 2] = 197;
-        b[h / 2 + 1, w / 2] = 197;
-        b[h / 2 + 2, w / 2] = 197;
-        b[h / 2, w / 2 - 1] = 197;
-        b[h / 2, w / 2 - 2] = 197;
-        b[h / 2, w / 2 + 1] = 197;
-        b[h / 2, w / 2 + 2] = 197;
+        b[h / 2, w / 2] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2 - 1, w / 2] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2 - 2, w / 2] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2 + 1, w / 2] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2 + 2, w / 2] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2, w / 2 - 1] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2, w / 2 - 2] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2, w / 2 + 1] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+        b[h / 2, w / 2 + 2] = 197 - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
 
         return new IconImageDataModel()
         {
