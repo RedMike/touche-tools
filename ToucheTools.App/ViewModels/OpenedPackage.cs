@@ -32,11 +32,17 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         public int Index { get; set; } = -1;
     }
 
+    public class Room
+    {
+        public int Index { get; set; } = -1;
+    }
+
     public class Manifest
     {
         public HashSet<string> IncludedFiles { get; set; } = new HashSet<string>();
         public Dictionary<string, Image> Images { get; set; } = new Dictionary<string, Image>();
         public Dictionary<string, Animation> Animations { get; set; } = new Dictionary<string, Animation>();
+        public Dictionary<string, Room> Rooms { get; set; } = new Dictionary<string, Room>();
 
         public void ExcludeFile(string path)
         {
@@ -48,6 +54,10 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             if (Animations.ContainsKey(path))
             {
                 Animations.Remove(path);
+            }
+            if (Rooms.ContainsKey(path))
+            {
+                Rooms.Remove(path);
             }
         }
 
@@ -65,6 +75,13 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             if (path.EndsWith(".anim.json"))
             {
                 Animations.Add(path, new Animation()
+                {
+                    Index = -1
+                });
+            }
+            if (path.EndsWith(".room.json"))
+            {
+                Rooms.Add(path, new Room()
                 {
                     Index = -1
                 });
@@ -128,6 +145,16 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     {
         return Value.Animations;
     }
+    
+    public IEnumerable<string> GetAllRooms()
+    {
+        return Files.Where(f => f.EndsWith(".room.json"));
+    }
+
+    public Dictionary<string, Room> GetIncludedRooms()
+    {
+        return Value.Rooms;
+    }
 
     public void IncludeFile(string path)
     {
@@ -183,13 +210,23 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                             Index = -1
                         }
                     ),
+                Rooms = Files
+                    .Where(f => f.EndsWith(".room.json"))
+                    .ToDictionary(
+                        f => f,
+                        f => new Room()
+                        {
+                            Index = -1
+                        }
+                    ),
             };
         }
         else
         {
             //manifest exists, load it
             var manifestRaw = File.ReadAllText(ManifestPath);
-            manifest = JsonConvert.DeserializeObject<Manifest>(manifestRaw);
+            manifest = JsonConvert.DeserializeObject<Manifest>(manifestRaw) ??
+                       throw new Exception("Failed to parse manifest");
 
             foreach (var file in manifest.IncludedFiles)
             {
@@ -207,6 +244,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     private void Update()
     {
         //recalculate indexes
+        //images
         var imageCounters = new Dictionary<ImageType, int>();
         foreach (var (_, image) in Value.Images)
         {
@@ -228,6 +266,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             }
         }
 
+        //animations
         var animCounter = 1;
         if (Value.Animations.Any(a => a.Value.Index >= 0))
         {
@@ -241,6 +280,21 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                 animCounter++;
             }
         }
+        
+        //rooms
+        var roomCounter = 1;
+        if (Value.Rooms.Any(a => a.Value.Index >= 0))
+        {
+            roomCounter = Value.Rooms.Select(a => a.Value.Index).Max() + 1;
+        }
+        foreach (var (_, room) in Value.Rooms)
+        {
+            if (room.Index < 0)
+            {
+                room.Index = roomCounter;
+                roomCounter++;
+            }
+        }
     }
 
     private static bool FilterFiles(string path)
@@ -252,6 +306,11 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         }
         //animations
         if (path.EndsWith(".anim.json"))
+        {
+            return true;
+        }
+        //rooms
+        if (path.EndsWith(".room.json"))
         {
             return true;
         }
