@@ -189,15 +189,29 @@ public class PackagePublishService
         
         //TODO: correctly build programs instead of hard-coding just one program
         var program = db.Programs[ToucheTools.Constants.Game.StartupEpisode];
+        var roomInfo = rooms.First();
+        var roomImageIndex = roomInfo.Value.Index;
+        var roomImageModel = db.RoomImages[roomImageIndex].Value;
+        
         program.Points = new List<ProgramDataModel.Point>();
         program.Walks = new List<ProgramDataModel.Walk>();
+        program.Rects = new List<ProgramDataModel.Rect>();
+        //rect showing room size
+        program.Rects.Add(new ProgramDataModel.Rect()
+        {
+            X = 0,
+            Y = 0,
+            W = roomImageModel.RoomWidth,
+            H = roomImageModel.Height
+        });
+        //point showing room anchor?
         program.Points.Add(new ProgramDataModel.Point()
         {
             X = 0,
             Y = 0,
             Z = 0
         });
-        var roomPath = rooms.First().Key;
+        var roomPath = roomInfo.Key;
         var room = _rooms.GetRoom(roomPath);
         //TODO: correctly ensure indexes match
         foreach (var (_, (x, y, z)) in room.WalkablePoints.OrderBy(p => p.Key))
