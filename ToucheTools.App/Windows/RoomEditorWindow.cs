@@ -81,8 +81,24 @@ public class RoomEditorWindow : BaseWindow
         ImGui.EndChild();
 
         ImGui.SetCursorPos(startPos + new Vector2(windowSize.X/2.0f, 0.0f));
-        ImGui.BeginChild("Room View", childWindowSize, true, ImGuiWindowFlags.ChildWindow);
-        ImGui.Text("test");
+        ImGui.BeginChild("Room View", childWindowSize, true, ImGuiWindowFlags.ChildWindow | ImGuiWindowFlags.AlwaysHorizontalScrollbar);
+        var imagePos = ImGui.GetCursorPos();
+        if (room.RoomImageIndex != null)
+        {
+            var roomImagePath = _package.GetIncludedImages().First(p =>
+                    p.Value.Type == OpenedPackage.ImageType.Room && p.Value.Index == room.RoomImageIndex).Key;
+            var (roomImageWidth, roomImageHeight, roomImageBytes) = _images.GetImage(roomImagePath);
+
+            var blankTexture = _render.RenderCheckerboardRectangle(25, roomImageWidth, roomImageHeight,
+                (40, 30, 40, 255), (50, 40, 50, 255));
+            ImGui.SetCursorPos(imagePos);
+            ImGui.Image(blankTexture, new Vector2(roomImageWidth, roomImageHeight));
+
+            var roomTexture = _render.RenderImage(RenderWindow.RenderType.Primitive, roomImagePath, roomImageWidth,
+                roomImageHeight, roomImageBytes);
+            ImGui.SetCursorPos(imagePos);
+            ImGui.Image(roomTexture, new Vector2(roomImageWidth, roomImageHeight));
+        }
         ImGui.EndChild();
         
         ImGui.End();
