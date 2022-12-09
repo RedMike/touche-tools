@@ -10,13 +10,15 @@ public class PackagePublishService
     private readonly PackageImages _images;
     private readonly PackagePalettes _palettes;
     private readonly PackageAnimations _animations;
+    private readonly PackageRooms _rooms;
 
-    public PackagePublishService(OpenedPackage package, PackageImages images, PackagePalettes palettes, PackageAnimations animations)
+    public PackagePublishService(OpenedPackage package, PackageImages images, PackagePalettes palettes, PackageAnimations animations, PackageRooms rooms)
     {
         _package = package;
         _images = images;
         _palettes = palettes;
         _animations = animations;
+        _rooms = rooms;
     }
 
     public void Publish()
@@ -51,25 +53,26 @@ public class PackagePublishService
             Programs = Sample.Programs(),
         };
         var images = _package.GetIncludedImages();
-        var rooms = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Room);
+        var roomImages = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Room);
         var sprites = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Sprite);
         var palettes = _palettes.GetPalettes();
         var animations = _package.GetIncludedAnimations();
+        var rooms = _package.GetIncludedRooms();
 
-        foreach (var (roomPath, roomImageData) in rooms)
+        foreach (var (roomImagePath, roomImageData) in roomImages)
         {
-            var roomId = roomImageData.Index;
-            var palette = palettes[roomId];
-            db.Palettes[roomId] = new PaletteDataModel()
+            var roomImageId = roomImageData.Index;
+            var palette = palettes[roomImageId];
+            db.Palettes[roomImageId] = new PaletteDataModel()
             {
                 Colors = palette.OrderBy(p => p.Key).Select(p => p.Value).ToList()
             };
 
-            db.Rooms[roomId] = new RoomInfoDataModel()
+            db.Rooms[roomImageId] = new RoomInfoDataModel()
             {
-                RoomImageNum = roomId
+                RoomImageNum = roomImageId
             };
-            var (roomWidth, roomHeight, roomBytes) = _images.GetImage(roomPath);
+            var (roomWidth, roomHeight, roomBytes) = _images.GetImage(roomImagePath);
             var roomImage = new RoomImageDataModel()
             {
                 Width = roomWidth,
@@ -106,7 +109,7 @@ public class PackagePublishService
                     roomImage.RawData[y, x] = (byte)col;
                 }
             }
-            db.RoomImages[roomId] = new Lazy<RoomImageDataModel>(roomImage);
+            db.RoomImages[roomImageId] = new Lazy<RoomImageDataModel>(roomImage);
         }
 
         foreach (var (spritePath, spriteImageData) in sprites)
@@ -184,6 +187,41 @@ public class PackagePublishService
             db.Sequences[animation.Index] = sequence;
         }
         
+        //TODO: correctly build programs instead of hard-coding just one program
+        var program = db.Programs[ToucheTools.Constants.Game.StartupEpisode];
+        program.Points = new List<ProgramDataModel.Point>();
+        program.Walks = new List<ProgramDataModel.Walk>();
+        program.Points.Add(new ProgramDataModel.Point()
+        {
+            X = 0,
+            Y = 0,
+            Z = 0
+        });
+        var roomPath = rooms.First().Key;
+        var room = _rooms.GetRoom(roomPath);
+        //TODO: correctly ensure indexes match
+        foreach (var (_, (x, y, z)) in room.WalkablePoints.OrderBy(p => p.Key))
+        {
+            program.Points.Add(new ProgramDataModel.Point()
+            {
+                X = x,
+                Y = y,
+                Z = z
+            });
+        }
+        //TODO: correctly ensure indexes match
+        foreach (var ((p1, p2), (clipRect, area1, area2)) in room.WalkableLines)
+        {
+            program.Walks.Add(new ProgramDataModel.Walk()
+            {
+                Point1 = p1,
+                Point2 = p2,
+                ClipRect = clipRect,
+                Area1 = area1,
+                Area2 = area2
+            });
+        }
+
         var memoryStream = new MemoryStream();
         var exporter = new MainExporter(memoryStream);
         exporter.Export(db);

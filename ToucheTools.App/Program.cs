@@ -94,10 +94,12 @@ else
     container.AddSingleton<MainWindowState>();
     container.AddSingleton<ImageManagementState>();
     container.AddSingleton<AnimationManagementState>();
+    container.AddSingleton<RoomManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
     container.AddSingleton<PackageAnimations>();
+    container.AddSingleton<PackageRooms>();
     
     container.AddSingleton<LogData>();
 

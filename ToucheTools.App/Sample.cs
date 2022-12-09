@@ -999,8 +999,8 @@ public static class Sample
                 {
                     X = 0,
                     Y = 0,
-                    W = 640,
-                    H = 400
+                    W = 1200,
+                    H = 438
                 }
             }
         };
@@ -1266,7 +1266,7 @@ public static class Sample
                 new MoveCharToPosInstruction()
                 {
                     Character = 0,
-                    Num = 5
+                    Num = 9
                 }
             },
             {
@@ -1275,7 +1275,7 @@ public static class Sample
                 {
                     Character = 0, //actually ignored
                     Val1 = 1,
-                    Val2 = 5
+                    Val2 = 9
                 }
             },
             {
@@ -1290,7 +1290,16 @@ public static class Sample
                 new MoveCharToPosInstruction()
                 {
                     Character = 0,
-                    Num = 1
+                    Num = 13
+                }
+            },
+            {
+                93,
+                new SetupWaitingCharInstruction()
+                {
+                    Character = 0, //actually ignored
+                    Val1 = 1,
+                    Val2 = 13
                 }
             },
             {
@@ -1305,42 +1314,51 @@ public static class Sample
                 new MoveCharToPosInstruction()
                 {
                     Character = 0,
-                    Num = 4
+                    Num = 15
                 }
             },
             {
                 96,
+                new SetupWaitingCharInstruction()
+                {
+                    Character = 0, //actually ignored
+                    Val1 = 1,
+                    Val2 = 15
+                }
+            },
+            {
+                97,
                 new SetCharDelayInstruction()
                 {
                     Delay = 40
                 }
             },
             {
-                97,
+                99,
                 new EnableInputInstruction()
                 {
                 }
             },
             {
-                98,
+                110,
                 new FetchScriptWordInstruction()
                 {
                     Val = 0
                 }
             },
             {
-                99,
+                112,
                 new SetFlagInstruction()
                 {
                     Flag = (ushort)Flags.Known.HideCursor
                 }
             },
             {
-                100,
+                120,
                 new StopScriptInstruction()
             },
             {
-                101,
+                123,
                 new StopScriptInstruction()
             }
         };

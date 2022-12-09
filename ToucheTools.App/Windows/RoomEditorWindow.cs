@@ -80,7 +80,7 @@ public class RoomEditorWindow : BaseWindow
         
         ImGui.Separator();
 
-        if (ImGui.TreeNodeEx("WalkablePoints"))
+        if (ImGui.TreeNodeEx("Walkable Points"))
         {
             foreach (var (walkablePointId, (origX, origY, origZ)) in room.WalkablePoints)
             {
@@ -139,6 +139,63 @@ public class RoomEditorWindow : BaseWindow
             ImGui.TreePop();
         }
 
+        if (ImGui.TreeNodeEx("Walkable Lines"))
+        {
+            foreach (var ((p1, p2), (clip, area1, area2)) in room.WalkableLines.ToList())
+            {
+                ImGui.Text($"Point {p1} to point {p2}");
+                ImGui.SameLine();
+                ImGui.PushID($"RoomWalkLine{p1}-{p2}Delete");
+                //TODO: rest
+                if (ImGui.Button("Delete"))
+                {
+                    room.WalkableLines.Remove((p1, p2));
+                }
+                ImGui.PopID();
+            }
+            
+            var points = room.WalkablePoints.Keys.ToList();
+            var pointList = points.Select(p => $"Point {p}").ToArray();
+            
+            var origPoint1 = _roomManagementState.WalkableLinePoint1;
+            var point1 = origPoint1;
+            ImGui.PushID($"RoomWalkLineP1");
+            ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+            ImGui.Combo("", ref point1, pointList, pointList.Length);
+            if (point1 != origPoint1)
+            {
+                _roomManagementState.WalkableLinePoint1 = point1;
+            }
+            ImGui.PopID();
+            ImGui.SameLine();
+            
+            var origPoint2 = _roomManagementState.WalkableLinePoint2;
+            var point2 = origPoint2;
+            ImGui.PushID($"RoomWalkLineP2");
+            ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+            ImGui.Combo("", ref point2, pointList, pointList.Length);
+            if (point2 != origPoint2)
+            {
+                _roomManagementState.WalkableLinePoint2 = point2;
+            }
+            ImGui.PopID();
+            ImGui.SameLine();
+
+            ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+            if (ImGui.Button("Add"))
+            {
+                var p = (points[point1], points[point2]);
+                if (room.WalkableLines.ContainsKey(p))
+                {
+                    throw new Exception("Line already exists");
+                }
+
+                room.WalkableLines[p] = (0, -1, -1);
+            }
+
+            ImGui.TreePop();
+        }
+
         ImGui.Separator();
         if (ImGui.Button("Save"))
         {
@@ -187,6 +244,16 @@ public class RoomEditorWindow : BaseWindow
                 
                 ImGui.SetCursorPos(imagePos + new Vector2(ox, oy));
                 ImGui.Text($"{pointId}");
+            }
+            
+            //walk lines
+            var drawList = ImGui.GetWindowDrawList();
+            foreach (var ((point1, point2), (_, _, _)) in room.WalkableLines)
+            {
+                var (p1X, p1Y, _) = room.WalkablePoints[point1];
+                var (p2X, p2Y, _) = room.WalkablePoints[point2];
+                var curPos = ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY()) + imagePos;
+                drawList.AddLine(curPos + new Vector2(p1X, p1Y), curPos + new Vector2(p2X, p2Y), ImGui.GetColorU32(new Vector4(0.7f, 0.9f, 0.6f, 1.0f)), 1.0f);
             }
         }
         ImGui.EndChild();
