@@ -81,6 +81,62 @@ public class RoomEditorWindow : BaseWindow
         
         ImGui.Separator();
 
+        if (ImGui.TreeNodeEx("Actions"))
+        {
+            if (!room.ActionDefinitions.ContainsKey(Actions.DoNothing))
+            {
+                room.ActionDefinitions[Actions.DoNothing] = "~";
+            }
+            if (!room.ActionDefinitions.ContainsKey(Actions.LeftClick))
+            {
+                room.ActionDefinitions[Actions.LeftClick] = "~";
+            }
+            if (!room.ActionDefinitions.ContainsKey(Actions.LeftClickWithItem))
+            {
+                room.ActionDefinitions[Actions.LeftClickWithItem] = "~";
+            }
+           
+            foreach (var (actionId, origLabel) in room.ActionDefinitions)
+            {
+                var id = $"{actionId}";
+                if (actionId == Actions.DoNothing)
+                {
+                    id = "DoNothing";
+                }
+                if (actionId == Actions.LeftClick)
+                {
+                    id = "LeftClick";
+                }
+                if (actionId == Actions.LeftClickWithItem)
+                {
+                    id = "LeftClickWithItem";
+                }
+                ImGui.Text($"{id} -");
+                ImGui.SameLine();
+                var actionLabel = origLabel;
+                ImGui.PushID($"Action{actionId}");
+                ImGui.InputText("", ref actionLabel, 32);
+                if (actionLabel != origLabel)
+                {
+                    room.ActionDefinitions[actionId] = actionLabel;
+                }
+                ImGui.PopID();
+            }
+
+            if (ImGui.Button("Add Action"))
+            {
+                var newId = 1;
+                if (room.ActionDefinitions.Any(a => a.Key >= 0))
+                {
+                    newId = room.ActionDefinitions.Where(a => a.Key >= 0).Select(a => a.Key).Max() + 1;
+                }
+
+                room.ActionDefinitions[newId] = "~";
+            }
+            
+            ImGui.TreePop();
+        }
+
         if (ImGui.TreeNodeEx("Walkable Points"))
         {
             foreach (var (walkablePointId, (origX, origY, origZ)) in room.WalkablePoints)
@@ -265,6 +321,23 @@ public class RoomEditorWindow : BaseWindow
                         hitbox.H = h;
                     }
                     ImGui.PopID();
+
+                    var actions = room.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
+                    actions.Insert(0, (-1, "-"));
+                    var actionList = actions.Select(a => $"Action {a.Key} ({a.Value})").ToArray();
+
+                    for (var i = 0; i < 8; i++)
+                    {
+                        var origSelectedAction = actions.FindIndex(a => a.Key == hitbox.Actions[i]);
+                        var selectedAction = origSelectedAction;
+                        ImGui.PushID($"Hitbox{hitbox.Item}Action{i}");
+                        ImGui.Combo("", ref selectedAction, actionList, actionList.Length);
+                        if (selectedAction != origSelectedAction)
+                        {
+                            hitbox.Actions[i] = actions[selectedAction].Key;
+                        }
+                        ImGui.PopID();
+                    }
                         
                     ImGui.TreePop();
                 }
@@ -370,7 +443,7 @@ public class RoomEditorWindow : BaseWindow
                     secondary = $"\n({hitbox.SecondaryLabel})";
                 }
                 
-                var rectText = $"{hitbox.Label}{secondary}{type}";
+                var rectText = $"{hitbox.Item}\n{hitbox.Label}{secondary}{type}";
                 ImGui.SetCursorPos(imagePos + new Vector2(hitbox.X, hitbox.Y));
                 ImGui.Text(rectText);
             }

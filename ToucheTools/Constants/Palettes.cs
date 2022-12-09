@@ -8,7 +8,12 @@ public static class Palettes
     public const int TransparencyColor = 0;
     public const int TransparentSpriteMarkerColor = 64; //on x = 0 and y = 0, marks sprite tile size
     /// <summary>
-    /// Also doubles as the UI text colour for hitboxes
+    /// Also doubles as the UI text colour for hitboxes and hover colour for action menus
     /// </summary>
     public const int TransparentRoomMarkerColor = 255; //on y = 0, marks room width (only width)
+
+    public const int ConversationTextColor = 214;
+    public const int InventoryMoneyTextColor = 217;
+    public const int ActionMenuBackgroundColor = 248;
+    public const int ActionMenuTextColor = 249;
 }

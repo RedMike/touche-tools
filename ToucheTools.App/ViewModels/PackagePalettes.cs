@@ -59,7 +59,7 @@ public class PackagePalettes
                     //we've exhausted the room colours, so fill out with nothing
                     palette[i] = new PaletteDataModel.Rgb()
                     {
-                        R = 200,
+                        R = 100,
                         G = 0,
                         B = 200,
                     };
@@ -105,9 +105,9 @@ public class PackagePalettes
                     //we've exhausted the sprite colours, so fill out with nothing
                     palette[i] = new PaletteDataModel.Rgb()
                     {
-                        R = 255,
+                        R = (byte)(i),
                         G = 0,
-                        B = 255,
+                        B = (byte)(i-100),
                     };
                 }
                 else
@@ -138,8 +138,32 @@ public class PackagePalettes
         };
         palette[ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor] = new PaletteDataModel.Rgb()
         {
-            R = 250,
+            R = 150,
             G = 0,
+            B = 150
+        };
+        palette[ToucheTools.Constants.Palettes.InventoryMoneyTextColor] = new PaletteDataModel.Rgb()
+        {
+            R = 90,
+            G = 50,
+            B = 230
+        };
+        palette[ToucheTools.Constants.Palettes.ActionMenuTextColor] = new PaletteDataModel.Rgb()
+        {
+            R = 120,
+            G = 70,
+            B = 230
+        };
+        palette[ToucheTools.Constants.Palettes.ActionMenuBackgroundColor] = new PaletteDataModel.Rgb()
+        {
+            R = 200,
+            G = 200,
+            B = 200
+        };
+        palette[ToucheTools.Constants.Palettes.ConversationTextColor] = new PaletteDataModel.Rgb()
+        {
+            R = 150,
+            G = 90,
             B = 250
         };
         return palette;

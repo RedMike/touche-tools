@@ -239,6 +239,23 @@ public class PackagePublishService
                 Area2 = area2
             });
         }
+        
+        var actionIdMapping = new Dictionary<int, int>();
+        foreach (var (actionId, actionLabel) in room.ActionDefinitions)
+        {
+            var stringId = stringCounter;
+            if (program.Strings.Any(p => p.Value == actionLabel))
+            {
+                stringId = program.Strings.First(p => p.Value == actionLabel).Key;
+            }
+            else
+            {
+                program.Strings[stringId] = actionLabel;
+                stringCounter++;
+            }
+
+            actionIdMapping[actionId] = stringId;
+        }
 
         foreach (var hitbox in room.Hitboxes)
         {
@@ -284,12 +301,14 @@ public class PackagePublishService
                 program.Strings[secStringId] = hitbox.SecondaryLabel;
                 stringCounter++;
             }
+
+            var hitboxActions = hitbox.Actions.Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : -1).ToArray();
             program.Hitboxes.Add(new ProgramDataModel.Hitbox()
             {
                 Item = item,
                 String = stringId,
                 DefaultString = secStringId,
-                Actions = new int[8],
+                Actions = hitboxActions,
                 Rect1 = new ProgramDataModel.Rect()
                 {
                     X = hitbox.X,

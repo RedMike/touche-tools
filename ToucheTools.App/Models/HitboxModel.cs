@@ -12,7 +12,6 @@ public class HitboxModel
     }
     
     //TODO: redraw rect
-    //TODO: actions
     public int Item { get; set; }
     public HitboxType Type { get; set; } = HitboxType.Unknown;
     public string Label { get; set; } = "~~~";
@@ -21,4 +20,6 @@ public class HitboxModel
     public int Y { get; set; }
     public int W { get; set; }
     public int H { get; set; }
+    public int[] Actions { get; set; } = new int[8];
+    public int FallbackAction { get; set; }
 }

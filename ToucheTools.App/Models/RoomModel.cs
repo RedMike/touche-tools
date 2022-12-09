@@ -10,6 +10,6 @@ public class RoomModel
     
     //does not include inventory or keychar hitboxes
     public HashSet<HitboxModel> Hitboxes { get; set; } = new HashSet<HitboxModel>();
-    //TODO: inventory hitboxes
-    //TODO: keychar hitboxes
+    public Dictionary<int, string> ActionDefinitions { get; set; } = new Dictionary<int, string>();
+    public Dictionary<(int, int), ActionModel> Actions { get; set; } = new Dictionary<(int, int), ActionModel>();
 }
