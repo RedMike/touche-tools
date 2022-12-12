@@ -29,9 +29,19 @@ public abstract class BaseInstruction
 
     public static (ProgramDataModel.Opcode, string) DeserialiseOpcode(string s)
     {
-        var index = s.IndexOf(' ');
-        var opcode = s.Substring(0, index);
-        var remainder = s.Substring(index);
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            throw new Exception("Missing opcode");
+        }
+
+        var opcode = s;
+        var remainder = "";
+        if (s.Contains(' '))
+        {
+            var index = s.IndexOf(' ');
+            opcode = s.Substring(0, index);
+            remainder = s.Substring(index);
+        }
         return (Enum.Parse<ProgramDataModel.Opcode>(opcode), remainder);
     }
 

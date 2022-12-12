@@ -254,6 +254,11 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         File.WriteAllText(ManifestPath, manifestJson);
     }
 
+    public void ForceUpdate() //TODO: this should not be necessary
+    {
+        SetValue(Value);
+    }
+
     public void IncludeFile(string path)
     {
         Value.IncludeFile(path);

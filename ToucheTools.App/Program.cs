@@ -39,6 +39,7 @@ if (editor)
     container.AddSingleton<PackagePalettes>();
     container.AddSingleton<PackageAnimations>();
     container.AddSingleton<PackageRooms>();
+    container.AddSingleton<PackagePrograms>();
 
     container.AddSingleton<MainMenuWindow>();
     container.AddSingleton<ImageManagementWindow>();
@@ -48,6 +49,7 @@ if (editor)
     container.AddSingleton<RoomManagementWindow>();
     container.AddSingleton<RoomEditorWindow>();
     container.AddSingleton<ProgramManagementWindow>();
+    container.AddSingleton<ProgramPreviewWindow>();
     
     using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
     container.AddSingleton(window);
@@ -70,6 +72,7 @@ if (editor)
         sp.GetService<RoomManagementWindow>()?.Render();
         sp.GetService<RoomEditorWindow>()?.Render();
         sp.GetService<ProgramManagementWindow>()?.Render();
+        sp.GetService<ProgramPreviewWindow>()?.Render();
         
 
         window.Render();

@@ -86,6 +86,7 @@ public class ProgramManagementWindow : BaseWindow
                 if (selectedType != origSelectedType)
                 {
                     _package.Value.Programs[path].Type = Enum.Parse<OpenedPackage.ProgramType>(types[selectedType]);
+                    _package.ForceUpdate();
                 }
                 ImGui.SameLine();
                 
@@ -100,6 +101,7 @@ public class ProgramManagementWindow : BaseWindow
                 if (index != origIndex)
                 {
                     _package.Value.Programs[path].Index = index + 1;
+                    _package.ForceUpdate();
                 }
             }
         }
