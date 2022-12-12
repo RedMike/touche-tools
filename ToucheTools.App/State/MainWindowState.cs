@@ -5,11 +5,12 @@ public class MainWindowState
     public enum States
     {
         Idle = 0,
-        ImageManagement = 1,
-        AnimationManagement = 2,
-        RoomManagement = 3,
-        ProgramManagement = 4,
+        GameManagement = 1,
+        ImageManagement = 2,
+        AnimationManagement = 3,
+        RoomManagement = 4,
+        ProgramManagement = 5,
     }
 
-    public States State { get; set; } = States.ProgramManagement; //TODO: better default
+    public States State { get; set; } = States.GameManagement; //TODO: better default
 }

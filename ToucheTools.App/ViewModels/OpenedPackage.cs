@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using ToucheTools.App.Models;
 using ToucheTools.App.ViewModels.Observables;
 
 namespace ToucheTools.App.ViewModels;
@@ -118,6 +119,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     {
         public ProgramType Type { get; set; } = ProgramType.Unknown;
         public int Index { get; set; } = -1;
+        public int[] Target { get; set; } = new int[0];
     }
     
     public IEnumerable<string> GetAllPrograms()
@@ -151,8 +153,16 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     }
     #endregion
     
+    #region Game
+    public GameModel GetGame()
+    {
+        return Value.Game;
+    }
+    #endregion
+    
     public class Manifest
     {
+        public GameModel Game { get; set; } = new GameModel();
         public HashSet<string> IncludedFiles { get; set; } = new HashSet<string>();
         public Dictionary<string, Image> Images { get; set; } = new Dictionary<string, Image>();
         public Dictionary<string, Animation> Animations { get; set; } = new Dictionary<string, Animation>();

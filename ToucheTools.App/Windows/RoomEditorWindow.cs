@@ -43,6 +43,7 @@ public class RoomEditorWindow : BaseWindow
             return;
         }
 
+        var game = _package.GetGame();
         var room = _rooms.GetRoom(_roomManagementState.SelectedRoom);
         
         ImGui.Begin("Room Editor", ImGuiWindowFlags.NoCollapse);
@@ -80,62 +81,6 @@ public class RoomEditorWindow : BaseWindow
         }
         
         ImGui.Separator();
-
-        if (ImGui.TreeNodeEx("Actions"))
-        {
-            if (!room.ActionDefinitions.ContainsKey(Actions.DoNothing))
-            {
-                room.ActionDefinitions[Actions.DoNothing] = "~";
-            }
-            if (!room.ActionDefinitions.ContainsKey(Actions.LeftClick))
-            {
-                room.ActionDefinitions[Actions.LeftClick] = "~";
-            }
-            if (!room.ActionDefinitions.ContainsKey(Actions.LeftClickWithItem))
-            {
-                room.ActionDefinitions[Actions.LeftClickWithItem] = "~";
-            }
-           
-            foreach (var (actionId, origLabel) in room.ActionDefinitions)
-            {
-                var id = $"{actionId}";
-                if (actionId == Actions.DoNothing)
-                {
-                    id = "DoNothing";
-                }
-                if (actionId == Actions.LeftClick)
-                {
-                    id = "LeftClick";
-                }
-                if (actionId == Actions.LeftClickWithItem)
-                {
-                    id = "LeftClickWithItem";
-                }
-                ImGui.Text($"{id} -");
-                ImGui.SameLine();
-                var actionLabel = origLabel;
-                ImGui.PushID($"Action{actionId}");
-                ImGui.InputText("", ref actionLabel, 32);
-                if (actionLabel != origLabel)
-                {
-                    room.ActionDefinitions[actionId] = actionLabel;
-                }
-                ImGui.PopID();
-            }
-
-            if (ImGui.Button("Add Action"))
-            {
-                var newId = 1;
-                if (room.ActionDefinitions.Any(a => a.Key >= 0))
-                {
-                    newId = room.ActionDefinitions.Where(a => a.Key >= 0).Select(a => a.Key).Max() + 1;
-                }
-
-                room.ActionDefinitions[newId] = "~";
-            }
-            
-            ImGui.TreePop();
-        }
 
         if (ImGui.TreeNodeEx("Walkable Points"))
         {
@@ -322,7 +267,7 @@ public class RoomEditorWindow : BaseWindow
                     }
                     ImGui.PopID();
 
-                    var actions = room.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
+                    var actions = game.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
                     actions.Insert(0, (-1, "-"));
                     var actionList = actions.Select(a => $"Action {a.Key} ({a.Value})").ToArray();
 

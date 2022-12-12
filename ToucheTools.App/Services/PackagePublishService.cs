@@ -231,6 +231,7 @@ public class PackagePublishService
                     });
                 }
 
+                var game = _package.GetGame();
                 var roomPath = rooms.First(r => r.Value.Index == roomId).Key;
                 var room = _rooms.GetRoom(roomPath);
                 
@@ -262,7 +263,7 @@ public class PackagePublishService
                 }
 
                 var actionIdMapping = new Dictionary<int, int>();
-                foreach (var (actionId, actionLabel) in room.ActionDefinitions)
+                foreach (var (actionId, actionLabel) in game.ActionDefinitions)
                 {
                     var stringId = stringCounter;
                     if (program.Strings.Any(p => p.Value == actionLabel))
