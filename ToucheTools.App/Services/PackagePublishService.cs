@@ -2,6 +2,7 @@
 using ToucheTools.App.ViewModels;
 using ToucheTools.Exporters;
 using ToucheTools.Models;
+using ToucheTools.Models.Instructions;
 
 namespace ToucheTools.App.Services;
 
@@ -189,140 +190,200 @@ public class PackagePublishService
             var sequence = _animations.GetAnimation(animationPath);
             db.Sequences[animation.Index] = sequence;
         }
-        
-        //TODO: correctly build programs instead of hard-coding just one program
-        var program = db.Programs[ToucheTools.Constants.Game.StartupEpisode];
-        var roomInfo = rooms.First();
-        var roomImageIndex = roomInfo.Value.Index;
-        var roomImageModel = db.RoomImages[roomImageIndex].Value;
-        
-        program.Points = new List<ProgramDataModel.Point>();
-        program.Walks = new List<ProgramDataModel.Walk>();
-        program.Rects = new List<ProgramDataModel.Rect>();
-        program.Hitboxes = new List<ProgramDataModel.Hitbox>();
-        program.Strings = new Dictionary<int, string>();
-        var stringCounter = 1;
-        //rect showing room size
-        program.Rects.Add(new ProgramDataModel.Rect()
+
+        foreach (var (programId, programData) in _programs.GetIncludedPrograms())
         {
-            X = 0,
-            Y = 0,
-            W = roomImageModel.RoomWidth,
-            H = roomImageModel.Height
-        });
-        //point showing room anchor?
-        program.Points.Add(new ProgramDataModel.Point()
-        {
-            X = 0,
-            Y = 0,
-            Z = 0
-        });
-        var roomPath = roomInfo.Key;
-        var room = _rooms.GetRoom(roomPath);
-        //TODO: correctly ensure indexes match
-        foreach (var (_, (x, y, z)) in room.WalkablePoints.OrderBy(p => p.Key))
-        {
-            program.Points.Add(new ProgramDataModel.Point()
-            {
-                X = x,
-                Y = y,
-                Z = z
-            });
-        }
-        //TODO: correctly ensure indexes match
-        foreach (var ((p1, p2), (clipRect, area1, area2)) in room.WalkableLines)
-        {
-            program.Walks.Add(new ProgramDataModel.Walk()
-            {
-                Point1 = p1,
-                Point2 = p2,
-                ClipRect = clipRect,
-                Area1 = area1,
-                Area2 = area2
-            });
-        }
+            var program = new ProgramDataModel();
+            db.Programs[programId] = program;
 
-        var instructions = _programs.GetProgram(ToucheTools.Constants.Game.StartupEpisode);
-        program.Instructions = instructions;
+            var referencedRooms = programData.Values
+                .Where(i => i is LoadRoomInstruction)
+                .Select(i => ((LoadRoomInstruction)i).Num)
+                .Distinct().ToList();
 
-        var actionIdMapping = new Dictionary<int, int>();
-        foreach (var (actionId, actionLabel) in room.ActionDefinitions)
-        {
-            var stringId = stringCounter;
-            if (program.Strings.Any(p => p.Value == actionLabel))
+            var pointIds = new Dictionary<(int, int), int>();
+            var pointIdCounter = 1; //skip room anchor
+
+            var addedAnchorRoomPoints = false;
+            foreach (var roomId in referencedRooms)
             {
-                stringId = program.Strings.First(p => p.Value == actionLabel).Key;
-            }
-            else
-            {
-                program.Strings[stringId] = actionLabel;
-                stringCounter++;
+                var roomImageModel = db.RoomImages[roomId].Value;
+
+                var stringCounter = 1;
+                if (!addedAnchorRoomPoints)
+                {
+                    //TODO: do this for a specific room instead of the first one
+                    addedAnchorRoomPoints = true;
+                    //rect showing room size
+                    program.Rects.Add(new ProgramDataModel.Rect()
+                    {
+                        X = 0,
+                        Y = 0,
+                        W = roomImageModel.RoomWidth,
+                        H = roomImageModel.Height
+                    });
+                    //point showing room anchor?
+                    program.Points.Add(new ProgramDataModel.Point()
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0
+                    });
+                }
+
+                var roomPath = rooms.First(r => r.Value.Index == roomId).Key;
+                var room = _rooms.GetRoom(roomPath);
+                
+                foreach (var (id, (x, y, z)) in room.WalkablePoints.OrderBy(p => p.Key))
+                {
+                    pointIds[(roomId, id)] = pointIdCounter;
+                    pointIdCounter++;
+                    program.Points.Add(new ProgramDataModel.Point()
+                    {
+                        X = x,
+                        Y = y,
+                        Z = z
+                    });
+                }
+
+                foreach (var ((p1, p2), (clipRect, area1, area2)) in room.WalkableLines)
+                {
+                    //get the indexes from the global mapping
+                    var p1Id = pointIds[(roomId, p1)];
+                    var p2Id = pointIds[(roomId, p2)];
+                    program.Walks.Add(new ProgramDataModel.Walk()
+                    {
+                        Point1 = p1Id,
+                        Point2 = p2Id,
+                        ClipRect = clipRect,
+                        Area1 = area1,
+                        Area2 = area2
+                    });
+                }
+
+                var actionIdMapping = new Dictionary<int, int>();
+                foreach (var (actionId, actionLabel) in room.ActionDefinitions)
+                {
+                    var stringId = stringCounter;
+                    if (program.Strings.Any(p => p.Value == actionLabel))
+                    {
+                        stringId = program.Strings.First(p => p.Value == actionLabel).Key;
+                    }
+                    else
+                    {
+                        program.Strings[stringId] = actionLabel;
+                        stringCounter++;
+                    }
+
+                    actionIdMapping[actionId] = stringId;
+                }
+
+                foreach (var hitbox in room.Hitboxes)
+                {
+                    var item = hitbox.Item;
+                    if (hitbox.Type == HitboxModel.HitboxType.Unknown)
+                    {
+                        //TODO: warning
+                        continue;
+                    }
+
+                    if (hitbox.Type == HitboxModel.HitboxType.Inventory)
+                    {
+                        item = item | 0x1000;
+                    }
+
+                    if (hitbox.Type == HitboxModel.HitboxType.Disabled)
+                    {
+                        item = item | 0x2000;
+                    }
+
+                    if (hitbox.Type == HitboxModel.HitboxType.KeyChar)
+                    {
+                        item = item | 0x4000;
+                    }
+
+                    var stringId = stringCounter;
+                    if (program.Strings.Any(p => p.Value == hitbox.Label))
+                    {
+                        stringId = program.Strings.First(p => p.Value == hitbox.Label).Key;
+                    }
+                    else
+                    {
+                        program.Strings[stringId] = hitbox.Label;
+                        stringCounter++;
+                    }
+
+                    var secStringId = stringCounter;
+                    if (program.Strings.Any(p => p.Value == hitbox.SecondaryLabel))
+                    {
+                        secStringId = program.Strings.First(p => p.Value == hitbox.SecondaryLabel).Key;
+                    }
+                    else
+                    {
+                        program.Strings[secStringId] = hitbox.SecondaryLabel;
+                        stringCounter++;
+                    }
+
+                    var hitboxActions = hitbox.Actions
+                        .Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : -1).ToArray();
+                    program.Hitboxes.Add(new ProgramDataModel.Hitbox()
+                    {
+                        Item = item,
+                        String = stringId,
+                        DefaultString = secStringId,
+                        Actions = hitboxActions,
+                        Rect1 = new ProgramDataModel.Rect()
+                        {
+                            X = hitbox.X,
+                            Y = hitbox.Y,
+                            W = hitbox.W,
+                            H = hitbox.H
+                        },
+                        Rect2 = new ProgramDataModel.Rect() //TODO: second rect
+                    });
+                }
             }
 
-            actionIdMapping[actionId] = stringId;
-        }
+            var indexCorrectedInstructions = new Dictionary<uint, BaseInstruction>(program.Instructions.Count);
+            var currentRoom = ((LoadRoomInstruction)(programData.First(i => i.Value is LoadRoomInstruction).Value)).Num;
+            foreach (var (offset, instruction) in programData)
+            {
+                var newInstruction = instruction;
+                
+                //TODO: this does not correctly handle char/action instructions but that might be ok
+                if (instruction is LoadRoomInstruction loadRoom)
+                {
+                    currentRoom = loadRoom.Num;
+                }
+                
+                if (instruction is MoveCharToPosInstruction { TargetingAnotherCharacter: false } moveChar)
+                {
+                    newInstruction = new MoveCharToPosInstruction()
+                    {
+                        Character = moveChar.Character,
+                        Num = (short)pointIds[(currentRoom, moveChar.Num)]
+                    };
+                } else if (instruction is SetCharBoxInstruction setCharBox)
+                {
+                    newInstruction = new SetCharBoxInstruction()
+                    {
+                        Character = setCharBox.Character,
+                        Num = (short)pointIds[(currentRoom, setCharBox.Num)]
+                    };
+                } else if (instruction is SetupWaitingCharInstruction { Val1: 1 } setupWaitingChar)
+                {
+                    newInstruction = new SetupWaitingCharInstruction()
+                    {
+                        Character = setupWaitingChar.Character,
+                        Val1 = 1,
+                        Val2 = (short)pointIds[(currentRoom, setupWaitingChar.Val2)]
+                    };
+                }
 
-        foreach (var hitbox in room.Hitboxes)
-        {
-            var item = hitbox.Item;
-            if (hitbox.Type == HitboxModel.HitboxType.Unknown)
-            {
-                //TODO: warning
-                continue;
-            }
-            if (hitbox.Type == HitboxModel.HitboxType.Inventory)
-            {
-                item = item | 0x1000;
-            }
-
-            if (hitbox.Type == HitboxModel.HitboxType.Disabled)
-            {
-                item = item | 0x2000;
-            }
-
-            if (hitbox.Type == HitboxModel.HitboxType.KeyChar)
-            {
-                item = item | 0x4000;
-            }
-
-            var stringId = stringCounter;
-            if (program.Strings.Any(p => p.Value == hitbox.Label))
-            {
-                stringId = program.Strings.First(p => p.Value == hitbox.Label).Key;
-            }
-            else
-            {
-                program.Strings[stringId] = hitbox.Label;
-                stringCounter++;
+                indexCorrectedInstructions[offset] = newInstruction;
             }
             
-            var secStringId = stringCounter;
-            if (program.Strings.Any(p => p.Value == hitbox.SecondaryLabel))
-            {
-                secStringId = program.Strings.First(p => p.Value == hitbox.SecondaryLabel).Key;
-            }
-            else
-            {
-                program.Strings[secStringId] = hitbox.SecondaryLabel;
-                stringCounter++;
-            }
-
-            var hitboxActions = hitbox.Actions.Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : -1).ToArray();
-            program.Hitboxes.Add(new ProgramDataModel.Hitbox()
-            {
-                Item = item,
-                String = stringId,
-                DefaultString = secStringId,
-                Actions = hitboxActions,
-                Rect1 = new ProgramDataModel.Rect()
-                {
-                    X = hitbox.X,
-                    Y = hitbox.Y,
-                    W = hitbox.W,
-                    H = hitbox.H
-                },
-                Rect2 = new ProgramDataModel.Rect()
-            });
+            program.Instructions = indexCorrectedInstructions;
         }
 
         var memoryStream = new MemoryStream();

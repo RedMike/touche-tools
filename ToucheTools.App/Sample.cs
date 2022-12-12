@@ -1319,7 +1319,7 @@ public static class Sample
     {
         return new Dictionary<int, ProgramDataModel>()
         {
-            { Game.StartupEpisode, StartupEpisode() }
+            
         };
     }
 

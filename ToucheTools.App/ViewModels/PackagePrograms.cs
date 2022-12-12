@@ -22,6 +22,11 @@ public class PackagePrograms
         return _programs[programId];
     }
 
+    public Dictionary<int, Dictionary<uint, BaseInstruction>> GetIncludedPrograms()
+    {
+        return _programs;
+    }
+
     private void Update()
     {
         _programs = new Dictionary<int, Dictionary<uint, BaseInstruction>>();
