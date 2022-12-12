@@ -5,6 +5,7 @@ namespace ToucheTools.App.ViewModels;
 
 public class OpenedPackage : Observable<OpenedPackage.Manifest>
 {
+    #region Images
     public enum ImageType
     {
         Unknown = 0,
@@ -26,23 +27,137 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         public ImageType Type { get; set; } = ImageType.Unknown;
         public int Index { get; set; } = -1;
     }
+    
+    public IEnumerable<string> GetAllImages()
+    {
+        return Files.Where(f => f.EndsWith(".png"));
+    }
 
+    public Dictionary<string, Image> GetIncludedImages()
+    {
+        return Value.Images;
+    }
+    
+    private static ImageType GetDefaultImageType(string path)
+    {
+        if (path.Contains("room"))
+        {
+            return ImageType.Room;
+        }
+
+        if (path.Contains("sprite"))
+        {
+            return ImageType.Sprite;
+        }
+        if (path.Contains("char"))
+        {
+            return ImageType.Sprite;
+        }
+
+        if (path.Contains("icon"))
+        {
+            return ImageType.Icon;
+        }
+
+        return ImageType.Unknown;
+    }
+    #endregion
+
+    #region Animations
     public class Animation
     {
         public int Index { get; set; } = -1;
     }
+    
+    public IEnumerable<string> GetAllAnimations()
+    {
+        return Files.Where(f => f.EndsWith(".anim.json"));
+    }
 
+    public Dictionary<string, Animation> GetIncludedAnimations()
+    {
+        return Value.Animations;
+    }
+    #endregion
+
+    #region Rooms
     public class Room
     {
         public int Index { get; set; } = -1;
     }
+    public IEnumerable<string> GetAllRooms()
+    {
+        return Files.Where(f => f.EndsWith(".room.json"));
+    }
 
+    public Dictionary<string, Room> GetIncludedRooms()
+    {
+        return Value.Rooms;
+    }
+    #endregion
+
+    #region Programs
+
+    public enum ProgramType
+    {
+        Unknown = 0,
+        Main = 1, //runs as key char 0 in foreground
+        KeyChar = 2, //runs as a non-0 key char in background
+        Action = 3, //runs in response to an action in foreground
+    }
+    
+    public static List<string> ProgramTypeAsList()
+    {
+        return Enum.GetValues<ProgramType>()
+            .OrderBy(i => i)
+            .Select(i => i.ToString("G"))
+            .ToList();
+    }
+
+    public class Program
+    {
+        public ProgramType Type { get; set; } = ProgramType.Unknown;
+        public int Index { get; set; } = -1;
+    }
+    
+    public IEnumerable<string> GetAllPrograms()
+    {
+        return Files.Where(f => f.EndsWith(".c.tsf"));
+    }
+
+    public Dictionary<string, Program> GetIncludedPrograms()
+    {
+        return Value.Programs;
+    }
+    
+    private static ProgramType GetDefaultProgramType(string path)
+    {
+        if (path.Contains(".main."))
+        {
+            return ProgramType.Main;
+        }
+
+        if (path.Contains(".char."))
+        {
+            return ProgramType.KeyChar;
+        }
+
+        if (path.Contains(".action."))
+        {
+            return ProgramType.Action;
+        }
+
+        return ProgramType.Unknown;
+    }
+    #endregion
+    
     public class Manifest
     {
         public HashSet<string> IncludedFiles { get; set; } = new HashSet<string>();
         public Dictionary<string, Image> Images { get; set; } = new Dictionary<string, Image>();
         public Dictionary<string, Animation> Animations { get; set; } = new Dictionary<string, Animation>();
         public Dictionary<string, Room> Rooms { get; set; } = new Dictionary<string, Room>();
+        public Dictionary<string, Program> Programs { get; set; } = new Dictionary<string, Program>();
 
         public void ExcludeFile(string path)
         {
@@ -59,6 +174,10 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             {
                 Rooms.Remove(path);
             }
+            if (Programs.ContainsKey(path))
+            {
+                Programs.Remove(path);
+            }
         }
 
         public void IncludeFile(string path)
@@ -68,7 +187,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             {
                 Images.Add(path, new Image()
                 {
-                    Type = GetDefaultType(path),
+                    Type = GetDefaultImageType(path),
                     Index = -1
                 });
             }
@@ -83,6 +202,15 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             {
                 Rooms.Add(path, new Room()
                 {
+                    Index = -1
+                });
+            }
+
+            if (path.EndsWith(".c.tsf"))
+            {
+                Programs.Add(path, new Program()
+                {
+                    Type = GetDefaultProgramType(path),
                     Index = -1
                 });
             }
@@ -126,36 +254,6 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         File.WriteAllText(ManifestPath, manifestJson);
     }
 
-    public IEnumerable<string> GetAllImages()
-    {
-        return Files.Where(f => f.EndsWith(".png"));
-    }
-
-    public Dictionary<string, Image> GetIncludedImages()
-    {
-        return Value.Images;
-    }
-
-    public IEnumerable<string> GetAllAnimations()
-    {
-        return Files.Where(f => f.EndsWith(".anim.json"));
-    }
-
-    public Dictionary<string, Animation> GetIncludedAnimations()
-    {
-        return Value.Animations;
-    }
-    
-    public IEnumerable<string> GetAllRooms()
-    {
-        return Files.Where(f => f.EndsWith(".room.json"));
-    }
-
-    public Dictionary<string, Room> GetIncludedRooms()
-    {
-        return Value.Rooms;
-    }
-
     public void IncludeFile(string path)
     {
         Value.IncludeFile(path);
@@ -197,7 +295,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                         f => f,
                         f => new Image()
                         {
-                            Type = GetDefaultType(f),
+                            Type = GetDefaultImageType(f),
                             Index = -1
                         }
                     ),
@@ -216,6 +314,16 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                         f => f,
                         f => new Room()
                         {
+                            Index = -1
+                        }
+                    ),
+                Programs = Files
+                    .Where(f => f.EndsWith(".c.tsf"))
+                    .ToDictionary(
+                        f => f,
+                        f => new Program()
+                        {
+                            Type = GetDefaultProgramType(f),
                             Index = -1
                         }
                     ),
@@ -295,6 +403,28 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                 roomCounter++;
             }
         }
+        
+        //programs
+        var programCounters = new Dictionary<ProgramType, int>();
+        foreach (var (_, program) in Value.Programs)
+        {
+            if (!programCounters.ContainsKey(program.Type))
+            {
+                programCounters[program.Type] = 1;
+                if (Value.Programs.Any(i => i.Value.Type == program.Type && i.Value.Index >= 0))
+                {
+                    programCounters[program.Type] = Value.Programs.Where(i => i.Value.Type == program.Type && i.Value.Index >= 0)
+                        .Select(i => i.Value.Index)
+                        .Max();
+                }
+            }
+
+            if (program.Index < 0)
+            {
+                program.Index = programCounters[program.Type];
+                programCounters[program.Type]++;
+            }
+        }
     }
 
     private static bool FilterFiles(string path)
@@ -314,31 +444,12 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         {
             return true;
         }
+        //programs
+        if (path.EndsWith(".c.tsf"))
+        {
+            return true;
+        }
 
         return false;
-    }
-
-    private static ImageType GetDefaultType(string path)
-    {
-        if (path.Contains("room"))
-        {
-            return ImageType.Room;
-        }
-
-        if (path.Contains("sprite"))
-        {
-            return ImageType.Sprite;
-        }
-        if (path.Contains("char"))
-        {
-            return ImageType.Sprite;
-        }
-
-        if (path.Contains("icon"))
-        {
-            return ImageType.Icon;
-        }
-
-        return ImageType.Unknown;
     }
 }
