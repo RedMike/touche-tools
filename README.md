@@ -45,12 +45,20 @@ rendering (inventory, giving items, money, action menu).
 [x] Library: Implement 1-to-1 export that re-creates a usable file
 from the original game TOUCHE.DAT.
 
-[ ] Library: Start figuring out bare-bones set of data based on
+[x] Library: Start figuring out bare-bones set of data based on
 knowledge from GUI application.
 
-[ ] Library: Set up sample "game" with a set of data that forms a very
+[x] Library: Set up sample "game" with a set of data that forms a very
 basic game setup (multiple rooms, characters, items, conversation)
 
-[ ] Editor: Begin implementing higher-level tools to create/import
+[x] Editor: Begin implementing higher-level tools to create/import
 assets to generate databases (image processing into palettes, 
 basic scripting language, walk point definition, etc)
+
+[ ] Editor: Finish implementing higher-level tools for game creation
+to a point at which a sample game can be fully delivered mostly within
+the application itself
+
+[ ] Editor: Use tools to deliver a sample game that demonstrates
+all the basic functionality available in the game and is directly
+usable with ScummVM
