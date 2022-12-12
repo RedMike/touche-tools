@@ -12,14 +12,16 @@ public class PackagePublishService
     private readonly PackagePalettes _palettes;
     private readonly PackageAnimations _animations;
     private readonly PackageRooms _rooms;
+    private readonly PackagePrograms _programs;
 
-    public PackagePublishService(OpenedPackage package, PackageImages images, PackagePalettes palettes, PackageAnimations animations, PackageRooms rooms)
+    public PackagePublishService(OpenedPackage package, PackageImages images, PackagePalettes palettes, PackageAnimations animations, PackageRooms rooms, PackagePrograms programs)
     {
         _package = package;
         _images = images;
         _palettes = palettes;
         _animations = animations;
         _rooms = rooms;
+        _programs = programs;
     }
 
     public void Publish()
@@ -239,7 +241,10 @@ public class PackagePublishService
                 Area2 = area2
             });
         }
-        
+
+        var instructions = _programs.GetProgram(ToucheTools.Constants.Game.StartupEpisode);
+        program.Instructions = instructions;
+
         var actionIdMapping = new Dictionary<int, int>();
         foreach (var (actionId, actionLabel) in room.ActionDefinitions)
         {

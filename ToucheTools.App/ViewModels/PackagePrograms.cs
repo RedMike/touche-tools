@@ -95,12 +95,12 @@ public class PackagePrograms
                     var instruction = ProgramInstructionHelper.Get(opcode);
                     instruction.DeserialiseRemainder(remainder);
                     instructions[trackedOffset] = instruction;
-                    trackedOffset = (uint)(trackedOffset + instruction.Width);
+                    trackedOffset = (uint)(trackedOffset + instruction.Width + 1);
                 }
 
                 var endInstruction = ProgramInstructionHelper.Get(ProgramDataModel.Opcode.StopScript);
                 instructions[trackedOffset] = endInstruction;
-                trackedOffset = (uint)(trackedOffset + endInstruction.Width);
+                trackedOffset = (uint)(trackedOffset + endInstruction.Width + 1);
             }
             //then load the char programs
             foreach (var charProgram in charPrograms)
@@ -120,12 +120,12 @@ public class PackagePrograms
                     var instruction = ProgramInstructionHelper.Get(opcode);
                     instruction.DeserialiseRemainder(remainder);
                     instructions[trackedOffset] = instruction;
-                    trackedOffset = (uint)(trackedOffset + instruction.Width);
+                    trackedOffset = (uint)(trackedOffset + instruction.Width + 1);
                 }
 
                 var endInstruction = ProgramInstructionHelper.Get(ProgramDataModel.Opcode.StopScript);
                 instructions[trackedOffset] = endInstruction;
-                trackedOffset = (uint)(trackedOffset + endInstruction.Width);
+                trackedOffset = (uint)(trackedOffset + endInstruction.Width + 1);
             }
             
             //finally load the action programs
@@ -146,12 +146,12 @@ public class PackagePrograms
                     var instruction = ProgramInstructionHelper.Get(opcode);
                     instruction.DeserialiseRemainder(remainder);
                     instructions[trackedOffset] = instruction;
-                    trackedOffset = (uint)(trackedOffset + instruction.Width);
+                    trackedOffset = (uint)(trackedOffset + instruction.Width + 1);
                 }
 
                 var endInstruction = ProgramInstructionHelper.Get(ProgramDataModel.Opcode.StopScript);
                 instructions[trackedOffset] = endInstruction;
-                trackedOffset = (uint)(trackedOffset + endInstruction.Width);
+                trackedOffset = (uint)(trackedOffset + endInstruction.Width + 1);
             }
 
             _programs[programId] = instructions;

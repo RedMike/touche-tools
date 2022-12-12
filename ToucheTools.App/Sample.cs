@@ -1282,15 +1282,7 @@ public static class Sample
             Rects = StartupRects(),
             Points = StartupPoints(),
             Walks = StartupWalks(),
-            Instructions = StartupInstructions(),
-            CharScriptOffsets = new List<ProgramDataModel.CharScriptOffset>()
-            {
-                new ProgramDataModel.CharScriptOffset()
-                {
-                    Character = 1,
-                    Offs = 122
-                }
-            }
+            Instructions = StartupInstructions()
         };
     }
     #endregion
