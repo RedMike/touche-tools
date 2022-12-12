@@ -37,6 +37,20 @@ public class SetCharFrameInstruction : BaseInstruction
         writer.Write((short)Val2);
         writer.Write((short)Val3);
     }
+    
+    protected override string SerialiseInternal()
+    {
+        return $"{Character},{Val1},{Val2},{Val3}";
+    }
+
+    public override void DeserialiseRemainder(string remainder)
+    {
+        var parts = remainder.Split(',');
+        Character = short.Parse(parts[0]);
+        Val1 = short.Parse(parts[1]);
+        Val2 = short.Parse(parts[2]);
+        Val3 = short.Parse(parts[3]);
+    }
 
     public override string ToString()
     {
