@@ -9,6 +9,7 @@ public class PackagePrograms
     private readonly OpenedPackage _package;
 
     private Dictionary<int, Dictionary<uint, BaseInstruction>> _programs = null!;
+    private Dictionary<int, Dictionary<string, uint>> _actionOffsets = null!;
     public PackagePrograms(OpenedPackage package)
     {
         _package = package;
@@ -21,6 +22,11 @@ public class PackagePrograms
     {
         return _programs[programId];
     }
+    
+    public Dictionary<string, uint> GetActionOffsetsForProgram(int programId)
+    {
+        return _actionOffsets[programId];
+    }
 
     public Dictionary<int, Dictionary<uint, BaseInstruction>> GetIncludedPrograms()
     {
@@ -30,6 +36,7 @@ public class PackagePrograms
     private void Update()
     {
         _programs = new Dictionary<int, Dictionary<uint, BaseInstruction>>();
+        _actionOffsets = new Dictionary<int, Dictionary<string, uint>>();
         if (!_package.IsLoaded())
         {
             return;
@@ -134,8 +141,10 @@ public class PackagePrograms
             }
             
             //finally load the action programs
+            _actionOffsets[programId] = new Dictionary<string, uint>();
             foreach (var actionProgram in actionPrograms)
             {
+                _actionOffsets[programId][actionProgram] = trackedOffset;
                 var lines = File.ReadAllLines(actionProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
