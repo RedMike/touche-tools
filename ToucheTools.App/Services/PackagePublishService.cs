@@ -191,6 +191,28 @@ public class PackagePublishService
             var sequence = _animations.GetAnimation(animationPath);
             db.Sequences[animation.Index] = sequence;
         }
+        
+        //room-independent strings and actions
+        var game = _package.GetGame();
+        var actionIdMapping = new Dictionary<int, int>();
+        var globalStringCounter = 1;
+        foreach (var (actionId, actionLabel) in game.ActionDefinitions)
+        {
+            var id = actionId;
+                
+            var stringId = globalStringCounter;
+            if (db.Text.Strings.Any(p => p.Value == actionLabel))
+            {
+                stringId = db.Text.Strings.First(p => p.Value == actionLabel).Key;
+            }
+            else
+            {
+                db.Text.Strings[stringId] = actionLabel;
+                globalStringCounter++;
+            }
+
+            actionIdMapping[id] = -stringId;
+        }
 
         var programs = _package.GetIncludedPrograms();
         foreach (var (programId, programData) in _programs.GetIncludedPrograms())
@@ -202,37 +224,17 @@ public class PackagePublishService
                 .Where(i => i is LoadRoomInstruction)
                 .Select(i => ((LoadRoomInstruction)i).Num)
                 .Distinct().ToList();
-
+            
             var pointIds = new Dictionary<(int, int), int>();
             var pointIdCounter = 1; //skip room anchor
-            var game = _package.GetGame();
-
-            var actionIdMapping = new Dictionary<int, int>();
-            var globalStringCounter = 1;
-            foreach (var (actionId, actionLabel) in game.ActionDefinitions)
-            {
-                var id = actionId;
-                
-                var stringId = globalStringCounter;
-                if (db.Text.Strings.Any(p => p.Value == actionLabel))
-                {
-                    stringId = db.Text.Strings.First(p => p.Value == actionLabel).Key;
-                }
-                else
-                {
-                    db.Text.Strings[stringId] = actionLabel;
-                    globalStringCounter++;
-                }
-
-                actionIdMapping[id] = -stringId;
-            }
+            var textIds = new Dictionary<(int, int), int>();
+            var textCounter = 1;
 
             var addedAnchorRoomPoints = false;
             foreach (var roomId in referencedRooms)
             {
                 var roomImageModel = db.RoomImages[roomId].Value;
 
-                var stringCounter = 1;
                 if (!addedAnchorRoomPoints)
                 {
                     //TODO: do this for a specific room instead of the first one
@@ -308,7 +310,7 @@ public class PackagePublishService
                         item = item | 0x4000;
                     }
 
-                    var stringId = stringCounter;
+                    var stringId = textCounter;
                     if (program.Strings.Any(p => p.Value == hitbox.Label))
                     {
                         stringId = program.Strings.First(p => p.Value == hitbox.Label).Key;
@@ -316,10 +318,10 @@ public class PackagePublishService
                     else
                     {
                         program.Strings[stringId] = hitbox.Label;
-                        stringCounter++;
+                        textCounter++;
                     }
 
-                    var secStringId = stringCounter;
+                    var secStringId = textCounter;
                     if (program.Strings.Any(p => p.Value == hitbox.SecondaryLabel))
                     {
                         secStringId = program.Strings.First(p => p.Value == hitbox.SecondaryLabel).Key;
@@ -327,7 +329,7 @@ public class PackagePublishService
                     else
                     {
                         program.Strings[secStringId] = hitbox.SecondaryLabel;
-                        stringCounter++;
+                        textCounter++;
                     }
 
                     var hitboxActions = hitbox.Actions
@@ -347,6 +349,22 @@ public class PackagePublishService
                         },
                         Rect2 = new ProgramDataModel.Rect() //TODO: second rect
                     });
+                }
+
+                foreach (var (id, str) in room.Texts)
+                {
+                    var stringId = textCounter;
+                    if (program.Strings.Any(p => p.Value == str))
+                    {
+                        stringId = program.Strings.First(p => p.Value == str).Key;
+                    }
+                    else
+                    {
+                        program.Strings[stringId] = str;
+                        textCounter++;
+                    }
+
+                    textIds[(roomId, id)] = stringId;
                 }
             }
 
@@ -401,7 +419,15 @@ public class PackagePublishService
                         Val1 = 1,
                         Val2 = (short)pointIds[(currentRoom, setupWaitingChar.Val2)]
                     };
+                } else if (instruction is StartTalkInstruction startTalk)
+                {
+                    newInstruction = new StartTalkInstruction()
+                    {
+                        Character = startTalk.Character,
+                        Num = (short)textIds[(currentRoom, startTalk.Num)]
+                    };
                 }
+                //TODO: other places text entries are referenced (conversations?)
 
                 indexCorrectedInstructions[offset] = newInstruction;
             }

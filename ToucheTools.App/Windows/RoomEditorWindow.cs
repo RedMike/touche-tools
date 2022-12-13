@@ -295,7 +295,7 @@ public class RoomEditorWindow : BaseWindow
                     ImGui.TreePop();
                 }
             }
-            
+
             ImGui.SetNextItemWidth(childWidowWidth);
             if (ImGui.Button("Add Hitbox"))
             {
@@ -309,6 +309,40 @@ public class RoomEditorWindow : BaseWindow
                 {
                     Item = newId
                 });
+            }
+            
+            ImGui.TreePop();
+        }
+        
+        if (ImGui.TreeNodeEx("Texts"))
+        {
+            foreach (var (textId, origTextStr) in room.Texts)
+            {
+                ImGui.Text($"{textId} -");
+                ImGui.SameLine();
+
+                var textStr = origTextStr;
+                
+                ImGui.PushID($"RoomTexts{textId}");
+                ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+                ImGui.InputText("", ref textStr, 128);
+                if (textStr != origTextStr)
+                {
+                    room.Texts[textId] = textStr;
+                }
+                ImGui.PopID();
+            }
+
+            ImGui.SetNextItemWidth(childWidowWidth);
+            if (ImGui.Button("Add Text"))
+            {
+                var newId = 1;
+                if (room.Texts.Count > 0)
+                {
+                    newId = room.Texts.Select(p => p.Key).Max() + 1;
+                }
+
+                room.Texts.Add(newId, "");
             }
             
             ImGui.TreePop();
