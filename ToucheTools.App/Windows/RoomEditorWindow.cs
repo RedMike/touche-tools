@@ -267,19 +267,27 @@ public class RoomEditorWindow : BaseWindow
                     }
                     ImGui.PopID();
 
-                    var actions = game.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
+                    var actions = game.ActionDefinitions
+                        .Select(a => (a.Key, a.Value))
+                        .Where(a => !Actions.BuiltInActions.Contains(-a.Key))
+                        .ToList();
                     actions.Insert(0, (-1, "-"));
-                    var actionList = actions.Select(a => $"Action {a.Key} ({a.Value})").ToArray();
+                    var actionList = actions.Select(a => a.Key < 0 ? $"-" : $"Action {a.Key} ({a.Value})").ToArray();
 
                     for (var i = 0; i < 8; i++)
                     {
                         var origSelectedAction = actions.FindIndex(a => a.Key == hitbox.Actions[i]);
+                        if (origSelectedAction == -1)
+                        {
+                            origSelectedAction = 0;
+                        }
                         var selectedAction = origSelectedAction;
                         ImGui.PushID($"Hitbox{hitbox.Item}Action{i}");
                         ImGui.Combo("", ref selectedAction, actionList, actionList.Length);
                         if (selectedAction != origSelectedAction)
                         {
-                            hitbox.Actions[i] = actions[selectedAction].Key;
+                            var actionId = actions[selectedAction].Key;
+                            hitbox.Actions[i] = actionId;
                         }
                         ImGui.PopID();
                     }

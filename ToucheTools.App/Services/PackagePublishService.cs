@@ -1,4 +1,5 @@
-﻿using ToucheTools.App.Models;
+﻿using Newtonsoft.Json;
+using ToucheTools.App.Models;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Exporters;
 using ToucheTools.Models;
@@ -191,6 +192,7 @@ public class PackagePublishService
             db.Sequences[animation.Index] = sequence;
         }
 
+        var programs = _package.GetIncludedPrograms();
         foreach (var (programId, programData) in _programs.GetIncludedPrograms())
         {
             var program = new ProgramDataModel();
@@ -203,6 +205,27 @@ public class PackagePublishService
 
             var pointIds = new Dictionary<(int, int), int>();
             var pointIdCounter = 1; //skip room anchor
+            var game = _package.GetGame();
+
+            var actionIdMapping = new Dictionary<int, int>();
+            var globalStringCounter = 1;
+            foreach (var (actionId, actionLabel) in game.ActionDefinitions)
+            {
+                var id = actionId;
+                
+                var stringId = globalStringCounter;
+                if (db.Text.Strings.Any(p => p.Value == actionLabel))
+                {
+                    stringId = db.Text.Strings.First(p => p.Value == actionLabel).Key;
+                }
+                else
+                {
+                    db.Text.Strings[stringId] = actionLabel;
+                    globalStringCounter++;
+                }
+
+                actionIdMapping[id] = -stringId;
+            }
 
             var addedAnchorRoomPoints = false;
             foreach (var roomId in referencedRooms)
@@ -231,7 +254,6 @@ public class PackagePublishService
                     });
                 }
 
-                var game = _package.GetGame();
                 var roomPath = rooms.First(r => r.Value.Index == roomId).Key;
                 var room = _rooms.GetRoom(roomPath);
                 
@@ -260,23 +282,6 @@ public class PackagePublishService
                         Area1 = area1,
                         Area2 = area2
                     });
-                }
-
-                var actionIdMapping = new Dictionary<int, int>();
-                foreach (var (actionId, actionLabel) in game.ActionDefinitions)
-                {
-                    var stringId = stringCounter;
-                    if (program.Strings.Any(p => p.Value == actionLabel))
-                    {
-                        stringId = program.Strings.First(p => p.Value == actionLabel).Key;
-                    }
-                    else
-                    {
-                        program.Strings[stringId] = actionLabel;
-                        stringCounter++;
-                    }
-
-                    actionIdMapping[actionId] = stringId;
                 }
 
                 foreach (var hitbox in room.Hitboxes)
@@ -326,7 +331,7 @@ public class PackagePublishService
                     }
 
                     var hitboxActions = hitbox.Actions
-                        .Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : -1).ToArray();
+                        .Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : 0).ToArray();
                     program.Hitboxes.Add(new ProgramDataModel.Hitbox()
                     {
                         Item = item,
@@ -345,6 +350,23 @@ public class PackagePublishService
                 }
             }
 
+            foreach (var (actionPath, actionOffset) in _programs.GetActionOffsetsForProgram(programId))
+            {
+                if (programs[actionPath].Type != OpenedPackage.ProgramType.Action)
+                {
+                    throw new Exception("Wrong program type for action");
+                }
+
+                var action = programs[actionPath];
+                program.ActionScriptOffsets.Add(new ProgramDataModel.ActionScriptOffset()
+                {
+                    Action = actionIdMapping[action.Target],
+                    Object1 = action.Data,
+                    Object2 = 0, //TODO: is this even used?
+                    Offset = (ushort)(actionOffset)
+                });
+            }
+            
             var indexCorrectedInstructions = new Dictionary<uint, BaseInstruction>(program.Instructions.Count);
             var currentRoom = ((LoadRoomInstruction)(programData.First(i => i.Value is LoadRoomInstruction).Value)).Num;
             foreach (var (offset, instruction) in programData)
@@ -386,6 +408,10 @@ public class PackagePublishService
             
             program.Instructions = indexCorrectedInstructions;
         }
+        
+        //save a debug JSON version too for inspecting
+        var json = JsonConvert.SerializeObject(db, Formatting.Indented);
+        File.WriteAllText("../../../../sample/TOUCHE_PACKAGE.DAT.json", json);
 
         var memoryStream = new MemoryStream();
         var exporter = new MainExporter(memoryStream);

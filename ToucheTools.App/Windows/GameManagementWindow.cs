@@ -32,18 +32,17 @@ public class GameManagementWindow : BaseWindow
             foreach (var (actionId, origLabel) in game.ActionDefinitions)
             {
                 var id = $"{actionId}";
-                if (actionId == Actions.DoNothing)
+                if (actionId == -Actions.DoNothing)
                 {
                     id = "DoNothing";
-                }
-                if (actionId == Actions.LeftClick)
+                } else if (actionId == -Actions.LeftClick)
                 {
                     id = "LeftClick";
-                }
-                if (actionId == Actions.LeftClickWithItem)
+                } else if (actionId == -Actions.LeftClickWithItem)
                 {
                     id = "LeftClickWithItem";
                 }
+
                 ImGui.Text($"{id} -");
                 ImGui.SameLine();
                 var actionLabel = origLabel;
@@ -59,9 +58,14 @@ public class GameManagementWindow : BaseWindow
             if (ImGui.Button("Add Action"))
             {
                 var newId = 1;
-                if (game.ActionDefinitions.Any(a => a.Key >= 0))
+                if (game.ActionDefinitions.Any(a => a.Key >= 0 && !Actions.BuiltInActions.Contains(-a.Key)))
                 {
-                    newId = game.ActionDefinitions.Where(a => a.Key >= 0).Select(a => a.Key).Max() + 1;
+                    newId = game.ActionDefinitions.Where(a => a.Key >= 0 && !Actions.BuiltInActions.Contains(-a.Key))
+                        .Select(a => a.Key).Max() + 1;
+                    while (Actions.BuiltInActions.Contains(-newId) || game.ActionDefinitions.ContainsKey(newId))
+                    {
+                        newId++;
+                    }
                 }
 
                 game.ActionDefinitions[newId] = "~";

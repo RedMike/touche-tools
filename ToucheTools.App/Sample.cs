@@ -1329,9 +1329,6 @@ public static class Sample
         {
             Strings = new Dictionary<int, string>()
             {
-                {-Actions.DoNothing, ""},
-                {-Actions.LeftClick, "Look at"},
-                {-Actions.LeftClickWithItem, "Use"},
             }
         };
     }

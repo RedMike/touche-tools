@@ -119,7 +119,8 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     {
         public ProgramType Type { get; set; } = ProgramType.Unknown;
         public int Index { get; set; } = -1;
-        public int[] Target { get; set; } = new int[0];
+        public int Target { get; set; } = -1;
+        public int Data { get; set; } = -1;
     }
     
     public IEnumerable<string> GetAllPrograms()

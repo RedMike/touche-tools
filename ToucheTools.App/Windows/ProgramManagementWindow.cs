@@ -31,6 +31,7 @@ public class ProgramManagementWindow : BaseWindow
         var pos = Vector2.Zero + new Vector2(0.0f, ImGui.GetFrameHeight());
         ImGui.SetNextWindowPos(pos, ImGuiCond.Once);
         ImGui.Begin("Programs", ImGuiWindowFlags.NoCollapse);
+        var game = _package.GetGame();
         var allPrograms = _package.GetAllPrograms().ToList();
         var includedPrograms = _package.GetIncludedPrograms();
         foreach (var path in allPrograms)
@@ -102,6 +103,46 @@ public class ProgramManagementWindow : BaseWindow
                 {
                     _package.Value.Programs[path].Index = index + 1;
                     _package.ForceUpdate();
+                }
+                
+                //target
+                if (program.Type == OpenedPackage.ProgramType.Action)
+                {
+                    var actions = game.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
+                    var actionList = actions.Select(a => a.Value).ToArray();
+                    var origAction = -1;
+                    if (program.Target != -1)
+                    {
+                        origAction = actions.FindIndex(a => a.Key == program.Target);
+                    }
+                    var action = origAction;
+                    ImGui.SameLine();
+                    ImGui.PushID($"{path}_action");
+                    ImGui.SetNextItemWidth(60.0f);
+                    ImGui.Combo("", ref action, actionList, actionList.Length);
+                    ImGui.PopID();
+                    if (action != origAction)
+                    {
+                        _package.Value.Programs[path].Target = actions[action].Key;
+                        _package.ForceUpdate();
+                    }
+
+                    var origData = program.Data;
+                    var data = origData;
+                    
+                    ImGui.SameLine();
+                    ImGui.PushID($"{path}_data");
+                    ImGui.SetNextItemWidth(100.0f);
+                    ImGui.InputInt("", ref data, 1);
+                    ImGui.PopID();
+                    if (data != origData)
+                    {
+                        _package.Value.Programs[path].Data = data;
+                        _package.ForceUpdate();
+                    }
+                } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)
+                {
+                    //TODO: list of characters
                 }
             }
         }
