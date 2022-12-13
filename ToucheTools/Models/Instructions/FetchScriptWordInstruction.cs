@@ -22,7 +22,7 @@ public class FetchScriptWordInstruction : BaseInstruction
         return $"{Val}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         Val = short.Parse(remainder);
     }

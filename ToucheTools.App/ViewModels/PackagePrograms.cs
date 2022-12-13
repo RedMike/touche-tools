@@ -10,6 +10,7 @@ public class PackagePrograms
 
     private Dictionary<int, Dictionary<uint, BaseInstruction>> _programs = null!;
     private Dictionary<int, Dictionary<string, uint>> _actionOffsets = null!;
+    private Dictionary<int, Dictionary<string, uint>> _labels = null!;
     public PackagePrograms(OpenedPackage package)
     {
         _package = package;
@@ -28,6 +29,11 @@ public class PackagePrograms
         return _actionOffsets[programId];
     }
 
+    public Dictionary<string, uint> GetLabelOffsetsForProgram(int programId)
+    {
+        return _labels[programId];
+    }
+
     public Dictionary<int, Dictionary<uint, BaseInstruction>> GetIncludedPrograms()
     {
         return _programs;
@@ -37,6 +43,7 @@ public class PackagePrograms
     {
         _programs = new Dictionary<int, Dictionary<uint, BaseInstruction>>();
         _actionOffsets = new Dictionary<int, Dictionary<string, uint>>();
+        _labels = new Dictionary<int, Dictionary<string, uint>>();
         if (!_package.IsLoaded())
         {
             return;
@@ -81,6 +88,7 @@ public class PackagePrograms
             }
 
             //first load the main program
+            var labels = new Dictionary<string, uint>();
             var instructions = new Dictionary<uint, BaseInstruction>();
             uint trackedOffset = 0;
             if (!foundMain)
@@ -95,6 +103,7 @@ public class PackagePrograms
                 var lines = File.ReadAllLines(mainProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
+                var secondPassList = new Dictionary<uint, string>();
                 foreach (var line in lines)
                 {
                     if (line.StartsWith(";"))
@@ -102,12 +111,26 @@ public class PackagePrograms
                         //it's a comment
                         continue;
                     }
-                    //TODO: handle labels
+
+                    if (line.EndsWith(":"))
+                    {
+                        //it's a label
+                        var labelName = line.Substring(0, line.LastIndexOf(":", StringComparison.Ordinal));
+                        labels[labelName] = trackedOffset;
+                        continue;
+                    }
                     var (opcode, remainder) = BaseInstruction.DeserialiseOpcode(line);
                     var instruction = ProgramInstructionHelper.Get(opcode);
-                    instruction.DeserialiseRemainder(remainder);
                     instructions[trackedOffset] = instruction;
+                    secondPassList[trackedOffset] = remainder;
                     trackedOffset = (uint)(trackedOffset + instruction.Width + 1);
+                }
+
+                //second pass deserialisation to allow labels to work correctly
+                foreach (var (offset, remainder) in secondPassList)
+                {
+                    var instruction = instructions[offset];
+                    instruction.DeserialiseRemainder(remainder, labels);
                 }
 
                 var endInstruction = ProgramInstructionHelper.Get(ProgramDataModel.Opcode.StopScript);
@@ -120,6 +143,7 @@ public class PackagePrograms
                 var lines = File.ReadAllLines(charProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
+                var secondPassList = new Dictionary<uint, string>();
                 foreach (var line in lines)
                 {
                     if (line.StartsWith(";"))
@@ -127,18 +151,34 @@ public class PackagePrograms
                         //it's a comment
                         continue;
                     }
-                    //TODO: handle labels
+                    
+                    if (line.EndsWith(":"))
+                    {
+                        //it's a label
+                        var labelName = line.Substring(0, line.LastIndexOf(":", StringComparison.Ordinal));
+                        labels[labelName] = trackedOffset;
+                        continue;
+                    }
                     var (opcode, remainder) = BaseInstruction.DeserialiseOpcode(line);
                     var instruction = ProgramInstructionHelper.Get(opcode);
-                    instruction.DeserialiseRemainder(remainder);
                     instructions[trackedOffset] = instruction;
+                    secondPassList[trackedOffset] = remainder;
                     trackedOffset = (uint)(trackedOffset + instruction.Width + 1);
+                }
+                
+                //second pass deserialisation to allow labels to work correctly
+                foreach (var (offset, remainder) in secondPassList)
+                {
+                    var instruction = instructions[offset];
+                    instruction.DeserialiseRemainder(remainder, labels);
                 }
 
                 var endInstruction = ProgramInstructionHelper.Get(ProgramDataModel.Opcode.StopScript);
                 instructions[trackedOffset] = endInstruction;
                 trackedOffset = (uint)(trackedOffset + endInstruction.Width + 1);
             }
+
+            _labels[programId] = labels;
             
             //finally load the action programs
             _actionOffsets[programId] = new Dictionary<string, uint>();
@@ -148,6 +188,7 @@ public class PackagePrograms
                 var lines = File.ReadAllLines(actionProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
+                var secondPassList = new Dictionary<uint, string>();
                 foreach (var line in lines)
                 {
                     if (line.StartsWith(";"))
@@ -155,12 +196,26 @@ public class PackagePrograms
                         //it's a comment
                         continue;
                     }
-                    //TODO: handle labels
+                    
+                    if (line.EndsWith(":"))
+                    {
+                        //it's a label
+                        var labelName = line.Substring(0, line.LastIndexOf(":", StringComparison.Ordinal));
+                        labels[labelName] = trackedOffset;
+                        continue;
+                    }
                     var (opcode, remainder) = BaseInstruction.DeserialiseOpcode(line);
                     var instruction = ProgramInstructionHelper.Get(opcode);
-                    instruction.DeserialiseRemainder(remainder);
                     instructions[trackedOffset] = instruction;
+                    secondPassList[trackedOffset] = remainder;
                     trackedOffset = (uint)(trackedOffset + instruction.Width + 1);
+                }
+                
+                //second pass deserialisation to allow labels to work correctly
+                foreach (var (offset, remainder) in secondPassList)
+                {
+                    var instruction = instructions[offset];
+                    instruction.DeserialiseRemainder(remainder, labels);
                 }
 
                 var endInstruction = ProgramInstructionHelper.Get(ProgramDataModel.Opcode.StopScript);

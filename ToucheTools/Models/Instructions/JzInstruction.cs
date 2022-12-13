@@ -24,8 +24,14 @@ public class JzInstruction : BaseInstruction
         return $"{NewOffset}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
+        remainder = remainder.Trim();
+        if (remainder.StartsWith(":"))
+        {
+            var newOffset = labels[remainder.Substring(1)];
+            remainder = $"{newOffset}";
+        }
         NewOffset = ushort.Parse(remainder);
     }
 

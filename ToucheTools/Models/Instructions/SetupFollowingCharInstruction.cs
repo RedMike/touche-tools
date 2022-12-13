@@ -25,7 +25,7 @@ public class SetupFollowingCharInstruction : BaseInstruction
         return $"{Val},{Character}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         Val = short.Parse(parts[0]);

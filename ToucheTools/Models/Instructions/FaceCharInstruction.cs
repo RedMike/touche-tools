@@ -27,7 +27,7 @@ public class FaceCharInstruction : BaseInstruction
         return $"{Character1},{Character2}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         Character1 = short.Parse(parts[0]);

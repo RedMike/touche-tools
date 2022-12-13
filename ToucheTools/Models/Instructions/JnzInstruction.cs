@@ -24,7 +24,7 @@ public class JnzInstruction : BaseInstruction
         return $"{NewOffset}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         NewOffset = ushort.Parse(remainder);
     }

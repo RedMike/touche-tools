@@ -22,7 +22,7 @@ public class GetInventoryItemFlagsInstruction : BaseInstruction
         return $"{Item}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         Item = short.Parse(remainder);
     }

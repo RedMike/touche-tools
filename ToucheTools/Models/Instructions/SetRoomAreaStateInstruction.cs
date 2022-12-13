@@ -25,7 +25,7 @@ public class SetRoomAreaStateInstruction : BaseInstruction
         return $"{Num},{Val}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         Num = short.Parse(parts[0]);

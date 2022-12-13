@@ -27,7 +27,7 @@ public class SetCharDirectionInstruction : BaseInstruction
         return $"{Character},{Direction}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         Character = short.Parse(parts[0]);

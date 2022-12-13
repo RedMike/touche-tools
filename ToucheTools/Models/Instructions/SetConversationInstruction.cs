@@ -22,7 +22,7 @@ public class SetConversationInstruction : BaseInstruction
         return $"{Num}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         Num = short.Parse(remainder);
     }

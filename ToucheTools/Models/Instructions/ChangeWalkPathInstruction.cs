@@ -28,7 +28,7 @@ public class ChangeWalkPathInstruction : BaseInstruction
         return $"{Num1},{Num2},{Val}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         Num1 = short.Parse(parts[0]);

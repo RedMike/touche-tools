@@ -22,7 +22,7 @@ public class UpdateRoomAreasInstruction : BaseInstruction
         return $"{Area}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         Area = short.Parse(remainder);
     }

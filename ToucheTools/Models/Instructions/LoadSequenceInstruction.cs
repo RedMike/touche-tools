@@ -25,7 +25,7 @@ public class LoadSequenceInstruction : BaseInstruction
         return $"{Index},{Num}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         Index = short.Parse(parts[0]);

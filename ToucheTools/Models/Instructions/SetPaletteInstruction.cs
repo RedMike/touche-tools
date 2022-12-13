@@ -28,7 +28,7 @@ public class SetPaletteInstruction : BaseInstruction
         return $"{R},{G},{B}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         R = short.Parse(parts[0]);

@@ -24,7 +24,7 @@ public class FadePaletteInstruction : BaseInstruction
         return $"{FadeOutRaw}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         FadeOutRaw = short.Parse(remainder);
     }

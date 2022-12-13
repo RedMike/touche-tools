@@ -24,7 +24,7 @@ public class RemoveItemFromInventoryInstruction : BaseInstruction
         return $"{Character}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         Character = short.Parse(remainder);
     }

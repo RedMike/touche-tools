@@ -22,7 +22,7 @@ public class SetCharDelayInstruction : BaseInstruction
         return $"{Delay}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         Delay = short.Parse(remainder);
     }

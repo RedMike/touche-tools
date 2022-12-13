@@ -50,7 +50,7 @@ public abstract class BaseInstruction
         return "";
     }
 
-    public virtual void DeserialiseRemainder(string remainder)
+    public virtual void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         
     }

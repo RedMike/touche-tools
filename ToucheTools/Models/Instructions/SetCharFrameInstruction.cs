@@ -43,7 +43,7 @@ public class SetCharFrameInstruction : BaseInstruction
         return $"{Character},{Val1},{Val2},{Val3}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         var parts = remainder.Split(',');
         Character = short.Parse(parts[0]);

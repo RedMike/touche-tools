@@ -25,7 +25,7 @@ public class SetFlagInstruction : BaseInstruction
         return $"{Flag}";
     }
 
-    public override void DeserialiseRemainder(string remainder)
+    public override void DeserialiseRemainder(string remainder, Dictionary<string, uint> labels)
     {
         Flag = ushort.Parse(remainder);
     }
