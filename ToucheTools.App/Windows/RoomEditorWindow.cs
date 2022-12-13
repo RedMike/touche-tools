@@ -273,6 +273,23 @@ public class RoomEditorWindow : BaseWindow
                         .ToList();
                     actions.Insert(0, (-1, "-"));
                     var actionList = actions.Select(a => a.Key < 0 ? $"-" : $"Action {a.Key} ({a.Value})").ToArray();
+                    var fallbackActionList = actionList.Select(s => $"On click {s}").ToArray();
+
+                    var origFallbackAction = actions.FindIndex(a => a.Key == hitbox.FallbackAction);
+                    if (origFallbackAction == -1)
+                    {
+                        origFallbackAction = 0;
+                    }
+
+                    var fallbackAction = origFallbackAction;
+                    ImGui.PushID($"Hitbox{hitbox.Item}ActionFallback");
+                    ImGui.Combo("", ref fallbackAction, fallbackActionList, fallbackActionList.Length);
+                    if (fallbackAction != origFallbackAction)
+                    {
+                        var actionId = actions[fallbackAction].Key;
+                        hitbox.FallbackAction = actionId;
+                    }
+                    ImGui.PopID();
 
                     for (var i = 0; i < 8; i++)
                     {
