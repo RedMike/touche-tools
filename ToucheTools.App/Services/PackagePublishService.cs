@@ -194,29 +194,23 @@ public class PackagePublishService
         
         //room-independent strings and actions
         var game = _package.GetGame();
-        var actionIdMapping = new Dictionary<int, int>();
-        var globalStringCounter = 1;
+        var globalActionIdMapping = new Dictionary<int, int>();
         foreach (var (actionId, actionLabel) in game.ActionDefinitions)
         {
-            var id = actionId;
-                
-            var stringId = globalStringCounter;
-            if (db.Text.Strings.Any(p => p.Value == actionLabel))
+            //unlike room actions, global actions are handled per ID with gaps
+            if (db.Text.Strings.ContainsKey(actionId))
             {
-                stringId = db.Text.Strings.First(p => p.Value == actionLabel).Key;
-            }
-            else
-            {
-                db.Text.Strings[stringId] = actionLabel;
-                globalStringCounter++;
+                throw new Exception("Duplicate global action");
             }
 
-            actionIdMapping[id] = -stringId;
+            db.Text.Strings[actionId] = actionLabel;
+            globalActionIdMapping[actionId] = -actionId;
         }
 
         var programs = _package.GetIncludedPrograms();
         foreach (var (programId, programData) in _programs.GetIncludedPrograms())
         {
+            var actionIdMapping = new Dictionary<int, int>(globalActionIdMapping); //new set of actions per program
             var program = new ProgramDataModel();
             db.Programs[programId] = program;
 
@@ -334,12 +328,14 @@ public class PackagePublishService
 
                     var hitboxActions = hitbox.Actions
                         .Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : 0).ToArray();
+                    var fallbackAction = hitbox.FallbackAction == 0 ? 0 : actionIdMapping[hitbox.FallbackAction];
                     program.Hitboxes.Add(new ProgramDataModel.Hitbox()
                     {
                         Item = item,
                         String = stringId,
                         DefaultString = secStringId,
                         Actions = hitboxActions,
+                        Talk = fallbackAction,
                         Rect1 = new ProgramDataModel.Rect()
                         {
                             X = hitbox.X,
