@@ -102,9 +102,10 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     public enum ProgramType
     {
         Unknown = 0,
-        Main = 1, //runs as key char 0 in foreground
-        KeyChar = 2, //runs as a non-0 key char in background
-        Action = 3, //runs in response to an action in foreground
+        Main = 1, //runs as key char 0 in foreground (always)
+        KeyChar = 2, //runs as a non-0 key char in background (when key char is init'ed)
+        Action = 3, //runs as key char 0 in foreground (when an action is done)
+        Conversation = 4, //runs as key char 0 in foreground (when a conversation is started/choice picked)
     }
     
     public static List<string> ProgramTypeAsList()

@@ -47,6 +47,7 @@ public class ProgramPreviewWindow : BaseWindow
         var program = _programs.GetProgram(programId);
         var actionOffsets = _programs.GetActionOffsetsForProgram(programId);
         var charOffsets = _programs.GetCharOffsetsForProgram(programId);
+        var convoOffsets = _programs.GetConvoOffsetsForProgram(programId);
         var labels = _programs.GetLabelOffsetsForProgram(programId);
         
         ImGui.Begin("Program Preview", ImGuiWindowFlags.NoCollapse);
@@ -73,6 +74,12 @@ public class ProgramPreviewWindow : BaseWindow
                 var charPath = charOffsets.First(p => p.Value == offset).Key;
                 ImGui.SameLine();
                 ImGui.Text($" - KeyChar {charPath.ShortenPath()}");
+            }
+            if (convoOffsets.Any(p => p.Value == offset))
+            {
+                var convoPath = convoOffsets.First(p => p.Value == offset).Key;
+                ImGui.SameLine();
+                ImGui.Text($" - Conversation {convoPath.ShortenPath()}");
             }
         }
         

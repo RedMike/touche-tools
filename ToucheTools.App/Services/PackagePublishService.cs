@@ -413,6 +413,31 @@ public class PackagePublishService
                     Offs = (ushort)(charOffset)
                 });
             }
+
+            foreach (var (convoPath, convoOffset) in _programs.GetConvoOffsetsForProgram(programId))
+            {
+                if (programs[convoPath].Type != OpenedPackage.ProgramType.Conversation)
+                {
+                    throw new Exception("Wrong program type for convo");
+                }
+
+                var convo = programs[convoPath];
+                var num = convo.Target;
+                if (convo.Data.Length != 1)
+                {
+                    throw new Exception("Missing convo text");
+                }
+
+                //TODO: room ID
+                var msg = textIds[(1, convo.Data[0])];
+                //TODO: ordering matters here
+                program.Conversations.Add(new ProgramDataModel.Conversation()
+                {
+                    Offset = (ushort)(convoOffset),
+                    Num = num,
+                    Message = msg
+                });
+            }
             
             var indexCorrectedInstructions = new Dictionary<uint, BaseInstruction>(program.Instructions.Count);
             var currentRoom = ((LoadRoomInstruction)(programData.First(i => i.Value is LoadRoomInstruction).Value)).Num;

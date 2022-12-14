@@ -136,7 +136,7 @@ public class ProgramManagementWindow : BaseWindow
                 var origSelectedType = types.FindIndex(i => i == program.Type.ToString("G"));
                 var selectedType = origSelectedType;
                 ImGui.PushID($"{path}_type");
-                ImGui.SetNextItemWidth(100.0f);
+                ImGui.SetNextItemWidth(120.0f);
                 ImGui.Combo("", ref selectedType, types.ToArray(), types.Count);
                 ImGui.PopID();
                 if (selectedType != origSelectedType)
@@ -160,9 +160,10 @@ public class ProgramManagementWindow : BaseWindow
                     _package.ForceUpdate();
                 }
                 
-                //target
                 if (program.Type == OpenedPackage.ProgramType.Action)
                 {
+                    //target = an action
+                    //data = (roomId, hitboxId)
                     var origAction = -1;
                     if (program.Target != -1)
                     {
@@ -207,6 +208,8 @@ public class ProgramManagementWindow : BaseWindow
                     }
                 } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)
                 {
+                    //target = a keychar
+                    //data = empty
                     ImGui.SameLine();
                     var programKeyChars = keyChars[program.Index]
                         .Where(p => p.Key != 0) //you can't have a script on keychar 0
@@ -222,6 +225,38 @@ public class ProgramManagementWindow : BaseWindow
                     if (target != origTarget)
                     {
                         _package.Value.Programs[path].Target = programKeyChars[target].Key;
+                        _package.ForceUpdate();
+                    }
+                } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.Conversation)
+                {
+                    //target = a conversation ID (X = start convo, X+1 = potential choice 1, X+2 = potential choice 2, ...)
+                    //data = (textId)
+                    var target = program.Target;
+                    ImGui.SameLine();
+                    ImGui.PushID($"{path}_target");
+                    ImGui.SetNextItemWidth(100.0f);
+                    ImGui.InputInt("", ref target, 1);
+                    ImGui.PopID();
+                    if (target != program.Target)
+                    {
+                        _package.Value.Programs[path].Target = target;
+                        _package.ForceUpdate();
+                    }
+
+                    var origData = 0;
+                    if (program.Data.Length == 1)
+                    {
+                        origData = program.Data[0];
+                    }
+                    var data = origData;
+                    ImGui.SameLine();
+                    ImGui.PushID($"{path}_data");
+                    ImGui.SetNextItemWidth(100.0f);
+                    ImGui.InputInt("", ref data, 1);
+                    ImGui.PopID();
+                    if (data != origData)
+                    {
+                        _package.Value.Programs[path].Data = new[] { data };
                         _package.ForceUpdate();
                     }
                 }
