@@ -380,6 +380,21 @@ public class PackagePublishService
                     Offset = (ushort)(actionOffset)
                 });
             }
+
+            foreach (var (charPath, charOffset) in _programs.GetCharOffsetsForProgram(programId))
+            {
+                if (programs[charPath].Type != OpenedPackage.ProgramType.KeyChar)
+                {
+                    throw new Exception("Wrong program type for keychar");
+                }
+
+                var charScript = programs[charPath];
+                program.CharScriptOffsets.Add(new ProgramDataModel.CharScriptOffset()
+                {
+                    Character = charScript.Target,
+                    Offs = (ushort)(charOffset)
+                });
+            }
             
             var indexCorrectedInstructions = new Dictionary<uint, BaseInstruction>(program.Instructions.Count);
             var currentRoom = ((LoadRoomInstruction)(programData.First(i => i.Value is LoadRoomInstruction).Value)).Num;

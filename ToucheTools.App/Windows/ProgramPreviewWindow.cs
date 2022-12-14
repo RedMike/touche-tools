@@ -45,6 +45,7 @@ public class ProgramPreviewWindow : BaseWindow
         var programId = _package.GetIncludedPrograms().First(p => p.Key == _programManagementState.SelectedProgram).Value.Index;
         var program = _programs.GetProgram(programId);
         var actionOffsets = _programs.GetActionOffsetsForProgram(programId);
+        var charOffsets = _programs.GetCharOffsetsForProgram(programId);
         var labels = _programs.GetLabelOffsetsForProgram(programId);
         
         ImGui.Begin("Program Preview", ImGuiWindowFlags.NoCollapse);
@@ -65,6 +66,12 @@ public class ProgramPreviewWindow : BaseWindow
                 var actionPath = actionOffsets.First(p => p.Value == offset).Key;
                 ImGui.SameLine();
                 ImGui.Text($" - Action {actionPath}");
+            }
+            if (charOffsets.Any(p => p.Value == offset))
+            {
+                var charPath = charOffsets.First(p => p.Value == offset).Key;
+                ImGui.SameLine();
+                ImGui.Text($" - KeyChar {charPath}");
             }
         }
         

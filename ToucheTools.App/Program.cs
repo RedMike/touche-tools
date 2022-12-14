@@ -50,6 +50,7 @@ if (editor)
     container.AddSingleton<RoomEditorWindow>();
     container.AddSingleton<ProgramManagementWindow>();
     container.AddSingleton<ProgramPreviewWindow>();
+    container.AddSingleton<GameManagementWindow>();
     
     using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
     container.AddSingleton(window);
@@ -73,6 +74,7 @@ if (editor)
         sp.GetService<RoomEditorWindow>()?.Render();
         sp.GetService<ProgramManagementWindow>()?.Render();
         sp.GetService<ProgramPreviewWindow>()?.Render();
+        sp.GetService<GameManagementWindow>()?.Render();
         
 
         window.Render();
@@ -101,11 +103,13 @@ else
     container.AddSingleton<ImageManagementState>();
     container.AddSingleton<AnimationManagementState>();
     container.AddSingleton<RoomManagementState>();
+    container.AddSingleton<ProgramManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
     container.AddSingleton<PackageAnimations>();
     container.AddSingleton<PackageRooms>();
+    container.AddSingleton<PackagePrograms>();
     
     container.AddSingleton<LogData>();
 
@@ -165,7 +169,7 @@ else
     {
         container.AddSingleton<DatabaseModel>(provider =>
         {
-            var fileToLoad = "../../../../sample/TOUCHE.DAT";
+            var fileToLoad = "../../../../sample/TOUCHE_PACKAGE.DAT";
             if (!File.Exists(fileToLoad))
             {
                 throw new Exception("File not found: " + fileToLoad);

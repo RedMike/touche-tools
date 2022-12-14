@@ -131,6 +131,7 @@ public class ProgramManagementWindow : BaseWindow
                     var data = origData;
                     
                     ImGui.SameLine();
+                    //TODO: load list of targets from room/program
                     ImGui.PushID($"{path}_data");
                     ImGui.SetNextItemWidth(100.0f);
                     ImGui.InputInt("", ref data, 1);
@@ -142,7 +143,19 @@ public class ProgramManagementWindow : BaseWindow
                     }
                 } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)
                 {
-                    //TODO: list of characters
+                    ImGui.SameLine();
+                    //TODO: load list of characters from room/program
+                    var origTarget = program.Target;
+                    var target = origTarget;
+                    ImGui.PushID($"{path}_target");
+                    ImGui.SetNextItemWidth(100.0f);
+                    ImGui.InputInt("", ref target, 1);
+                    ImGui.PopID();
+                    if (target != origTarget)
+                    {
+                        _package.Value.Programs[path].Target = target;
+                        _package.ForceUpdate();
+                    }
                 }
             }
         }

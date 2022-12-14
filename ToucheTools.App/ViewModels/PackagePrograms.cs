@@ -10,6 +10,7 @@ public class PackagePrograms
 
     private Dictionary<int, Dictionary<uint, BaseInstruction>> _programs = null!;
     private Dictionary<int, Dictionary<string, uint>> _actionOffsets = null!;
+    private Dictionary<int, Dictionary<string, uint>> _charOffsets = null!;
     private Dictionary<int, Dictionary<string, uint>> _labels = null!;
     public PackagePrograms(OpenedPackage package)
     {
@@ -29,6 +30,11 @@ public class PackagePrograms
         return _actionOffsets[programId];
     }
 
+    public Dictionary<string, uint> GetCharOffsetsForProgram(int programId)
+    {
+        return _charOffsets[programId];
+    }
+
     public Dictionary<string, uint> GetLabelOffsetsForProgram(int programId)
     {
         return _labels[programId];
@@ -43,6 +49,7 @@ public class PackagePrograms
     {
         _programs = new Dictionary<int, Dictionary<uint, BaseInstruction>>();
         _actionOffsets = new Dictionary<int, Dictionary<string, uint>>();
+        _charOffsets = new Dictionary<int, Dictionary<string, uint>>();
         _labels = new Dictionary<int, Dictionary<string, uint>>();
         if (!_package.IsLoaded())
         {
@@ -138,8 +145,10 @@ public class PackagePrograms
                 trackedOffset = (uint)(trackedOffset + endInstruction.Width + 1);
             }
             //then load the char programs
+            _charOffsets[programId] = new Dictionary<string, uint>();
             foreach (var charProgram in charPrograms)
             {
+                _charOffsets[programId][charProgram] = trackedOffset;
                 var lines = File.ReadAllLines(charProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
