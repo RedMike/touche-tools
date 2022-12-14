@@ -12,15 +12,15 @@ public class ProgramManagementWindow : BaseWindow
     private readonly MainWindowState _state;
     private readonly ProgramManagementState _programManagementState;
     private readonly PackagePrograms _programs;
-    private readonly PackageImages _images;
+    private readonly PackageRooms _rooms;
 
-    public ProgramManagementWindow(OpenedPackage package, MainWindowState state, ProgramManagementState programManagementState, PackagePrograms programs, PackageImages images)
+    public ProgramManagementWindow(OpenedPackage package, MainWindowState state, ProgramManagementState programManagementState, PackagePrograms programs, PackageRooms rooms)
     {
         _package = package;
         _state = state;
         _programManagementState = programManagementState;
         _programs = programs;
-        _images = images;
+        _rooms = rooms;
     }
 
     public override void Render()
@@ -44,8 +44,10 @@ public class ProgramManagementWindow : BaseWindow
         var actions = game.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
         var actionList = actions.Select(a => a.Value).ToArray();
         
-        //figure out which rooms (hitboxes) are tied to which programs
-        
+        //figure out which hitboxes are tied to which programs
+        var hitboxes = new Dictionary<int, Dictionary<(int, int), string>>();
+        var rooms = _package.GetIncludedRooms()
+            .ToDictionary(p => p.Value.Index, p => p.Key);
         
         //figure out which keychars are tied to which programs
         var keyChars = new Dictionary<int, Dictionary<int, string>>();
@@ -66,7 +68,24 @@ public class ProgramManagementWindow : BaseWindow
                 programKeyChars[keyCharId] = $"{keyCharId} ({spriteName})";
             }
 
+            var programHitboxes = new Dictionary<(int, int), string>();
+            var roomMappings = _programs.GetRoomMappingsForProgram(programId);
+            foreach (var roomId in roomMappings)
+            {
+                if (!rooms.ContainsKey(roomId))
+                {
+                    //TODO: warning
+                    continue;
+                }
+                var room = _rooms.GetRoom(rooms[roomId]);
+                foreach (var (hitboxId, hitbox) in room.Hitboxes)
+                {
+                    programHitboxes[(roomId, hitboxId)] = $"Room {roomId} hitbox {hitboxId} ({hitbox.Type:G} {hitbox.Item})";
+                }
+            }
+            
             keyChars[programId] = programKeyChars;
+            hitboxes[programId] = programHitboxes;
         }
 
         foreach (var path in allPrograms)
@@ -160,19 +179,30 @@ public class ProgramManagementWindow : BaseWindow
                         _package.Value.Programs[path].Target = actions[action].Key;
                         _package.ForceUpdate();
                     }
-
-                    var origData = program.Data;
-                    var data = origData;
                     
                     ImGui.SameLine();
-                    //TODO: load list of targets from room/program
-                    ImGui.PushID($"{path}_data");
-                    ImGui.SetNextItemWidth(100.0f);
-                    ImGui.InputInt("", ref data, 1);
-                    ImGui.PopID();
-                    if (data != origData)
+                    var programHitboxes = hitboxes[program.Index]
+                        .Select(p => (p.Key, p.Value))
+                        .ToList();
+                    var programHitboxList = programHitboxes.Select(p => p.Value).ToArray();
+                    var currentData = new [] {-1, -1};
+                    if (program.Data.Length == 2)
                     {
-                        _package.Value.Programs[path].Data = data;
+                        currentData = program.Data;
+                    }
+
+                    var origHitbox = programHitboxes.FindIndex(i =>
+                        i.Key.Item1 == currentData[0] && i.Key.Item2 == currentData[1]);
+                    var hitbox = origHitbox;
+                    
+                    ImGui.PushID($"{path}_data");
+                    ImGui.SetNextItemWidth(240.0f);
+                    ImGui.Combo("", ref hitbox, programHitboxList, programHitboxList.Length);
+                    ImGui.PopID();
+                    if (hitbox != origHitbox)
+                    {
+                        var newData = new[] { programHitboxes[hitbox].Key.Item1, programHitboxes[hitbox].Key.Item2 };
+                        _package.Value.Programs[path].Data = newData;
                         _package.ForceUpdate();
                     }
                 } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)

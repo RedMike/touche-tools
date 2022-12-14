@@ -13,6 +13,7 @@ public class PackagePrograms
     private Dictionary<int, Dictionary<string, uint>> _charOffsets = null!;
     private Dictionary<int, Dictionary<string, uint>> _labels = null!;
     private Dictionary<int, Dictionary<int, int>> _keyChars = null!;
+    private Dictionary<int, HashSet<int>> _rooms = null!;
     
     public PackagePrograms(OpenedPackage package)
     {
@@ -47,6 +48,11 @@ public class PackagePrograms
         return _keyChars[programId];
     }
 
+    public HashSet<int> GetRoomMappingsForProgram(int programId)
+    {
+        return _rooms[programId];
+    }
+
     public Dictionary<int, Dictionary<uint, BaseInstruction>> GetIncludedPrograms()
     {
         return _programs;
@@ -59,6 +65,7 @@ public class PackagePrograms
         _charOffsets = new Dictionary<int, Dictionary<string, uint>>();
         _labels = new Dictionary<int, Dictionary<string, uint>>();
         _keyChars = new Dictionary<int, Dictionary<int, int>>();
+        _rooms = new Dictionary<int, HashSet<int>>();
         if (!_package.IsLoaded())
         {
             return;
@@ -73,6 +80,7 @@ public class PackagePrograms
             var charPrograms = new List<string>();
             var actionPrograms = new List<string>();
             _keyChars[programId] = new Dictionary<int, int>();
+            _rooms[programId] = new HashSet<int>();
             var foundMain = false;
             foreach (var (programPath, programData) in group)
             {
@@ -157,6 +165,11 @@ public class PackagePrograms
                     if (instruction is InitCharScriptInstruction initCharScript)
                     {
                         _keyChars[programId][initCharScript.Character] = spriteMappings[initCharScript.SpriteIndex];
+                    }
+
+                    if (instruction is LoadRoomInstruction loadRoom)
+                    {
+                        _rooms[programId].Add(loadRoom.Num);
                     }
                 }
 

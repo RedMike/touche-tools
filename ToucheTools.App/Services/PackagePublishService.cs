@@ -211,6 +211,7 @@ public class PackagePublishService
         foreach (var (programId, programData) in _programs.GetIncludedPrograms())
         {
             var actionIdMapping = new Dictionary<int, int>(globalActionIdMapping); //new set of actions per program
+            var hitboxIdMapping = new Dictionary<(int, int), int>();
             var program = new ProgramDataModel();
             db.Programs[programId] = program;
 
@@ -329,6 +330,7 @@ public class PackagePublishService
                     var hitboxActions = hitbox.Actions
                         .Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : 0).ToArray();
                     var fallbackAction = hitbox.FallbackAction == 0 ? 0 : actionIdMapping[hitbox.FallbackAction];
+                    hitboxIdMapping[(roomId, hitboxId)] = item;
                     program.Hitboxes.Add(new ProgramDataModel.Hitbox()
                     {
                         Item = item,
@@ -372,11 +374,27 @@ public class PackagePublishService
                 }
 
                 var action = programs[actionPath];
+
+                var object1 = 0;
+                var object2 = 0; //TODO: is this used?
+                if (action.Data.Length == 2)
+                {
+                    //(roomId, hitboxId)
+                    var roomId = action.Data[0];
+                    var hitboxId = action.Data[1];
+                    if (!hitboxIdMapping.ContainsKey((roomId, hitboxId)))
+                    {
+                        throw new Exception("Missing hitbox");
+                    }
+
+                    object1 = hitboxIdMapping[(roomId, hitboxId)];
+                }
+                
                 program.ActionScriptOffsets.Add(new ProgramDataModel.ActionScriptOffset()
                 {
                     Action = actionIdMapping[action.Target],
-                    Object1 = action.Data, //TODO: figure out what data maps to (0x4000 | Data for char hitboxes)
-                    Object2 = 0, //TODO: is this even used?
+                    Object1 = object1,
+                    Object2 = object2, 
                     Offset = (ushort)(actionOffset)
                 });
             }
