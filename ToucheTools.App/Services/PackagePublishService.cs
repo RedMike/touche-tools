@@ -375,7 +375,7 @@ public class PackagePublishService
                 program.ActionScriptOffsets.Add(new ProgramDataModel.ActionScriptOffset()
                 {
                     Action = actionIdMapping[action.Target],
-                    Object1 = action.Data,
+                    Object1 = action.Data, //TODO: figure out what data maps to (0x4000 | Data for char hitboxes)
                     Object2 = 0, //TODO: is this even used?
                     Offset = (ushort)(actionOffset)
                 });
