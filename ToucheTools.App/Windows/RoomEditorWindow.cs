@@ -200,13 +200,12 @@ public class RoomEditorWindow : BaseWindow
 
         if (ImGui.TreeNodeEx("Hitboxes"))
         {
-            foreach (var hitbox in room.Hitboxes)
+            foreach (var (hitboxId, hitbox) in room.Hitboxes)
             {
-                var id = $"{hitbox.Type:G} {hitbox.Item}";
-                if (ImGui.TreeNodeEx(id))
+                if (ImGui.TreeNodeEx($"{hitboxId} - {hitbox.Item} {hitbox.Type:G}"))
                 {
                     var item = hitbox.Item;
-                    ImGui.PushID($"Hitbox{id}Item");
+                    ImGui.PushID($"Hitbox{hitboxId}Item");
                     var text = "ID";
                     if (hitbox.Type == HitboxModel.HitboxType.KeyChar)
                     {
@@ -227,7 +226,7 @@ public class RoomEditorWindow : BaseWindow
                     var origType = types.FindIndex(t => t == hitbox.Type);
                     var type = origType;
                     
-                    ImGui.PushID($"Hitbox{id}Type");
+                    ImGui.PushID($"Hitbox{hitboxId}Type");
                     ImGui.Combo("", ref type, typeList, typeList.Length);
                     if (type != origType)
                     {
@@ -258,7 +257,7 @@ public class RoomEditorWindow : BaseWindow
                     } else if (hitbox.Type == HitboxModel.HitboxType.Normal)
                     {
                         var x = hitbox.X;
-                        ImGui.PushID($"Hitbox{id}X");
+                        ImGui.PushID($"Hitbox{hitboxId}X");
                         ImGui.SliderInt("", ref x, 0, roomWidth, $"X {x}");
                         if (x != hitbox.X)
                         {
@@ -267,7 +266,7 @@ public class RoomEditorWindow : BaseWindow
                         ImGui.PopID();
                     
                         var y = hitbox.Y;
-                        ImGui.PushID($"Hitbox{id}Y");
+                        ImGui.PushID($"Hitbox{hitboxId}Y");
                         ImGui.SliderInt("", ref y, 0, roomHeight, $"Y {y}");
                         if (y != hitbox.Y)
                         {
@@ -276,7 +275,7 @@ public class RoomEditorWindow : BaseWindow
                         ImGui.PopID();
                     
                         var w = hitbox.W;
-                        ImGui.PushID($"Hitbox{id}W");
+                        ImGui.PushID($"Hitbox{hitboxId}W");
                         ImGui.SliderInt("", ref w, 0, roomWidth, $"W {w}");
                         if (w != hitbox.W)
                         {
@@ -285,7 +284,7 @@ public class RoomEditorWindow : BaseWindow
                         ImGui.PopID();
                     
                         var h = hitbox.H;
-                        ImGui.PushID($"Hitbox{id}H");
+                        ImGui.PushID($"Hitbox{hitboxId}H");
                         ImGui.SliderInt("", ref h, 0, roomHeight, $"H {h}");
                         if (h != hitbox.H)
                         {
@@ -300,7 +299,7 @@ public class RoomEditorWindow : BaseWindow
                         .ToList();
                     actions.Insert(0, (-1, "-"));
                     var actionList = actions.Select(a => a.Key < 0 ? $"-" : $"Action {a.Key} ({a.Value})").ToArray();
-                    var fallbackActionList = actionList.Select(s => $"On click {s}").ToArray();
+                    var fallbackActionList = actionList.Select(s => $"Fallback {s}").ToArray();
 
                     var origFallbackAction = actions.FindIndex(a => a.Key == hitbox.FallbackAction);
                     if (origFallbackAction == -1)
@@ -309,7 +308,7 @@ public class RoomEditorWindow : BaseWindow
                     }
 
                     var fallbackAction = origFallbackAction;
-                    ImGui.PushID($"Hitbox{id}ActionFallback");
+                    ImGui.PushID($"Hitbox{hitboxId}ActionFallback");
                     ImGui.Combo("", ref fallbackAction, fallbackActionList, fallbackActionList.Length);
                     if (fallbackAction != origFallbackAction)
                     {
@@ -326,7 +325,7 @@ public class RoomEditorWindow : BaseWindow
                             origSelectedAction = 0;
                         }
                         var selectedAction = origSelectedAction;
-                        ImGui.PushID($"Hitbox{id}Action{i}");
+                        ImGui.PushID($"Hitbox{hitboxId}Action{i}");
                         ImGui.Combo("", ref selectedAction, actionList, actionList.Length);
                         if (selectedAction != origSelectedAction)
                         {
@@ -346,12 +345,12 @@ public class RoomEditorWindow : BaseWindow
                 var newId = 1;
                 if (room.Hitboxes.Count > 0)
                 {
-                    newId = room.Hitboxes.Select(h => h.Item).Max() + 1;
+                    newId = room.Hitboxes.Select(h => h.Key).Max() + 1;
                 }
 
-                room.Hitboxes.Add(new HitboxModel()
+                room.Hitboxes.Add(newId, new HitboxModel()
                 {
-                    Item = newId
+                    Item = -1
                 });
             }
             
@@ -453,7 +452,7 @@ public class RoomEditorWindow : BaseWindow
             }
             
             //hitboxes
-            foreach (var hitbox in room.Hitboxes)
+            foreach (var (hitboxId, hitbox) in room.Hitboxes)
             {
                 if (hitbox.W == 0 || hitbox.H == 0)
                 {
@@ -474,7 +473,7 @@ public class RoomEditorWindow : BaseWindow
                     secondary = $"\n({hitbox.SecondaryLabel})";
                 }
                 
-                var rectText = $"{hitbox.Item}\n{hitbox.Label}{secondary}{type}";
+                var rectText = $"Hitbox {hitboxId}\nItem {hitbox.Item}\n{hitbox.Label}{secondary}{type}";
                 ImGui.SetCursorPos(imagePos + new Vector2(hitbox.X, hitbox.Y));
                 ImGui.Text(rectText);
             }

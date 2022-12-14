@@ -280,7 +280,7 @@ public class PackagePublishService
                     });
                 }
 
-                foreach (var hitbox in room.Hitboxes)
+                foreach (var (hitboxId, hitbox) in room.Hitboxes)
                 {
                     var item = hitbox.Item;
                     if (hitbox.Type == HitboxModel.HitboxType.Unknown)
