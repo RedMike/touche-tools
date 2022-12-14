@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.State;
+using ToucheTools.App.Utils;
 using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;
@@ -10,12 +11,16 @@ public class ProgramManagementWindow : BaseWindow
     private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
     private readonly ProgramManagementState _programManagementState;
+    private readonly PackagePrograms _programs;
+    private readonly PackageImages _images;
 
-    public ProgramManagementWindow(OpenedPackage package, MainWindowState state, ProgramManagementState programManagementState)
+    public ProgramManagementWindow(OpenedPackage package, MainWindowState state, ProgramManagementState programManagementState, PackagePrograms programs, PackageImages images)
     {
         _package = package;
         _state = state;
         _programManagementState = programManagementState;
+        _programs = programs;
+        _images = images;
     }
 
     public override void Render()
@@ -34,6 +39,36 @@ public class ProgramManagementWindow : BaseWindow
         var game = _package.GetGame();
         var allPrograms = _package.GetAllPrograms().ToList();
         var includedPrograms = _package.GetIncludedPrograms();
+        
+        //figure out which actions that can be selected
+        var actions = game.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
+        var actionList = actions.Select(a => a.Value).ToArray();
+        
+        //figure out which rooms (hitboxes) are tied to which programs
+        
+        
+        //figure out which keychars are tied to which programs
+        var keyChars = new Dictionary<int, Dictionary<int, string>>();
+        var sprites = _package.GetIncludedImages().Where(i => i.Value.Type == OpenedPackage.ImageType.Sprite)
+            .ToDictionary(p => p.Value.Index, p => p.Key.ShortenPath());
+        foreach (var programId in includedPrograms.Select(p => p.Value.Index).Distinct())
+        {
+            var programKeyChars = new Dictionary<int, string>();
+            var keyCharMappings = _programs.GetKeyCharMappingsForProgram(programId);
+            foreach (var (keyCharId, spriteId) in keyCharMappings)
+            {
+                var spriteName = "UNKNOWN";
+                if (sprites.ContainsKey(spriteId))
+                {
+                    spriteName = sprites[spriteId];
+                }
+
+                programKeyChars[keyCharId] = $"{keyCharId} ({spriteName})";
+            }
+
+            keyChars[programId] = programKeyChars;
+        }
+
         foreach (var path in allPrograms)
         {
             //included checkbox
@@ -61,7 +96,8 @@ public class ProgramManagementWindow : BaseWindow
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.7f, 1.0f));
             }
-            if (ImGui.Button(path))
+
+            if (ImGui.Button(path.ShortenPath()))
             {
                 _programManagementState.SelectedProgram = path;
                 _programManagementState.PreviewOpen = true;
@@ -108,8 +144,6 @@ public class ProgramManagementWindow : BaseWindow
                 //target
                 if (program.Type == OpenedPackage.ProgramType.Action)
                 {
-                    var actions = game.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
-                    var actionList = actions.Select(a => a.Value).ToArray();
                     var origAction = -1;
                     if (program.Target != -1)
                     {
@@ -118,7 +152,7 @@ public class ProgramManagementWindow : BaseWindow
                     var action = origAction;
                     ImGui.SameLine();
                     ImGui.PushID($"{path}_action");
-                    ImGui.SetNextItemWidth(60.0f);
+                    ImGui.SetNextItemWidth(100.0f);
                     ImGui.Combo("", ref action, actionList, actionList.Length);
                     ImGui.PopID();
                     if (action != origAction)
@@ -144,16 +178,20 @@ public class ProgramManagementWindow : BaseWindow
                 } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)
                 {
                     ImGui.SameLine();
-                    //TODO: load list of characters from room/program
-                    var origTarget = program.Target;
+                    var programKeyChars = keyChars[program.Index]
+                        .Where(p => p.Key != 0) //you can't have a script on keychar 0
+                        .Select(p => (p.Key, p.Value))
+                        .ToList();
+                    var programKeyCharList = programKeyChars.Select(p => p.Value).ToArray();
+                    var origTarget = programKeyChars.FindIndex(i => i.Key == program.Target);
                     var target = origTarget;
                     ImGui.PushID($"{path}_target");
-                    ImGui.SetNextItemWidth(100.0f);
-                    ImGui.InputInt("", ref target, 1);
+                    ImGui.SetNextItemWidth(120.0f);
+                    ImGui.Combo("", ref target, programKeyCharList, programKeyCharList.Length);
                     ImGui.PopID();
                     if (target != origTarget)
                     {
-                        _package.Value.Programs[path].Target = target;
+                        _package.Value.Programs[path].Target = programKeyChars[target].Key;
                         _package.ForceUpdate();
                     }
                 }

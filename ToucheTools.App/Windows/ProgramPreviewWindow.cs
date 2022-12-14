@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using ToucheTools.App.State;
+using ToucheTools.App.Utils;
 using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;
@@ -65,13 +66,13 @@ public class ProgramPreviewWindow : BaseWindow
             {
                 var actionPath = actionOffsets.First(p => p.Value == offset).Key;
                 ImGui.SameLine();
-                ImGui.Text($" - Action {actionPath}");
+                ImGui.Text($" - Action {actionPath.ShortenPath()}");
             }
             if (charOffsets.Any(p => p.Value == offset))
             {
                 var charPath = charOffsets.First(p => p.Value == offset).Key;
                 ImGui.SameLine();
-                ImGui.Text($" - KeyChar {charPath}");
+                ImGui.Text($" - KeyChar {charPath.ShortenPath()}");
             }
         }
         

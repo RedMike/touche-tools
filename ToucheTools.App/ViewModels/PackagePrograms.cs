@@ -12,6 +12,8 @@ public class PackagePrograms
     private Dictionary<int, Dictionary<string, uint>> _actionOffsets = null!;
     private Dictionary<int, Dictionary<string, uint>> _charOffsets = null!;
     private Dictionary<int, Dictionary<string, uint>> _labels = null!;
+    private Dictionary<int, Dictionary<int, int>> _keyChars = null!;
+    
     public PackagePrograms(OpenedPackage package)
     {
         _package = package;
@@ -40,6 +42,11 @@ public class PackagePrograms
         return _labels[programId];
     }
 
+    public Dictionary<int, int> GetKeyCharMappingsForProgram(int programId)
+    {
+        return _keyChars[programId];
+    }
+
     public Dictionary<int, Dictionary<uint, BaseInstruction>> GetIncludedPrograms()
     {
         return _programs;
@@ -51,6 +58,7 @@ public class PackagePrograms
         _actionOffsets = new Dictionary<int, Dictionary<string, uint>>();
         _charOffsets = new Dictionary<int, Dictionary<string, uint>>();
         _labels = new Dictionary<int, Dictionary<string, uint>>();
+        _keyChars = new Dictionary<int, Dictionary<int, int>>();
         if (!_package.IsLoaded())
         {
             return;
@@ -61,8 +69,10 @@ public class PackagePrograms
             var programId = group.Key;
 
             var mainProgram = "";
+            var spriteMappings = new Dictionary<int, int>();
             var charPrograms = new List<string>();
             var actionPrograms = new List<string>();
+            _keyChars[programId] = new Dictionary<int, int>();
             var foundMain = false;
             foreach (var (programPath, programData) in group)
             {
@@ -138,6 +148,16 @@ public class PackagePrograms
                 {
                     var instruction = instructions[offset];
                     instruction.DeserialiseRemainder(remainder, labels);
+
+                    if (instruction is LoadSpriteInstruction loadSprite)
+                    {
+                        spriteMappings[loadSprite.Index] = loadSprite.Num;
+                    }
+
+                    if (instruction is InitCharScriptInstruction initCharScript)
+                    {
+                        _keyChars[programId][initCharScript.Character] = spriteMappings[initCharScript.SpriteIndex];
+                    }
                 }
 
                 var endInstruction = ProgramInstructionHelper.Get(ProgramDataModel.Opcode.StopScript);

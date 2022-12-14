@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using ToucheTools.App.State;
+using ToucheTools.App.Utils;
 using ToucheTools.App.ViewModels;
 
 namespace ToucheTools.App.Windows;
@@ -62,7 +63,7 @@ public class ImageManagementWindow : BaseWindow
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.7f, 1.0f));
             }
-            if (ImGui.Button(path))
+            if (ImGui.Button(path.ShortenPath()))
             {
                 _imageManagementState.SelectedImage = path;
                 _imageManagementState.PreviewOpen = true;

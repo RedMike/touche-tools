@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ToucheTools.App.Services;
 using ToucheTools.App.State;
+using ToucheTools.App.Utils;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Constants;
 using ToucheTools.Models;
@@ -60,7 +61,7 @@ public class AnimationEditorWindow : BaseWindow
             .Where(p => p.Value.Type == OpenedPackage.ImageType.Sprite)
             .Select(p => (p.Key, p.Value.Index))
             .ToList();
-        var spriteList = sprites.Select(s => $"Sprite {s.Index} ({s.Key})").ToArray();
+        var spriteList = sprites.Select(s => $"Sprite {s.Index} ({s.Key.ShortenPath()})").ToArray();
         var origSelectedSprite = sprites.FindIndex(p => p.Index == _animationManagementState.SelectedSpriteIndex);
         if (origSelectedSprite == -1)
         {

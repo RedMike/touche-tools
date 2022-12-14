@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ToucheTools.App.Models;
 using ToucheTools.App.State;
+using ToucheTools.App.Utils;
 using ToucheTools.App.ViewModels;
 using ToucheTools.Constants;
 
@@ -59,7 +60,7 @@ public class RoomEditorWindow : BaseWindow
             .Where(p => p.Value.Type == OpenedPackage.ImageType.Room)
             .Select(p => (p.Key, p.Value.Index))
             .ToList();
-        var roomImageList = roomImages.Select(r => $"Room {r.Index} ({r.Key})").ToArray();
+        var roomImageList = roomImages.Select(r => $"Room {r.Index} ({r.Key.ShortenPath()})").ToArray();
         var origSelectedRoomImage = roomImages.FindIndex(p => p.Index == room.RoomImageIndex);
         var selectedRoomImage = origSelectedRoomImage;
         ImGui.PushID("RoomImage");
