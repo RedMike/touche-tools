@@ -93,9 +93,9 @@ public class ImageManagementWindow : BaseWindow
                 ImGui.SameLine();
                 
                 //image index
-                var indexes = Enumerable.Range(1, 99).ToList();
+                var indexes = Enumerable.Range(0, 99).ToList();
                 var indexList = indexes.Select(i => ImageName(image.Type, i)).ToArray();
-                var origIndex = image.Index - 1;
+                var origIndex = image.Index;
                 var index = origIndex;
                 ImGui.PushID($"{path}_index");
                 ImGui.SetNextItemWidth(120.0f);
@@ -103,7 +103,7 @@ public class ImageManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (index != origIndex)
                 {
-                    _package.Value.Images[path].Index = index + 1;
+                    _package.Value.Images[path].Index = index;
                 }
             }
         }

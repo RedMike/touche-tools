@@ -60,6 +60,7 @@ public class PackagePublishService
         var images = _package.GetIncludedImages();
         var roomImages = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Room);
         var sprites = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Sprite);
+        var icons = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Icon);
         var palettes = _palettes.GetPalettes();
         var animations = _package.GetIncludedAnimations();
         var rooms = _package.GetIncludedRooms();
@@ -184,6 +185,53 @@ public class PackagePublishService
             }
 
             db.Sprites[spriteId] = new Lazy<SpriteImageDataModel>(sprite);
+        }
+        
+        foreach (var (iconPath, iconImageData) in icons)
+        {
+            var iconId = iconImageData.Index;
+            var palette = palettes.First().Value; //TODO: this may need a different selection via mapping
+
+            var (iconWidth, iconHeight, iconBytes) = _images.GetImage(iconPath);
+            var icon = new IconImageDataModel()
+            {
+                Width = (short)iconWidth,
+                Height = (short)iconHeight,
+                RawData = new byte[iconHeight, iconWidth],
+                DecodedData = new byte[iconHeight, iconWidth],
+            };
+            
+            for (var y = 0; y < iconHeight; y++)
+            {
+                for (var x = 0; x < iconWidth; x++)
+                {
+                    var r = iconBytes[(y * iconWidth + x) * 4 + 0];
+                    var g = iconBytes[(y * iconWidth + x) * 4 + 1];
+                    var b = iconBytes[(y * iconWidth + x) * 4 + 2];
+                    var a = iconBytes[(y * iconWidth + x) * 4 + 3];
+
+                    if (r == 255 && g == 0 && b == 255 && a == 255)
+                    {
+                        icon.RawData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                        icon.DecodedData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                        continue;
+                    }
+
+                    if (a < 255)
+                    {
+                        icon.RawData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                        icon.DecodedData[y, x] = ToucheTools.Constants.Palettes.TransparencyColor;
+                        continue;
+                    }
+
+                    var iconCol = palette.First(p => p.Key >= ToucheTools.Constants.Palettes.StartOfSpriteColors &&
+                                                     p.Value.R == r && p.Value.G == g && p.Value.B == b).Key - ToucheTools.Constants.Palettes.StartOfSpriteColors + 1;
+                    icon.RawData[y, x] = (byte)iconCol;
+                    icon.DecodedData[y, x] = (byte)(iconCol + ToucheTools.Constants.Palettes.StartOfSpriteColors - 1);
+                }
+            }
+
+            db.Icons[iconId] = new Lazy<IconImageDataModel>(icon);
         }
 
         foreach (var (animationPath, animation) in animations)

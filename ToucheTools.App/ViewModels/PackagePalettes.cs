@@ -33,7 +33,10 @@ public class PackagePalettes
         
         var images = _package.GetIncludedImages();
         var rooms = images.Where(i => i.Value.Type == OpenedPackage.ImageType.Room).ToList();
-        var sprites = images.Where(i => i.Value.Type == OpenedPackage.ImageType.Sprite).ToList();
+        var sprites = images.Where(i => 
+            i.Value.Type == OpenedPackage.ImageType.Sprite ||
+            i.Value.Type == OpenedPackage.ImageType.Icon //icons also use the same colour range as sprites/UI
+        ).ToList();
         foreach (var (path, imageData) in rooms)
         {
             var roomId = imageData.Index;
