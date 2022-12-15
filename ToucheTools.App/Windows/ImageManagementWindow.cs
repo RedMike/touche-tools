@@ -136,13 +136,8 @@ public class ImageManagementWindow : BaseWindow
         ImGui.End();
     }
 
-    private static string ColorName(int i)
+    private string ColorName(int i)
     {
-        if (!ToucheTools.Constants.Palettes.SpecialColors.Contains(i))
-        {
-            return $"{i}";
-        }
-
         if (ToucheTools.Constants.Palettes.TransparencyColor == i)
         {
             return "Transparent";
@@ -175,8 +170,21 @@ public class ImageManagementWindow : BaseWindow
         {
             return "Action Menu Text";
         }
+        
+        var customColours = _package.GetGame().CustomColors;
 
-        throw new Exception($"Unknown color: {i}");
+        var type = "room";
+        if (i >= ToucheTools.Constants.Palettes.StartOfSpriteColors)
+        {
+            type = "sprite/icon/UI";
+        }
+
+        if (customColours.ContainsKey(i))
+        {
+            return $"Custom {type} {i}";
+        }
+
+        return $"Generated {type} {i}";
     }
 
     private static string ImageName(OpenedPackage.ImageType type, int i)

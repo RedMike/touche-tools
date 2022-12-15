@@ -30,7 +30,7 @@ public class PackagePalettes
         {
             return;
         }
-
+        
         var images = _package.GetIncludedImages();
         var rooms = images.Where(i => i.Value.Type == OpenedPackage.ImageType.Room).ToList();
         var sprites = images.Where(i => i.Value.Type == OpenedPackage.ImageType.Sprite).ToList();
@@ -70,6 +70,10 @@ public class PackagePalettes
                     colIdx++;
                 }
             }
+
+            var customSpriteColours = _package.GetGame().CustomColors
+                .Where(pair => pair.Key >= ToucheTools.Constants.Palettes.StartOfSpriteColors)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
             
             //TODO: build mapping of which sprites are expected to be in which rooms to filter down
             var spriteCols = new List<PaletteDataModel.Rgb>();
@@ -84,9 +88,15 @@ public class PackagePalettes
                         continue;
                     }
 
+                    if (customSpriteColours.ContainsValue((spriteCol.R, spriteCol.G, spriteCol.B)))
+                    {
+                        //custom colours were added separately
+                        continue;
+                    }
+
                     spriteCols.Add(spriteCol);
                 }
-                if (spriteCols.Count > ToucheTools.Constants.Palettes.SpriteColorCount)
+                if (spriteCols.Count > ToucheTools.Constants.Palettes.SpriteColorCount - customSpriteColours.Count)
                 {
                     throw new Exception($"Too many colours in room/sprite: {roomId} {path} {spritePath}");
                 }
@@ -103,9 +113,10 @@ public class PackagePalettes
                 if (colIdx >= spriteCols.Count)
                 {
                     //we've exhausted the sprite colours, so fill out with nothing
+                    
                     palette[i] = new PaletteDataModel.Rgb()
                     {
-                        R = (byte)(i),
+                        R = (byte)(i-100),
                         G = 0,
                         B = (byte)(i-100),
                     };
@@ -121,39 +132,20 @@ public class PackagePalettes
         }
     }
 
-    private static Dictionary<int, PaletteDataModel.Rgb> NewPalette()
+    private Dictionary<int, PaletteDataModel.Rgb> NewPalette()
     {
+        var game = _package.GetGame();
         var palette = new Dictionary<int, PaletteDataModel.Rgb>();
-        palette[ToucheTools.Constants.Palettes.TransparencyColor] = new PaletteDataModel.Rgb()
+        //add custom colours from the start
+        foreach (var (colId, (r, g, b)) in game.CustomColors)
         {
-            R = 0,
-            G = 0,
-            B = 0
-        };
-        palette[ToucheTools.Constants.Palettes.TransparentRoomMarkerColor] = new PaletteDataModel.Rgb()
-        {
-            R = 255,
-            G = 255,
-            B = 255
-        };
-        palette[ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor] = new PaletteDataModel.Rgb()
-        {
-            R = 150,
-            G = 0,
-            B = 150
-        };
-        palette[ToucheTools.Constants.Palettes.InventoryMoneyTextColor] = new PaletteDataModel.Rgb()
-        {
-            R = 50,
-            G = 56,
-            B = 122
-        };
-        palette[ToucheTools.Constants.Palettes.ActionMenuTextColor] = new PaletteDataModel.Rgb()
-        {
-            R = 50,
-            G = 56,
-            B = 122
-        };
+            palette[colId] = new PaletteDataModel.Rgb()
+            {
+                R = r,
+                G = g,
+                B = b
+            };
+        }
         
         //TODO: bg color should come from image
         palette[ToucheTools.Constants.Palettes.ActionMenuBackgroundColor] = new PaletteDataModel.Rgb()
@@ -162,14 +154,6 @@ public class PackagePalettes
             G = 100,
             B = 188
         };
-        palette[ToucheTools.Constants.Palettes.ConversationTextColor] = new PaletteDataModel.Rgb()
-        {
-            R = 60,
-            G = 66,
-            B = 142
-        };
-        
-        
         //TODO: bg color should come from image
         palette[ToucheTools.Constants.Palettes.InventoryBackgroundColor] = new PaletteDataModel.Rgb()
         {
