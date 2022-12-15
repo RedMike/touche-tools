@@ -94,11 +94,12 @@ public class ImageManagementWindow : BaseWindow
                 
                 //image index
                 var indexes = Enumerable.Range(1, 99).ToList();
+                var indexList = indexes.Select(i => ImageName(image.Type, i)).ToArray();
                 var origIndex = image.Index - 1;
                 var index = origIndex;
                 ImGui.PushID($"{path}_index");
-                ImGui.SetNextItemWidth(60.0f);
-                ImGui.Combo("", ref index, indexes.Select(i => i.ToString()).ToArray(), indexes.Count);
+                ImGui.SetNextItemWidth(120.0f);
+                ImGui.Combo("", ref index, indexList, indexList.Length);
                 ImGui.PopID();
                 if (index != origIndex)
                 {
@@ -116,7 +117,7 @@ public class ImageManagementWindow : BaseWindow
             {
                 foreach (var (colId, col) in palette.OrderBy(p => p.Key))
                 {
-                    ImGui.Text($"{colId} - ({col.R}, {col.G}, {col.B})");
+                    ImGui.Text($"{ColorName(colId)} - ({col.R}, {col.G}, {col.B})");
                     ImGui.SameLine();
                     ImGui.PushStyleColor(ImGuiCol.Button,
                         new Vector4(col.R / 255.0f, col.G / 255.0f, col.B / 255.0f, 1.0f));
@@ -133,5 +134,91 @@ public class ImageManagementWindow : BaseWindow
             //TODO: add any new images to list
         }
         ImGui.End();
+    }
+
+    private static string ColorName(int i)
+    {
+        if (!ToucheTools.Constants.Palettes.SpecialColors.Contains(i))
+        {
+            return $"{i}";
+        }
+
+        if (ToucheTools.Constants.Palettes.TransparencyColor == i)
+        {
+            return "Transparent";
+        }
+        if (ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor == i)
+        {
+            return "Sprite Marker (Transparent)";
+        }
+        if (ToucheTools.Constants.Palettes.TransparentRoomMarkerColor == i)
+        {
+            return "Room Marker/UI text";
+        }
+        if (ToucheTools.Constants.Palettes.InventoryBackgroundColor == i)
+        {
+            return "Inventory/Conversation Background";
+        }
+        if (ToucheTools.Constants.Palettes.ConversationTextColor == i)
+        {
+            return "Conversation Text";
+        }
+        if (ToucheTools.Constants.Palettes.InventoryMoneyTextColor == i)
+        {
+            return "Inventory Money";
+        }
+        if (ToucheTools.Constants.Palettes.ActionMenuBackgroundColor == i)
+        {
+            return "Action Menu Background";
+        }
+        if (ToucheTools.Constants.Palettes.ActionMenuTextColor == i)
+        {
+            return "Action Menu Text";
+        }
+
+        throw new Exception($"Unknown color: {i}");
+    }
+
+    private static string ImageName(OpenedPackage.ImageType type, int i)
+    {
+        if (type == OpenedPackage.ImageType.Sprite)
+        {
+            if (i == ToucheTools.Constants.Sprites.InventoryBackground1)
+            {
+                return "Inventory 1";
+            }
+            if (i == ToucheTools.Constants.Sprites.InventoryBackground2)
+            {
+                return "Inventory 2 (not usually used)";
+            }
+            if (i == ToucheTools.Constants.Sprites.InventoryBackground3)
+            {
+                return "Inventory 3 (not used)";
+            }
+            
+            if (i == ToucheTools.Constants.Sprites.ActionMenu)
+            {
+                return "Action Menu";
+            }
+
+            if (i == ToucheTools.Constants.Sprites.ConversationMenu)
+            {
+                return "Conversation Menu";
+            }
+        }
+
+        if (type == OpenedPackage.ImageType.Icon)
+        {
+            if (i == ToucheTools.Constants.Icons.DefaultMouseCursor)
+            {
+                return "Mouse Cursor";
+            }
+            if (i == ToucheTools.Constants.Icons.MoneyIcon)
+            {
+                return "Money Icon";
+            }
+        }
+
+        return $"{type:G} {i}";
     }
 }

@@ -154,6 +154,8 @@ public class PackagePalettes
             G = 56,
             B = 122
         };
+        
+        //TODO: bg color should come from image
         palette[ToucheTools.Constants.Palettes.ActionMenuBackgroundColor] = new PaletteDataModel.Rgb()
         {
             R = 92,
@@ -165,6 +167,15 @@ public class PackagePalettes
             R = 60,
             G = 66,
             B = 142
+        };
+        
+        
+        //TODO: bg color should come from image
+        palette[ToucheTools.Constants.Palettes.InventoryBackgroundColor] = new PaletteDataModel.Rgb()
+        {
+            R = 15,
+            G = 15,
+            B = 15
         };
         return palette;
     }

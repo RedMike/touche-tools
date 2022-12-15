@@ -12,8 +12,16 @@ public static class Palettes
     /// </summary>
     public const int TransparentRoomMarkerColor = 255; //on y = 0, marks room width (only width)
 
+    public const int InventoryBackgroundColor = 210;
     public const int ConversationTextColor = 214;
     public const int InventoryMoneyTextColor = 217;
     public const int ActionMenuBackgroundColor = 248;
     public const int ActionMenuTextColor = 249;
+
+    public static readonly int[] SpecialColors =
+    {
+        TransparencyColor, TransparentSpriteMarkerColor, TransparentRoomMarkerColor,
+        InventoryBackgroundColor, ConversationTextColor, InventoryMoneyTextColor,
+        ActionMenuBackgroundColor, ActionMenuTextColor
+    };
 }

@@ -6,4 +6,5 @@ public static class Icons
     public const int Height = 42;
 
     public const int DefaultMouseCursor = 0;
+    public const int MoneyIcon = 1;
 }
