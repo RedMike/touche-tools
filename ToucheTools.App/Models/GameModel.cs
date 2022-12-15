@@ -18,6 +18,6 @@ public class GameModel
         {Palettes.TransparentRoomMarkerColor, (255, 255, 255)},
         {Palettes.ConversationTextColor, (200, 200, 255)},
         {Palettes.InventoryMoneyTextColor, (200, 200, 255)},
-        {Palettes.ActionMenuTextColor, (50, 100, 205)}
+        {Palettes.ActionMenuTextColor, (50, 60, 105)}
     };
 }

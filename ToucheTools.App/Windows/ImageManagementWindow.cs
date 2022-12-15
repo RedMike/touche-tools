@@ -138,53 +138,16 @@ public class ImageManagementWindow : BaseWindow
 
     private string ColorName(int i)
     {
-        if (ToucheTools.Constants.Palettes.TransparencyColor == i)
-        {
-            return "Transparent";
-        }
-        if (ToucheTools.Constants.Palettes.TransparentSpriteMarkerColor == i)
-        {
-            return "Sprite Marker (Transparent)";
-        }
-        if (ToucheTools.Constants.Palettes.TransparentRoomMarkerColor == i)
-        {
-            return "Room Marker/UI text";
-        }
-        if (ToucheTools.Constants.Palettes.InventoryBackgroundColor == i)
-        {
-            return "Inventory/Conversation Background";
-        }
-        if (ToucheTools.Constants.Palettes.ConversationTextColor == i)
-        {
-            return "Conversation Text";
-        }
-        if (ToucheTools.Constants.Palettes.InventoryMoneyTextColor == i)
-        {
-            return "Inventory Money";
-        }
-        if (ToucheTools.Constants.Palettes.ActionMenuBackgroundColor == i)
-        {
-            return "Action Menu Background";
-        }
-        if (ToucheTools.Constants.Palettes.ActionMenuTextColor == i)
-        {
-            return "Action Menu Text";
-        }
+        var id = ColourHelper.ColourName(i);
         
         var customColours = _package.GetGame().CustomColors;
 
-        var type = "room";
-        if (i >= ToucheTools.Constants.Palettes.StartOfSpriteColors)
-        {
-            type = "sprite/icon/UI";
-        }
-
         if (customColours.ContainsKey(i))
         {
-            return $"Custom {type} {i}";
+            return $"Custom {id}";
         }
 
-        return $"Generated {type} {i}";
+        return $"Generated {id}";
     }
 
     private static string ImageName(OpenedPackage.ImageType type, int i)

@@ -34,6 +34,7 @@ if (editor)
     container.AddSingleton<AnimationManagementState>();
     container.AddSingleton<RoomManagementState>();
     container.AddSingleton<ProgramManagementState>();
+    container.AddSingleton<GameManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
@@ -104,6 +105,7 @@ else
     container.AddSingleton<AnimationManagementState>();
     container.AddSingleton<RoomManagementState>();
     container.AddSingleton<ProgramManagementState>();
+    container.AddSingleton<GameManagementState>();
     container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
