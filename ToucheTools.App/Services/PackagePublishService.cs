@@ -26,7 +26,7 @@ public class PackagePublishService
         _programs = programs;
     }
 
-    public void Publish()
+    public void Publish(string datPath)
     {
         if (!_package.IsLoaded())
         {
@@ -539,12 +539,11 @@ public class PackagePublishService
         
         //save a debug JSON version too for inspecting
         var json = JsonConvert.SerializeObject(db, Formatting.Indented);
-        File.WriteAllText("../../../../sample/TOUCHE_PACKAGE.DAT.json", json);
+        File.WriteAllText(datPath + ".json", json);
 
         var memoryStream = new MemoryStream();
         var exporter = new MainExporter(memoryStream);
         exporter.Export(db);
-        var path = "../../../../sample/TOUCHE_PACKAGE.DAT"; //TODO: different path
-        File.WriteAllBytes(path, memoryStream.ToArray());
+        File.WriteAllBytes(datPath, memoryStream.ToArray());
     }
 }

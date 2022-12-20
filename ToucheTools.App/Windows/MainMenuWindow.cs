@@ -7,15 +7,19 @@ namespace ToucheTools.App.Windows;
 
 public class MainMenuWindow : BaseWindow
 {
+    private const string DatFilePath = "../../../../sample/TOUCHE.DAT";
+    
     private readonly OpenedPackage _openedPackage;
     private readonly MainWindowState _state;
     private readonly PackagePublishService _publishService;
+    private readonly RunService _runService;
 
-    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService)
+    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService, RunService runService)
     {
         _openedPackage = openedPackage;
         _state = state;
         _publishService = publishService;
+        _runService = runService;
     }
 
     public override void Render()
@@ -45,7 +49,13 @@ public class MainMenuWindow : BaseWindow
 
             if (ImGui.MenuItem("Publish"))
             {
-                _publishService.Publish();
+                _publishService.Publish(DatFilePath);
+            }
+
+            if (ImGui.MenuItem("Publish & Run"))
+            {
+                _publishService.Publish(DatFilePath);
+                _runService.Run(Path.GetDirectoryName(Path.GetFullPath(DatFilePath)) ?? throw new InvalidOperationException());
             }
             
             ImGui.EndMenu();

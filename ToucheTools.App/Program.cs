@@ -25,6 +25,9 @@ if (editor)
         .SetMinimumLevel(LogLevel.Information)
         .AddConsole()
     );
+    
+    container.AddSingleton<ConfigService>();
+    container.AddSingleton<RunService>();
 
     container.AddSingleton<PackagePublishService>();
     container.AddSingleton<SpriteSheetRenderer>();
@@ -98,6 +101,9 @@ else
 
     #region Data setup
 
+    container.AddSingleton<ConfigService>();
+    container.AddSingleton<RunService>();
+    
     container.AddSingleton<PackagePublishService>();
 
     container.AddSingleton<MainWindowState>();
