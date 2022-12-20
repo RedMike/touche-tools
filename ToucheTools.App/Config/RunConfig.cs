@@ -10,5 +10,5 @@ public class RunConfig
     /// <summary>
     /// Executable arguments, as format string where {0} is replaced with the DAT file path in double quotes
     /// </summary>
-    public string ExecutableArgumentFormatString { get; set; } = @"-p {0} touche";
+    public string ExecutableArgumentFormatString { get; set; } = @"-p {0} touche:touche";
 }
