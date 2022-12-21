@@ -331,25 +331,52 @@ public class PackagePublishService
 
                 foreach (var (bgAreaId, bgArea) in room.BackgroundAreas)
                 {
-                    var destX = bgArea.DestX ?? 0x4000;
-                    var destY = bgArea.DestY ?? 0x4000;
-                    var type = bgArea.ScaledOffset != null ? 4 : 1;
-                    program.Backgrounds.Add(new ProgramDataModel.Background()
+                    if (bgArea.Dynamic)
                     {
-                        SrcX = bgArea.SourceX,
-                        SrcY = bgArea.SourceY,
-                        Type = type,
-                        Rect = new ProgramDataModel.Rect()
+                        //it's an area
+                        var destX = bgArea.DestX ?? 0x4000;
+                        var destY = bgArea.DestY ?? 0x4000;
+                        //offset/scaling is ignored
+                        program.Areas.Add(new ProgramDataModel.Area()
                         {
-                            X = destX,
-                            Y = destY,
-                            W = bgArea.Width,
-                            H = bgArea.Height
-                        },
-                        Offset = bgArea.ScaledOffset ?? 0,
-                        ScaleDiv = bgArea.ScaleDiv,
-                        ScaleMul = bgArea.ScaleMul
-                    });
+                            Id = bgAreaId, //TODO: mapping?
+                            SrcX = bgArea.SourceX,
+                            SrcY = bgArea.SourceY,
+                            Rect = new ProgramDataModel.Rect()
+                            {
+                                X = destX,
+                                Y = destY,
+                                W = bgArea.Width,
+                                H = bgArea.Height
+                            },
+                            InitialState = ProgramDataModel.AreaState.Static,
+                            AnimationCount = 0, //TODO: animations
+                            AnimationNext = 0, //TODO: animations
+                        });
+                    }
+                    else
+                    {
+                        //it's a background
+                        var destX = bgArea.DestX ?? 0x4000;
+                        var destY = bgArea.DestY ?? 0x4000;
+                        var type = bgArea.ScaledOffset != null ? 4 : 1;
+                        program.Backgrounds.Add(new ProgramDataModel.Background()
+                        {
+                            SrcX = bgArea.SourceX,
+                            SrcY = bgArea.SourceY,
+                            Type = type,
+                            Rect = new ProgramDataModel.Rect()
+                            {
+                                X = destX,
+                                Y = destY,
+                                W = bgArea.Width,
+                                H = bgArea.Height
+                            },
+                            Offset = bgArea.ScaledOffset ?? 0,
+                            ScaleDiv = bgArea.ScaleDiv,
+                            ScaleMul = bgArea.ScaleMul
+                        });
+                    }
                 }
 
                 foreach (var (hitboxId, hitbox) in room.Hitboxes)

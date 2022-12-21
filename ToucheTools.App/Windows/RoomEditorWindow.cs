@@ -452,6 +452,18 @@ public class RoomEditorWindow : BaseWindow
                     {
                         bgArea.Height = height;
                     }
+                    
+                    var origDynamic = bgArea.Dynamic;
+                    var dynamic = origDynamic;
+                    ImGui.PushID($"BackgroundArea{bgAreaId}Dynamic");
+                    ImGui.Checkbox("", ref dynamic);
+                    ImGui.PopID();
+                    ImGui.SameLine();
+                    ImGui.Text("Dynamic?");
+                    if (dynamic != origDynamic)
+                    {
+                        bgArea.Dynamic = dynamic;
+                    }
                 }
             }
 
@@ -605,8 +617,13 @@ public class RoomEditorWindow : BaseWindow
                     col, (255, 255, 255, 255));
                 ImGui.SetCursorPos(imagePos + new Vector2(bgArea.SourceX, bgArea.SourceY));
                 ImGui.Image(rectTexture, new Vector2(bgArea.Width, bgArea.Height));
-                
-                var rectText = $"BG Area {bgAreaId}\nSource";
+
+                var type = "\nStatic";
+                if (bgArea.Dynamic)
+                {
+                    type = "\nDynamic";
+                }
+                var rectText = $"BG Area {bgAreaId}\nSource{type}";
                 ImGui.SetCursorPos(imagePos + new Vector2(bgArea.SourceX, bgArea.SourceY));
                 ImGui.Text(rectText);
                 
@@ -619,7 +636,7 @@ public class RoomEditorWindow : BaseWindow
                     ImGui.SetCursorPos(imagePos + new Vector2(bgArea.DestX.Value, bgArea.DestY.Value));
                     ImGui.Image(rectTexture, new Vector2(bgArea.Width, bgArea.Height));
 
-                    rectText = $"BG Area {bgAreaId}\nDestination";
+                    rectText = $"BG Area {bgAreaId}\nDestination{type}";
                     ImGui.SetCursorPos(imagePos + new Vector2(bgArea.DestX.Value, bgArea.DestY.Value));
                     ImGui.Text(rectText);
                 }
