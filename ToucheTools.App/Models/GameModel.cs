@@ -4,6 +4,16 @@ namespace ToucheTools.App.Models;
 
 public class GameModel
 {
+    public class InventoryItem
+    {
+        /// <summary>
+        /// Name used by default, but a specific program could technically overwrite it
+        /// </summary>
+        public string DefaultLabel { get; set; } = "";
+        
+        //TODO: default actions?
+    }
+    
     public Dictionary<int, string> ActionDefinitions { get; set; } = new Dictionary<int, string>()
     {
         { -Actions.DoNothing, "DoNothing" },
@@ -19,5 +29,9 @@ public class GameModel
         {Palettes.ConversationTextColor, (200, 200, 255)},
         {Palettes.InventoryMoneyTextColor, (200, 200, 255)},
         {Palettes.ActionMenuTextColor, (50, 60, 105)}
+    };
+
+    public Dictionary<int, InventoryItem> InventoryItems { get; set; } = new Dictionary<int, InventoryItem>()
+    {
     };
 }

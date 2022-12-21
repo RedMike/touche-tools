@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
+using ToucheTools.App.Models;
 using ToucheTools.App.State;
 using ToucheTools.App.Utils;
 using ToucheTools.App.ViewModels;
@@ -196,6 +197,42 @@ public class GameManagementWindow : BaseWindow
                 game.ActionDefinitions[newId] = "~";
             }
             
+            ImGui.TreePop();
+        }
+
+        if (ImGui.TreeNodeEx("Inventory Items"))
+        {
+            //inventory items are tied to icons, so only loaded icons are valid
+            var validItemIds = _package.GetIncludedImages().Where(p => p.Value.Type == OpenedPackage.ImageType.Icon)
+                .Select(p => p.Value.Index)
+                .Where(id => id != Icons.MoneyIcon && id != Icons.DefaultMouseCursor)
+                .ToList();
+
+            foreach (var itemId in validItemIds)
+            {
+                var origLabel = "";
+                if (game.InventoryItems.ContainsKey(itemId))
+                {
+                    origLabel = game.InventoryItems[itemId].DefaultLabel;
+                }
+
+                var label = origLabel;
+
+                ImGui.Text($"{itemId}");
+                ImGui.SameLine();
+                ImGui.PushID($"InventoryItem{itemId}");
+                ImGui.InputText("", ref label, 32);
+                ImGui.PopID();
+                if (label != origLabel)
+                {
+                    if (!game.InventoryItems.ContainsKey(itemId))
+                    {
+                        game.InventoryItems[itemId] = new GameModel.InventoryItem();
+                    }
+                    game.InventoryItems[itemId].DefaultLabel = label;
+                }
+            }
+
             ImGui.TreePop();
         }
         
