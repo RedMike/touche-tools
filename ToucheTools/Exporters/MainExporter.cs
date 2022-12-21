@@ -50,7 +50,12 @@ public class MainExporter
         {
             var memStream = new MemoryStream();
             var writer = new BinaryWriter(memStream);
-            var nextOffset = db.Text.Strings.Count * 4 + 4;
+            var maxString = 0;
+            if (db.Text.Strings.Count > 0)
+            {
+                maxString = db.Text.Strings.Keys.Max();
+            }
+            var nextOffset = maxString * 4 + 4;
             var allocate = (int size) =>
             {
                 var retOffset = nextOffset;
@@ -58,9 +63,9 @@ public class MainExporter
                 return retOffset;
             };
 
-            for(var i = 1; i <= db.Text.Strings.Count; i++) //1-indexed
+            for(var i = 1; i <= maxString; i++) //1-indexed
             {
-                var s = "";
+                var s = "~";
                 if (db.Text.Strings.ContainsKey(i))
                 {
                     s = db.Text.Strings[i];
