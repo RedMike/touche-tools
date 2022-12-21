@@ -254,6 +254,20 @@ public class PackagePublishService
             db.Text.Strings[actionId] = actionLabel;
             globalActionIdMapping[actionId] = -actionId;
         }
+        var globalItemDefaultLabelMapping = new Dictionary<int, int>();
+        foreach (var (inventoryItemId, inventoryItem) in game.InventoryItems)
+        {
+            if (db.Text.Strings.ContainsValue(inventoryItem.DefaultLabel))
+            {
+                var id = db.Text.Strings.First(p => p.Value == inventoryItem.DefaultLabel).Key;
+                globalItemDefaultLabelMapping[inventoryItemId] = -id;
+                continue;
+            }
+            
+            var nextTextId = db.Text.Strings.Keys.Max() + 1;
+            db.Text.Strings[nextTextId] = inventoryItem.DefaultLabel;
+            globalItemDefaultLabelMapping[inventoryItemId] = -nextTextId;
+        }
 
         var programs = _package.GetIncludedPrograms();
         foreach (var (programId, programData) in _programs.GetIncludedPrograms())
@@ -462,6 +476,32 @@ public class PackagePublishService
 
                     textIds[(roomId, id)] = stringId;
                 }
+            }
+            
+            //add inventory item hitboxes
+            foreach (var (inventoryItemId, _) in game.InventoryItems)
+            {
+                var item = inventoryItemId | 0x1000;
+                program.Hitboxes.Add(new ProgramDataModel.Hitbox()
+                {
+                    Item = item,
+                    String = globalItemDefaultLabelMapping[inventoryItemId],
+                    DefaultString = globalItemDefaultLabelMapping[inventoryItemId],
+                    Actions = new int[8]
+                    {
+                        actionIdMapping[4],
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    },
+                    Talk = 0,
+                    Rect1 = new ProgramDataModel.Rect(),
+                    Rect2 = new ProgramDataModel.Rect() //TODO: second rect
+                });
             }
 
             foreach (var (actionPath, actionOffset) in _programs.GetActionOffsetsForProgram(programId))
