@@ -203,7 +203,7 @@ public class RoomEditorWindow : BaseWindow
         {
             foreach (var (hitboxId, hitbox) in room.Hitboxes)
             {
-                if (ImGui.TreeNodeEx($"{hitboxId} - {hitbox.Item} {hitbox.Type:G}"))
+                if (ImGui.TreeNodeEx($"{hitboxId}", ImGuiTreeNodeFlags.None, $"{hitboxId} - {hitbox.Item} {hitbox.Type:G} - {hitbox.Label}"))
                 {
                     var item = hitbox.Item;
                     ImGui.PushID($"Hitbox{hitboxId}Item");
