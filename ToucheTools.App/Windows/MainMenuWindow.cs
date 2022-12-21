@@ -7,7 +7,7 @@ namespace ToucheTools.App.Windows;
 
 public class MainMenuWindow : BaseWindow
 {
-    private const string DatFilePath = "../../../../sample/TOUCHE.DAT";
+    private const string DatFilePath = "../../../../sample/DATABASE/TOUCHE.DAT";
     
     private readonly OpenedPackage _openedPackage;
     private readonly MainWindowState _state;
