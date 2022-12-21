@@ -8,7 +8,6 @@ public class RoomModel
     public Dictionary<int, (int, int, int)> WalkablePoints { get; set; } = new Dictionary<int, (int, int, int)>();
     public Dictionary<(int, int), (int, int, int)> WalkableLines { get; set; } = new Dictionary<(int, int), (int, int, int)>();
     
-    //does not include inventory or keychar hitboxes
     public Dictionary<int, HitboxModel> Hitboxes { get; set; } = new Dictionary<int, HitboxModel>();
 
     public Dictionary<int, string> Texts { get; set; } = new Dictionary<int, string>();
