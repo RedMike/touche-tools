@@ -329,6 +329,29 @@ public class PackagePublishService
                     });
                 }
 
+                foreach (var (bgAreaId, bgArea) in room.BackgroundAreas)
+                {
+                    var destX = bgArea.DestX ?? 0x4000;
+                    var destY = bgArea.DestY ?? 0x4000;
+                    var type = bgArea.ScaledOffset != null ? 4 : 1;
+                    program.Backgrounds.Add(new ProgramDataModel.Background()
+                    {
+                        SrcX = bgArea.SourceX,
+                        SrcY = bgArea.SourceY,
+                        Type = type,
+                        Rect = new ProgramDataModel.Rect()
+                        {
+                            X = destX,
+                            Y = destY,
+                            W = bgArea.Width,
+                            H = bgArea.Height
+                        },
+                        Offset = bgArea.ScaledOffset ?? 0,
+                        ScaleDiv = bgArea.ScaleDiv,
+                        ScaleMul = bgArea.ScaleMul
+                    });
+                }
+
                 foreach (var (hitboxId, hitbox) in room.Hitboxes)
                 {
                     var item = hitbox.Item;

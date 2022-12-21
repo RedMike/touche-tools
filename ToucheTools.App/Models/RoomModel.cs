@@ -11,4 +11,7 @@ public class RoomModel
     public Dictionary<int, HitboxModel> Hitboxes { get; set; } = new Dictionary<int, HitboxModel>();
 
     public Dictionary<int, string> Texts { get; set; } = new Dictionary<int, string>();
+
+    public Dictionary<int, BackgroundAreaModel> BackgroundAreas { get; set; } =
+        new Dictionary<int, BackgroundAreaModel>();
 }

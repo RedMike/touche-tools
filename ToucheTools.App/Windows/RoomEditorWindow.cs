@@ -203,7 +203,7 @@ public class RoomEditorWindow : BaseWindow
         {
             foreach (var (hitboxId, hitbox) in room.Hitboxes)
             {
-                if (ImGui.TreeNodeEx($"{hitboxId}", ImGuiTreeNodeFlags.None, $"{hitboxId} - {hitbox.Item} {hitbox.Type:G} - {hitbox.Label}"))
+                if (ImGui.TreeNodeEx($"Hitbox{hitboxId}", ImGuiTreeNodeFlags.None, $"{hitboxId} - {hitbox.Item} {hitbox.Type:G} - {hitbox.Label}"))
                 {
                     var item = hitbox.Item;
                     ImGui.PushID($"Hitbox{hitboxId}Item");
@@ -357,6 +357,118 @@ public class RoomEditorWindow : BaseWindow
             
             ImGui.TreePop();
         }
+
+        if (ImGui.TreeNodeEx("Background Areas"))
+        {
+            foreach (var (bgAreaId, bgArea) in room.BackgroundAreas)
+            {
+                if (ImGui.TreeNodeEx($"BackgroundArea{bgAreaId}", ImGuiTreeNodeFlags.None,
+                        $"{bgAreaId} - ({bgArea.SourceX}, {bgArea.SourceY}) x ({bgArea.Width}, {bgArea.Height})"))
+                {
+                    var origEnabled = bgArea.DestX != null && bgArea.DestY != null;
+                    var enabled = origEnabled;
+                    ImGui.PushID($"BackgroundArea{bgAreaId}Enabled");
+                    ImGui.Checkbox("", ref enabled);
+                    ImGui.PopID();
+                    ImGui.SameLine();
+                    ImGui.Text("Start Enabled?");
+                    if (enabled != origEnabled)
+                    {
+                        if (enabled)
+                        {
+                            bgArea.DestX = 0;
+                            bgArea.DestY = 0;
+                        }
+                        else
+                        {
+                            bgArea.DestX = null;
+                            bgArea.DestY = null;
+                        }
+                    }
+
+                    if (enabled)
+                    {
+                        if (bgArea.DestX == null || bgArea.DestY == null)
+                        {
+                            throw new Exception("Missing destination values");
+                        }
+                        var origDestX = bgArea.DestX.Value;
+                        var destX = origDestX;
+                        ImGui.PushID($"BackgroundArea{bgAreaId}DestX");
+                        ImGui.SliderInt("", ref destX, 0, roomWidth, $"Dest X {destX}");
+                        ImGui.PopID();
+                        if (destX != origDestX)
+                        {
+                            bgArea.DestX = destX;
+                        }
+
+                        var origDestY = bgArea.DestY.Value;
+                        var destY = origDestY;
+                        ImGui.PushID($"BackgroundArea{bgAreaId}DestY");
+                        ImGui.SliderInt("", ref destY, 0, roomHeight, $"Dest Y {destY}");
+                        ImGui.PopID();
+                        if (destY != origDestY)
+                        {
+                            bgArea.DestY = destY;
+                        }
+                    }
+                    
+                    var origSrcX = bgArea.SourceX;
+                    var srcX = origSrcX;
+                    ImGui.PushID($"BackgroundArea{bgAreaId}SrcX");
+                    ImGui.SliderInt("", ref srcX, 0, roomWidth, $"Source X {srcX}");
+                    ImGui.PopID();
+                    if (srcX != origSrcX)
+                    {
+                        bgArea.SourceX = srcX;
+                    }
+                    
+                    var origSrcY = bgArea.SourceY;
+                    var srcY = origSrcY;
+                    ImGui.PushID($"BackgroundArea{bgAreaId}SrcY");
+                    ImGui.SliderInt("", ref srcY, 0, roomHeight, $"Source Y {srcY}");
+                    ImGui.PopID();
+                    if (srcY != origSrcY)
+                    {
+                        bgArea.SourceY = srcY;
+                    }
+                    
+                    var origWidth = bgArea.Width;
+                    var width = origWidth;
+                    ImGui.PushID($"BackgroundArea{bgAreaId}Width");
+                    ImGui.SliderInt("", ref width, 0, roomWidth, $"Width {width}");
+                    ImGui.PopID();
+                    if (width != origWidth)
+                    {
+                        bgArea.Width = width;
+                    }
+                    
+                    var origHeight = bgArea.Height;
+                    var height = origHeight;
+                    ImGui.PushID($"BackgroundArea{bgAreaId}Height");
+                    ImGui.SliderInt("", ref height, 0, roomHeight, $"Height {height}");
+                    ImGui.PopID();
+                    if (height != origHeight)
+                    {
+                        bgArea.Height = height;
+                    }
+                }
+            }
+
+            ImGui.SetNextItemWidth(childWidowWidth);
+            if (ImGui.Button("Add Background Area"))
+            {
+                var newId = 1;
+                if (room.BackgroundAreas.Count > 0)
+                {
+                    newId = room.BackgroundAreas.Select(h => h.Key).Max() + 1;
+                }
+
+                room.BackgroundAreas.Add(newId, new BackgroundAreaModel());
+            }
+            
+            ImGui.TreePop();
+        }
         
         if (ImGui.TreeNodeEx("Texts"))
         {
@@ -477,6 +589,40 @@ public class RoomEditorWindow : BaseWindow
                 var rectText = $"Hitbox {hitboxId}\nItem {hitbox.Item}\n{hitbox.Label}{secondary}{type}";
                 ImGui.SetCursorPos(imagePos + new Vector2(hitbox.X, hitbox.Y));
                 ImGui.Text(rectText);
+            }
+            
+            //background areas
+            foreach (var (bgAreaId, bgArea) in room.BackgroundAreas)
+            {
+                if (bgArea.Width == 0 || bgArea.Height == 0)
+                {
+                    continue;
+                }
+                
+                //source
+                (byte, byte, byte, byte) col = (100, 255, 100, 50);
+                var rectTexture = _render.RenderRectangle(1, bgArea.Width, bgArea.Height,
+                    col, (255, 255, 255, 255));
+                ImGui.SetCursorPos(imagePos + new Vector2(bgArea.SourceX, bgArea.SourceY));
+                ImGui.Image(rectTexture, new Vector2(bgArea.Width, bgArea.Height));
+                
+                var rectText = $"BG Area {bgAreaId}\nSource";
+                ImGui.SetCursorPos(imagePos + new Vector2(bgArea.SourceX, bgArea.SourceY));
+                ImGui.Text(rectText);
+                
+                //dest
+                if (bgArea.DestX != null && bgArea.DestY != null)
+                {
+                    col = (50, 50, 255, 50);
+                    rectTexture = _render.RenderRectangle(1, bgArea.Width, bgArea.Height,
+                        col, (255, 255, 255, 255));
+                    ImGui.SetCursorPos(imagePos + new Vector2(bgArea.DestX.Value, bgArea.DestY.Value));
+                    ImGui.Image(rectTexture, new Vector2(bgArea.Width, bgArea.Height));
+
+                    rectText = $"BG Area {bgAreaId}\nDestination";
+                    ImGui.SetCursorPos(imagePos + new Vector2(bgArea.DestX.Value, bgArea.DestY.Value));
+                    ImGui.Text(rectText);
+                }
             }
         }
         ImGui.EndChild();
