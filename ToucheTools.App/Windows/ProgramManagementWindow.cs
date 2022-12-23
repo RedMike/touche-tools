@@ -182,27 +182,32 @@ public class ProgramManagementWindow : BaseWindow
                     }
                     
                     ImGui.SameLine();
+                    var gameHitboxes = game.InventoryItems
+                        .Select(p => ((-1, p.Key | 0x1000), p.Value.DefaultLabel))
+                        .ToList();
                     var programHitboxes = hitboxes[program.Index]
                         .Select(p => (p.Key, p.Value))
                         .ToList();
-                    var programHitboxList = programHitboxes.Select(p => p.Value).ToArray();
+                    //TODO: allow overwriting of hitboxes?
+                    var allHitboxes = gameHitboxes.Concat(programHitboxes).ToList();
+                    var hitboxList = allHitboxes.Select(p => p.Item2).ToArray();
                     var currentData = new [] {-1, -1};
                     if (program.Data.Length == 2)
                     {
                         currentData = program.Data;
                     }
 
-                    var origHitbox = programHitboxes.FindIndex(i =>
-                        i.Key.Item1 == currentData[0] && i.Key.Item2 == currentData[1]);
+                    var origHitbox = allHitboxes.FindIndex(i =>
+                        i.Item1.Item1 == currentData[0] && i.Item1.Item2 == currentData[1]);
                     var hitbox = origHitbox;
                     
                     ImGui.PushID($"{path}_data");
                     ImGui.SetNextItemWidth(240.0f);
-                    ImGui.Combo("", ref hitbox, programHitboxList, programHitboxList.Length);
+                    ImGui.Combo("", ref hitbox, hitboxList, hitboxList.Length);
                     ImGui.PopID();
                     if (hitbox != origHitbox)
                     {
-                        var newData = new[] { programHitboxes[hitbox].Key.Item1, programHitboxes[hitbox].Key.Item2 };
+                        var newData = new[] { allHitboxes[hitbox].Item1.Item1, allHitboxes[hitbox].Item1.Item2 };
                         _package.Value.Programs[path].Data = newData;
                         _package.ForceUpdate();
                     }

@@ -511,14 +511,23 @@ public class PackagePublishService
                 if (action.Data.Length == 2)
                 {
                     //(roomId, hitboxId)
-                    var roomId = action.Data[0];
-                    var hitboxId = action.Data[1];
-                    if (!hitboxIdMapping.ContainsKey((roomId, hitboxId)))
+                    if (action.Data[0] == -1)
                     {
-                        throw new Exception("Missing hitbox");
+                        //it's a global one
+                        object1 = action.Data[1];
                     }
+                    else
+                    {
+                        //it's a room-specific one
+                        var roomId = action.Data[0];
+                        var hitboxId = action.Data[1];
+                        if (!hitboxIdMapping.ContainsKey((roomId, hitboxId)))
+                        {
+                            throw new Exception("Missing hitbox");
+                        }
 
-                    object1 = hitboxIdMapping[(roomId, hitboxId)];
+                        object1 = hitboxIdMapping[(roomId, hitboxId)];   
+                    }
                 }
                 
                 program.ActionScriptOffsets.Add(new ProgramDataModel.ActionScriptOffset()
