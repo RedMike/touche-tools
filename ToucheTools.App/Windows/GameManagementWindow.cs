@@ -216,20 +216,24 @@ public class GameManagementWindow : BaseWindow
                     origLabel = game.InventoryItems[itemId].DefaultLabel;
                 }
 
-                var label = origLabel;
-
-                ImGui.Text($"{itemId}");
-                ImGui.SameLine();
-                ImGui.PushID($"InventoryItem{itemId}");
-                ImGui.InputText("", ref label, 32);
-                ImGui.PopID();
-                if (label != origLabel)
+                if (ImGui.TreeNodeEx($"Inventory{itemId}", ImGuiTreeNodeFlags.None, $"Item {itemId} - {origLabel}"))
                 {
-                    if (!game.InventoryItems.ContainsKey(itemId))
+                    var label = origLabel;
+
+                    
+                    ImGui.PushID($"Inventory{itemId}label");
+                    ImGui.InputText("", ref label, 32);
+                    ImGui.PopID();
+                    if (label != origLabel)
                     {
-                        game.InventoryItems[itemId] = new GameModel.InventoryItem();
+                        if (!game.InventoryItems.ContainsKey(itemId))
+                        {
+                            game.InventoryItems[itemId] = new GameModel.InventoryItem();
+                        }
+                        game.InventoryItems[itemId].DefaultLabel = label;
                     }
-                    game.InventoryItems[itemId].DefaultLabel = label;
+                    
+                    ImGui.TreePop();
                 }
             }
 

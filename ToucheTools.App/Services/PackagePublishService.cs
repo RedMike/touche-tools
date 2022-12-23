@@ -482,6 +482,7 @@ public class PackagePublishService
             foreach (var (inventoryItemId, _) in game.InventoryItems)
             {
                 var item = inventoryItemId | 0x1000;
+                //TODO: check if the hitbox for the item has already been defined in the program explicitly
                 program.Hitboxes.Add(new ProgramDataModel.Hitbox()
                 {
                     Item = item,
