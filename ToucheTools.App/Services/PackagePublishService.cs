@@ -479,26 +479,18 @@ public class PackagePublishService
             }
             
             //add inventory item hitboxes
-            foreach (var (inventoryItemId, _) in game.InventoryItems)
+            foreach (var (inventoryItemId, inventoryItem) in game.InventoryItems)
             {
                 var item = inventoryItemId | 0x1000;
                 //TODO: check if the hitbox for the item has already been defined in the program explicitly
+                var itemActions = inventoryItem.DefaultActions
+                    .Select(a => actionIdMapping.ContainsKey(a) ? actionIdMapping[a] : 0).ToArray();
                 program.Hitboxes.Add(new ProgramDataModel.Hitbox()
                 {
                     Item = item,
                     String = globalItemDefaultLabelMapping[inventoryItemId],
                     DefaultString = globalItemDefaultLabelMapping[inventoryItemId],
-                    Actions = new int[8]
-                    {
-                        actionIdMapping[4],
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0
-                    },
+                    Actions = itemActions,
                     Talk = 0,
                     Rect1 = new ProgramDataModel.Rect(),
                     Rect2 = new ProgramDataModel.Rect() //TODO: second rect

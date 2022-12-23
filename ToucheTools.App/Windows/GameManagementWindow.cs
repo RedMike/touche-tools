@@ -207,19 +207,27 @@ public class GameManagementWindow : BaseWindow
                 .Select(p => p.Value.Index)
                 .Where(id => id != Icons.MoneyIcon && id != Icons.DefaultMouseCursor)
                 .ToList();
+            
+            var actions = game.ActionDefinitions
+                .Select(a => (a.Key, a.Value))
+                .Where(a => !Actions.BuiltInActions.Contains(-a.Key))
+                .ToList();
+            actions.Insert(0, (-1, "-"));
+            var actionList = actions.Select(a => a.Key < 0 ? $"-" : $"Action {a.Key} ({a.Value})").ToArray();
 
             foreach (var itemId in validItemIds)
             {
+                var itemActions = new int[8];
                 var origLabel = "";
                 if (game.InventoryItems.ContainsKey(itemId))
                 {
                     origLabel = game.InventoryItems[itemId].DefaultLabel;
+                    itemActions = game.InventoryItems[itemId].DefaultActions;
                 }
 
                 if (ImGui.TreeNodeEx($"Inventory{itemId}", ImGuiTreeNodeFlags.None, $"Item {itemId} - {origLabel}"))
                 {
                     var label = origLabel;
-
                     
                     ImGui.PushID($"Inventory{itemId}label");
                     ImGui.InputText("", ref label, 32);
@@ -231,6 +239,29 @@ public class GameManagementWindow : BaseWindow
                             game.InventoryItems[itemId] = new GameModel.InventoryItem();
                         }
                         game.InventoryItems[itemId].DefaultLabel = label;
+                    }
+                    
+                    for (var i = 0; i < 8; i++)
+                    {
+                        var origSelectedAction = actions.FindIndex(a => a.Key == itemActions[i]);
+                        if (origSelectedAction == -1)
+                        {
+                            origSelectedAction = 0;
+                        }
+                        var selectedAction = origSelectedAction;
+                        ImGui.PushID($"Inventory{itemId}Action{i}");
+                        ImGui.Combo("", ref selectedAction, actionList, actionList.Length);
+                        if (selectedAction != origSelectedAction)
+                        {
+                            if (!game.InventoryItems.ContainsKey(itemId))
+                            {
+                                game.InventoryItems[itemId] = new GameModel.InventoryItem();
+                            }
+                            
+                            var actionId = actions[selectedAction].Key;
+                            game.InventoryItems[itemId].DefaultActions[i] = actionId;
+                        }
+                        ImGui.PopID();
                     }
                     
                     ImGui.TreePop();

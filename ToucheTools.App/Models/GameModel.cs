@@ -10,8 +10,8 @@ public class GameModel
         /// Name used by default, but a specific program could technically overwrite it
         /// </summary>
         public string DefaultLabel { get; set; } = "";
-        
-        //TODO: default actions?
+
+        public int[] DefaultActions { get; set; } = new int[8];
     }
     
     public Dictionary<int, string> ActionDefinitions { get; set; } = new Dictionary<int, string>()
