@@ -9,13 +9,12 @@ and similar files.
 ## Why?
 
 The game itself was obscure due to issues around the game's release, 
-but it was actually decent. The game is actually supported 
-by ScummVM, which means it is actually playable on modern 
-machines, and through browsing the engine logic in ScummVM 
-I realised that the technical setup of the engine is actually 
+but it was actually decent. The game is supported by ScummVM, 
+which means it is playable on modern machines, and through browsing 
+the engine logic in ScummVM I realised that the technical setup of the engine is 
 pretty interesting with the amount of flexibility built 
-into it (and at the same time, it is actually annoyingly rigid 
-due to changes once deadlines started appearing on the horizon).
+into it (and at the same time, it is in fact annoyingly rigid 
+due to changes once deadlines started appearing on the horizon presumably).
 
 Making a small hacky (and probably not very stable) fan-game 
 on the engine appealed to me, and I realised that it's not an 
@@ -55,7 +54,7 @@ basic game setup (multiple rooms, characters, items, conversation)
 assets to generate databases (image processing into palettes, 
 basic scripting language, walk point definition, etc)
 
-[ ] Editor: Finish implementing higher-level tools for game creation
+[x] Editor: Finish implementing higher-level tools for game creation
 to a point at which a sample game can be fully delivered mostly within
 the application itself
 
