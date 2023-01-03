@@ -196,7 +196,9 @@ public class SequenceDataExporter
                 _writer.Write((ushort)(sequence.CharToFrameFlag[charId]));
                     
                 var anims = sequence.FrameMappings.Where(i => i.Key.Item1 == charId)
-                    .Select(i => i.Key.Item2).Distinct().ToList();
+                    .Select(i => i.Key.Item2)
+                    .OrderBy(i => i)
+                    .Distinct().ToList();
                 var dirOffset = animOffset + anims.Count * 4 + 4;
                 if (dirOffset >= globalOffset)
                 {
@@ -209,7 +211,9 @@ public class SequenceDataExporter
                     animOffset += 4;
                     
                     var dirs = sequence.FrameMappings.Where(i => i.Key.Item1 == charId && i.Key.Item2 == animId)
-                        .Select(i => i.Key.Item3).Distinct().ToList();
+                        .Select(i => i.Key.Item3)
+                        .OrderBy(i => i)
+                        .Distinct().ToList();
                     foreach (var dirId in dirs)
                     {
                         _stream.Seek(dirOffset, SeekOrigin.Begin);
