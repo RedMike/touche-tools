@@ -86,7 +86,7 @@ public class MainMenuWindow : BaseWindow
                 var publishPath = "";
                 if (triggerPublish)
                 {
-                    publishPath = _publishService.Publish(_openedPath.LoadedPath + "/dist/");
+                    publishPath = _publishService.Publish(Path.Combine(_openedPath.LoadedPath, "dist"));
                 }
 
                 if (triggerRun)

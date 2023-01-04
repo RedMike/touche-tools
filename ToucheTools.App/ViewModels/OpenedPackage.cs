@@ -265,7 +265,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         }
 
         var manifestJson = JsonConvert.SerializeObject(Value, Formatting.Indented);
-        File.WriteAllText(path + "/manifest.json", manifestJson);
+        File.WriteAllText(Path.Combine(path, "manifest.json"), manifestJson);
     }
 
     public void ForceUpdate() //TODO: this should not be necessary
@@ -335,7 +335,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                 .Select(p => AdjustFilePaths(path, p))
                 .Where(FilterFiles)
                 .ToHashSet();
-            var manifestPath = path + "/manifest.json";
+            var manifestPath = Path.Combine(path, "manifest.json");
             if (!File.Exists(manifestPath))
             {
                 //no manifest, generate one
