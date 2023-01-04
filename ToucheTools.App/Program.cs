@@ -59,6 +59,7 @@ if (editor)
     container.AddSingleton<ProgramManagementWindow>();
     container.AddSingleton<ProgramPreviewWindow>();
     container.AddSingleton<GameManagementWindow>();
+    container.AddSingleton<PackageManagementWindow>();
     
     using var window = new RenderWindow("ToucheTools", Constants.MainWindowWidth, Constants.MainWindowHeight);
     container.AddSingleton(window);
@@ -84,6 +85,7 @@ if (editor)
         sp.GetService<ProgramManagementWindow>()?.Render();
         sp.GetService<ProgramPreviewWindow>()?.Render();
         sp.GetService<GameManagementWindow>()?.Render();
+        sp.GetService<PackageManagementWindow>()?.Render();
         
 
         window.Render();

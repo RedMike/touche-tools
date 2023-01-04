@@ -51,6 +51,11 @@ public class OpenedPackage : Observable<OpenedPackage.PackageMarker>
         return new FileInfo(path).Name;
     }
 
+    public void SetPackageName(string name)
+    {
+        Value.Name = name;
+    }
+
     public void Save()
     {
         if (!IsLoaded())

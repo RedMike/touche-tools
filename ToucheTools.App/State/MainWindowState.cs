@@ -5,6 +5,7 @@ public class MainWindowState
     public enum States
     {
         Idle = 0,
+        PackageManagement = 6,
         GameManagement = 1,
         ImageManagement = 2,
         AnimationManagement = 3,
