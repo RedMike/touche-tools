@@ -65,16 +65,37 @@ public class MainMenuWindow : BaseWindow
                     _openedPackage.SaveManifest();
                 }
 
+                var triggerPublish = false;
+                var triggerRun = false;
                 if (ImGui.MenuItem("Publish"))
                 {
-                    _publishService.Publish(DatFilePath);
+                    //TODO: check if saving is needed
+                    //TODO: trigger saving
+                    triggerPublish = true;
                 }
 
                 if (ImGui.MenuItem("Publish & Run"))
                 {
-                    _publishService.Publish(DatFilePath);
-                    _runService.Run(Path.GetDirectoryName(Path.GetFullPath(DatFilePath)) ??
-                                    throw new InvalidOperationException());
+                    //TODO: check if saving is needed
+                    //TODO: trigger saving
+                    //TODO: check if publish is needed
+                    triggerPublish = true;
+                    triggerRun = true;
+                }
+
+                var publishPath = "";
+                if (triggerPublish)
+                {
+                    publishPath = _publishService.Publish(_openedPath.LoadedPath + "/dist/");
+                }
+
+                if (triggerRun)
+                {
+                    if (string.IsNullOrEmpty(publishPath))
+                    {
+                        throw new Exception("Missing publish path");
+                    }
+                    _runService.Run(publishPath);
                 }
             }
             

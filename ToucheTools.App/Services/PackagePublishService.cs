@@ -26,12 +26,27 @@ public class PackagePublishService
         _programs = programs;
     }
 
-    public void Publish(string datPath)
+    public string Publish(string publishFolder)
     {
         if (!_package.IsLoaded())
         {
             throw new Exception("Package not loaded");
         }
+
+        var absolutePublishFolder = Path.GetFullPath(publishFolder);
+        if (!Directory.Exists(absolutePublishFolder))
+        {
+            Directory.CreateDirectory(absolutePublishFolder);
+        }
+
+        var databaseFolder = Path.Combine(absolutePublishFolder, "DATABASE");
+        if (!Directory.Exists(databaseFolder))
+        {
+            Directory.CreateDirectory(databaseFolder);
+        }
+        
+        var datPath = Path.Combine(databaseFolder, "TOUCHE.DAT"); //TODO: filename override?
+        //TODO: non-DAT files like speech/sound/etc
         
         var db = new DatabaseModel()
         {
@@ -629,13 +644,17 @@ public class PackagePublishService
             program.Instructions = indexCorrectedInstructions;
         }
         
+        #if DEBUG
         //save a debug JSON version too for inspecting
         var json = JsonConvert.SerializeObject(db, Formatting.Indented);
         File.WriteAllText(datPath + ".json", json);
+        #endif
 
         var memoryStream = new MemoryStream();
         var exporter = new MainExporter(memoryStream);
         exporter.Export(db);
         File.WriteAllBytes(datPath, memoryStream.ToArray());
+
+        return absolutePublishFolder;
     }
 }

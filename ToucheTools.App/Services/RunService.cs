@@ -11,7 +11,7 @@ public class RunService
         _configService = configService;
     }
 
-    public void Run(string datFilePath)
+    public void Run(string publishFolder)
     {
         var config = _configService.LoadConfig();
         if (string.IsNullOrEmpty(config.ExecutablePath))
@@ -19,16 +19,28 @@ public class RunService
             //TODO: warning
             return;
         }
+        
+        var absolutePublishFolder = Path.GetFullPath(publishFolder);
+        if (!Directory.Exists(absolutePublishFolder))
+        {
+            throw new Exception("Missing publish folder");
+        }
 
         var exePath = config.ExecutablePath;
-        var escapedDatFilePath = '"' + datFilePath.Replace("\"", "\\\"") + '"';
-        var argFormatString = string.Format(config.ExecutableArgumentFormatString, escapedDatFilePath);
+        var escapedPath = '"' + //wrap in double quotes 
+                                 absolutePublishFolder
+                                     .Replace("\\", "\\\\") //escape path separators
+                                     .Replace("\"", "\\\"") //escape double-quotes
+                                 + '"' //wrap in double quotes
+                                 ;
+        var argFormatString = string.Format(config.ExecutableArgumentFormatString, escapedPath);
 
         var process = new Process()
         {
             StartInfo = new ProcessStartInfo()
             {
                 FileName = exePath,
+                WorkingDirectory = absolutePublishFolder,
                 Arguments = argFormatString,
             }
         };
