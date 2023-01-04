@@ -231,23 +231,22 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
 
     public HashSet<string> Files { get; set; } = null!;
     
-    private readonly string _path = "../../../../sample/assets"; //TODO: different default value
-    public string ManifestPath => _path + "/manifest.json";
+    private readonly OpenedPath _openedPath;
+    private bool _loaded = false;
     
-    public OpenedPackage()
+    public OpenedPackage(OpenedPath openedPath)
     {
+        _openedPath = openedPath;
+
+        _openedPath.Observe(Load);
+        
         Observe(Update);
         Load();
     }
     
     public bool IsLoaded()
     {
-        return true;
-    }
-
-    public string GetLoadedPath()
-    {
-        return _path;
+        return _loaded;
     }
 
     public void SaveManifest()
@@ -257,13 +256,15 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             return;
         }
 
-        if (!Directory.Exists(_path))
+        var path = _openedPath.Value;
+
+        if (!Directory.Exists(path))
         {
-            Directory.CreateDirectory(_path);
+            Directory.CreateDirectory(path);
         }
 
         var manifestJson = JsonConvert.SerializeObject(Value, Formatting.Indented);
-        File.WriteAllText(ManifestPath, manifestJson);
+        File.WriteAllText(path + "/manifest.json", manifestJson);
     }
 
     public void ForceUpdate() //TODO: this should not be necessary
@@ -271,11 +272,38 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         SetValue(Value);
     }
 
+    public FileStream LoadFileStream(string path)
+    {
+        var basePath = _openedPath.Value;
+        var adjustedPath = RevertFilePath(basePath, path);
+        return File.Open(adjustedPath, FileMode.Open);
+    }
+
+    public string LoadFile(string path)
+    {
+        var basePath = _openedPath.Value;
+        var adjustedPath = RevertFilePath(basePath, path);
+        return File.ReadAllText(adjustedPath);
+    }
+
+    public string[] LoadFileLines(string path)
+    {
+        var basePath = _openedPath.Value;
+        var adjustedPath = RevertFilePath(basePath, path);
+        return File.ReadAllLines(adjustedPath);
+    }
+
+    public void WriteFile(string path, string data)
+    {
+        var basePath = _openedPath.Value;
+        var adjustedPath = RevertFilePath(basePath, path);
+        File.WriteAllText(adjustedPath, data);
+    }
+    
     public void IncludeFile(string path)
     {
         Value.IncludeFile(path);
         SetValue(Value);
-        
     }
 
     public void ExcludeFile(string path)
@@ -286,84 +314,95 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
 
     private void Load()
     {
-        if (!IsLoaded())
-        {
-            return;
-        }
+        _loaded = false;
+        Files = new HashSet<string>();
 
-        if (!Directory.Exists(_path))
-        {
-            return;
-        }
+        var path = _openedPath.Value;
 
-        Files = Directory.EnumerateFiles(_path)
-            .Where(FilterFiles)
-            .ToHashSet();
-        Manifest manifest;
-        if (!File.Exists(ManifestPath))
+        var newManifest = new Manifest();
+        try
         {
-            //no manifest, generate one
-            manifest = new Manifest()
+            if (string.IsNullOrEmpty(path))
             {
-                IncludedFiles = Files,
-                Images = Files
-                    .Where(f => f.EndsWith(".png"))
-                    .ToDictionary(
-                        f => f,
-                        f => new Image()
-                        {
-                            Type = GetDefaultImageType(f),
-                            Index = -1
-                        }
-                    ),
-                Animations = Files
-                    .Where(f => f.EndsWith(".anim.json"))
-                    .ToDictionary(
-                        f => f,
-                        f => new Animation()
-                        {
-                            Index = -1
-                        }
-                    ),
-                Rooms = Files
-                    .Where(f => f.EndsWith(".room.json"))
-                    .ToDictionary(
-                        f => f,
-                        f => new Room()
-                        {
-                            Index = -1
-                        }
-                    ),
-                Programs = Files
-                    .Where(f => f.EndsWith(".c.tsf"))
-                    .ToDictionary(
-                        f => f,
-                        f => new Program()
-                        {
-                            Type = GetDefaultProgramType(f),
-                            Index = -1
-                        }
-                    ),
-            };
-        }
-        else
-        {
-            //manifest exists, load it
-            var manifestRaw = File.ReadAllText(ManifestPath);
-            manifest = JsonConvert.DeserializeObject<Manifest>(manifestRaw) ??
-                       throw new Exception("Failed to parse manifest");
-
-            foreach (var file in manifest.IncludedFiles)
+                return;
+            }
+            if (!Directory.Exists(path))
             {
-                if (!Files.Contains(file))
+                return;
+            }
+            Files = Directory.EnumerateFiles(path)
+                .Select(p => AdjustFilePaths(path, p))
+                .Where(FilterFiles)
+                .ToHashSet();
+            var manifestPath = path + "/manifest.json";
+            if (!File.Exists(manifestPath))
+            {
+                //no manifest, generate one
+                newManifest = new Manifest()
                 {
-                    //TODO: warning about why
-                    manifest.ExcludeFile(file);
+                    IncludedFiles = Files,
+                    Images = Files
+                        .Where(f => f.EndsWith(".png"))
+                        .ToDictionary(
+                            f => f,
+                            f => new Image()
+                            {
+                                Type = GetDefaultImageType(f),
+                                Index = -1
+                            }
+                        ),
+                    Animations = Files
+                        .Where(f => f.EndsWith(".anim.json"))
+                        .ToDictionary(
+                            f => f,
+                            f => new Animation()
+                            {
+                                Index = -1
+                            }
+                        ),
+                    Rooms = Files
+                        .Where(f => f.EndsWith(".room.json"))
+                        .ToDictionary(
+                            f => f,
+                            f => new Room()
+                            {
+                                Index = -1
+                            }
+                        ),
+                    Programs = Files
+                        .Where(f => f.EndsWith(".c.tsf"))
+                        .ToDictionary(
+                            f => f,
+                            f => new Program()
+                            {
+                                Type = GetDefaultProgramType(f),
+                                Index = -1
+                            }
+                        ),
+                };
+            }
+            else
+            {
+                //manifest exists, load it
+                var manifestRaw = File.ReadAllText(manifestPath);
+                newManifest = JsonConvert.DeserializeObject<Manifest>(manifestRaw) ??
+                           throw new Exception("Failed to parse manifest");
+
+                foreach (var file in newManifest.IncludedFiles)
+                {
+                    if (!Files.Contains(file))
+                    {
+                        //TODO: warning about why
+                        newManifest.ExcludeFile(file);
+                    }
                 }
             }
+            _loaded = true;
         }
-        
-        SetValue(manifest);
+        finally
+        {
+            SetValue(newManifest);
+        }
     }
 
     private void Update()
@@ -442,6 +481,32 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
                 programCounters[program.Type]++;
             }
         }
+    }
+
+    private static string RevertFilePath(string basePath, string path)
+    {
+        var separatorPrefix = "";
+        if (!basePath.EndsWith("/") && !basePath.EndsWith("\\"))
+        {
+            separatorPrefix = "/"; //TODO: pick the right one?
+        }
+        
+        path = basePath +
+               separatorPrefix +
+               path;
+        
+        return path;
+    }
+
+    private static string AdjustFilePaths(string basePath, string path)
+    {
+        path = path
+            .Replace(basePath, "") //remove the path to the package
+            .TrimStart('\\').TrimStart('/') //remove folder prefix if any
+            .Replace("\\", "/") //standardise paths to one separator type
+            ;
+        
+        return path;
     }
 
     private static bool FilterFiles(string path)

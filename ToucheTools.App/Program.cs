@@ -13,6 +13,7 @@ using ToucheTools.Loaders;
 using ToucheTools.Models;
 
 var editor = true;
+//correctly allow (int, int, ...) tuples to be serialised/deserialised
 TypeDescriptor.AddAttributes(typeof((Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32>)));
 TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32>)));
 TypeDescriptor.AddAttributes(typeof((Int32, Int32, Int32, Int32)), new TypeConverterAttribute(typeof(ValueTupleConverter<Int32, Int32, Int32, Int32>)));
@@ -25,6 +26,8 @@ if (editor)
         .SetMinimumLevel(LogLevel.Information)
         .AddConsole()
     );
+    container.AddSingleton<OpenedPath>();
+    container.AddSingleton<OpenedPackage>();
     
     container.AddSingleton<ConfigService>();
     container.AddSingleton<RunService>();
@@ -38,7 +41,6 @@ if (editor)
     container.AddSingleton<RoomManagementState>();
     container.AddSingleton<ProgramManagementState>();
     container.AddSingleton<GameManagementState>();
-    container.AddSingleton<OpenedPackage>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
     container.AddSingleton<PackageAnimations>();

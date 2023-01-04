@@ -12,5 +12,5 @@ public class MainWindowState
         ProgramManagement = 5,
     }
 
-    public States State { get; set; } = States.ProgramManagement; //TODO: better default
+    public States State { get; set; } = States.Idle;
 }

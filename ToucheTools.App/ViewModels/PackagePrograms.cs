@@ -136,7 +136,7 @@ public class PackagePrograms
             }
             else
             {
-                var lines = File.ReadAllLines(mainProgram)
+                var lines = _package.LoadFileLines(mainProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();
@@ -193,7 +193,7 @@ public class PackagePrograms
             foreach (var charProgram in charPrograms)
             {
                 _charOffsets[programId][charProgram] = trackedOffset;
-                var lines = File.ReadAllLines(charProgram)
+                var lines = _package.LoadFileLines(charProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();
@@ -238,7 +238,7 @@ public class PackagePrograms
             foreach (var actionProgram in actionPrograms)
             {
                 _actionOffsets[programId][actionProgram] = trackedOffset;
-                var lines = File.ReadAllLines(actionProgram)
+                var lines = _package.LoadFileLines(actionProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();
@@ -281,7 +281,7 @@ public class PackagePrograms
             foreach (var convoProgram in convoPrograms)
             {
                 _convoOffsets[programId][convoProgram] = trackedOffset;
-                var lines = File.ReadAllLines(convoProgram)
+                var lines = _package.LoadFileLines(convoProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();

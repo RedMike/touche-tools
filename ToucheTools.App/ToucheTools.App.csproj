@@ -42,4 +42,8 @@
     <ItemGroup>
       <ProjectReference Include="..\ToucheTools\ToucheTools.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(SolutionDir)samples\**" CopyToOutputDirectory="PreserveNewest" LinkBase="samples\" />
+    </ItemGroup>
 </Project>

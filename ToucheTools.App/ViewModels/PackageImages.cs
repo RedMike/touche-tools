@@ -26,7 +26,7 @@ public class PackageImages
 
         foreach (var path in _package.GetAllImages())
         {
-            var stream = File.Open(path, FileMode.Open);
+            using var stream = _package.LoadFileStream(path);
             var bitmap = SKBitmap.Decode(stream);
             _images[path] = (bitmap.Width, bitmap.Height, bitmap.Pixels
                 .SelectMany(p => new[] { p.Red, p.Green, p.Blue, p.Alpha })

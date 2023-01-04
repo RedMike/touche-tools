@@ -26,7 +26,7 @@ public class PackageAnimations
     {
         var animation = _animations[path];
         var data = JsonConvert.SerializeObject(animation, Formatting.Indented);
-        File.WriteAllText(path, data);
+        _package.WriteFile(path, data);
     }
     
     private void Update()
@@ -39,7 +39,7 @@ public class PackageAnimations
 
         foreach (var path in _package.GetAllAnimations())
         {
-            var data = File.ReadAllText(path);
+            var data = _package.LoadFile(path);
             var sequence = JsonConvert.DeserializeObject<SequenceDataModel>(data) ??
                            throw new Exception("Failed to parse animation data");
             _animations[path] = sequence;

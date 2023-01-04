@@ -1,0 +1,27 @@
+﻿using ToucheTools.App.ViewModels.Observables;
+
+namespace ToucheTools.App.ViewModels;
+
+public class OpenedPath : Observable<string>
+{
+    public void LoadFolder(string folderPath)
+    {
+        var path = Path.GetDirectoryName(folderPath);
+        if (path == null)
+        {
+            throw new Exception("Invalid path");
+        }
+
+        if (!Directory.Exists(path))
+        {
+            throw new Exception("Path folder does not exist");
+        }
+        
+        SetValue(path);
+    }
+    
+    public void Clear()
+    {
+        SetValue("");
+    }
+}

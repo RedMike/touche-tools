@@ -26,7 +26,7 @@ public class PackageRooms
     {
         var room = _rooms[path];
         var data = JsonConvert.SerializeObject(room, Formatting.Indented);
-        File.WriteAllText(path, data);
+        _package.WriteFile(path, data);
     }
     
     private void Update()
@@ -39,7 +39,7 @@ public class PackageRooms
 
         foreach (var path in _package.GetAllRooms())
         {
-            var data = File.ReadAllText(path);
+            var data = _package.LoadFile(path);
             var room = JsonConvert.DeserializeObject<RoomModel>(data) ??
                        throw new Exception("Failed to parse room data");
             _rooms[path] = room;
