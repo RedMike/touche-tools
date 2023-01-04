@@ -5,15 +5,15 @@ namespace ToucheTools.App.ViewModels;
 
 public class PackageRooms
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     
     private Dictionary<string, RoomModel> _rooms = null!;
 
-    public PackageRooms(OpenedPackage package)
+    public PackageRooms(OpenedManifest manifest)
     {
-        _package = package;
+        _manifest = manifest;
         
-        _package.Observe(Update);
+        _manifest.Observe(Update);
         Update();
     }
 
@@ -26,20 +26,20 @@ public class PackageRooms
     {
         var room = _rooms[path];
         var data = JsonConvert.SerializeObject(room, Formatting.Indented);
-        _package.WriteFile(path, data);
+        _manifest.WriteFile(path, data);
     }
     
     private void Update()
     {
         _rooms = new Dictionary<string, RoomModel>();
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
 
-        foreach (var path in _package.GetAllRooms())
+        foreach (var path in _manifest.GetAllRooms())
         {
-            var data = _package.LoadFile(path);
+            var data = _manifest.LoadFile(path);
             var room = JsonConvert.DeserializeObject<RoomModel>(data) ??
                        throw new Exception("Failed to parse room data");
             _rooms[path] = room;

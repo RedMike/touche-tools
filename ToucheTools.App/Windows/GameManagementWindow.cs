@@ -10,13 +10,13 @@ namespace ToucheTools.App.Windows;
 
 public class GameManagementWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly MainWindowState _state;
     private readonly GameManagementState _gameManagementState;
 
-    public GameManagementWindow(OpenedPackage package, MainWindowState state, GameManagementState gameManagementState)
+    public GameManagementWindow(OpenedManifest manifest, MainWindowState state, GameManagementState gameManagementState)
     {
-        _package = package;
+        _manifest = manifest;
         _state = state;
         _gameManagementState = gameManagementState;
     }
@@ -28,7 +28,7 @@ public class GameManagementWindow : BaseWindow
             return;
         }
 
-        var game = _package.GetGame();
+        var game = _manifest.GetGame();
         
         ImGui.Begin("Game Editor", ImGuiWindowFlags.NoCollapse);
 
@@ -99,7 +99,7 @@ public class GameManagementWindow : BaseWindow
                 if (r != origR || g != origG || b != origB)
                 {
                     game.CustomColors[colId] = ((byte)r, (byte)g, (byte)b);
-                    _package.ForceUpdate();
+                    _manifest.ForceUpdate();
                 }
 
                 if (isRemovable)
@@ -110,7 +110,7 @@ public class GameManagementWindow : BaseWindow
                     if (ImGui.Button("Remove"))
                     {
                         game.CustomColors.Remove(colId);
-                        _package.ForceUpdate();
+                        _manifest.ForceUpdate();
                     }
                     ImGui.PopID();
                 }
@@ -147,7 +147,7 @@ public class GameManagementWindow : BaseWindow
             {
                 var curCol = _gameManagementState.CurrentColour;
                 game.CustomColors[curCol] = (255, 0, 255);
-                _package.ForceUpdate();
+                _manifest.ForceUpdate();
             }
 
             ImGui.TreePop();
@@ -203,7 +203,7 @@ public class GameManagementWindow : BaseWindow
         if (ImGui.TreeNodeEx("Inventory Items"))
         {
             //inventory items are tied to icons, so only loaded icons are valid
-            var validItemIds = _package.GetIncludedImages().Where(p => p.Value.Type == OpenedPackage.ImageType.Icon)
+            var validItemIds = _manifest.GetIncludedImages().Where(p => p.Value.Type == OpenedManifest.ImageType.Icon)
                 .Select(p => p.Value.Index)
                 .Where(id => id != Icons.MoneyIcon && id != Icons.DefaultMouseCursor)
                 .ToList();

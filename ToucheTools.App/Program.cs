@@ -28,6 +28,7 @@ if (editor)
     );
     container.AddSingleton<OpenedPath>();
     container.AddSingleton<OpenedPackage>();
+    container.AddSingleton<OpenedManifest>();
     
     container.AddSingleton<ConfigService>();
     container.AddSingleton<RunService>();
@@ -117,6 +118,7 @@ else
     container.AddSingleton<ProgramManagementState>();
     container.AddSingleton<GameManagementState>();
     container.AddSingleton<OpenedPackage>();
+    container.AddSingleton<OpenedManifest>();
     container.AddSingleton<PackageImages>();
     container.AddSingleton<PackagePalettes>();
     container.AddSingleton<PackageAnimations>();

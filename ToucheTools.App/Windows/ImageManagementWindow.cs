@@ -8,22 +8,22 @@ namespace ToucheTools.App.Windows;
 
 public class ImageManagementWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly MainWindowState _state;
     private readonly ImageManagementState _imageManagementState;
     private readonly PackagePalettes _palettes;
 
-    public ImageManagementWindow(OpenedPackage package, MainWindowState state, ImageManagementState imageManagementState, PackagePalettes palettes)
+    public ImageManagementWindow(MainWindowState state, ImageManagementState imageManagementState, PackagePalettes palettes, OpenedManifest manifest)
     {
-        _package = package;
         _state = state;
         _imageManagementState = imageManagementState;
         _palettes = palettes;
+        _manifest = manifest;
     }
 
     public override void Render()
     {
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
@@ -34,8 +34,8 @@ public class ImageManagementWindow : BaseWindow
         var pos = Vector2.Zero + new Vector2(0.0f, ImGui.GetFrameHeight());
         ImGui.SetNextWindowPos(pos, ImGuiCond.Once);
         ImGui.Begin("Images", ImGuiWindowFlags.NoCollapse);
-        var allImages = _package.GetAllImages().ToList();
-        var includedImages = _package.GetIncludedImages();
+        var allImages = _manifest.GetAllImages().ToList();
+        var includedImages = _manifest.GetIncludedImages();
         foreach (var path in allImages)
         {
             //included checkbox
@@ -48,11 +48,11 @@ public class ImageManagementWindow : BaseWindow
             {
                 if (isIncluded)
                 {
-                    _package.IncludeFile(path);
+                    _manifest.IncludeFile(path);
                 }
                 else
                 {
-                    _package.ExcludeFile(path);
+                    _manifest.ExcludeFile(path);
                 }
             }
             ImGui.SameLine();
@@ -79,7 +79,7 @@ public class ImageManagementWindow : BaseWindow
                 ImGui.SameLine();
                 //image type
                 var image = includedImages[path];
-                var types = OpenedPackage.ImageTypeAsList();
+                var types = OpenedManifest.ImageTypeAsList();
                 var origSelectedType = types.FindIndex(i => i == image.Type.ToString("G"));
                 var selectedType = origSelectedType;
                 ImGui.PushID($"{path}_type");
@@ -88,7 +88,7 @@ public class ImageManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (selectedType != origSelectedType)
                 {
-                    _package.LoadedManifest.Images[path].Type = Enum.Parse<OpenedPackage.ImageType>(types[selectedType]);
+                    _manifest.LoadedManifest.Images[path].Type = Enum.Parse<OpenedManifest.ImageType>(types[selectedType]);
                 }
                 ImGui.SameLine();
                 
@@ -103,7 +103,7 @@ public class ImageManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (index != origIndex)
                 {
-                    _package.LoadedManifest.Images[path].Index = index;
+                    _manifest.LoadedManifest.Images[path].Index = index;
                 }
             }
         }
@@ -140,7 +140,7 @@ public class ImageManagementWindow : BaseWindow
     {
         var id = ColourHelper.ColourName(i);
         
-        var customColours = _package.GetGame().CustomColors;
+        var customColours = _manifest.GetGame().CustomColors;
 
         if (customColours.ContainsKey(i))
         {
@@ -150,9 +150,9 @@ public class ImageManagementWindow : BaseWindow
         return $"Generated {id}";
     }
 
-    private static string ImageName(OpenedPackage.ImageType type, int i)
+    private static string ImageName(OpenedManifest.ImageType type, int i)
     {
-        if (type == OpenedPackage.ImageType.Sprite)
+        if (type == OpenedManifest.ImageType.Sprite)
         {
             if (i == ToucheTools.Constants.Sprites.InventoryBackground1)
             {
@@ -178,7 +178,7 @@ public class ImageManagementWindow : BaseWindow
             }
         }
 
-        if (type == OpenedPackage.ImageType.Icon)
+        if (type == OpenedManifest.ImageType.Icon)
         {
             if (i == ToucheTools.Constants.Icons.DefaultMouseCursor)
             {

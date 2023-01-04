@@ -10,16 +10,16 @@ namespace ToucheTools.App.Windows;
 
 public class RoomEditorWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly MainWindowState _state;
     private readonly RoomManagementState _roomManagementState;
     private readonly RenderWindow _render;
     private readonly PackageImages _images;
     private readonly PackageRooms _rooms;
 
-    public RoomEditorWindow(OpenedPackage package, MainWindowState state, RoomManagementState roomManagementState, RenderWindow render, PackageImages images, PackageRooms rooms)
+    public RoomEditorWindow(OpenedManifest manifest, MainWindowState state, RoomManagementState roomManagementState, RenderWindow render, PackageImages images, PackageRooms rooms)
     {
-        _package = package;
+        _manifest = manifest;
         _state = state;
         _roomManagementState = roomManagementState;
         _render = render;
@@ -44,7 +44,7 @@ public class RoomEditorWindow : BaseWindow
             return;
         }
 
-        var game = _package.GetGame();
+        var game = _manifest.GetGame();
         var room = _rooms.GetRoom(_roomManagementState.SelectedRoom);
         
         ImGui.Begin("Room Editor", ImGuiWindowFlags.NoCollapse);
@@ -56,8 +56,8 @@ public class RoomEditorWindow : BaseWindow
         ImGui.BeginChild("Room Controls", childWindowSize, false, ImGuiWindowFlags.ChildWindow);
 
         //room image
-        var roomImages = _package.GetIncludedImages()
-            .Where(p => p.Value.Type == OpenedPackage.ImageType.Room)
+        var roomImages = _manifest.GetIncludedImages()
+            .Where(p => p.Value.Type == OpenedManifest.ImageType.Room)
             .Select(p => (p.Key, p.Value.Index))
             .ToList();
         var roomImageList = roomImages.Select(r => $"Room {r.Index} ({r.Key.ShortenPath()})").ToArray();
@@ -76,8 +76,8 @@ public class RoomEditorWindow : BaseWindow
         var roomHeight = 0;
         if (room.RoomImageIndex != null)
         {
-            var roomImagePath = _package.GetIncludedImages().First(p =>
-                p.Value.Type == OpenedPackage.ImageType.Room && p.Value.Index == room.RoomImageIndex).Key;
+            var roomImagePath = _manifest.GetIncludedImages().First(p =>
+                p.Value.Type == OpenedManifest.ImageType.Room && p.Value.Index == room.RoomImageIndex).Key;
             (roomWidth, roomHeight, _) = _images.GetImage(roomImagePath);
         }
         
@@ -533,8 +533,8 @@ public class RoomEditorWindow : BaseWindow
         var imagePos = ImGui.GetCursorPos();
         if (room.RoomImageIndex != null)
         {
-            var roomImagePath = _package.GetIncludedImages().First(p =>
-                    p.Value.Type == OpenedPackage.ImageType.Room && p.Value.Index == room.RoomImageIndex).Key;
+            var roomImagePath = _manifest.GetIncludedImages().First(p =>
+                    p.Value.Type == OpenedManifest.ImageType.Room && p.Value.Index == room.RoomImageIndex).Key;
             var (roomImageWidth, roomImageHeight, roomImageBytes) = _images.GetImage(roomImagePath);
 
             //blank texture

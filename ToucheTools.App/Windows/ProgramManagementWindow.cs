@@ -8,24 +8,24 @@ namespace ToucheTools.App.Windows;
 
 public class ProgramManagementWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly MainWindowState _state;
     private readonly ProgramManagementState _programManagementState;
     private readonly PackagePrograms _programs;
     private readonly PackageRooms _rooms;
 
-    public ProgramManagementWindow(OpenedPackage package, MainWindowState state, ProgramManagementState programManagementState, PackagePrograms programs, PackageRooms rooms)
+    public ProgramManagementWindow(MainWindowState state, ProgramManagementState programManagementState, PackagePrograms programs, PackageRooms rooms, OpenedManifest manifest)
     {
-        _package = package;
         _state = state;
         _programManagementState = programManagementState;
         _programs = programs;
         _rooms = rooms;
+        _manifest = manifest;
     }
 
     public override void Render()
     {
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
@@ -36,9 +36,9 @@ public class ProgramManagementWindow : BaseWindow
         var pos = Vector2.Zero + new Vector2(0.0f, ImGui.GetFrameHeight());
         ImGui.SetNextWindowPos(pos, ImGuiCond.Once);
         ImGui.Begin("Programs", ImGuiWindowFlags.NoCollapse);
-        var game = _package.GetGame();
-        var allPrograms = _package.GetAllPrograms().ToList();
-        var includedPrograms = _package.GetIncludedPrograms();
+        var game = _manifest.GetGame();
+        var allPrograms = _manifest.GetAllPrograms().ToList();
+        var includedPrograms = _manifest.GetIncludedPrograms();
         
         //figure out which actions that can be selected
         var actions = game.ActionDefinitions.Select(a => (a.Key, a.Value)).ToList();
@@ -46,12 +46,12 @@ public class ProgramManagementWindow : BaseWindow
         
         //figure out which hitboxes are tied to which programs
         var hitboxes = new Dictionary<int, Dictionary<(int, int), string>>();
-        var rooms = _package.GetIncludedRooms()
+        var rooms = _manifest.GetIncludedRooms()
             .ToDictionary(p => p.Value.Index, p => p.Key);
         
         //figure out which keychars are tied to which programs
         var keyChars = new Dictionary<int, Dictionary<int, string>>();
-        var sprites = _package.GetIncludedImages().Where(i => i.Value.Type == OpenedPackage.ImageType.Sprite)
+        var sprites = _manifest.GetIncludedImages().Where(i => i.Value.Type == OpenedManifest.ImageType.Sprite)
             .ToDictionary(p => p.Value.Index, p => p.Key.ShortenPath());
         foreach (var programId in includedPrograms.Select(p => p.Value.Index).Distinct())
         {
@@ -100,11 +100,11 @@ public class ProgramManagementWindow : BaseWindow
             {
                 if (isIncluded)
                 {
-                    _package.IncludeFile(path);
+                    _manifest.IncludeFile(path);
                 }
                 else
                 {
-                    _package.ExcludeFile(path);
+                    _manifest.ExcludeFile(path);
                 }
             }
             ImGui.SameLine();
@@ -132,7 +132,7 @@ public class ProgramManagementWindow : BaseWindow
                 ImGui.SameLine();
                 //program type
                 var program = includedPrograms[path];
-                var types = OpenedPackage.ProgramTypeAsList();
+                var types = OpenedManifest.ProgramTypeAsList();
                 var origSelectedType = types.FindIndex(i => i == program.Type.ToString("G"));
                 var selectedType = origSelectedType;
                 ImGui.PushID($"{path}_type");
@@ -141,8 +141,8 @@ public class ProgramManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (selectedType != origSelectedType)
                 {
-                    _package.LoadedManifest.Programs[path].Type = Enum.Parse<OpenedPackage.ProgramType>(types[selectedType]);
-                    _package.ForceUpdate();
+                    _manifest.LoadedManifest.Programs[path].Type = Enum.Parse<OpenedManifest.ProgramType>(types[selectedType]);
+                    _manifest.ForceUpdate();
                 }
                 ImGui.SameLine();
                 
@@ -156,11 +156,11 @@ public class ProgramManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (index != origIndex)
                 {
-                    _package.LoadedManifest.Programs[path].Index = index + 1;
-                    _package.ForceUpdate();
+                    _manifest.LoadedManifest.Programs[path].Index = index + 1;
+                    _manifest.ForceUpdate();
                 }
                 
-                if (program.Type == OpenedPackage.ProgramType.Action)
+                if (program.Type == OpenedManifest.ProgramType.Action)
                 {
                     //target = an action
                     //data = (roomId, hitboxId)
@@ -177,8 +177,8 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (action != origAction)
                     {
-                        _package.LoadedManifest.Programs[path].Target = actions[action].Key;
-                        _package.ForceUpdate();
+                        _manifest.LoadedManifest.Programs[path].Target = actions[action].Key;
+                        _manifest.ForceUpdate();
                     }
                     
                     ImGui.SameLine();
@@ -208,10 +208,10 @@ public class ProgramManagementWindow : BaseWindow
                     if (hitbox != origHitbox)
                     {
                         var newData = new[] { allHitboxes[hitbox].Item1.Item1, allHitboxes[hitbox].Item1.Item2 };
-                        _package.LoadedManifest.Programs[path].Data = newData;
-                        _package.ForceUpdate();
+                        _manifest.LoadedManifest.Programs[path].Data = newData;
+                        _manifest.ForceUpdate();
                     }
-                } else if (_package.LoadedManifest.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)
+                } else if (_manifest.LoadedManifest.Programs[path].Type == OpenedManifest.ProgramType.KeyChar)
                 {
                     //target = a keychar
                     //data = empty
@@ -229,10 +229,10 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (target != origTarget)
                     {
-                        _package.LoadedManifest.Programs[path].Target = programKeyChars[target].Key;
-                        _package.ForceUpdate();
+                        _manifest.LoadedManifest.Programs[path].Target = programKeyChars[target].Key;
+                        _manifest.ForceUpdate();
                     }
-                } else if (_package.LoadedManifest.Programs[path].Type == OpenedPackage.ProgramType.Conversation)
+                } else if (_manifest.LoadedManifest.Programs[path].Type == OpenedManifest.ProgramType.Conversation)
                 {
                     //target = a conversation ID (X = start convo, X+1 = potential choice 1, X+2 = potential choice 2, ...)
                     //data = (textId)
@@ -244,8 +244,8 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (target != program.Target)
                     {
-                        _package.LoadedManifest.Programs[path].Target = target;
-                        _package.ForceUpdate();
+                        _manifest.LoadedManifest.Programs[path].Target = target;
+                        _manifest.ForceUpdate();
                     }
 
                     var origData = 0;
@@ -261,8 +261,8 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (data != origData)
                     {
-                        _package.LoadedManifest.Programs[path].Data = new[] { data };
-                        _package.ForceUpdate();
+                        _manifest.LoadedManifest.Programs[path].Data = new[] { data };
+                        _manifest.ForceUpdate();
                     }
                 }
             }

@@ -4,17 +4,17 @@ namespace ToucheTools.App.ViewModels;
 
 public class PackagePalettes
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly PackageImages _images;
 
     private Dictionary<int, Dictionary<int, PaletteDataModel.Rgb>> _palettesByRoom = null!;
 
-    public PackagePalettes(OpenedPackage package, PackageImages images)
+    public PackagePalettes(OpenedManifest manifest, PackageImages images)
     {
-        _package = package;
+        _manifest = manifest;
         _images = images;
 
-        _package.Observe(Update);
+        _manifest.Observe(Update);
         Update();
     }
 
@@ -26,16 +26,16 @@ public class PackagePalettes
     private void Update()
     {
         _palettesByRoom = new Dictionary<int, Dictionary<int, PaletteDataModel.Rgb>>();
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
         
-        var images = _package.GetIncludedImages();
-        var rooms = images.Where(i => i.Value.Type == OpenedPackage.ImageType.Room).ToList();
+        var images = _manifest.GetIncludedImages();
+        var rooms = images.Where(i => i.Value.Type == OpenedManifest.ImageType.Room).ToList();
         var sprites = images.Where(i => 
-            i.Value.Type == OpenedPackage.ImageType.Sprite ||
-            i.Value.Type == OpenedPackage.ImageType.Icon //icons also use the same colour range as sprites/UI
+            i.Value.Type == OpenedManifest.ImageType.Sprite ||
+            i.Value.Type == OpenedManifest.ImageType.Icon //icons also use the same colour range as sprites/UI
         ).ToList();
         foreach (var (path, imageData) in rooms)
         {
@@ -74,7 +74,7 @@ public class PackagePalettes
                 }
             }
 
-            var customSpriteColours = _package.GetGame().CustomColors
+            var customSpriteColours = _manifest.GetGame().CustomColors
                 .Where(pair => pair.Key >= ToucheTools.Constants.Palettes.StartOfSpriteColors)
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
             
@@ -137,7 +137,7 @@ public class PackagePalettes
 
     private Dictionary<int, PaletteDataModel.Rgb> NewPalette()
     {
-        var game = _package.GetGame();
+        var game = _manifest.GetGame();
         var palette = new Dictionary<int, PaletteDataModel.Rgb>();
         //add custom colours from the start
         foreach (var (colId, (r, g, b)) in game.CustomColors)

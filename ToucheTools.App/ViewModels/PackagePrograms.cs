@@ -6,7 +6,7 @@ namespace ToucheTools.App.ViewModels;
 
 public class PackagePrograms
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
 
     private Dictionary<int, Dictionary<uint, BaseInstruction>> _programs = null!;
     private Dictionary<int, Dictionary<string, uint>> _actionOffsets = null!;
@@ -16,11 +16,11 @@ public class PackagePrograms
     private Dictionary<int, Dictionary<int, int>> _keyChars = null!;
     private Dictionary<int, HashSet<int>> _rooms = null!;
     
-    public PackagePrograms(OpenedPackage package)
+    public PackagePrograms(OpenedManifest manifest)
     {
-        _package = package;
+        _manifest = manifest;
 
-        _package.Observe(Update);
+        _manifest.Observe(Update);
         Update();
     }
 
@@ -73,12 +73,12 @@ public class PackagePrograms
         _labels = new Dictionary<int, Dictionary<string, uint>>();
         _keyChars = new Dictionary<int, Dictionary<int, int>>();
         _rooms = new Dictionary<int, HashSet<int>>();
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
 
-        foreach (var group in _package.GetIncludedPrograms().GroupBy(p => p.Value.Index))
+        foreach (var group in _manifest.GetIncludedPrograms().GroupBy(p => p.Value.Index))
         {
             var programId = group.Key;
 
@@ -92,13 +92,13 @@ public class PackagePrograms
             var foundMain = false;
             foreach (var (programPath, programData) in group)
             {
-                if (programData.Type == OpenedPackage.ProgramType.Unknown)
+                if (programData.Type == OpenedManifest.ProgramType.Unknown)
                 {
                     //TODO: log warning
                     continue;
                 }
                 
-                if (programData.Type == OpenedPackage.ProgramType.Main)
+                if (programData.Type == OpenedManifest.ProgramType.Main)
                 {
                     if (foundMain)
                     {
@@ -107,13 +107,13 @@ public class PackagePrograms
 
                     foundMain = true;
                     mainProgram = programPath;   
-                } else if (programData.Type == OpenedPackage.ProgramType.KeyChar)
+                } else if (programData.Type == OpenedManifest.ProgramType.KeyChar)
                 {
                     charPrograms.Add(programPath);
-                } else if (programData.Type == OpenedPackage.ProgramType.Action)
+                } else if (programData.Type == OpenedManifest.ProgramType.Action)
                 {
                     actionPrograms.Add(programPath);
-                } else if (programData.Type == OpenedPackage.ProgramType.Conversation)
+                } else if (programData.Type == OpenedManifest.ProgramType.Conversation)
                 {
                     convoPrograms.Add(programPath);
                 }
@@ -136,7 +136,7 @@ public class PackagePrograms
             }
             else
             {
-                var lines = _package.LoadFileLines(mainProgram)
+                var lines = _manifest.LoadFileLines(mainProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();
@@ -193,7 +193,7 @@ public class PackagePrograms
             foreach (var charProgram in charPrograms)
             {
                 _charOffsets[programId][charProgram] = trackedOffset;
-                var lines = _package.LoadFileLines(charProgram)
+                var lines = _manifest.LoadFileLines(charProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();
@@ -238,7 +238,7 @@ public class PackagePrograms
             foreach (var actionProgram in actionPrograms)
             {
                 _actionOffsets[programId][actionProgram] = trackedOffset;
-                var lines = _package.LoadFileLines(actionProgram)
+                var lines = _manifest.LoadFileLines(actionProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();
@@ -281,7 +281,7 @@ public class PackagePrograms
             foreach (var convoProgram in convoPrograms)
             {
                 _convoOffsets[programId][convoProgram] = trackedOffset;
-                var lines = _package.LoadFileLines(convoProgram)
+                var lines = _manifest.LoadFileLines(convoProgram)
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToList();
                 var secondPassList = new Dictionary<uint, string>();

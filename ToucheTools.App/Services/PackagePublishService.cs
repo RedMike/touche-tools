@@ -9,16 +9,16 @@ namespace ToucheTools.App.Services;
 
 public class PackagePublishService
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly PackageImages _images;
     private readonly PackagePalettes _palettes;
     private readonly PackageAnimations _animations;
     private readonly PackageRooms _rooms;
     private readonly PackagePrograms _programs;
 
-    public PackagePublishService(OpenedPackage package, PackageImages images, PackagePalettes palettes, PackageAnimations animations, PackageRooms rooms, PackagePrograms programs)
+    public PackagePublishService(OpenedManifest manifest, PackageImages images, PackagePalettes palettes, PackageAnimations animations, PackageRooms rooms, PackagePrograms programs)
     {
-        _package = package;
+        _manifest = manifest;
         _images = images;
         _palettes = palettes;
         _animations = animations;
@@ -28,7 +28,7 @@ public class PackagePublishService
 
     public string Publish(string publishFolder)
     {
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             throw new Exception("Package not loaded");
         }
@@ -72,13 +72,13 @@ public class PackagePublishService
             },
             Programs = Sample.Programs(),
         };
-        var images = _package.GetIncludedImages();
-        var roomImages = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Room);
-        var sprites = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Sprite);
-        var icons = images.Where(p => p.Value.Type == OpenedPackage.ImageType.Icon);
+        var images = _manifest.GetIncludedImages();
+        var roomImages = images.Where(p => p.Value.Type == OpenedManifest.ImageType.Room);
+        var sprites = images.Where(p => p.Value.Type == OpenedManifest.ImageType.Sprite);
+        var icons = images.Where(p => p.Value.Type == OpenedManifest.ImageType.Icon);
         var palettes = _palettes.GetPalettes();
-        var animations = _package.GetIncludedAnimations();
-        var rooms = _package.GetIncludedRooms();
+        var animations = _manifest.GetIncludedAnimations();
+        var rooms = _manifest.GetIncludedRooms();
 
         foreach (var (roomImagePath, roomImageData) in roomImages)
         {
@@ -256,7 +256,7 @@ public class PackagePublishService
         }
         
         //room-independent strings and actions
-        var game = _package.GetGame();
+        var game = _manifest.GetGame();
         var globalActionIdMapping = new Dictionary<int, int>();
         foreach (var (actionId, actionLabel) in game.ActionDefinitions)
         {
@@ -284,7 +284,7 @@ public class PackagePublishService
             globalItemDefaultLabelMapping[inventoryItemId] = -nextTextId;
         }
 
-        var programs = _package.GetIncludedPrograms();
+        var programs = _manifest.GetIncludedPrograms();
         foreach (var (programId, programData) in _programs.GetIncludedPrograms())
         {
             var actionIdMapping = new Dictionary<int, int>(globalActionIdMapping); //new set of actions per program
@@ -514,7 +514,7 @@ public class PackagePublishService
 
             foreach (var (actionPath, actionOffset) in _programs.GetActionOffsetsForProgram(programId))
             {
-                if (programs[actionPath].Type != OpenedPackage.ProgramType.Action)
+                if (programs[actionPath].Type != OpenedManifest.ProgramType.Action)
                 {
                     throw new Exception("Wrong program type for action");
                 }
@@ -556,7 +556,7 @@ public class PackagePublishService
 
             foreach (var (charPath, charOffset) in _programs.GetCharOffsetsForProgram(programId))
             {
-                if (programs[charPath].Type != OpenedPackage.ProgramType.KeyChar)
+                if (programs[charPath].Type != OpenedManifest.ProgramType.KeyChar)
                 {
                     throw new Exception("Wrong program type for keychar");
                 }
@@ -571,7 +571,7 @@ public class PackagePublishService
 
             foreach (var (convoPath, convoOffset) in _programs.GetConvoOffsetsForProgram(programId))
             {
-                if (programs[convoPath].Type != OpenedPackage.ProgramType.Conversation)
+                if (programs[convoPath].Type != OpenedManifest.ProgramType.Conversation)
                 {
                     throw new Exception("Wrong program type for convo");
                 }

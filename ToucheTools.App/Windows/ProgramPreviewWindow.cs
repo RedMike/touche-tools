@@ -7,17 +7,17 @@ namespace ToucheTools.App.Windows;
 
 public class ProgramPreviewWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly MainWindowState _state;
     private readonly ProgramManagementState _programManagementState;
     private readonly PackagePrograms _programs;
 
-    public ProgramPreviewWindow(OpenedPackage package, MainWindowState state, ProgramManagementState programManagementState, PackagePrograms programs)
+    public ProgramPreviewWindow(MainWindowState state, ProgramManagementState programManagementState, PackagePrograms programs, OpenedManifest manifest)
     {
-        _package = package;
         _state = state;
         _programManagementState = programManagementState;
         _programs = programs;
+        _manifest = manifest;
     }
 
     public override void Render()
@@ -37,13 +37,13 @@ public class ProgramPreviewWindow : BaseWindow
             return;
         }
 
-        if (!_package.LoadedManifest.Programs.ContainsKey(_programManagementState.SelectedProgram))
+        if (!_manifest.LoadedManifest.Programs.ContainsKey(_programManagementState.SelectedProgram))
         {
             //error?
             return;
         }
 
-        var programId = _package.GetIncludedPrograms().First(p => p.Key == _programManagementState.SelectedProgram).Value.Index;
+        var programId = _manifest.GetIncludedPrograms().First(p => p.Key == _programManagementState.SelectedProgram).Value.Index;
         var program = _programs.GetProgram(programId);
         var actionOffsets = _programs.GetActionOffsetsForProgram(programId);
         var charOffsets = _programs.GetCharOffsetsForProgram(programId);

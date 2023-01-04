@@ -8,20 +8,20 @@ namespace ToucheTools.App.Windows;
 
 public class AnimationManagementWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
     private readonly AnimationManagementState _animationManagementState;
+    private readonly OpenedManifest _manifest;
 
-    public AnimationManagementWindow(OpenedPackage package, MainWindowState state, AnimationManagementState animationManagementState)
+    public AnimationManagementWindow(MainWindowState state, AnimationManagementState animationManagementState, OpenedManifest manifest)
     {
-        _package = package;
         _state = state;
         _animationManagementState = animationManagementState;
+        _manifest = manifest;
     }
 
     public override void Render()
     {
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
@@ -34,8 +34,8 @@ public class AnimationManagementWindow : BaseWindow
         ImGui.SetNextWindowPos(pos, ImGuiCond.Once);
         ImGui.Begin("Animations", ImGuiWindowFlags.NoCollapse);
 
-        var allAnimations = _package.GetAllAnimations();
-        var includedAnimations = _package.GetIncludedAnimations();
+        var allAnimations = _manifest.GetAllAnimations();
+        var includedAnimations = _manifest.GetIncludedAnimations();
         foreach (var path in allAnimations)
         {
             //included checkbox
@@ -48,11 +48,11 @@ public class AnimationManagementWindow : BaseWindow
             {
                 if (isIncluded)
                 {
-                    _package.IncludeFile(path);
+                    _manifest.IncludeFile(path);
                 }
                 else
                 {
-                    _package.ExcludeFile(path);
+                    _manifest.ExcludeFile(path);
                 }
             }
             ImGui.SameLine();
@@ -87,7 +87,7 @@ public class AnimationManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (index != origIndex)
                 {
-                    _package.LoadedManifest.Animations[path].Index = index + 1;
+                    _manifest.LoadedManifest.Animations[path].Index = index + 1;
                 }
             }
         }

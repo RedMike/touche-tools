@@ -8,20 +8,20 @@ namespace ToucheTools.App.Windows;
 
 public class RoomManagementWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly MainWindowState _state;
     private readonly RoomManagementState _roomManagementState;
 
-    public RoomManagementWindow(OpenedPackage package, MainWindowState state, RoomManagementState roomManagementState)
+    public RoomManagementWindow(OpenedManifest manifest, MainWindowState state, RoomManagementState roomManagementState)
     {
-        _package = package;
+        _manifest = manifest;
         _state = state;
         _roomManagementState = roomManagementState;
     }
 
     public override void Render()
     {
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
@@ -33,8 +33,8 @@ public class RoomManagementWindow : BaseWindow
         var pos = Vector2.Zero + new Vector2(0.0f, ImGui.GetFrameHeight());
         ImGui.SetNextWindowPos(pos, ImGuiCond.Once);
         ImGui.Begin("Rooms", ImGuiWindowFlags.NoCollapse);
-        var allRooms = _package.GetAllRooms().ToList();
-        var includedRooms = _package.GetIncludedRooms();
+        var allRooms = _manifest.GetAllRooms().ToList();
+        var includedRooms = _manifest.GetIncludedRooms();
         foreach (var path in allRooms)
         {
             //included checkbox
@@ -47,11 +47,11 @@ public class RoomManagementWindow : BaseWindow
             {
                 if (isIncluded)
                 {
-                    _package.IncludeFile(path);
+                    _manifest.IncludeFile(path);
                 }
                 else
                 {
-                    _package.ExcludeFile(path);
+                    _manifest.ExcludeFile(path);
                 }
             }
             ImGui.SameLine();

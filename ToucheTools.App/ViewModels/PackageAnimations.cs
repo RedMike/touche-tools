@@ -5,15 +5,15 @@ namespace ToucheTools.App.ViewModels;
 
 public class PackageAnimations
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     
     private Dictionary<string, SequenceDataModel> _animations = null!;
 
-    public PackageAnimations(OpenedPackage package)
+    public PackageAnimations(OpenedManifest manifest)
     {
-        _package = package;
+        _manifest = manifest;
         
-        _package.Observe(Update);
+        _manifest.Observe(Update);
         Update();
     }
 
@@ -26,20 +26,20 @@ public class PackageAnimations
     {
         var animation = _animations[path];
         var data = JsonConvert.SerializeObject(animation, Formatting.Indented);
-        _package.WriteFile(path, data);
+        _manifest.WriteFile(path, data);
     }
     
     private void Update()
     {
         _animations = new Dictionary<string, SequenceDataModel>();
-        if (!_package.IsLoaded())
+        if (!_manifest.IsLoaded())
         {
             return;
         }
 
-        foreach (var path in _package.GetAllAnimations())
+        foreach (var path in _manifest.GetAllAnimations())
         {
-            var data = _package.LoadFile(path);
+            var data = _manifest.LoadFile(path);
             var sequence = JsonConvert.DeserializeObject<SequenceDataModel>(data) ??
                            throw new Exception("Failed to parse animation data");
             _animations[path] = sequence;

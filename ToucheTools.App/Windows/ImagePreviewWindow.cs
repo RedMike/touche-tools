@@ -7,21 +7,21 @@ namespace ToucheTools.App.Windows;
 
 public class ImagePreviewWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
     private readonly MainWindowState _state;
     private readonly ImageManagementState _imageManagementState;
     private readonly RenderWindow _render;
     private readonly PackageImages _images;
+    private readonly OpenedManifest _manifest;
 
     private readonly Dictionary<string, (IntPtr, int, int)> _textures = new Dictionary<string, (IntPtr, int, int)>();
     
-    public ImagePreviewWindow(OpenedPackage package, MainWindowState state, ImageManagementState imageManagementState, RenderWindow render, PackageImages images)
+    public ImagePreviewWindow(MainWindowState state, ImageManagementState imageManagementState, RenderWindow render, PackageImages images, OpenedManifest manifest)
     {
-        _package = package;
         _state = state;
         _imageManagementState = imageManagementState;
         _render = render;
         _images = images;
+        _manifest = manifest;
     }
 
 
@@ -42,7 +42,7 @@ public class ImagePreviewWindow : BaseWindow
             return;
         }
 
-        if (!_package.LoadedManifest.Images.ContainsKey(_imageManagementState.SelectedImage))
+        if (!_manifest.LoadedManifest.Images.ContainsKey(_imageManagementState.SelectedImage))
         {
             //error?
             return;

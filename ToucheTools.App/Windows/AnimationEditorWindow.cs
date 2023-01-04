@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using ImGuiNET;
-using ToucheTools.App.Services;
 using ToucheTools.App.State;
 using ToucheTools.App.Utils;
 using ToucheTools.App.ViewModels;
@@ -11,23 +10,21 @@ namespace ToucheTools.App.Windows;
 
 public class AnimationEditorWindow : BaseWindow
 {
-    private readonly OpenedPackage _package;
+    private readonly OpenedManifest _manifest;
     private readonly MainWindowState _state;
     private readonly AnimationManagementState _animationManagementState;
     private readonly RenderWindow _render;
     private readonly PackageImages _images;
     private readonly PackageAnimations _animations;
-    private readonly SpriteSheetRenderer _spriteRenderer;
 
-    public AnimationEditorWindow(OpenedPackage package, MainWindowState state, AnimationManagementState animationManagementState, RenderWindow render, PackageImages images, PackageAnimations animations, SpriteSheetRenderer spriteRenderer)
+    public AnimationEditorWindow(MainWindowState state, AnimationManagementState animationManagementState, RenderWindow render, PackageImages images, PackageAnimations animations, OpenedManifest manifest)
     {
-        _package = package;
         _state = state;
         _animationManagementState = animationManagementState;
         _render = render;
         _images = images;
         _animations = animations;
-        _spriteRenderer = spriteRenderer;
+        _manifest = manifest;
     }
 
     public override void Render()
@@ -47,7 +44,7 @@ public class AnimationEditorWindow : BaseWindow
             return;
         }
         
-        if (!_package.LoadedManifest.Animations.ContainsKey(_animationManagementState.SelectedAnimationPath))
+        if (!_manifest.LoadedManifest.Animations.ContainsKey(_animationManagementState.SelectedAnimationPath))
         {
             //error?
             return;
@@ -57,8 +54,8 @@ public class AnimationEditorWindow : BaseWindow
         var windowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
 
         //sprite selection
-        var sprites = _package.GetIncludedImages()
-            .Where(p => p.Value.Type == OpenedPackage.ImageType.Sprite)
+        var sprites = _manifest.GetIncludedImages()
+            .Where(p => p.Value.Type == OpenedManifest.ImageType.Sprite)
             .Select(p => (p.Key, p.Value.Index))
             .ToList();
         var spriteList = sprites.Select(s => $"Sprite {s.Index} ({s.Key.ShortenPath()})").ToArray();

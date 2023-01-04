@@ -19,14 +19,16 @@ public class MainMenuWindow : BaseWindow
     private readonly PackagePublishService _publishService;
     private readonly RunService _runService;
     private readonly OpenedPath _openedPath;
+    private readonly OpenedManifest _openedManifest;
 
-    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService, RunService runService, OpenedPath openedPath)
+    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService, RunService runService, OpenedPath openedPath, OpenedManifest openedManifest)
     {
         _openedPackage = openedPackage;
         _state = state;
         _publishService = publishService;
         _runService = runService;
         _openedPath = openedPath;
+        _openedManifest = openedManifest;
     }
 
     private void RenderFileMenu()
@@ -62,7 +64,7 @@ public class MainMenuWindow : BaseWindow
                 if (ImGui.MenuItem("Save"))
                 {
                     //TODO: trigger all saving
-                    _openedPackage.SaveManifest();
+                    _openedManifest.Save();
                 }
 
                 var triggerPublish = false;
