@@ -77,6 +77,13 @@ public class MainMenuWindow : BaseWindow
                                     throw new InvalidOperationException());
                 }
             }
+            
+            ImGui.Separator();
+
+            if (ImGui.MenuItem("Editor Settings"))
+            {
+                _state.ShowingEditorSettings = true;
+            }
 
             ImGui.EndMenu();
         }
@@ -109,11 +116,6 @@ public class MainMenuWindow : BaseWindow
 
             ImGui.EndMenu();
         }
-    }
-
-    private void RenderSettingsMenu()
-    {
-        
     }
 
     /// <summary>
@@ -149,7 +151,6 @@ public class MainMenuWindow : BaseWindow
         
         RenderFileMenu();
         RenderModeMenu();
-        RenderSettingsMenu();
 
         RenderInfoMenuLast();
         

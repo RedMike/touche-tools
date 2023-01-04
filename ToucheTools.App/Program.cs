@@ -48,6 +48,7 @@ if (editor)
     container.AddSingleton<PackagePrograms>();
 
     container.AddSingleton<MainMenuWindow>();
+    container.AddSingleton<EditorSettingsWindow>();
     container.AddSingleton<ImageManagementWindow>();
     container.AddSingleton<ImagePreviewWindow>();
     container.AddSingleton<AnimationManagementWindow>();
@@ -72,6 +73,7 @@ if (editor)
         }
         
         sp.GetService<MainMenuWindow>()?.Render();
+        sp.GetService<EditorSettingsWindow>()?.Render();
         sp.GetService<ImageManagementWindow>()?.Render();
         sp.GetService<ImagePreviewWindow>()?.Render();
         sp.GetService<AnimationManagementWindow>()?.Render();

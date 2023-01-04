@@ -13,4 +13,6 @@ public class MainWindowState
     }
 
     public States State { get; set; } = States.Idle;
+
+    public bool ShowingEditorSettings { get; set; } = false;
 }

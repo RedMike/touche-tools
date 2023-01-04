@@ -29,6 +29,14 @@ public class ConfigService
             return _cachedConfig;
         }
 
+        if (failed is FileNotFoundException)
+        {
+            //pretend it's written
+            _cachedConfig = new RunConfig();
+            _cacheId = 0;
+            return _cachedConfig;
+        }
+
         if (failed != null)
         {
             throw new Exception("Failed to load run config file", failed);
