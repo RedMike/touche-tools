@@ -229,6 +229,17 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         }
     }
 
+    public class PackageMarker
+    {
+        /// <summary>
+        /// Version of the package, for future-proofing
+        /// </summary>
+        public int Version { get; set; }
+        
+        //TODO: authors, homepages, etc
+    }
+    private const int CurrentVersion = 1;
+    
     public HashSet<string> Files { get; set; } = null!;
     public Manifest LoadedManifest => Value;
 
@@ -266,6 +277,14 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
 
         var manifestJson = JsonConvert.SerializeObject(Value, Formatting.Indented);
         File.WriteAllText(Path.Combine(path, "manifest.json"), manifestJson);
+        
+        //also save marker
+        var markerData = new PackageMarker()
+        {
+            Version = CurrentVersion
+        };
+        var markerJson = JsonConvert.SerializeObject(markerData, Formatting.Indented);
+        File.WriteAllText(Path.Combine(path, "package.tpf"), markerJson);
     }
 
     public void ForceUpdate() //TODO: this should not be necessary
@@ -319,6 +338,27 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         Files = new HashSet<string>();
 
         var path = _openedPath.LoadedPath;
+        
+        //try and see if it's a known project first
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+
+        var markerPath = Path.Combine(path, "package.tpf");
+        if (File.Exists(markerPath))
+        {
+            var markerData = File.ReadAllText(markerPath);
+            var marker = JsonConvert.DeserializeObject<PackageMarker>(markerData);
+            if (marker != null)
+            {
+                if (marker.Version != CurrentVersion)
+                {
+                    throw new Exception($"Reading package of version {marker.Version} which is unknown; only version {CurrentVersion} can be read");
+                }
+            }
+        }
+        //if marker does not exist, assume we'll use the current version
 
         var newManifest = new Manifest();
         try
