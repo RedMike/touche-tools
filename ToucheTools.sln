@@ -11,6 +11,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{9980617E-768F-4E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToucheTools.App", "ToucheTools.App\ToucheTools.App.csproj", "{6A4A3E90-444E-49B2-A727-7E5F8EEDCDF9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{71230617-C343-45E7-9742-272D54E1AD9D}"
+	ProjectSection(SolutionItems) = preProject
+		samples\README.md = samples\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
