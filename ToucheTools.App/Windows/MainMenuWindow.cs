@@ -151,7 +151,7 @@ public class MainMenuWindow : BaseWindow
             return;
         }
         
-        var text = $"Loaded: '{_openedPath.LoadedPath}'";
+        var text = $"Loaded: '{_openedPackage.GetPackageName()}' ({_openedPath.LoadedPath})";
         var oldCursorPos = ImGui.GetCursorPos();
         try
         {

@@ -230,7 +230,6 @@ public class OpenedManifest : Observable<OpenedManifest.Manifest>
         }
     }
 
-    
     private readonly OpenedPackage _package;
     private readonly OpenedPath _path;
     private bool _loaded = false;

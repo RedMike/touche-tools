@@ -39,6 +39,18 @@ public class OpenedPackage : Observable<OpenedPackage.PackageMarker>
         return _loaded;
     }
 
+    public string GetPackageName()
+    {
+        if (!string.IsNullOrEmpty(Value.Name))
+        {
+            return Value.Name;
+        }
+        
+        //use the parent folder as a placeholder
+        var path = _openedPath.LoadedPath;
+        return new FileInfo(path).Name;
+    }
+
     public void Save()
     {
         if (!IsLoaded())
