@@ -6,22 +6,50 @@ namespace ToucheTools.App.Services;
 public class ConfigService
 {
     private const string Path = "config.json";
+
+    private int _cacheId = 0;
+    private RunConfig? _cachedConfig = null;
     
     public RunConfig LoadConfig()
     {
-        if (!File.Exists(Path))
+        var fileContents = "";
+        Exception? failed = null;
+        try
         {
-            return new RunConfig();
+            fileContents = File.ReadAllText(Path);
+        }
+        catch (Exception e)
+        {
+            failed = e;
         }
 
-        var json = File.ReadAllText(Path);
-        var obj = JsonConvert.DeserializeObject<RunConfig>(json);
-        if (obj == null)
+        var cacheId = fileContents.GetHashCode(); //different between restarts but otherwise fairly consistent
+        if (_cachedConfig != null && _cacheId == cacheId)
         {
-            throw new Exception("Unable to deserialise run config");
+            return _cachedConfig;
         }
 
-        return obj;
+        if (failed != null)
+        {
+            throw new Exception("Failed to load run config file", failed);
+        }
+
+        try
+        {
+            var obj = JsonConvert.DeserializeObject<RunConfig>(fileContents);
+            if (obj == null)
+            {
+                throw new Exception("Run config null");
+            }
+
+            _cachedConfig = obj;
+            _cacheId = cacheId;
+            return obj;
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Unable to deserialise run config file", e);
+        }
     }
 
     public void SaveConfig(RunConfig runConfig)
