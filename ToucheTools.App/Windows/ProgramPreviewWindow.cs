@@ -37,7 +37,7 @@ public class ProgramPreviewWindow : BaseWindow
             return;
         }
 
-        if (!_package.Value.Programs.ContainsKey(_programManagementState.SelectedProgram))
+        if (!_package.LoadedManifest.Programs.ContainsKey(_programManagementState.SelectedProgram))
         {
             //error?
             return;

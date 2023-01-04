@@ -42,7 +42,7 @@ public class ImagePreviewWindow : BaseWindow
             return;
         }
 
-        if (!_package.Value.Images.ContainsKey(_imageManagementState.SelectedImage))
+        if (!_package.LoadedManifest.Images.ContainsKey(_imageManagementState.SelectedImage))
         {
             //error?
             return;

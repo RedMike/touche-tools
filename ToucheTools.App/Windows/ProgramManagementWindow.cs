@@ -141,7 +141,7 @@ public class ProgramManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (selectedType != origSelectedType)
                 {
-                    _package.Value.Programs[path].Type = Enum.Parse<OpenedPackage.ProgramType>(types[selectedType]);
+                    _package.LoadedManifest.Programs[path].Type = Enum.Parse<OpenedPackage.ProgramType>(types[selectedType]);
                     _package.ForceUpdate();
                 }
                 ImGui.SameLine();
@@ -156,7 +156,7 @@ public class ProgramManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (index != origIndex)
                 {
-                    _package.Value.Programs[path].Index = index + 1;
+                    _package.LoadedManifest.Programs[path].Index = index + 1;
                     _package.ForceUpdate();
                 }
                 
@@ -177,7 +177,7 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (action != origAction)
                     {
-                        _package.Value.Programs[path].Target = actions[action].Key;
+                        _package.LoadedManifest.Programs[path].Target = actions[action].Key;
                         _package.ForceUpdate();
                     }
                     
@@ -208,10 +208,10 @@ public class ProgramManagementWindow : BaseWindow
                     if (hitbox != origHitbox)
                     {
                         var newData = new[] { allHitboxes[hitbox].Item1.Item1, allHitboxes[hitbox].Item1.Item2 };
-                        _package.Value.Programs[path].Data = newData;
+                        _package.LoadedManifest.Programs[path].Data = newData;
                         _package.ForceUpdate();
                     }
-                } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)
+                } else if (_package.LoadedManifest.Programs[path].Type == OpenedPackage.ProgramType.KeyChar)
                 {
                     //target = a keychar
                     //data = empty
@@ -229,10 +229,10 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (target != origTarget)
                     {
-                        _package.Value.Programs[path].Target = programKeyChars[target].Key;
+                        _package.LoadedManifest.Programs[path].Target = programKeyChars[target].Key;
                         _package.ForceUpdate();
                     }
-                } else if (_package.Value.Programs[path].Type == OpenedPackage.ProgramType.Conversation)
+                } else if (_package.LoadedManifest.Programs[path].Type == OpenedPackage.ProgramType.Conversation)
                 {
                     //target = a conversation ID (X = start convo, X+1 = potential choice 1, X+2 = potential choice 2, ...)
                     //data = (textId)
@@ -244,7 +244,7 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (target != program.Target)
                     {
-                        _package.Value.Programs[path].Target = target;
+                        _package.LoadedManifest.Programs[path].Target = target;
                         _package.ForceUpdate();
                     }
 
@@ -261,7 +261,7 @@ public class ProgramManagementWindow : BaseWindow
                     ImGui.PopID();
                     if (data != origData)
                     {
-                        _package.Value.Programs[path].Data = new[] { data };
+                        _package.LoadedManifest.Programs[path].Data = new[] { data };
                         _package.ForceUpdate();
                     }
                 }

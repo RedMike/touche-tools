@@ -230,7 +230,8 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
     }
 
     public HashSet<string> Files { get; set; } = null!;
-    
+    public Manifest LoadedManifest => Value;
+
     private readonly OpenedPath _openedPath;
     private bool _loaded = false;
     
@@ -256,7 +257,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
             return;
         }
 
-        var path = _openedPath.Value;
+        var path = _openedPath.LoadedPath;
 
         if (!Directory.Exists(path))
         {
@@ -274,28 +275,28 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
 
     public FileStream LoadFileStream(string path)
     {
-        var basePath = _openedPath.Value;
+        var basePath = _openedPath.LoadedPath;
         var adjustedPath = RevertFilePath(basePath, path);
         return File.Open(adjustedPath, FileMode.Open);
     }
 
     public string LoadFile(string path)
     {
-        var basePath = _openedPath.Value;
+        var basePath = _openedPath.LoadedPath;
         var adjustedPath = RevertFilePath(basePath, path);
         return File.ReadAllText(adjustedPath);
     }
 
     public string[] LoadFileLines(string path)
     {
-        var basePath = _openedPath.Value;
+        var basePath = _openedPath.LoadedPath;
         var adjustedPath = RevertFilePath(basePath, path);
         return File.ReadAllLines(adjustedPath);
     }
 
     public void WriteFile(string path, string data)
     {
-        var basePath = _openedPath.Value;
+        var basePath = _openedPath.LoadedPath;
         var adjustedPath = RevertFilePath(basePath, path);
         File.WriteAllText(adjustedPath, data);
     }
@@ -317,7 +318,7 @@ public class OpenedPackage : Observable<OpenedPackage.Manifest>
         _loaded = false;
         Files = new HashSet<string>();
 
-        var path = _openedPath.Value;
+        var path = _openedPath.LoadedPath;
 
         var newManifest = new Manifest();
         try

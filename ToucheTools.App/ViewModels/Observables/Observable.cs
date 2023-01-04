@@ -2,7 +2,7 @@
 
 public abstract class Observable<T>
 {
-    public T Value { get; private set; } = default!;
+    protected T Value { get; private set; } = default!;
 
     protected void SetValue(T val)
     {

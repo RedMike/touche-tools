@@ -121,12 +121,12 @@ public class MainMenuWindow : BaseWindow
     /// </summary>
     private void RenderInfoMenuLast()
     {
-        if (string.IsNullOrEmpty(_openedPath.Value))
+        if (string.IsNullOrEmpty(_openedPath.LoadedPath))
         {
             return;
         }
         
-        var text = $"Loaded: '{_openedPath.Value}'";
+        var text = $"Loaded: '{_openedPath.LoadedPath}'";
         var oldCursorPos = ImGui.GetCursorPos();
         try
         {

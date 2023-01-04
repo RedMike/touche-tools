@@ -87,7 +87,7 @@ public class AnimationManagementWindow : BaseWindow
                 ImGui.PopID();
                 if (index != origIndex)
                 {
-                    _package.Value.Animations[path].Index = index + 1;
+                    _package.LoadedManifest.Animations[path].Index = index + 1;
                 }
             }
         }

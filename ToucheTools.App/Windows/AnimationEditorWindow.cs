@@ -47,7 +47,7 @@ public class AnimationEditorWindow : BaseWindow
             return;
         }
         
-        if (!_package.Value.Animations.ContainsKey(_animationManagementState.SelectedAnimationPath))
+        if (!_package.LoadedManifest.Animations.ContainsKey(_animationManagementState.SelectedAnimationPath))
         {
             //error?
             return;

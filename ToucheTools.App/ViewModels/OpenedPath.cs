@@ -4,6 +4,8 @@ namespace ToucheTools.App.ViewModels;
 
 public class OpenedPath : Observable<string>
 {
+    public string LoadedPath => Value;
+    
     public void LoadFolder(string folderPath)
     {
         var path = Path.GetDirectoryName(folderPath);
