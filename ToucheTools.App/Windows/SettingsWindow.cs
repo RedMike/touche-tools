@@ -31,8 +31,8 @@ public class SettingsWindow : IWindow
         bool origProgramViewShown = _settings.ProgramViewOpen;
         bool programViewShown = origProgramViewShown;
     
-        ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
-        ImGui.SetNextWindowSize(new Vector2(150.0f, 200.0f));
+        ImGui.SetNextWindowPos(new Vector2(0.0f, 20.0f));
+        ImGui.SetNextWindowSize(new Vector2(150.0f, 180.0f));
         ImGui.Begin("Windows", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
         ImGui.Checkbox("Room View", ref roomViewShown);
         if (roomViewShown != origRoomViewShown)

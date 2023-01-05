@@ -28,8 +28,8 @@ public class ActiveObjectsWindow : BaseWindow
         {
             return;
         }
-        ImGui.SetNextWindowPos(new Vector2(150.0f, 0.0f));
-        ImGui.SetNextWindowSize(new Vector2(200.0f, 200.0f));
+        ImGui.SetNextWindowPos(new Vector2(150.0f, 20.0f));
+        ImGui.SetNextWindowSize(new Vector2(200.0f, 180.0f));
         ImGui.Begin("Active", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
         ObservableCombo("Palette", _palette);

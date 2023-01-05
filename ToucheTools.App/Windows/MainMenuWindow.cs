@@ -19,8 +19,9 @@ public class MainMenuWindow : BaseWindow
     private readonly OpenedPath _openedPath;
     private readonly OpenedManifest _openedManifest;
     private readonly DebugService _debugService;
+    private readonly DebuggingGame _game;
 
-    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService, RunService runService, OpenedPath openedPath, OpenedManifest openedManifest, DebugService debugService)
+    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService, RunService runService, OpenedPath openedPath, OpenedManifest openedManifest, DebugService debugService, DebuggingGame game)
     {
         _openedPackage = openedPackage;
         _state = state;
@@ -29,6 +30,7 @@ public class MainMenuWindow : BaseWindow
         _openedPath = openedPath;
         _openedManifest = openedManifest;
         _debugService = debugService;
+        _game = game;
     }
 
     private void RenderFileMenu()
@@ -116,6 +118,7 @@ public class MainMenuWindow : BaseWindow
                     {
                         throw new Exception("Missing publish path");
                     }
+                    _state.State = MainWindowState.States.Idle;
                     _debugService.Run(publishPath);
                 }
             }
@@ -190,11 +193,27 @@ public class MainMenuWindow : BaseWindow
     public override void Render()
     {
         ImGui.BeginMainMenuBar();
-        
-        RenderFileMenu();
-        RenderModeMenu();
 
-        RenderInfoMenuLast();
+        if (_game.IsLoaded())
+        {
+            //currently debugging
+            if (ImGui.BeginMenu("File"))
+            {
+                if (ImGui.MenuItem("Stop Debugging"))
+                {
+                    _game.Clear();
+                    _state.State = MainWindowState.States.Idle;
+                }
+                ImGui.EndMenu();
+            }
+        }
+        else
+        {
+            RenderFileMenu();
+            RenderModeMenu();
+
+            RenderInfoMenuLast();
+        }
         
         ImGui.EndMainMenuBar();
     }
