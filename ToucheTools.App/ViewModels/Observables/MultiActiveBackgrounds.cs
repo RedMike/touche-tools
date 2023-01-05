@@ -30,6 +30,7 @@ public class MultiActiveBackgrounds : MultiActiveObservable<int>
         var model = _game.Model;
         
         var program = model.Programs[_program.Active];
+        SetElements(program.Backgrounds.Select((_, idx) => idx).ToList(), true); //to force an update
         SetElements(program.Backgrounds.Select((_, idx) => idx).ToList(), false);
     }
 

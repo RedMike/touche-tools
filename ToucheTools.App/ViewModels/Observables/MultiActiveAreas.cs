@@ -29,6 +29,7 @@ public class MultiActiveAreas : MultiActiveObservable<int>
 
         var model = _game.Model;
         var program = model.Programs[_program.Active];
+        SetElements(program.Areas.Select((_, idx) => idx).ToList(), true); //to force an update
         SetElements(program.Areas.Select((_, idx) => idx).ToList(), false);
     }
 

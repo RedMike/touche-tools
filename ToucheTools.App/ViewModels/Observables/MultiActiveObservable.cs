@@ -16,6 +16,7 @@ public class MultiActiveObservable<T> where T : notnull
         Elements = elements.ToDictionary(e => e, _ => defaultState);
         ElementsAsDict = Elements.ToDictionary(pair => ConvertElementToString(pair.Key), pair => pair.Value);
         ElementMapping = Elements.ToDictionary(pair => ConvertElementToString(pair.Key), pair => pair.Key);
+        _changeUpdated();
     }
 
     public void SetElement(T element, bool state)

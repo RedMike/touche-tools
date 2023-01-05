@@ -13,8 +13,8 @@ public class MultiActiveRects : MultiActiveObservable<int>
         _program.ObserveActive(UpdateProgram);
         _game = game;
         game.Observe(UpdateProgram);
-        UpdateProgram();
         ObserveChanged(Update);
+        UpdateProgram();
         Update();
     }
 
@@ -27,6 +27,7 @@ public class MultiActiveRects : MultiActiveObservable<int>
 
         var model = _game.Model;
         var program = model.Programs[_program.Active];
+        SetElements(program.Rects.Select((_, idx) => idx).ToList(), true); //to force an update
         SetElements(program.Rects.Select((_, idx) => idx).ToList(), false);
     }
 

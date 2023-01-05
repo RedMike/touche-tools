@@ -29,6 +29,7 @@ public class MultiActivePoints : MultiActiveObservable<int>
 
         var model = _game.Model;
         var program = model.Programs[_program.Active];
+        SetElements(program.Points.Select((_, idx) => idx).ToList(), true); //to force an update
         SetElements(program.Points.Select((_, idx) => idx).ToList(), false);
     }
 
