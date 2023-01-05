@@ -39,7 +39,7 @@ public class MainMenuWindow : BaseWindow
         {
             if (!_openedPackage.IsLoaded())
             {
-                ImGui.MenuItem("New"); //TODO: new package
+                //ImGui.MenuItem("New"); //TODO: new package
 
                 if (ImGui.BeginMenu("Load Sample"))
                 {
