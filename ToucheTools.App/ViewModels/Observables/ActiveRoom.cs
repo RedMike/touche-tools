@@ -13,16 +13,14 @@ public class ActiveRoom : ActiveObservable<int>
     
     public ActiveRoom(ActivePalette palette, RoomImageRenderer renderer, DebuggingGame game)
     {
-        ObserveActive(GenerateRoomView);
         _palette = palette;
         _renderer = renderer;
         _palette.ObserveActive(GenerateRoomView);
+        ObserveActive(GenerateRoomView);
         
         _game = game;
         game.Observe(Update);
         Update();
-
-        GenerateRoomView();
     }
 
     private void Update()
@@ -46,8 +44,17 @@ public class ActiveRoom : ActiveObservable<int>
         }
 
         var model = _game.Model;
+
+        if (!model.Rooms.ContainsKey(Active))
+        {
+            return;
+        }
+        if (!model.Palettes.ContainsKey(_palette.Active))
+        {
+            return;
+        }
         
-        var roomImageId = model.Rooms[Active].RoomImageNum;
+        var roomImageId = model.Rooms[Active].RoomImageNum; 
         var roomImage = model.RoomImages[roomImageId].Value;
         var palette = model.Palettes[_palette.Active];
 

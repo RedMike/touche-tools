@@ -26,6 +26,7 @@ container.AddSingleton<DebuggingGame>();
 
 container.AddSingleton<ConfigService>();
 container.AddSingleton<RunService>();
+container.AddSingleton<DebugService>();
 
 container.AddSingleton<PackagePublishService>();
 container.AddSingleton<SpriteSheetRenderer>();

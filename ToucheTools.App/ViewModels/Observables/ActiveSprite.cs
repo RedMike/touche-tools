@@ -45,6 +45,10 @@ public class ActiveSprite : ActiveObservable<int>
         }
 
         var model = _game.Model;
+        if (!model.Sprites.ContainsKey(Active))
+        {
+            return;
+        }
         var sprite = model.Sprites[Active].Value;
         var palette = model.Palettes[_palette.Active];
 

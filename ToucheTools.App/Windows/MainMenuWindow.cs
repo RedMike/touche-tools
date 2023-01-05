@@ -7,8 +7,6 @@ namespace ToucheTools.App.Windows;
 
 public class MainMenuWindow : BaseWindow
 {
-    private const string DatFilePath = "../../../../sample/DATABASE/TOUCHE.DAT";
-
     private static readonly List<(string, string)> SampleNamesAndPaths = new List<(string, string)>()
     {
         ("Basic Mechanics", "./samples/basic-mechanics/")
@@ -20,8 +18,9 @@ public class MainMenuWindow : BaseWindow
     private readonly RunService _runService;
     private readonly OpenedPath _openedPath;
     private readonly OpenedManifest _openedManifest;
+    private readonly DebugService _debugService;
 
-    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService, RunService runService, OpenedPath openedPath, OpenedManifest openedManifest)
+    public MainMenuWindow(OpenedPackage openedPackage, MainWindowState state, PackagePublishService publishService, RunService runService, OpenedPath openedPath, OpenedManifest openedManifest, DebugService debugService)
     {
         _openedPackage = openedPackage;
         _state = state;
@@ -29,6 +28,7 @@ public class MainMenuWindow : BaseWindow
         _runService = runService;
         _openedPath = openedPath;
         _openedManifest = openedManifest;
+        _debugService = debugService;
     }
 
     private void RenderFileMenu()
@@ -69,6 +69,7 @@ public class MainMenuWindow : BaseWindow
 
                 var triggerPublish = false;
                 var triggerRun = false;
+                var triggerDebug = false;
                 if (ImGui.MenuItem("Publish"))
                 {
                     //TODO: check if saving is needed
@@ -84,6 +85,15 @@ public class MainMenuWindow : BaseWindow
                     triggerPublish = true;
                     triggerRun = true;
                 }
+                
+                if (ImGui.MenuItem("Publish & Debug"))
+                {
+                    //TODO: check if saving is needed
+                    //TODO: trigger saving
+                    //TODO: check if publish is needed
+                    triggerPublish = true;
+                    triggerDebug = true;
+                }
 
                 var publishPath = "";
                 if (triggerPublish)
@@ -98,6 +108,15 @@ public class MainMenuWindow : BaseWindow
                         throw new Exception("Missing publish path");
                     }
                     _runService.Run(publishPath);
+                }
+
+                if (triggerDebug)
+                {
+                    if (string.IsNullOrEmpty(publishPath))
+                    {
+                        throw new Exception("Missing publish path");
+                    }
+                    _debugService.Run(publishPath);
                 }
             }
             
