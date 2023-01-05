@@ -6,15 +6,22 @@ namespace ToucheTools.App.Windows;
 
 public class SettingsWindow : IWindow
 {
+    private readonly DebuggingGame _game;
     private readonly WindowSettings _settings;
 
-    public SettingsWindow(WindowSettings settings)
+    public SettingsWindow(WindowSettings settings, DebuggingGame game)
     {
         _settings = settings;
+        _game = game;
     }
 
     public void Render()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+        
         bool origRoomViewShown = _settings.RoomViewOpen;
         bool roomViewShown = origRoomViewShown;
 

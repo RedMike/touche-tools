@@ -26,6 +26,7 @@ public class RoomViewWindow : IWindow
         (200, 200, 200)
     };
     
+    private readonly DebuggingGame _game;
     private readonly RenderWindow _render;
     private readonly WindowSettings _windowSettings;
     private readonly ActiveRoom _room;
@@ -35,7 +36,7 @@ public class RoomViewWindow : IWindow
     private readonly MultiActiveAreas _areas;
     private readonly MultiActivePoints _points;
 
-    public RoomViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveRoom room, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, MultiActiveAreas areas, MultiActivePoints points)
+    public RoomViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveRoom room, RoomViewSettings viewSettings, MultiActiveRects rects, MultiActiveBackgrounds backgrounds, MultiActiveAreas areas, MultiActivePoints points, DebuggingGame game)
     {
         _render = render;
         _windowSettings = windowSettings;
@@ -45,10 +46,15 @@ public class RoomViewWindow : IWindow
         _backgrounds = backgrounds;
         _areas = areas;
         _points = points;
+        _game = game;
     }
 
     public void Render()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
         if (!_windowSettings.RoomViewOpen)
         {
             return;

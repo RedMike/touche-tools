@@ -7,21 +7,27 @@ namespace ToucheTools.App.Windows;
 
 public class ProgramViewWindow : IWindow
 {
+    private readonly DebuggingGame _game;
     private readonly WindowSettings _windowSettings;
     private readonly ProgramViewSettings _viewSettings;
     private readonly ProgramViewState _viewState;
     private readonly ActiveProgramState _activeProgramState;
 
-    public ProgramViewWindow(WindowSettings windowSettings, ProgramViewSettings viewSettings, ProgramViewState viewState, ActiveProgramState activeProgramState)
+    public ProgramViewWindow(WindowSettings windowSettings, ProgramViewSettings viewSettings, ProgramViewState viewState, ActiveProgramState activeProgramState, DebuggingGame game)
     {
         _windowSettings = windowSettings;
         _viewSettings = viewSettings;
         _viewState = viewState;
         _activeProgramState = activeProgramState;
+        _game = game;
     }
 
     public void Render()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
         if (!_windowSettings.ProgramViewOpen)
         {
             return;

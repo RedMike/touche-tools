@@ -7,13 +7,13 @@ namespace ToucheTools.App.ViewModels;
 public class SpriteViewSettings
 {
     private const long MinimumFrameStepInMillis = 100;
-    private readonly DatabaseModel _databaseModel;
     private readonly ActiveSequence _sequence;
     private readonly ActiveCharacter _character;
     private readonly ActiveAnimation _animation;
     private readonly ActiveDirection _direction;
     private readonly ActiveFrame _frame;
     private readonly SpriteViewState _state;
+    private readonly DebuggingGame _game;
 
     public bool ShowRoom { get; set; }
     public int RoomOffsetX { get; set; }
@@ -21,19 +21,25 @@ public class SpriteViewSettings
     public bool AutoStepFrame { get; set; }
     public bool ShowEntireSheet { get; set; }
     
-    public SpriteViewSettings(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, ActiveFrame frame, SpriteViewState state)
+    public SpriteViewSettings(ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, ActiveFrame frame, SpriteViewState state, DebuggingGame game)
     {
-        _databaseModel = model;
         _sequence = sequence;
         _character = character;
         _animation = animation;
         _direction = direction;
         _frame = frame;
         _state = state;
+        _game = game;
     }
 
     public void Tick()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+        var model = _game.Model;
+        
         if (!AutoStepFrame)
         {
             _state.PositionOffset = (0, 0, 0);
@@ -42,7 +48,7 @@ public class SpriteViewSettings
 
         var curTime = DateTime.UtcNow;
         var lastTime = _state.LastStep;
-        var frames = _databaseModel.Sequences[_sequence.Active]
+        var frames = model.Sequences[_sequence.Active]
             .Characters[_character.Active]
             .Animations[_animation.Active]
             .Directions[_direction.Active]

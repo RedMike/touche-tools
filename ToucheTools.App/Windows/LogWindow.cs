@@ -19,7 +19,7 @@ public class LogWindow : IWindow
     {
         ImGui.SetNextWindowPos(new Vector2(0.0f, Constants.MainWindowHeight-100.0f));
         ImGui.SetNextWindowSize(new Vector2(Constants.MainWindowWidth, 100.0f));
-        ImGui.Begin("Log", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+        ImGui.Begin("Log", ImGuiWindowFlags.NoDocking);
         foreach (var (isError, msg) in _logData.List())
         {
             if (isError)

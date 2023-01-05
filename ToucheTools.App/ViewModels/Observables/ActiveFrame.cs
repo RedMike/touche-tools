@@ -4,7 +4,7 @@ namespace ToucheTools.App.ViewModels.Observables;
 
 public class ActiveFrame : ActiveObservable<int>
 {
-    private readonly DatabaseModel _model;
+    private readonly DebuggingGame _game;
     private readonly ActiveSequence _sequence;
     private readonly ActiveCharacter _character;
     private readonly ActiveAnimation _animation;
@@ -13,9 +13,8 @@ public class ActiveFrame : ActiveObservable<int>
     public List<(int, int, int, bool, bool)> PartsView { get; private set; } = null!;
     public ((int, int, int), int)? FrameView { get; private set; } = null!;
 
-    public ActiveFrame(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction)
+    public ActiveFrame(ActiveSequence sequence, ActiveCharacter character, ActiveAnimation animation, ActiveDirection direction, DebuggingGame game)
     {
-        _model = model;
         _sequence = sequence;
         _character = character;
         _animation = animation;
@@ -25,12 +24,21 @@ public class ActiveFrame : ActiveObservable<int>
         _animation.ObserveActive(Update);
         _direction.ObserveActive(Update);
         ObserveActive(Update);
+        _game = game;
+        game.Observe(Update);
         Update();
     }
 
     private void Update()
     {
-        var frames = _model
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        
+        var frames = model
             .Sequences[_sequence.Active]
             .Characters[_character.Active]
             .Animations[_animation.Active]

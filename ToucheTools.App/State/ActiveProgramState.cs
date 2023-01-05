@@ -263,21 +263,22 @@ public class ActiveProgramState
         public Dictionary<int, bool> OverwrittenHitboxes { get; set; } = new Dictionary<int, bool>();
     }
 
-    private readonly DatabaseModel _model;
+    private readonly DebuggingGame _game;
     private readonly ActiveProgram _program;
     private readonly LogData _log;
     private readonly GameViewState _viewState; //needed to get rendered sprite sizes (from parts)
 
-    public ActiveProgramState(DatabaseModel model, ActiveProgram program, LogData log, GameViewState viewState)
+    public ActiveProgramState(ActiveProgram program, LogData log, GameViewState viewState, DebuggingGame game)
     {
-        _model = model;
         _program = program;
         _log = log;
         _viewState = viewState;
+        _game = game;
 
         OnStartup();
         
         _program.ObserveActive(Update);
+        _game.Observe(Update);
         Update();
     }
 
@@ -644,7 +645,13 @@ public class ActiveProgramState
 
     private void AddConversationChoice(int num)
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         var curConvo = CurrentConversation;
         if (curConvo == null)
         {
@@ -680,7 +687,13 @@ public class ActiveProgramState
 
     public void ChooseConversationChoice(int num)
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         var curConvo = CurrentConversation;
         if (curConvo == null)
         {
@@ -713,15 +726,21 @@ public class ActiveProgramState
 
     public string GetString(int num)
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return "unknown";
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         var str = "";
         if (num < 0)
         {
-            if (!_model.Text?.Strings.ContainsKey(-num) ?? false)
+            if (!model.Text?.Strings.ContainsKey(-num) ?? false)
             {
                 return "";
             }
-            str = _model.Text?.Strings[-num];
+            str = model.Text?.Strings[-num];
         }
         else
         {
@@ -737,6 +756,13 @@ public class ActiveProgramState
     
     private void OnProgramChange()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        
         Breakpoints = new List<uint>();
         BreakpointHit = false;
         LastKnownOffset = uint.MaxValue;
@@ -751,7 +777,7 @@ public class ActiveProgramState
 
         TalkEntries = new List<TalkEntry>();
 
-        var program = _model.Programs[_program.Active];
+        var program = model.Programs[_program.Active];
         CurrentState = new ProgramState()
         {
             CurrentProgram = _program.Active,
@@ -862,7 +888,13 @@ public class ActiveProgramState
     
     private void OnGameTick()
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
 
         #region Conversations
         if (QueuedConversation != null)
@@ -1090,7 +1122,7 @@ public class ActiveProgramState
                         throw new Exception("Missing character");
                     }
                     
-                    var frames = _model.Sequences[sequenceNum.Value]
+                    var frames = model.Sequences[sequenceNum.Value]
                         .Characters[keyChar.Character.Value]
                         .Animations[keyChar.CurrentAnim]
                         .Directions[keyChar.CurrentDirection]
@@ -1463,6 +1495,13 @@ public class ActiveProgramState
     
     private void OnGraphicalUpdate()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        
         #region Fade palette update
         var increment = GetFlag(ToucheTools.Constants.Flags.Known.FadePaletteScaleIncrement);
         if (increment != 0)
@@ -1503,8 +1542,8 @@ public class ActiveProgramState
         if (GetFlag(ToucheTools.Constants.Flags.Known.DisableRoomScroll) == 0 && CurrentState.LoadedRoom != null)
         {
             //center to current keychar
-            var roomImageNum = _model.Rooms[CurrentState.LoadedRoom.Value].RoomImageNum;
-            var roomImage = _model.RoomImages[roomImageNum].Value;
+            var roomImageNum = model.Rooms[CurrentState.LoadedRoom.Value].RoomImageNum;
+            var roomImage = model.RoomImages[roomImageNum].Value;
             var roomImageWidth = roomImage.RoomWidth;
             var roomImageHeight = roomImage.Height;
             
@@ -1582,11 +1621,11 @@ public class ActiveProgramState
             }
 
             var sequenceNum = LoadedSprites[keyChar.SequenceIndex.Value].SequenceNum;
-            if (sequenceNum != null && _model.Sequences.ContainsKey(sequenceNum.Value))
+            if (sequenceNum != null && model.Sequences.ContainsKey(sequenceNum.Value))
             {
-                if (keyChar.Character != null && _model.Sequences[sequenceNum.Value].Characters.ContainsKey(keyChar.Character.Value))
+                if (keyChar.Character != null && model.Sequences[sequenceNum.Value].Characters.ContainsKey(keyChar.Character.Value))
                 {
-                    var ch = _model.Sequences[sequenceNum.Value].Characters[keyChar.Character.Value];
+                    var ch = model.Sequences[sequenceNum.Value].Characters[keyChar.Character.Value];
                     if (ch.Animations.ContainsKey(keyChar.CurrentAnim) &&
                         ch.Animations[keyChar.CurrentAnim].Directions.ContainsKey(keyChar.CurrentDirection)
                        )
@@ -1693,12 +1732,19 @@ public class ActiveProgramState
 
     public void RightClicked(int screenX, int screenY, int globalX, int globalY)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        
         if (DisabledInputCounter != 0)
         {
             return;
         }
 
-        var program = _model.Programs[CurrentState.CurrentProgram];
+        var program = model.Programs[CurrentState.CurrentProgram];
         if (screenX < 0 || screenX > Constants.GameScreenWidth || screenY < 0 || screenY > Constants.GameScreenHeight)
         {
             return;
@@ -1898,11 +1944,17 @@ public class ActiveProgramState
 
     public void LeftClicked(int screenX, int screenY, int globalX, int globalY)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (DisabledInputCounter != 0)
         {
             return;
         }
-        var program = _model.Programs[CurrentState.CurrentProgram];
+        var program = model.Programs[CurrentState.CurrentProgram];
         if (screenX < 0 || screenX > Constants.GameScreenWidth || screenY < 0 || screenY > Constants.GameScreenHeight)
         {
             return;
@@ -2148,7 +2200,13 @@ public class ActiveProgramState
 
     private bool TryTriggerAction(int action, int object1, int object2)
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return false;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         var aso = program.ActionScriptOffsets.FirstOrDefault(aso =>
             aso.Action == action && aso.Object1 == object1 && aso.Object2 == object2
         );
@@ -2172,8 +2230,14 @@ public class ActiveProgramState
 
     private void WalkTo(int x, int y)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         //find closest point
-        var program = _model.Programs[_program.Active];
+        var program = model.Programs[_program.Active];
         
         int closestPointIdx = -1;
         double lowestDistance = int.MaxValue;
@@ -2331,7 +2395,13 @@ public class ActiveProgramState
     
     public bool RunStep()
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return true;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         
         var currentScript = CurrentState.GetRunningScript();
         if (currentScript == null)
@@ -2437,7 +2507,7 @@ public class ActiveProgramState
             CurrentState.LoadedRoom = loadRoom.Num;
             
             //from game code
-            var palette = _model.Palettes[loadRoom.Num];
+            var palette = model.Palettes[loadRoom.Num];
             LoadPalette(palette);
             LoadedSprites[5].SpriteNum = null;
             LoadedSprites[5].SequenceNum = null;

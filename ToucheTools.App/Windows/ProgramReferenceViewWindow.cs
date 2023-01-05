@@ -9,19 +9,25 @@ namespace ToucheTools.App.Windows;
 
 public class ProgramReferenceViewWindow : IWindow
 {
-    public readonly DatabaseModel _model;
+    private readonly DebuggingGame _game;
     private readonly WindowSettings _windowSettings;
     private readonly ActiveProgramState _activeProgramState;
 
-    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveProgramState activeProgramState, DatabaseModel model)
+    public ProgramReferenceViewWindow(WindowSettings windowSettings, ActiveProgramState activeProgramState, DebuggingGame game)
     {
         _windowSettings = windowSettings;
         _activeProgramState = activeProgramState;
-        _model = model;
+        _game = game;
     }
 
     public void Render()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (!_windowSettings.ProgramViewOpen)
         {
             return;
@@ -37,7 +43,7 @@ public class ProgramReferenceViewWindow : IWindow
         ImGui.Begin("Program References", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
         var state = _activeProgramState.CurrentState;
-        var program = _model.Programs[state.CurrentProgram];
+        var program = model.Programs[state.CurrentProgram];
 
         if (ImGui.Button("Step"))
         {

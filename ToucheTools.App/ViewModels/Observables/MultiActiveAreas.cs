@@ -4,16 +4,17 @@ namespace ToucheTools.App.ViewModels.Observables;
 
 public class MultiActiveAreas : MultiActiveObservable<int>
 {
-    private readonly DatabaseModel _model;
+    private readonly DebuggingGame _game;
     private readonly ActiveProgram _program;
     
     public List<((int, int, int, int), (int, int), int, int, int, int)> AreaView = null!;
     
-    public MultiActiveAreas(DatabaseModel model, ActiveProgram program)
+    public MultiActiveAreas(ActiveProgram program, DebuggingGame game)
     {
-        _model = model;
         _program = program;
         _program.ObserveActive(UpdateProgram);
+        _game = game;
+        game.Observe(UpdateProgram);
         UpdateProgram();
         ObserveChanged(Update);
         Update();
@@ -21,13 +22,25 @@ public class MultiActiveAreas : MultiActiveObservable<int>
 
     private void UpdateProgram()
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         SetElements(program.Areas.Select((_, idx) => idx).ToList(), false);
     }
 
     private void Update()
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         var areaView = new List<((int, int, int, int), (int, int), int, int, int, int)>();
         for (var idx = 0; idx < program.Areas.Count; idx++)
         {
@@ -50,7 +63,13 @@ public class MultiActiveAreas : MultiActiveObservable<int>
 
     protected override string ConvertElementToString(int element)
     {
-        var program = _model.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return $"unknown {element}";
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_program.Active];
         var area = program.Areas[element];
 
         return $"{element} id {area.Id} initial {area.InitialState:G} ({area.Rect.X},{area.Rect.Y} x {area.Rect.W},{area.Rect.H} src {area.SrcX}, {area.SrcY})";

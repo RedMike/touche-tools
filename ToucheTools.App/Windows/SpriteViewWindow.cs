@@ -8,6 +8,7 @@ namespace ToucheTools.App.Windows;
 
 public class SpriteViewWindow : IWindow
 {
+    private readonly DebuggingGame _game;
     private readonly RenderWindow _render;
     private readonly WindowSettings _windowSettings;
     private readonly SpriteViewSettings _viewSettings;
@@ -17,7 +18,7 @@ public class SpriteViewWindow : IWindow
     private readonly ActiveDirection _direction;
     private readonly SpriteViewState _viewState;
 
-    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite, ActiveFrame frame, ActiveDirection direction, SpriteViewState viewState)
+    public SpriteViewWindow(RenderWindow render, WindowSettings windowSettings, SpriteViewSettings viewSettings, ActiveRoom room, ActiveSprite sprite, ActiveFrame frame, ActiveDirection direction, SpriteViewState viewState, DebuggingGame game)
     {
         _render = render;
         _windowSettings = windowSettings;
@@ -27,10 +28,15 @@ public class SpriteViewWindow : IWindow
         _frame = frame;
         _direction = direction;
         _viewState = viewState;
+        _game = game;
     }
 
     public void Render()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
         if (!_windowSettings.SpriteViewOpen)
         {
             return;

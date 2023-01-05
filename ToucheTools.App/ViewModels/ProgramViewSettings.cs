@@ -8,13 +8,11 @@ namespace ToucheTools.App.ViewModels;
 
 public class ProgramViewSettings
 {
-    private readonly DatabaseModel _databaseModel;
+    private readonly DebuggingGame _game;
     private readonly ActiveProgram _program;
     private readonly LogData _log;
-    private readonly ActiveProgramState _activeProgramState;
     
     public List<(int, string)> InstructionsView { get; private set; } = null!;
-    public int EvaluateUntil { get; private set; }
 
     //for each sprite, the offset
     public Dictionary<int, int> CharacterScriptOffsetView { get; private set; } = null!;
@@ -82,27 +80,26 @@ public class ProgramViewSettings
     public ProgramData Data { get; set; } = null!;
     
 
-    public ProgramViewSettings(DatabaseModel model, ActiveProgram program, LogData log, ActiveProgramState activeProgramState)
+    public ProgramViewSettings(ActiveProgram program, LogData log, DebuggingGame game)
     {
-        _databaseModel = model;
-        
         _program = program;
         _log = log;
-        _activeProgramState = activeProgramState;
         _program.ObserveActive(GenerateView);
-        EvaluateUntil = -1;
+        _game = game;
+        game.Observe(GenerateView);
         
         GenerateView();
     }
 
-    public void SetEvaluateUntil(int index)
-    {
-        EvaluateUntil = index;
-    }
-
     private void GenerateView()
     {
-        var program = _databaseModel.Programs[_program.Active];
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+        var model = _game.Model;
+        
+        var program = model.Programs[_program.Active];
         InstructionsView = program.Instructions.OrderBy(pair => pair.Key).Select(pair => ((int)pair.Key, pair.Value.ToString())).ToList();
 
         var programData = new ProgramData();

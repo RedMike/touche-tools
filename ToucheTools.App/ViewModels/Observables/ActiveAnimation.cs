@@ -4,23 +4,30 @@ namespace ToucheTools.App.ViewModels.Observables;
 
 public class ActiveAnimation : ActiveObservable<int>
 {
-    private readonly DatabaseModel _model;
+    private readonly DebuggingGame _game;
     private readonly ActiveSequence _sequence;
     private readonly ActiveCharacter _character;
     
-    public ActiveAnimation(DatabaseModel model, ActiveSequence sequence, ActiveCharacter character)
+    public ActiveAnimation(ActiveSequence sequence, ActiveCharacter character, DebuggingGame game)
     {
-        _model = model;
-        _sequence = sequence;
-        _sequence.ObserveActive(Update);
         _character = character;
         _character.ObserveActive(Update);
+        _sequence = sequence;
+        _sequence.ObserveActive(Update);
+        _game = game;
+        game.Observe(Update);
         Update();
     }
 
     private void Update()
     {
-        SetElements(_model
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        SetElements(model
             .Sequences[_sequence.Active]
             .Characters[_character.Active]
             .Animations.Keys.ToList());

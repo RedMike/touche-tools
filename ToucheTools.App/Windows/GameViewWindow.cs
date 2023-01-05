@@ -20,7 +20,7 @@ public class GameViewWindow : BaseWindow
     private const bool ShowDebugHitboxRects = ShowDebug && false;
     private const bool ShowDebugInventoryRects = ShowDebug && false;
     
-    private readonly DatabaseModel _model;
+    private readonly DebuggingGame _game;
     private readonly RenderWindow _render;
     private readonly WindowSettings _windowSettings;
     private readonly ActiveProgramState _activeProgramState;
@@ -30,9 +30,8 @@ public class GameViewWindow : BaseWindow
     private readonly LogData _log;
     private readonly GameViewState _viewState;
 
-    public GameViewWindow(DatabaseModel model, RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer, LogData log, GameViewState viewState, IconImageRenderer iconImageRenderer)
+    public GameViewWindow(RenderWindow render, WindowSettings windowSettings, ActiveProgramState activeProgramState, RoomImageRenderer roomImageRenderer, SpriteSheetRenderer spriteSheetRenderer, LogData log, GameViewState viewState, IconImageRenderer iconImageRenderer, DebuggingGame game)
     {
-        _model = model;
         _render = render;
         _windowSettings = windowSettings;
         _activeProgramState = activeProgramState;
@@ -41,10 +40,16 @@ public class GameViewWindow : BaseWindow
         _log = log;
         _viewState = viewState;
         _iconImageRenderer = iconImageRenderer;
+        _game = game;
     }
 
     public override void Render()
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+        
         if (!_windowSettings.ProgramViewOpen)
         {
             return;
@@ -115,11 +120,17 @@ public class GameViewWindow : BaseWindow
 
     private void RenderActiveAreas(Vector2 offset)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         
         ushort aIdx = 0;
         foreach (var (areaId, areaState) in _activeProgramState.CurrentState.ActiveRoomAreas)
@@ -135,11 +146,17 @@ public class GameViewWindow : BaseWindow
 
     private void RenderBackgroundActiveAreas(Vector2 offset)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
         short idx = 0;
@@ -241,6 +258,12 @@ public class GameViewWindow : BaseWindow
 
     private void RenderInventory(Vector2 offset)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
@@ -281,7 +304,7 @@ public class GameViewWindow : BaseWindow
 
             if (item != 0)
             {
-                var iconImage = _model.Icons[item].Value;
+                var iconImage = model.Icons[item].Value;
                 var (iconImageId, bytes) = _iconImageRenderer.RenderIconImage(item, iconImage, palette);
                 
                 var iconTexture = _render.RenderImage(RenderWindow.RenderType.Icon, iconImageId, iconImage.Width, iconImage.Height, bytes);
@@ -317,7 +340,7 @@ public class GameViewWindow : BaseWindow
         if (_activeProgramState.RemovedMoney != 0 && _activeProgramState.GrabbedItem != 1)
         {
             //draw icon
-            var iconImage = _model.Icons[1].Value;
+            var iconImage = model.Icons[1].Value;
             var (iconImageId, bytes) = _iconImageRenderer.RenderIconImage(1, iconImage, palette);
                 
             var iconTexture = _render.RenderImage(RenderWindow.RenderType.Icon, iconImageId, iconImage.Width, iconImage.Height, bytes);
@@ -337,7 +360,7 @@ public class GameViewWindow : BaseWindow
             //grabbed item
             //draw icon on top of cursor
             var iconId = _activeProgramState.GrabbedItem;
-            var iconImage = _model.Icons[iconId].Value;
+            var iconImage = model.Icons[iconId].Value;
             var (iconImageId, bytes) = _iconImageRenderer.RenderIconImage(iconId, iconImage, palette);
                 
             var iconTexture = _render.RenderImage(RenderWindow.RenderType.Icon, iconImageId, iconImage.Width, iconImage.Height, bytes);
@@ -387,12 +410,17 @@ public class GameViewWindow : BaseWindow
 
     private void RenderActionMenu(Vector2 offset)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
         
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         if (_activeProgramState.ActiveMenu == null)
         {
             return;
@@ -417,13 +445,19 @@ public class GameViewWindow : BaseWindow
 
     private void RenderPointsDebug(Vector2 offset)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
         var (offsetX, offsetY) = GetLoadedRoomOffset();
 
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         
         ushort pIdx = 0;
         foreach (var point in program.Points)
@@ -457,11 +491,17 @@ public class GameViewWindow : BaseWindow
     private void RenderHitboxesDebug(Vector2 offset)
     {
         return;
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         
         ushort pIdx = 0;
         foreach (var hitbox in program.Hitboxes)
@@ -493,12 +533,18 @@ public class GameViewWindow : BaseWindow
 
     private void RenderKeyChars(Vector2 offset)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         var colIdx = 0;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
         foreach (var (keyCharId, keyChar) in _activeProgramState.KeyChars
@@ -558,13 +604,19 @@ public class GameViewWindow : BaseWindow
 
     private void RenderKeyChar(Vector2 offset, int keyCharId, int x, int y, int z)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             throw new Exception("Room not loaded");
         }
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var keyChar = _activeProgramState.KeyChars[keyCharId];
 
         if (keyChar.SequenceIndex == null || keyChar.SpriteIndex == null || keyChar.Character == null)
@@ -588,14 +640,14 @@ public class GameViewWindow : BaseWindow
             return;
         }
 
-        if (!_model.Sequences.ContainsKey(sequenceNum.Value) ||
-            !_model.Sprites.ContainsKey(spriteNum.Value))
+        if (!model.Sequences.ContainsKey(sequenceNum.Value) ||
+            !model.Sprites.ContainsKey(spriteNum.Value))
         {
             return;
         }
 
         var character = keyChar.Character.Value;
-        if (!_model.Sequences[sequenceNum.Value].Characters.ContainsKey(character))
+        if (!model.Sequences[sequenceNum.Value].Characters.ContainsKey(character))
         {
             return;
         }
@@ -613,7 +665,7 @@ public class GameViewWindow : BaseWindow
                 true);
         }
 
-        var ch = _model.Sequences[sequenceNum.Value].Characters[character];
+        var ch = model.Sequences[sequenceNum.Value].Characters[character];
         var animId = keyChar.CurrentAnim;
         if (!ch.Animations.ContainsKey(animId))
         {
@@ -656,11 +708,17 @@ public class GameViewWindow : BaseWindow
     
     private void RenderHitboxes(Vector2 offset)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             return;
         }
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         var mousePos = _viewState.MousePos;
         
@@ -759,7 +817,13 @@ public class GameViewWindow : BaseWindow
 
     private void RenderHitbox(Vector2 offset, ProgramDataModel.Hitbox hitbox, string id, string str = "", int? x = null, int? y = null, int? w = null, int? h = null)
     {
-        var program = _model.Programs[_activeProgramState.CurrentState.CurrentProgram];
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
+        var program = model.Programs[_activeProgramState.CurrentState.CurrentProgram];
         var (offsetX, offsetY) = GetLoadedRoomOffset();
         var s = str;
         if (string.IsNullOrEmpty(str))
@@ -835,12 +899,18 @@ public class GameViewWindow : BaseWindow
 
     private void DrawEntireSpriteSheet(Vector2 offset, int x, int y, int spriteNum)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             throw new Exception("Room not loaded");
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-        var sprite = _model.Sprites[spriteNum].Value;
+        var sprite = model.Sprites[spriteNum].Value;
         var palette = _activeProgramState.GetLoadedPalette();
 
         var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum, sprite, activeRoom, palette);
@@ -857,18 +927,26 @@ public class GameViewWindow : BaseWindow
         float zFactor, 
         out int width, out int height)
     {
+        if (!_game.IsLoaded())
+        {
+            width = 0;
+            height = 0;
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             throw new Exception("Room not loaded");
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
-        var sprite = _model.Sprites[spriteNum].Value;
+        var sprite = model.Sprites[spriteNum].Value;
         var palette = _activeProgramState.GetLoadedPalette();
 
         var (viewId, bytes) = _spriteSheetRenderer.RenderSpriteSheet(spriteNum, sprite, activeRoom, palette);
         var spriteTexture = _render.RenderImage(RenderWindow.RenderType.Sprite, viewId, sprite.Width, sprite.Height, bytes);
 
-        var sequence = _model.Sequences[sequenceNum];
+        var sequence = model.Sequences[sequenceNum];
         var ch = sequence.Characters[charId];
         var anim = ch.Animations[animId];
         var dir = anim.Directions[dirId];
@@ -937,14 +1015,20 @@ public class GameViewWindow : BaseWindow
     
     private void RenderRoomImageSubsection(Vector2 offset, int x, int y, int srcX, int srcY, int w, int h, bool transparency)
     {
+        if (!_game.IsLoaded())
+        {
+            return;
+        }
+
+        var model = _game.Model;
         if (_activeProgramState.CurrentState.LoadedRoom == null)
         {
             throw new Exception("Room not loaded");
         }
         var activeRoom = _activeProgramState.CurrentState.LoadedRoom.Value;
 
-        var roomImageId = _model.Rooms[activeRoom].RoomImageNum;
-        var roomImage = _model.RoomImages[roomImageId].Value;
+        var roomImageId = model.Rooms[activeRoom].RoomImageNum;
+        var roomImage = model.RoomImages[roomImageId].Value;
         var palette = _activeProgramState.GetLoadedPalette();
 
         var activeRoomSprites = _activeProgramState.CurrentState.ActiveRoomSprites.Select(roomSprite =>
@@ -955,7 +1039,7 @@ public class GameViewWindow : BaseWindow
                 throw new Exception("Sprite not loaded");
             }
 
-            var sprite = _model.Sprites[spriteNum.Value].Value;
+            var sprite = model.Sprites[spriteNum.Value].Value;
             return (roomSprite.Item1, sprite, roomSprite.Item2, roomSprite.Item3);
         }).ToList();
         
