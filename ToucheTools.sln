@@ -16,6 +16,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{7123
 		samples\README.md = samples\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{09325DBB-EC1E-40FD-9857-07296F7CA24E}"
+	ProjectSection(SolutionItems) = preProject
+		samples\assets\action-menu.png = samples\assets\action-menu.png
+		samples\assets\cursor.png = samples\assets\cursor.png
+		samples\assets\inventory.png = samples\assets\inventory.png
+		samples\assets\README.md = samples\assets\README.md
+		samples\assets\char.png = samples\assets\char.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +39,8 @@ Global
 		{6A4A3E90-444E-49B2-A727-7E5F8EEDCDF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A4A3E90-444E-49B2-A727-7E5F8EEDCDF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A4A3E90-444E-49B2-A727-7E5F8EEDCDF9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{09325DBB-EC1E-40FD-9857-07296F7CA24E} = {71230617-C343-45E7-9742-272D54E1AD9D}
 	EndGlobalSection
 EndGlobal
