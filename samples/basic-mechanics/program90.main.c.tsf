@@ -1,0 +1,91 @@
+Noop
+
+;    initial setup
+;show inventory
+FetchScriptWord 0
+SetFlag 606
+
+;hide cursor
+FetchScriptWord 1
+SetFlag 618
+;    initial setup done
+
+;    load data and setup key characters
+;load sprites (index 0 is now num 1) and animations (index 0 is now num 1)
+LoadSprite 0,1
+LoadSequence 0,1
+
+;set up main key character (0) with sprite index 0 (ties to num 1, so char), animation index 0 (ties to num 1, so char)
+InitCharScript 0,255,0,0,0
+;set up talk animation to be ID 2
+SetCharFrame 0,2,2,1
+;set up idle looping animation to be ID 0
+SetCharFrame 0,0,0,1
+;    load data and setup key characters done
+
+;    setup room and key char positions
+;teleport character
+SetCharBox 0,11
+;make character be hidden on screen
+SetCharFlags 0,32768
+
+;load room
+LoadRoom 1
+
+;    setup room and key char positions done
+
+;    start cutscene
+
+;        animate background
+;wait a bit before starting animation
+SetCharDelay 5
+
+;draw the first area
+UpdateRoomAreas 0
+;wait a bit before next frame
+SetCharDelay 10
+;draw the next area
+UpdateRoomAreas 1
+;wait a bit before next frame
+SetCharDelay 10
+;draw the next area
+UpdateRoomAreas 2
+;wait a bit before next frame
+SetCharDelay 10
+;draw the next area
+UpdateRoomAreas 3
+;TODO: draw room area 3 always if not entered program via flag 0
+
+;wait a bit before character shows up
+SetCharDelay 10
+
+;make character be shown on screen
+UnsetCharFlags 0,32768
+
+;dialogue
+StartTalk 0,1
+;slight delay
+SetCharDelay 5
+;dialogue
+StartTalk 0,2
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+
+;move character to another point (pathfinding)
+MoveCharToPos 0,2,0
+;wait for key char 0 of type 1 with ID 2 (for character 0's movement until moved to point 2)
+SetupWaitingChar 0,1,2
+
+;dialogue
+StartTalk 0,3
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;    cutscene done
+
+;    final setup
+;show cursor
+FetchScriptWord 0
+SetFlag 618
+
+;end
+StopScript

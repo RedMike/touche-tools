@@ -1,0 +1,92 @@
+{
+  "RoomImageIndex": 1,
+  "WalkablePoints": {
+    "1": "(232, 248, 161)",
+    "2": "(432, 248, 161)",
+    "3": "(672, 248, 161)",
+    "4": "(208, 356, 161)",
+    "5": "(336, 356, 161)",
+    "6": "(744, 356, 161)",
+    "7": "(176, 476, 201)",
+    "8": "(488, 476, 201)",
+    "9": "(824, 476, 201)",
+    "10": "(880, 476, 201)",
+    "11": "(232, 232, 161)",
+    "12": "(584, 356, 161)"
+  },
+  "WalkableLines": {
+    "(9, 10)": "(0, -1, -1)",
+    "(6, 9)": "(0, -1, -1)",
+    "(12, 6)": "(0, -1, -1)",
+    "(3, 6)": "(0, -1, -1)",
+    "(12, 3)": "(0, -1, -1)",
+    "(8, 9)": "(0, -1, -1)",
+    "(8, 12)": "(0, -1, -1)",
+    "(2, 12)": "(0, -1, -1)",
+    "(2, 3)": "(0, -1, -1)",
+    "(5, 2)": "(0, -1, -1)",
+    "(5, 8)": "(0, -1, -1)",
+    "(7, 8)": "(0, -1, -1)",
+    "(4, 7)": "(0, -1, -1)",
+    "(4, 5)": "(0, -1, -1)",
+    "(1, 4)": "(0, -1, -1)",
+    "(1, 2)": "(0, -1, -1)",
+    "(11, 1)": "(0, -1, -1)"
+  },
+  "Hitboxes": {},
+  "Texts": {
+    "1": "So this is the Basic Mechanics sample.",
+    "2": "I've spawned in and now I'm queueing a movement to point 2.",
+    "3": "I've reached point 2 and now I'm enabling input."
+  },
+  "BackgroundAreas": {
+    "1": {
+      "DestX": 174,
+      "DestY": 133,
+      "Width": 83,
+      "Height": 106,
+      "SourceX": 1002,
+      "SourceY": 1,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
+    },
+    "2": {
+      "DestX": 174,
+      "DestY": 133,
+      "Width": 83,
+      "Height": 106,
+      "SourceX": 1085,
+      "SourceY": 1,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
+    },
+    "3": {
+      "DestX": 174,
+      "DestY": 133,
+      "Width": 83,
+      "Height": 106,
+      "SourceX": 1002,
+      "SourceY": 112,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
+    },
+    "4": {
+      "DestX": 174,
+      "DestY": 133,
+      "Width": 83,
+      "Height": 106,
+      "SourceX": 1085,
+      "SourceY": 112,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "Game": {
+    "ActionDefinitions": {
+      "26": "DoNothing",
+      "49": "LeftClick",
+      "53": "LeftClickWithItem"
+    },
+    "CustomColors": {
+      "0": {
+        "Item1": 0,
+        "Item2": 0,
+        "Item3": 0
+      },
+      "64": {
+        "Item1": 255,
+        "Item2": 0,
+        "Item3": 255
+      },
+      "255": {
+        "Item1": 255,
+        "Item2": 255,
+        "Item3": 255
+      },
+      "214": {
+        "Item1": 200,
+        "Item2": 200,
+        "Item3": 255
+      },
+      "217": {
+        "Item1": 200,
+        "Item2": 200,
+        "Item3": 255
+      },
+      "249": {
+        "Item1": 50,
+        "Item2": 60,
+        "Item3": 105
+      }
+    },
+    "InventoryItems": {}
+  },
+  "IncludedFiles": [
+    "action-menu.png",
+    "char.png",
+    "cursor.png",
+    "inventory.png",
+    "room1.png",
+    "char.anim.json",
+    "room1.room.json",
+    "program90.main.c.tsf"
+  ],
+  "Images": {
+    "action-menu.png": {
+      "Type": 1,
+      "Index": 18
+    },
+    "char.png": {
+      "Type": 1,
+      "Index": 1
+    },
+    "cursor.png": {
+      "Type": 3,
+      "Index": 0
+    },
+    "inventory.png": {
+      "Type": 1,
+      "Index": 12
+    },
+    "room1.png": {
+      "Type": 2,
+      "Index": 1
+    }
+  },
+  "Animations": {
+    "char.anim.json": {
+      "Index": 1
+    }
+  },
+  "Rooms": {
+    "room1.room.json": {
+      "Index": 1
+    }
+  },
+  "Programs": {
+    "program90.main.c.tsf": {
+      "Type": 1,
+      "Index": 90,
+      "Target": -1,
+      "Data": []
+    }
+  }
+}
