@@ -464,6 +464,8 @@ public class RoomEditorWindow : BaseWindow
                     {
                         bgArea.Dynamic = dynamic;
                     }
+                    
+                    ImGui.TreePop();
                 }
             }
 
