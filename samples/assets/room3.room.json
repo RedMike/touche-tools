@@ -1,0 +1,14 @@
+{
+  "RoomImageIndex": 3,
+  "WalkablePoints": {
+    "1": "(448, 392, 160)"
+  },
+  "WalkableLines": {},
+  "Hitboxes": {},
+  "Texts": {
+    "1": "We're now in a different room and characters are hidden and moved.",
+    "2": "Because it's a different room, it can actually use more colours than if we embedded it as a sprite or area in the previous room.",
+    "3": "Now we'll move back to the old room and positions."
+  },
+  "BackgroundAreas": {}
+}
