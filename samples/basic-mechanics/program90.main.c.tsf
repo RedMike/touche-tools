@@ -10,6 +10,10 @@ FetchScriptWord 1
 SetFlag 618
 ;    initial setup done
 
+
+
+
+
 ;    load data and setup key characters
 ;load sprites (index 0 is now num 1) and animations (index 0 is now num 1)
 LoadSprite 0,1
@@ -23,6 +27,9 @@ SetCharFrame 0,2,2,1
 SetCharFrame 0,0,0,1
 ;    load data and setup key characters done
 
+
+
+
 ;    setup room and key char positions
 ;teleport character
 SetCharBox 0,11
@@ -34,17 +41,34 @@ LoadRoom 1
 
 ;    setup room and key char positions done
 
-;    start cutscene
 
-;        animate background
+
+
+;    start cutscene
+; branch depending on if entry flag to program was 0 (new game), 1 (entered from other room)
+Push
+;get flag 0 (entry flag to program)
+GetFlag 0
+Push
+;set value 0 (to compare against)
+FetchScriptWord 0
+;set current value to -1 if they're equal, or 0 if not
+TestEquals
+;if current value is not zero (so flag was 0) then jump to new game entry
+Jnz :new-game
+;this is where we would run new checks for other values if needed
+;otherwise (flag was not 0) then jump to other room entry
+Jz :other-room
+
+
+
+new-game:
+;a new game was started, so we want to animate the character coming into the room from the top door
+;        animate background door opening
 ;wait a bit before starting animation
 SetCharDelay 5
 
 ;draw the first area
-UpdateRoomAreas 0
-;wait a bit before next frame
-SetCharDelay 10
-;draw the next area
 UpdateRoomAreas 1
 ;wait a bit before next frame
 SetCharDelay 10
@@ -54,7 +78,10 @@ UpdateRoomAreas 2
 SetCharDelay 10
 ;draw the next area
 UpdateRoomAreas 3
-;TODO: draw room area 3 always if not entered program via flag 0
+;wait a bit before next frame
+SetCharDelay 10
+;draw the next area
+UpdateRoomAreas 4
 
 ;wait a bit before character shows up
 SetCharDelay 10
@@ -62,14 +89,32 @@ SetCharDelay 10
 ;make character be shown on screen
 UnsetCharFlags 0,32768
 
+;start animating the door closing
+UpdateRoomAreas 3
+
 ;dialogue
 StartTalk 0,1
-;slight delay
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+
+;continue animating the door closing
+UpdateRoomAreas 2
+
+;slight delay on top
 SetCharDelay 5
 ;dialogue
 StartTalk 0,2
 ;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
 SetupWaitingChar 0,-1,0
+
+;continue animating the door closing
+UpdateRoomAreas 1
+
+;slight delay on top
+SetCharDelay 5
+
+;finish animating the door closing
+UpdateRoomAreas 5
 
 ;move character to another point (pathfinding)
 MoveCharToPos 0,2,0
@@ -80,6 +125,34 @@ SetupWaitingChar 0,1,2
 StartTalk 0,3
 ;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
 SetupWaitingChar 0,-1,0
+;jump to end of branch
+Push
+Jz :entry-done
+
+
+
+
+other-room:
+;the player was entering back into the room from a nearby one, so we want to animate the char coming from the right
+;teleport character
+SetCharBox 0,10
+;face left
+SetCharDirection 0,3
+;make character be shown on screen
+UnsetCharFlags 0,32768
+;move character to another point (pathfinding)
+MoveCharToPos 0,9,0
+;wait for key char 0 of type 1 with ID 9 (for character 0's movement until moved to point 9)
+SetupWaitingChar 0,1,9
+;jump to end of branch
+Push
+Jz :entry-done
+
+
+
+
+
+entry-done:
 ;    cutscene done
 
 ;    final setup
