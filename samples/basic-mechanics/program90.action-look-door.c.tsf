@@ -25,3 +25,6 @@ SetHitboxText 1
 Push
 FetchScriptWord 1
 SetFlag 401
+
+;end
+StopScript

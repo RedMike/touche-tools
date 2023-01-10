@@ -1,11 +1,12 @@
 Noop
 
 ;    load data and setup key characters
-;load sprites (index 0 is now num 1) and animations (index 0 is now num 1)
+;we're using a different sequence for the character, but the animation data is the same, the walk dx/dz are just larger
+;load sprites (index 0 is now num 1) and animations (index 0 is now num 2)
 LoadSprite 0,1
-LoadSequence 0,1
+LoadSequence 0,2
 
-;set up main key character (0) with sprite index 0 (ties to num 1, so char), animation index 0 (ties to num 1, so char)
+;set up main key character (0) with sprite index 0 (ties to num 1, so char), animation index 0 (ties to num 2, so char-sped-up)
 InitCharScript 0,255,0,0,0
 ;set up talk animation to be ID 2
 SetCharFrame 0,2,2,1
@@ -152,5 +153,38 @@ Jz :entry-done
 
 
 entry-done:
+
+;now update all the hitbox texts as needed
+;update hitbox text for small room
+Push
+GetFlag 403
+Push
+FetchScriptWord 1
+TestEquals
+Jz :skip-update-text-small-room
+SetHitboxText 2
+
+skip-update-text-small-room:
+;update hitbox text for large room
+Push
+GetFlag 404
+Push
+FetchScriptWord 1
+TestEquals
+Jz :skip-update-text-large-room
+SetHitboxText 3
+
+skip-update-text-large-room:
+
+;update hitbox text for painting
+Push
+GetFlag 405
+Push
+FetchScriptWord 1
+TestEquals
+Jz :skip-update-text-painting
+SetHitboxText 4
+
+skip-update-text-painting:
 ;end
 StopScript

@@ -1,0 +1,31 @@
+;TODO: check if player is already in point 3 correctly to not 'teleport' early
+
+; first go to the place the door is
+MoveCharToPos 0,3,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 3 (for character 0's movement until moved to point 3)
+SetupWaitingChar 0,1,3
+
+;teleport the character to point 18 that's in the same place (but only connected to the door point)
+;this allows point 19 to only be accessible via this action and makes waiting work correctly
+SetCharBox 0,18
+
+;say the text lines
+StartTalk 0,5
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;make sure the non-temporary flag exists to mark the hitbox as having had its text updated, main program will check
+Push
+FetchScriptWord 1
+SetFlag 403
+
+;go past the door point
+MoveCharToPos 0,19,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 19 (for character 0's movement until moved to point 19)
+SetupWaitingChar 0,1,19
+
+; change to small room program
+;flag is passed as 1 to let it know the entry is from here
+;TODO: small room program instead of teleport back
+SetCharBox 0,3

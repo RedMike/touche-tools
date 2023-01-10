@@ -56,7 +56,10 @@
     "room2.png",
     "program90.action-go-door.c.tsf",
     "program10.main.c.tsf",
-    "program10.action-leftclick-firstroom.c.tsf"
+    "program10.action-leftclick-firstroom.c.tsf",
+    "program10.action-leftclick-largeroom.c.tsf",
+    "program10.action-leftclick-smallroom.c.tsf",
+    "program10.action-look-painting.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -144,6 +147,33 @@
       "Data": [
         2,
         1
+      ]
+    },
+    "program10.action-leftclick-largeroom.c.tsf": {
+      "Type": 3,
+      "Index": 10,
+      "Target": 49,
+      "Data": [
+        2,
+        3
+      ]
+    },
+    "program10.action-leftclick-smallroom.c.tsf": {
+      "Type": 3,
+      "Index": 10,
+      "Target": 49,
+      "Data": [
+        2,
+        2
+      ]
+    },
+    "program10.action-look-painting.c.tsf": {
+      "Type": 3,
+      "Index": 10,
+      "Target": 1,
+      "Data": [
+        2,
+        4
       ]
     }
   }

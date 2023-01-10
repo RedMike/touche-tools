@@ -1,0 +1,38 @@
+;TODO: check if player is already in point 11
+
+; first go to the place the door is
+MoveCharToPos 0,11,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 11 (for character 0's movement until moved to point 11)
+SetupWaitingChar 0,1,11
+
+;skip saying the first line if already known about
+Push
+GetFlag 405
+Push
+FetchScriptWord 1
+TestEquals
+Jnz :skip-first-talk-line
+;say the text lines
+StartTalk 0,7
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;make sure the non-temporary flag exists to mark the hitbox as having had its text updated, main program will check
+Push
+FetchScriptWord 1
+SetFlag 405
+SetHitboxText 4
+SetCharDelay 5
+
+skip-first-talk-line:
+;say the text line
+StartTalk 0,8
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 5
+
+;TODO: load third room without changing program to show a 'pop-up'
+
+;end
+StopScript
