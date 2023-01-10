@@ -3,7 +3,9 @@
     "ActionDefinitions": {
       "26": "DoNothing",
       "49": "LeftClick",
-      "53": "LeftClickWithItem"
+      "53": "LeftClickWithItem",
+      "1": "Look at",
+      "2": "Go"
     },
     "CustomColors": {
       "0": {
