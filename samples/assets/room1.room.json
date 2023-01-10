@@ -7,10 +7,10 @@
     "4": "(208, 356, 161)",
     "5": "(336, 356, 161)",
     "6": "(744, 356, 161)",
-    "7": "(176, 476, 201)",
-    "8": "(488, 476, 201)",
-    "9": "(824, 476, 201)",
-    "10": "(880, 476, 201)",
+    "7": "(176, 476, 231)",
+    "8": "(488, 476, 231)",
+    "9": "(824, 476, 231)",
+    "10": "(880, 476, 231)",
     "11": "(232, 232, 161)",
     "12": "(584, 356, 161)"
   },
@@ -33,8 +33,58 @@
     "(1, 2)": "(0, -1, -1)",
     "(11, 1)": "(0, -1, -1)"
   },
-  "Hitboxes": {},
+  "Hitboxes": {
+    "1": {
+      "Item": 1,
+      "Type": 1,
+      "Label": "Door",
+      "SecondaryLabel": "Top-down View Room",
+      "X": 871,
+      "Y": 337,
+      "W": 46,
+      "H": 160,
+      "Actions": [
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "2": {
+      "Item": 2,
+      "Type": 1,
+      "Label": "Wall",
+      "SecondaryLabel": "",
+      "X": 192,
+      "Y": 147,
+      "W": 69,
+      "H": 83,
+      "Actions": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    }
+  },
   "Texts": {
+    "1": "So this is the Basic Mechanics sample.",
+    "2": "I've spawned in and now I'm queueing a movement to point 2.",
+    "3": "I've reached point 2 and now I'm enabling input.",
+    "4": "The door isn't here any more.",
+    "5": "It's just a wall.",
+    "6": "This door leads to the next room.",
+    "7": "The next room shows a top-down view."
   },
   "BackgroundAreas": {
     "1": {
@@ -80,6 +130,18 @@
       "Height": 106,
       "SourceX": 1085,
       "SourceY": 112,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
+    },
+    "5": {
+      "DestX": 174,
+      "DestY": 133,
+      "Width": 83,
+      "Height": 106,
+      "SourceX": 1002,
+      "SourceY": 223,
       "ScaledOffset": null,
       "ScaleMul": 1,
       "ScaleDiv": 1,
