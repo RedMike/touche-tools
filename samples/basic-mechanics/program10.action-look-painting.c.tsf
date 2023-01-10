@@ -32,7 +32,74 @@ SetupWaitingChar 0,-1,0
 ;extra delay to be more natural
 SetCharDelay 5
 
-;TODO: load third room without changing program to show a 'pop-up'
+;load third room without changing program to show a 'pop-up'
+;disable room scroll/inventory menu for it to work right
+Push
+FetchScriptWord 1
+;disable room scroll
+SetFlag 616
+;disable inventory menu
+SetFlag 606
+FetchScriptWord 0
+;set room x to 0
+SetFlag 614
+;set room y to 0
+SetFlag 615
+;disable input
+EnableInput
+
+;actually load the room
+LoadRoom 3
+;NOTE: the indexes after this (text, point) are from room 3!
+;hide and move characters to prevent them showing up on top of the 'pop-up'
+;teleport character
+SetCharBox 0,1
+;make character be hidden on screen
+SetCharFlags 0,32768
+
+
+
+;say the text line
+StartTalk 0,1
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 10
+
+;say the text line
+StartTalk 0,2
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 10
+
+;say the text line
+StartTalk 0,3
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 10
+
+
+
+;load the previous room and move everything back
+LoadRoom 2
+;NOTE: the indexes after this (text, point) are from room 2 again!
+
+;re-enable room scroll/inventory menu
+Push
+FetchScriptWord 0
+SetFlag 616
+SetFlag 606
+;deliberately re-draw the inventory to make it correctly re-render
+DrawInventory 0
+;enable input
+DisableInput
+
+;teleport character
+SetCharBox 0,11
+;make character be shown on screen
+UnsetCharFlags 0,32768
 
 ;end
 StopScript

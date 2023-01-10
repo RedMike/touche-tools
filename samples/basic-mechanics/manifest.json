@@ -59,7 +59,10 @@
     "program10.action-leftclick-firstroom.c.tsf",
     "program10.action-leftclick-largeroom.c.tsf",
     "program10.action-leftclick-smallroom.c.tsf",
-    "program10.action-look-painting.c.tsf"
+    "program10.action-look-painting.c.tsf",
+    "char-sped-up.anim.json",
+    "room3.png",
+    "room3.room.json"
   ],
   "Images": {
     "action-menu.png": {
@@ -85,11 +88,18 @@
     "room2.png": {
       "Type": 2,
       "Index": 2
+    },
+    "room3.png": {
+      "Type": 2,
+      "Index": 3
     }
   },
   "Animations": {
     "char.anim.json": {
       "Index": 1
+    },
+    "char-sped-up.anim.json": {
+      "Index": 2
     }
   },
   "Rooms": {
@@ -98,6 +108,9 @@
     },
     "room2.room.json": {
       "Index": 2
+    },
+    "room3.room.json": {
+      "Index": 3
     }
   },
   "Programs": {
