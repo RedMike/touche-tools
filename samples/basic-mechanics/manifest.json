@@ -5,7 +5,8 @@
       "49": "LeftClick",
       "53": "LeftClickWithItem",
       "1": "Look at",
-      "2": "Go"
+      "2": "Go",
+      "3": "Talk to"
     },
     "CustomColors": {
       "0": {
@@ -37,6 +38,11 @@
         "Item1": 50,
         "Item2": 60,
         "Item3": 105
+      },
+      "254": {
+        "Item1": 150,
+        "Item2": 10,
+        "Item3": 10
       }
     },
     "InventoryItems": {}
@@ -62,7 +68,10 @@
     "program10.action-look-painting.c.tsf",
     "char-sped-up.anim.json",
     "room3.png",
-    "room3.room.json"
+    "room3.room.json",
+    "room4.png",
+    "room4.room.json",
+    "program11.main.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -92,6 +101,10 @@
     "room3.png": {
       "Type": 2,
       "Index": 3
+    },
+    "room4.png": {
+      "Type": 2,
+      "Index": 4
     }
   },
   "Animations": {
@@ -111,6 +124,9 @@
     },
     "room3.room.json": {
       "Index": 3
+    },
+    "room4.room.json": {
+      "Index": 4
     }
   },
   "Programs": {
@@ -188,6 +204,12 @@
         2,
         4
       ]
+    },
+    "program11.main.c.tsf": {
+      "Type": 1,
+      "Index": 11,
+      "Target": -1,
+      "Data": []
     }
   }
 }

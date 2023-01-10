@@ -1,0 +1,119 @@
+{
+  "RoomImageIndex": 4,
+  "WalkablePoints": {
+    "1": "(72, 464, 160)",
+    "2": "(96, 464, 160)",
+    "3": "(96, 464, 160)",
+    "4": "(264, 464, 160)",
+    "5": "(520, 464, 160)",
+    "6": "(792, 464, 160)",
+    "7": "(184, 396, 160)",
+    "8": "(320, 396, 160)",
+    "9": "(480, 396, 160)",
+    "10": "(624, 396, 160)",
+    "11": "(752, 396, 160)",
+    "12": "(216, 324, 137)",
+    "13": "(328, 324, 137)",
+    "14": "(464, 324, 137)",
+    "15": "(584, 324, 137)",
+    "16": "(704, 324, 137)"
+  },
+  "WalkableLines": {
+    "(1, 2)": "(0, -1, -1)",
+    "(3, 4)": "(0, -1, -1)",
+    "(5, 4)": "(0, -1, -1)",
+    "(5, 6)": "(0, -1, -1)",
+    "(3, 7)": "(0, -1, -1)",
+    "(8, 7)": "(0, -1, -1)",
+    "(4, 7)": "(0, -1, -1)",
+    "(4, 8)": "(0, -1, -1)",
+    "(5, 9)": "(0, -1, -1)",
+    "(10, 9)": "(0, -1, -1)",
+    "(10, 5)": "(0, -1, -1)",
+    "(10, 11)": "(0, -1, -1)",
+    "(10, 6)": "(0, -1, -1)",
+    "(11, 6)": "(0, -1, -1)",
+    "(7, 12)": "(0, -1, -1)",
+    "(8, 12)": "(0, -1, -1)",
+    "(8, 13)": "(0, -1, -1)",
+    "(12, 13)": "(0, -1, -1)",
+    "(14, 13)": "(0, 1, -1)",
+    "(14, 9)": "(0, -1, -1)",
+    "(15, 9)": "(0, -1, -1)",
+    "(15, 14)": "(0, -1, -1)",
+    "(15, 10)": "(0, -1, -1)",
+    "(13, 7)": "(0, -1, -1)",
+    "(14, 10)": "(0, -1, -1)",
+    "(16, 10)": "(0, -1, -1)",
+    "(16, 15)": "(0, -1, -1)",
+    "(11, 15)": "(0, -1, -1)",
+    "(11, 16)": "(0, -1, -1)"
+  },
+  "Hitboxes": {
+    "1": {
+      "Item": 3,
+      "Type": 4,
+      "Label": "Second character",
+      "SecondaryLabel": "",
+      "X": 0,
+      "Y": 0,
+      "W": 0,
+      "H": 0,
+      "Actions": [
+        1,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "2": {
+      "Item": 1,
+      "Type": 1,
+      "Label": "3D Thing",
+      "SecondaryLabel": "",
+      "X": 344,
+      "Y": 236,
+      "W": 117,
+      "H": 179,
+      "Actions": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    }
+  },
+  "Texts": {
+    "1": "This room has another character.",
+    "2": "The second character walks around and talks on his own.",
+    "3": "There is also a character hitbox which moves with them.",
+    "4": "And centrally there is a fake 3D object that lets you pass behind or in front of it.",
+    "5": "This is a second character.",
+    "6": "They are running their own script in parallel.",
+    "7": "For conversation trees, look at the conversations sample, to keep the source for this one simpler."
+  },
+  "BackgroundAreas": {
+    "1": {
+      "DestX": 349,
+      "DestY": 235,
+      "Width": 106,
+      "Height": 178,
+      "SourceX": 1042,
+      "SourceY": 9,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
+    }
+  }
+}

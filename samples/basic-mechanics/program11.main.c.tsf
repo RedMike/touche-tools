@@ -1,0 +1,79 @@
+Noop
+
+
+;    load data and setup key characters
+;load sprites (index 0 is now num 1) and animations (index 0 is now num 1)
+LoadSprite 0,1
+LoadSequence 0,1
+
+;set up main key character (0) with sprite index 0 (ties to num 1, so char), animation index 0 (ties to num 1, so char)
+InitCharScript 0,255,0,0,0
+;set up talk animation to be ID 2
+SetCharFrame 0,2,2,1
+;set up idle looping animation to be ID 0
+SetCharFrame 0,0,0,1
+
+;set up second key character (3) with sprite index 0 (ties to num 1, so char), animation index 0 (ties to num 1, so char)
+;also has a special UI colour for text (defined in game editor)
+InitCharScript 3,254,0,0,0
+;set up talk animation to be ID 2
+SetCharFrame 3,2,2,1
+;set up idle looping animation to be ID 0 
+SetCharFrame 3,0,0,1
+;    load data and setup key characters done
+
+
+;    setup room and key char positions
+;teleport character
+SetCharBox 0,3
+;teleport character
+SetCharBox 3,16
+;face left
+SetCharDirection 3,3
+;make character be hidden on screen
+SetCharFlags 0,32768
+;make character be hidden on screen
+SetCharFlags 3,32768
+
+;load room
+LoadRoom 4
+
+
+;    start cutscene
+;make character be shown on screen
+UnsetCharFlags 0,32768
+;make character be shown on screen
+UnsetCharFlags 3,32768
+
+;say the text lines
+StartTalk 0,1
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;wait a bit more
+SetCharDelay 5
+
+;say the text lines
+StartTalk 0,2
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;wait a bit more
+SetCharDelay 5
+
+;say the text lines
+StartTalk 0,3
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;wait a bit more
+SetCharDelay 5
+
+;say the text lines
+StartTalk 0,4
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+
+;    cutscene done
+
+;    final setup
+
+;end
+StopScript
