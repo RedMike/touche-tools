@@ -1,0 +1,21 @@
+;TODO: check if player is already in point 1 correctly to not 'teleport' early
+
+; first go to the place the door is
+MoveCharToPos 0,1,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 1 (for character 0's movement until moved to point 1)
+SetupWaitingChar 0,1,1
+
+;teleport the character to point 4 that's in the same place (but only connected to the door point)
+;this allows point 5 to only be accessible via this action and makes waiting work correctly
+SetCharBox 0,4
+
+;go past the door point
+MoveCharToPos 0,5,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 5 (for character 0's movement until moved to point 5)
+SetupWaitingChar 0,1,5
+
+; change to first program
+;flag is passed as 1 to let it know the entry is from other room
+StartEpisode 90,1

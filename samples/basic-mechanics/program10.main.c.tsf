@@ -1,0 +1,156 @@
+Noop
+
+;    load data and setup key characters
+;load sprites (index 0 is now num 1) and animations (index 0 is now num 1)
+LoadSprite 0,1
+LoadSequence 0,1
+
+;set up main key character (0) with sprite index 0 (ties to num 1, so char), animation index 0 (ties to num 1, so char)
+InitCharScript 0,255,0,0,0
+;set up talk animation to be ID 2
+SetCharFrame 0,2,2,1
+;set up idle looping animation to be ID 0
+SetCharFrame 0,0,0,1
+;    load data and setup key characters done
+
+
+
+
+;    setup room and key char positions
+;teleport character
+SetCharBox 0,1
+;make character be hidden on screen
+SetCharFlags 0,32768
+
+;load room
+LoadRoom 2
+;    setup room and key char positions done
+
+
+
+
+; branch depending on if entry flag to program was 1 (first room), 2 (small room), 3 (large room)
+Push
+;get flag 0 (entry flag to program)
+GetFlag 0
+Push
+;set value 1 (to compare against)
+FetchScriptWord 1
+;set current value to -1 if they're equal, or 0 if not
+TestEquals
+;if current value is not zero (so flag was 1) then jump to first room
+Jnz :first-room-entry
+
+Push
+;get flag 0 (entry flag to program)
+GetFlag 0
+Push
+;set value 2 (to compare against)
+FetchScriptWord 2
+;set current value to -1 if they're equal, or 0 if not
+TestEquals
+;if current value is not zero (so flag was 2) then jump to small room
+Jnz :small-room-entry
+
+Push
+;get flag 0 (entry flag to program)
+GetFlag 0
+Push
+;set value 3 (to compare against)
+FetchScriptWord 3
+;set current value to -1 if they're equal, or 0 if not
+TestEquals
+;if current value is not zero (so flag was 3) then jump to large room
+Jnz :large-room-entry
+
+;if we're still here then it was an unknown entry, either error or bad save data
+Jz :first-room-entry
+
+
+
+first-room-entry:
+;we came in from first room
+;teleport character
+SetCharBox 0,1
+;set facing
+SetCharDirection 0,0
+
+;make character be shown on screen
+UnsetCharFlags 0,32768
+
+;   check if this is the first time we enter the room
+Push
+GetFlag 402
+Push
+FetchScriptWord 1
+TestNotEquals
+;   if it isn't, then skip the cutscene with text
+Jz :first-room-entry-cutscene-done
+;it is the first time we enter the room so explain it
+
+;say the text lines
+StartTalk 0,1
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 5
+;say the text lines
+StartTalk 0,2
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 5
+;say the text lines
+StartTalk 0,3
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 5
+;say the text lines
+StartTalk 0,4
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;set the flag
+Push
+FetchScriptWord 1
+SetFlag 402
+
+first-room-entry-cutscene-done:
+;jump to end of branch
+Push
+Jz :entry-done
+
+small-room-entry:
+;we came in from small room
+;teleport character
+SetCharBox 0,3
+;set facing
+SetCharDirection 0,3
+
+;make character be shown on screen
+UnsetCharFlags 0,32768
+
+;jump to end of branch
+Push
+Jz :entry-done
+
+large-room-entry:
+;TODO:
+;teleport character
+SetCharBox 0,3
+;set facing
+SetCharDirection 0,3
+
+;make character be shown on screen
+UnsetCharFlags 0,32768
+
+;jump to end of branch
+Push
+Jz :entry-done
+
+
+
+
+entry-done:
+;end
+StopScript

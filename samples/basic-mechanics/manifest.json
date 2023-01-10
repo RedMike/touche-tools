@@ -49,7 +49,14 @@
     "room1.png",
     "char.anim.json",
     "room1.room.json",
-    "program90.main.c.tsf"
+    "program90.main.c.tsf",
+    "program90.action-look-wall.c.tsf",
+    "program90.action-look-door.c.tsf",
+    "room2.room.json",
+    "room2.png",
+    "program90.action-go-door.c.tsf",
+    "program10.main.c.tsf",
+    "program10.action-leftclick-firstroom.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -71,6 +78,10 @@
     "room1.png": {
       "Type": 2,
       "Index": 1
+    },
+    "room2.png": {
+      "Type": 2,
+      "Index": 2
     }
   },
   "Animations": {
@@ -81,6 +92,9 @@
   "Rooms": {
     "room1.room.json": {
       "Index": 1
+    },
+    "room2.room.json": {
+      "Index": 2
     }
   },
   "Programs": {
@@ -89,6 +103,48 @@
       "Index": 90,
       "Target": -1,
       "Data": []
+    },
+    "program90.action-look-wall.c.tsf": {
+      "Type": 3,
+      "Index": 90,
+      "Target": 1,
+      "Data": [
+        1,
+        2
+      ]
+    },
+    "program90.action-look-door.c.tsf": {
+      "Type": 3,
+      "Index": 90,
+      "Target": 1,
+      "Data": [
+        1,
+        1
+      ]
+    },
+    "program90.action-go-door.c.tsf": {
+      "Type": 3,
+      "Index": 90,
+      "Target": 2,
+      "Data": [
+        1,
+        1
+      ]
+    },
+    "program10.main.c.tsf": {
+      "Type": 1,
+      "Index": 10,
+      "Target": -1,
+      "Data": []
+    },
+    "program10.action-leftclick-firstroom.c.tsf": {
+      "Type": 3,
+      "Index": 10,
+      "Target": 49,
+      "Data": [
+        2,
+        1
+      ]
     }
   }
 }
