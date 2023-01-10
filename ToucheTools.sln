@@ -23,6 +23,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{09325D
 		samples\assets\inventory.png = samples\assets\inventory.png
 		samples\assets\README.md = samples\assets\README.md
 		samples\assets\char.png = samples\assets\char.png
+		samples\assets\room1.png = samples\assets\room1.png
+		samples\assets\room2.png = samples\assets\room2.png
+		samples\assets\room1.room.json = samples\assets\room1.room.json
+		samples\assets\room2.room.json = samples\assets\room2.room.json
 	EndProjectSection
 EndProject
 Global

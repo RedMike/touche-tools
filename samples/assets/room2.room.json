@@ -1,0 +1,139 @@
+{
+  "RoomImageIndex": 2,
+  "WalkablePoints": {
+    "1": "(91, 80, 21)",
+    "2": "(195, 80, 21)",
+    "3": "(309, 80, 21)",
+    "4": "(91, 80, 21)",
+    "5": "(75, 80, 21)",
+    "6": "(195, 213, 21)",
+    "7": "(195, 307, 21)",
+    "8": "(195, 333, 21)",
+    "9": "(568, 213, 21)",
+    "10": "(568, 383, 21)",
+    "11": "(549, 383, 21)",
+    "12": "(523, 383, 21)",
+    "13": "(523, 307, 21)",
+    "14": "(424, 333, 21)",
+    "15": "(424, 420, 21)",
+    "16": "(424, 420, 21)",
+    "17": "(424, 440, 21)",
+    "18": "(309, 80, 21)",
+    "19": "(320, 80, 21)"
+  },
+  "WalkableLines": {
+    "(1, 2)": "(0, -1, -1)",
+    "(3, 2)": "(0, -1, -1)",
+    "(4, 5)": "(0, -1, -1)",
+    "(2, 6)": "(0, -1, -1)",
+    "(9, 6)": "(0, -1, -1)",
+    "(9, 10)": "(0, -1, -1)",
+    "(11, 10)": "(0, -1, -1)",
+    "(11, 12)": "(0, -1, -1)",
+    "(13, 12)": "(0, -1, -1)",
+    "(13, 7)": "(0, -1, -1)",
+    "(6, 7)": "(0, -1, -1)",
+    "(8, 7)": "(0, -1, -1)",
+    "(8, 14)": "(0, -1, -1)",
+    "(15, 14)": "(0, -1, -1)",
+    "(16, 17)": "(0, -1, -1)",
+    "(18, 19)": "(0, -1, -1)"
+  },
+  "Hitboxes": {
+    "1": {
+      "Item": 1,
+      "Type": 1,
+      "Label": "First room",
+      "SecondaryLabel": "",
+      "X": 71,
+      "Y": 64,
+      "W": 21,
+      "H": 23,
+      "Actions": [
+        -1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "2": {
+      "Item": 2,
+      "Type": 1,
+      "Label": "?",
+      "SecondaryLabel": "Small room",
+      "X": 311,
+      "Y": 63,
+      "W": 21,
+      "H": 23,
+      "Actions": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "3": {
+      "Item": 3,
+      "Type": 1,
+      "Label": "?",
+      "SecondaryLabel": "Large room",
+      "X": 399,
+      "Y": 420,
+      "W": 52,
+      "H": 36,
+      "Actions": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "4": {
+      "Item": 4,
+      "Type": 1,
+      "Label": "?",
+      "SecondaryLabel": "Painting",
+      "X": 527,
+      "Y": 364,
+      "W": 36,
+      "H": 17,
+      "Actions": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    }
+  },
+  "Texts": {
+    "1": "In this room, the view is top-down.",
+    "2": "So all movement is on the same Z value.",
+    "3": "Also, the room hitboxes are set to work on-click, not action menu.",
+    "4": "Except the painting which has actions.",
+    "5": "This room seems small.",
+    "6": "This room seems large.",
+    "7": "It looks like it's a painting.",
+    "8": "I'll pop it up by loading a new room temporarily."
+  },
+  "BackgroundAreas": {}
+}
