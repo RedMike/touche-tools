@@ -39,6 +39,19 @@ SetCharFlags 0,32768
 ;load room
 LoadRoom 1
 
+;check non-temporary flag to decide if hitbox description should be changed or not
+Push
+GetFlag 401
+Push
+FetchScriptWord 1
+TestEquals
+;if the flag is not set, then skip over the next few lines
+Jz :skip-hitbox-1-set
+
+;update the hitbox description same as in the actions to look/go through door
+SetHitboxText 1
+
+skip-hitbox-1-set:
 ;    setup room and key char positions done
 
 

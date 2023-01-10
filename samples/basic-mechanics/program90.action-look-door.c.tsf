@@ -1,0 +1,27 @@
+;TODO: check if player is already in point 10 or 9
+
+; first go to the place the door is
+MoveCharToPos 0,10,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 10 (for character 0's movement until moved to point 10)
+SetupWaitingChar 0,1,10
+
+;small delay to make it look right
+SetCharDelay 5
+
+;say the text lines
+StartTalk 0,6
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 5
+StartTalk 0,7
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+
+;change the description of the Door hitbox to its secondary description (Top-down View Room)
+SetHitboxText 1
+;and save a non-temporary flag to mark it as having been set, main program will check for this flag
+Push
+FetchScriptWord 1
+SetFlag 401

@@ -1,0 +1,25 @@
+;TODO: check if player is already in point 11 or 1
+
+; first go to the place the wall is
+MoveCharToPos 0,11,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 11 (for character 0's movement until moved to point 11)
+SetupWaitingChar 0,1,11
+
+; simplified 'look around' animation
+SetCharDirection 0,0
+SetCharDelay 5
+SetCharDirection 0,3
+SetCharDelay 5
+SetCharDirection 0,0
+SetCharDelay 5
+
+;say the text lines
+StartTalk 0,4
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;extra delay to be more natural
+SetCharDelay 5
+StartTalk 0,5
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
