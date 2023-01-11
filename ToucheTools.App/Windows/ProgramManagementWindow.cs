@@ -216,7 +216,12 @@ public class ProgramManagementWindow : BaseWindow
                     //target = a keychar
                     //data = empty
                     ImGui.SameLine();
-                    var programKeyChars = keyChars[program.Index]
+                    var allProgramKeyChars = new Dictionary<int, string>();
+                    if (keyChars.ContainsKey(program.Index))
+                    {
+                        allProgramKeyChars = keyChars[program.Index];
+                    }
+                    var programKeyChars = allProgramKeyChars
                         .Where(p => p.Key != 0) //you can't have a script on keychar 0
                         .Select(p => (p.Key, p.Value))
                         .ToList();
