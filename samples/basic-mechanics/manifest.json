@@ -71,7 +71,8 @@
     "room3.room.json",
     "room4.png",
     "room4.room.json",
-    "program11.main.c.tsf"
+    "program11.main.c.tsf",
+    "program11.char.3.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -209,6 +210,12 @@
       "Type": 1,
       "Index": 11,
       "Target": -1,
+      "Data": []
+    },
+    "program11.char.3.c.tsf": {
+      "Type": 2,
+      "Index": 11,
+      "Target": 3,
       "Data": []
     }
   }

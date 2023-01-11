@@ -1,0 +1,69 @@
+Noop
+
+;this script is run in the background whenever it's not paused/stopped and the main character script has paused/stopped
+;some instructions (SetCharDelay) now run on this character, but others (inventory) may still reference the main one
+
+;the script will also by default restart after every run, so to run once and stop:
+;  either add a check here that lets it jump to the end (more CPU-expensive)
+;  or re-init the character (and maybe move the graphics to a new char ID) without the script being there
+
+;say the text lines
+StartTalk 3,8
+;wait for key char 3 of type -1 with IDs 0 (for character 3's animation to be 0 (idle, not speaking))
+SetupWaitingChar 3,-1,0
+;extra delay to be more natural
+SetCharDelay 15
+
+;say the text lines
+StartTalk 3,9
+;don't wait for talk to finish, just start moving after a bit
+SetCharDelay 5
+
+;move around to point 14
+MoveCharToPos 3,14,0
+;wait for key char 3 of type 1 with ID 14 (for character 3's movement until moved to point 14)
+SetupWaitingChar 3,1,14
+
+;move around to point 13
+MoveCharToPos 3,13,0
+;wait for key char 3 of type 1 with ID 13 (for character 3's movement until moved to point 13)
+SetupWaitingChar 3,1,13
+
+;move around to point 7
+MoveCharToPos 3,7,0
+;wait for key char 3 of type 1 with ID 7 (for character 3's movement until moved to point 7)
+SetupWaitingChar 3,1,7
+
+;move around back to point 16
+MoveCharToPos 3,16,0
+;wait for key char 3 of type 1 with ID 16 (for character 3's movement until moved to point 16)
+SetupWaitingChar 3,1,16
+
+;face the original direction
+SetCharDirection 3,3
+
+;wait a bit
+SetCharDelay 15
+
+;say the text lines
+StartTalk 3,10
+;wait for key char 3 of type -1 with IDs 0 (for character 3's animation to be 0 (idle, not speaking))
+SetupWaitingChar 3,-1,0
+
+;queue up on char 3, type 1 (random count then stop), animation 3 count 1
+SetCharFrame 3,1,3,1
+;wait for key char 3 of type -1 with IDs 0 (for character 3's animation to be 0 (idle, not speaking or animating))
+SetupWaitingChar 3,-1,0
+
+;wait a bit
+SetCharDelay 15
+
+;say the text lines
+StartTalk 3,11
+;wait for key char 3 of type -1 with IDs 0 (for character 3's animation to be 0 (idle, not speaking))
+SetupWaitingChar 3,-1,0
+;wait a bit
+SetCharDelay 15
+
+;end
+StopScript
