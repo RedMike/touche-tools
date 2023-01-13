@@ -102,7 +102,8 @@ public class PackagePrograms
                 {
                     if (foundMain)
                     {
-                        throw new Exception("Found two mains for the same program");
+                        //TODO: log error
+                        continue;
                     }
 
                     foundMain = true;
