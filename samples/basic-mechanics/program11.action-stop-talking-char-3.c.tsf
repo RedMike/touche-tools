@@ -1,0 +1,7 @@
+;set a flag that the other scripts can check
+Push
+FetchScriptWord 1
+SetFlag 410
+
+;end
+StopScript

@@ -137,7 +137,12 @@
     "(0, 2, 2)": 12,
     "(0, 3, 0)": 13,
     "(0, 4, 0)": 14,
-    "(0, 3, 3)": 15
+    "(0, 3, 3)": 15,
+    "(0, 4, 3)": 16,
+    "(0, 4, 1)": 17,
+    "(0, 4, 2)": 18,
+    "(0, 3, 1)": 19,
+    "(0, 3, 2)": 20
   },
   "PartMappings": {
     "(0, 0, 0, 0)": 1,
@@ -205,7 +210,26 @@
     "(0, 3, 3, 4)": 63,
     "(0, 3, 3, 5)": 64,
     "(0, 3, 3, 6)": 65,
-    "(0, 3, 3, 7)": 66
+    "(0, 3, 3, 7)": 66,
+    "(0, 4, 3, 0)": 67,
+    "(0, 4, 1, 0)": 68,
+    "(0, 4, 2, 0)": 69,
+    "(0, 3, 1, 0)": 70,
+    "(0, 3, 2, 0)": 71,
+    "(0, 3, 1, 1)": 72,
+    "(0, 3, 2, 1)": 73,
+    "(0, 3, 1, 2)": 74,
+    "(0, 3, 2, 2)": 75,
+    "(0, 3, 1, 3)": 76,
+    "(0, 3, 2, 3)": 77,
+    "(0, 3, 1, 4)": 78,
+    "(0, 3, 2, 4)": 79,
+    "(0, 3, 1, 5)": 80,
+    "(0, 3, 2, 5)": 81,
+    "(0, 3, 1, 6)": 82,
+    "(0, 3, 2, 6)": 83,
+    "(0, 3, 1, 7)": 84,
+    "(0, 3, 2, 7)": 85
   },
   "CharToFrameFlag": {
     "0": 0
@@ -639,6 +663,149 @@
       }
     ],
     "15": [
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 2
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 0
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      }
+    ],
+    "16": [
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 0
+      }
+    ],
+    "17": [
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 0
+      }
+    ],
+    "18": [
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 0
+      }
+    ],
+    "19": [
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 2
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 0
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      },
+      {
+        "Parts": [],
+        "WalkDx": 0,
+        "WalkDy": 0,
+        "WalkDz": 0,
+        "Delay": 1
+      }
+    ],
+    "20": [
       {
         "Parts": [],
         "WalkDx": 0,
@@ -2357,6 +2524,460 @@
       }
     ],
     "66": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -32,
+        "DestY": -43,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "67": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "68": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "69": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "70": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "71": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "72": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -37,
+        "DestY": -41,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "73": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -37,
+        "DestY": -41,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "74": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -22,
+        "DestY": -66,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "75": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -22,
+        "DestY": -66,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "76": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -24,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "77": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -24,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "78": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -72,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -24,
+        "DestY": -72,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "79": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -72,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -24,
+        "DestY": -72,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "80": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -24,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "81": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -24,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "82": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -26,
+        "DestY": -54,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "83": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -26,
+        "DestY": -54,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "84": [
+      {
+        "RawFrameIndex": 11,
+        "FrameIndex": 11,
+        "DestX": -31,
+        "DestY": -58,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 20,
+        "FrameIndex": 20,
+        "DestX": -29,
+        "DestY": -73,
+        "VFlipped": false,
+        "HFlipped": false
+      },
+      {
+        "RawFrameIndex": 40,
+        "FrameIndex": 40,
+        "DestX": -32,
+        "DestY": -43,
+        "VFlipped": false,
+        "HFlipped": false
+      }
+    ],
+    "85": [
       {
         "RawFrameIndex": 11,
         "FrameIndex": 11,

@@ -62,7 +62,7 @@
       "Actions": [
         1,
         3,
-        0,
+        4,
         0,
         0,
         0,
@@ -103,8 +103,8 @@
     "7": "For conversation trees, look at the conversations sample, to keep the source for this one simpler.",
     "8": "I'm a second character, my code runs in the background.",
     "9": "I can walk around, like this.",
-    "10": "I can even run a specific animation or two, like this.",
-    "11": "And if you use the Stop Talking action on me, you can make me skip the actual talking."
+    "10": "I can even run a specific animation, like this.",
+    "11": "And if you use the \"Stop talking\" action on me, you can make me skip the actual talking."
   },
   "BackgroundAreas": {
     "1": {
