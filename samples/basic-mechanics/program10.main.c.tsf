@@ -25,6 +25,9 @@ SetCharFlags 0,32768
 
 ;load room
 LoadRoom 2
+
+;add small delay to force script to proceed from the current key char one, otherwise scroll behaviour may break
+SetCharDelay 1
 ;    setup room and key char positions done
 
 

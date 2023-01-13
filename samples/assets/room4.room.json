@@ -91,6 +91,48 @@
         0
       ],
       "FallbackAction": 0
+    },
+    "3": {
+      "Item": 5,
+      "Type": 2,
+      "Label": "Key",
+      "SecondaryLabel": "",
+      "X": 0,
+      "Y": 0,
+      "W": 0,
+      "H": 0,
+      "Actions": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "4": {
+      "Item": 2,
+      "Type": 1,
+      "Label": "Exit",
+      "SecondaryLabel": "",
+      "X": 54,
+      "Y": 326,
+      "W": 34,
+      "H": 169,
+      "Actions": [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
     }
   },
   "Texts": {
@@ -104,7 +146,8 @@
     "8": "I'm a second character, my code runs in the background.",
     "9": "I can walk around, like this.",
     "10": "I can even run a specific animation, like this.",
-    "11": "And if you use the \"Stop talking\" action on me, you can make me skip the actual talking."
+    "11": "And if you use the \"Stop talking\" action on me, you can make me skip the actual talking.",
+    "12": "It's the key for the door in the small room."
   },
   "BackgroundAreas": {
     "1": {

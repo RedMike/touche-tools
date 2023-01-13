@@ -43,8 +43,27 @@ LoadRoom 5
 DisableInput
 
 
-;TODO: hide the key if the inventory item is already owned
-;TODO: room area 3 needs to be pushed to 141, 123
+;check if the key item is in the inventory or not
+Push
+;this will return 0x20 if no-one has the item, or 0x10 | <inventory> if <inventory> has the item
+;therefore we need to check that the value is not 32 (0x20) therefore show it as taken
+GetInventoryItemFlags 5
+Push
+FetchScriptWord 32
+;if it is 32 (0x20) then skip the adding
+TestEquals
+Jnz :key-not-owned
+
+Push
+;save the intended X/Y location into consecutive temporary flags
+FetchScriptWord 141
+SetFlag 220
+FetchScriptWord 123
+SetFlag 221
+;now add room areas
+AddRoomArea 3,220
+
+key-not-owned:
  
 ;    start cutscene
 

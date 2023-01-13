@@ -95,7 +95,10 @@
     "room5.png",
     "room5.room.json",
     "program12.main.c.tsf",
-    "item5.png"
+    "item5.png",
+    "program12.action-pick-up-key.c.tsf",
+    "program11.action-go-door.c.tsf",
+    "program12.action-go-door.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -284,6 +287,33 @@
       "Index": 12,
       "Target": -1,
       "Data": []
+    },
+    "program12.action-pick-up-key.c.tsf": {
+      "Type": 3,
+      "Index": 12,
+      "Target": 5,
+      "Data": [
+        5,
+        2
+      ]
+    },
+    "program11.action-go-door.c.tsf": {
+      "Type": 3,
+      "Index": 11,
+      "Target": 2,
+      "Data": [
+        4,
+        4
+      ]
+    },
+    "program12.action-go-door.c.tsf": {
+      "Type": 3,
+      "Index": 12,
+      "Target": 2,
+      "Data": [
+        5,
+        3
+      ]
     }
   }
 }

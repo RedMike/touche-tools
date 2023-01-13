@@ -1,0 +1,14 @@
+;TODO: check if player is already in point 1
+
+; first go to the place the door is
+MoveCharToPos 0,1,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 1 (for character 0's movement until moved to point 1)
+SetupWaitingChar 0,1,1
+
+;small delay to make it look right
+SetCharDelay 5
+
+; change to next program
+;flag is passed as 3 to let it know the entry is from large room
+StartEpisode 10,3

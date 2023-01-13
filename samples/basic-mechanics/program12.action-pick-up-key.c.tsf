@@ -1,0 +1,49 @@
+;TODO: check if player is already in point 2
+
+; first go to the place the item is
+MoveCharToPos 0,2,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 2 (for character 0's movement until moved to point 2)
+SetupWaitingChar 0,1,2
+
+;small delay to make it look right
+SetCharDelay 5
+
+;animate a pick up
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+;queue up on char 0, type 1 (queue animation), animation 3 count 0 (count 1 would randomly pick between 3 and 4)
+SetCharFrame 0,1,3,0
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking or animating))
+SetupWaitingChar 0,-1,0
+
+;small delay to make it look right
+SetCharDelay 5
+
+;check if the item already exists
+Push
+;this will return 0x20 if no-one has the item, or 0x10 | <inventory> if <inventory> has the item
+;therefore we need to check that the value is 32 (0x20) to see if it can still be picked up
+GetInventoryItemFlags 5
+Push
+FetchScriptWord 32
+;if it is not 32 (0x20) then skip the adding
+TestEquals
+Jz :exit
+
+;add item 5 to inventory of character 0
+Push
+FetchScriptWord 5
+AddItemToInventoryAndRedraw 0
+
+;save the intended X/Y location into consecutive temporary flags
+FetchScriptWord 141
+SetFlag 220
+FetchScriptWord 123
+SetFlag 221
+;now add room areas
+AddRoomArea 3,220
+
+exit:
+;end
+StopScript

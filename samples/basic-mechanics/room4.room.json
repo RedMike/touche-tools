@@ -112,6 +112,27 @@
         0
       ],
       "FallbackAction": 0
+    },
+    "4": {
+      "Item": 2,
+      "Type": 1,
+      "Label": "Exit",
+      "SecondaryLabel": "",
+      "X": 54,
+      "Y": 326,
+      "W": 34,
+      "H": 169,
+      "Actions": [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
     }
   },
   "Texts": {
