@@ -1,0 +1,102 @@
+{
+  "RoomImageIndex": 5,
+  "WalkablePoints": {
+    "1": "(115, 259, 160)",
+    "2": "(149, 203, 101)",
+    "3": "(163, 203, 101)",
+    "4": "(187, 259, 160)",
+    "5": "(187, 259, 160)",
+    "6": "(240, 259, 160)",
+    "7": "(240, 259, 160)",
+    "8": "(331, 259, 160)",
+    "9": "(427, 259, 160)",
+    "10": "(307, 203, 101)"
+  },
+  "WalkableLines": {
+    "(1, 2)": "(0, -1, -1)",
+    "(3, 2)": "(0, -1, -1)",
+    "(3, 4)": "(0, -1, -1)",
+    "(1, 4)": "(0, -1, -1)",
+    "(5, 6)": "(0, -1, -1)",
+    "(7, 8)": "(0, -1, -1)",
+    "(7, 10)": "(0, -1, -1)",
+    "(8, 10)": "(0, -1, -1)",
+    "(8, 9)": "(0, -1, -1)",
+    "(10, 9)": "(0, -1, -1)"
+  },
+  "Hitboxes": {
+    "1": {
+      "Item": 1,
+      "Type": 1,
+      "Label": "Door",
+      "SecondaryLabel": "",
+      "X": 194,
+      "Y": 116,
+      "W": 36,
+      "H": 151,
+      "Actions": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "2": {
+      "Item": 2,
+      "Type": 1,
+      "Label": "Key",
+      "SecondaryLabel": "",
+      "X": 139,
+      "Y": 117,
+      "W": 40,
+      "H": 35,
+      "Actions": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    }
+  },
+  "Texts": {
+    "1": "This room is split into two halves with a door.",
+    "2": "This stops movement across unless you have a particular item.",
+    "3": "Luckily the item is there on the back wall."
+  },
+  "BackgroundAreas": {
+    "1": {
+      "DestX": 179,
+      "DestY": 116,
+      "Width": 29,
+      "Height": 146,
+      "SourceX": 644,
+      "SourceY": 2,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
+    },
+    "2": {
+      "DestX": 206,
+      "DestY": 106,
+      "Width": 14,
+      "Height": 175,
+      "SourceX": 693,
+      "SourceY": 93,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": false
+    }
+  }
+}

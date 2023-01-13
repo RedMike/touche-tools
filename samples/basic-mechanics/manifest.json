@@ -76,7 +76,9 @@
     "program11.char.3.c.tsf",
     "program11.action-stop-talking-char-3.c.tsf",
     "program11.action-look-at-char-3.c.tsf",
-    "program11.action-talk-to-char-3.c.tsf"
+    "program11.action-talk-to-char-3.c.tsf",
+    "room5.png",
+    "room5.room.json"
   ],
   "Images": {
     "action-menu.png": {
@@ -110,6 +112,10 @@
     "room4.png": {
       "Type": 2,
       "Index": 4
+    },
+    "room5.png": {
+      "Type": 2,
+      "Index": 5
     }
   },
   "Animations": {
@@ -132,6 +138,9 @@
     },
     "room4.room.json": {
       "Index": 4
+    },
+    "room5.room.json": {
+      "Index": 5
     }
   },
   "Programs": {
