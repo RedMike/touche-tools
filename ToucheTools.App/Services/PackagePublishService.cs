@@ -289,6 +289,7 @@ public class PackagePublishService
         {
             var actionIdMapping = new Dictionary<int, int>(globalActionIdMapping); //new set of actions per program
             var hitboxIdMapping = new Dictionary<(int, int), int>();
+            var backgroundIdMapping = new Dictionary<(int, int), int>();
             var program = new ProgramDataModel();
             db.Programs[programId] = program;
 
@@ -389,6 +390,7 @@ public class PackagePublishService
                         var destX = bgArea.DestX ?? 0x4000;
                         var destY = bgArea.DestY ?? 0x4000;
                         var type = bgArea.ScaledOffset != null ? 4 : 1;
+                        backgroundIdMapping[(roomId, bgAreaId)] = program.Backgrounds.Count;
                         program.Backgrounds.Add(new ProgramDataModel.Background()
                         {
                             SrcX = bgArea.SourceX,
@@ -634,6 +636,13 @@ public class PackagePublishService
                     {
                         Character = startTalk.Character,
                         Num = (short)textIds[(currentRoom, startTalk.Num)]
+                    };
+                } else if (instruction is AddRoomAreaInstruction addRoomArea)
+                {
+                    newInstruction = new AddRoomAreaInstruction()
+                    {
+                        Num = (short)backgroundIdMapping[(currentRoom, addRoomArea.Num)],
+                        Flag = addRoomArea.Flag
                     };
                 }
                 //TODO: other places text entries are referenced (conversations?)
