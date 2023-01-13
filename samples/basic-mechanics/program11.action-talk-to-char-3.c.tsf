@@ -1,0 +1,7 @@
+;say the text lines
+StartTalk 0,7
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+
+;end
+StopScript

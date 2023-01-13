@@ -74,7 +74,9 @@
     "room4.room.json",
     "program11.main.c.tsf",
     "program11.char.3.c.tsf",
-    "program11.action-stop-talking-char-3.c.tsf"
+    "program11.action-stop-talking-char-3.c.tsf",
+    "program11.action-look-at-char-3.c.tsf",
+    "program11.action-talk-to-char-3.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -224,6 +226,24 @@
       "Type": 3,
       "Index": 11,
       "Target": 4,
+      "Data": [
+        4,
+        1
+      ]
+    },
+    "program11.action-look-at-char-3.c.tsf": {
+      "Type": 3,
+      "Index": 11,
+      "Target": 1,
+      "Data": [
+        4,
+        1
+      ]
+    },
+    "program11.action-talk-to-char-3.c.tsf": {
+      "Type": 3,
+      "Index": 11,
+      "Target": 3,
       "Data": [
         4,
         1
