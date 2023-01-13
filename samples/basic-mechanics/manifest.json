@@ -7,7 +7,8 @@
       "1": "Look at",
       "2": "Go",
       "3": "Talk to",
-      "4": "Stop talking"
+      "4": "Stop talking",
+      "5": "Pick up"
     },
     "CustomColors": {
       "0": {
@@ -46,7 +47,21 @@
         "Item3": 10
       }
     },
-    "InventoryItems": {}
+    "InventoryItems": {
+      "5": {
+        "DefaultLabel": "Key",
+        "DefaultActions": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
   },
   "IncludedFiles": [
     "action-menu.png",
@@ -78,7 +93,9 @@
     "program11.action-look-at-char-3.c.tsf",
     "program11.action-talk-to-char-3.c.tsf",
     "room5.png",
-    "room5.room.json"
+    "room5.room.json",
+    "program12.main.c.tsf",
+    "item5.png"
   ],
   "Images": {
     "action-menu.png": {
@@ -115,6 +132,10 @@
     },
     "room5.png": {
       "Type": 2,
+      "Index": 5
+    },
+    "item5.png": {
+      "Type": 3,
       "Index": 5
     }
   },
@@ -257,6 +278,12 @@
         4,
         1
       ]
+    },
+    "program12.main.c.tsf": {
+      "Type": 1,
+      "Index": 12,
+      "Target": -1,
+      "Data": []
     }
   }
 }

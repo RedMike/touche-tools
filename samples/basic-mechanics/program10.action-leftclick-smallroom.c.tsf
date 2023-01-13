@@ -27,5 +27,4 @@ SetupWaitingChar 0,1,19
 
 ; change to small room program
 ;flag is passed as 1 to let it know the entry is from here
-;TODO: small room program instead of teleport back
-SetCharBox 0,3
+StartEpisode 12,1

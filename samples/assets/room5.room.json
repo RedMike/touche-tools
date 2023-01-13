@@ -36,7 +36,7 @@
       "H": 151,
       "Actions": [
         1,
-        0,
+        2,
         0,
         0,
         0,
@@ -56,7 +56,49 @@
       "W": 40,
       "H": 35,
       "Actions": [
+        5,
         0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "3": {
+      "Item": 3,
+      "Type": 1,
+      "Label": "Exit",
+      "SecondaryLabel": "",
+      "X": 89,
+      "Y": 134,
+      "W": 26,
+      "H": 144,
+      "Actions": [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
+    },
+    "4": {
+      "Item": 5,
+      "Type": 2,
+      "Label": "Key",
+      "SecondaryLabel": "",
+      "X": 0,
+      "Y": 0,
+      "W": 0,
+      "H": 0,
+      "Actions": [
+        1,
         0,
         0,
         0,
@@ -71,7 +113,10 @@
   "Texts": {
     "1": "This room is split into two halves with a door.",
     "2": "This stops movement across unless you have a particular item.",
-    "3": "Luckily the item is there on the back wall."
+    "3": "Luckily the item is there on the back wall.",
+    "4": "It's a door, the key for it is on the back wall.",
+    "5": "It's a door, I have the key for it.",
+    "6": "It's the key for the door in this room."
   },
   "BackgroundAreas": {
     "1": {
@@ -93,6 +138,18 @@
       "Height": 175,
       "SourceX": 693,
       "SourceY": 93,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": false
+    },
+    "3": {
+      "DestX": null,
+      "DestY": null,
+      "Width": 34,
+      "Height": 22,
+      "SourceX": 643,
+      "SourceY": 254,
       "ScaledOffset": null,
       "ScaleMul": 1,
       "ScaleDiv": 1,
