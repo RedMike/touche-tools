@@ -494,7 +494,7 @@ public class RoomEditorWindow : BaseWindow
                 var textStr = origTextStr;
                 
                 ImGui.PushID($"RoomTexts{textId}");
-                ImGui.SetNextItemWidth(childWidowWidth / 4.0f);
+                ImGui.SetNextItemWidth(3.0f * childWidowWidth/4.0f);
                 ImGui.InputText("", ref textStr, 128);
                 if (textStr != origTextStr)
                 {
