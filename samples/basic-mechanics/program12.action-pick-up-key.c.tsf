@@ -6,6 +6,17 @@ MoveCharToPos 0,2,0
 ;wait for key char 0 of type 1 with ID 2 (for character 0's movement until moved to point 2)
 SetupWaitingChar 0,1,2
 
+;check if the item already exists
+Push
+;this will return 0x20 if no-one has the item, or 0x10 | <inventory> if <inventory> has the item
+;therefore we need to check that the value is 32 (0x20) to see if it can still be picked up
+GetInventoryItemFlags 5
+Push
+FetchScriptWord 32
+;if it is not 32 (0x20) then skip the adding
+TestEquals
+Jz :exit
+
 ;small delay to make it look right
 SetCharDelay 5
 
@@ -17,19 +28,8 @@ SetCharFrame 0,1,3,0
 ;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking or animating))
 SetupWaitingChar 0,-1,0
 
-;small delay to make it look right
-SetCharDelay 5
-
-;check if the item already exists
-Push
-;this will return 0x20 if no-one has the item, or 0x10 | <inventory> if <inventory> has the item
-;therefore we need to check that the value is 32 (0x20) to see if it can still be picked up
-GetInventoryItemFlags 5
-Push
-FetchScriptWord 32
-;if it is not 32 (0x20) then skip the adding
-TestEquals
-Jz :exit
+;face left
+SetCharDirection 0,3
 
 ;add item 5 to inventory of character 0
 Push
@@ -43,6 +43,8 @@ FetchScriptWord 123
 SetFlag 221
 ;now add room areas
 AddRoomArea 3,220
+;disable hitbox
+LockHitbox 2
 
 exit:
 ;end
