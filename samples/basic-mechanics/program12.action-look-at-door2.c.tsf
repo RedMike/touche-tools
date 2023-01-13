@@ -1,0 +1,31 @@
+;check if the key item is in the inventory or not
+Push
+;this will return 0x20 if no-one has the item, or 0x10 | <inventory> if <inventory> has the item
+;therefore we need to check that the value is not 32 (0x20) therefore show it as taken
+GetInventoryItemFlags 5
+Push
+FetchScriptWord 32
+;if it is 32 (0x20) then skip the adding
+TestEquals
+Jnz :key-not-owned
+Jz :key-owned
+
+key-not-owned:
+;say the text lines
+StartTalk 0,4
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+Push
+Jz :key-done
+
+key-owned:
+;say the text lines
+StartTalk 0,5
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+Push
+Jz :key-done
+
+key-done:
+;end
+StopScript

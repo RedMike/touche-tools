@@ -123,6 +123,27 @@
         0
       ],
       "FallbackAction": 0
+    },
+    "5": {
+      "Item": 5,
+      "Type": 2,
+      "Label": "Key",
+      "SecondaryLabel": "",
+      "X": 0,
+      "Y": 0,
+      "W": 0,
+      "H": 0,
+      "Actions": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
     }
   },
   "Texts": {
@@ -133,7 +154,11 @@
     "5": "This room seems small.",
     "6": "This room seems large.",
     "7": "It looks like it's a painting.",
-    "8": "I'll pop it up by loading a new room temporarily."
+    "8": "I'll pop it up by loading a new room temporarily.",
+    "9": "~",
+    "10": "~",
+    "11": "~",
+    "12": "It's the key for the door in the small room."
   },
   "BackgroundAreas": {}
 }

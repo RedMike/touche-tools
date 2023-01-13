@@ -79,6 +79,27 @@
         0
       ],
       "FallbackAction": 0
+    },
+    "3": {
+      "Item": 5,
+      "Type": 2,
+      "Label": "Key",
+      "SecondaryLabel": "",
+      "X": 0,
+      "Y": 0,
+      "W": 0,
+      "H": 0,
+      "Actions": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "FallbackAction": 0
     }
   },
   "Texts": {
@@ -88,7 +109,12 @@
     "4": "The door isn't here any more.",
     "5": "It's just a wall.",
     "6": "This door leads to the next room.",
-    "7": "The next room shows a top-down view."
+    "7": "The next room shows a top-down view.",
+    "8": "~",
+    "9": "~",
+    "10": "~",
+    "11": "~",
+    "12": "It's the key for the door in the small room."
   },
   "BackgroundAreas": {
     "1": {

@@ -98,7 +98,12 @@
     "item5.png",
     "program12.action-pick-up-key.c.tsf",
     "program11.action-go-door.c.tsf",
-    "program12.action-go-door.c.tsf"
+    "program12.action-go-door.c.tsf",
+    "program10.action-look-at-key-item.c.tsf",
+    "program11.action-look-at-key-item.c.tsf",
+    "program12.action-look-at-door2.c.tsf",
+    "program12.action-look-at-key-item.c.tsf",
+    "program90.action-look-at-key-item.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -312,6 +317,51 @@
       "Target": 2,
       "Data": [
         5,
+        3
+      ]
+    },
+    "program10.action-look-at-key-item.c.tsf": {
+      "Type": 3,
+      "Index": 10,
+      "Target": 1,
+      "Data": [
+        2,
+        5
+      ]
+    },
+    "program11.action-look-at-key-item.c.tsf": {
+      "Type": 3,
+      "Index": 11,
+      "Target": 1,
+      "Data": [
+        4,
+        3
+      ]
+    },
+    "program12.action-look-at-door2.c.tsf": {
+      "Type": 3,
+      "Index": 12,
+      "Target": 1,
+      "Data": [
+        5,
+        1
+      ]
+    },
+    "program12.action-look-at-key-item.c.tsf": {
+      "Type": 3,
+      "Index": 12,
+      "Target": 1,
+      "Data": [
+        5,
+        4
+      ]
+    },
+    "program90.action-look-at-key-item.c.tsf": {
+      "Type": 3,
+      "Index": 90,
+      "Target": 1,
+      "Data": [
+        1,
         3
       ]
     }

@@ -1,0 +1,10 @@
+;TODO: this script should act as a global default for the item, not room-based, and use global texts, not room-based
+
+;say the text lines
+;TODO: text line should be global not room-based
+StartTalk 0,12
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+
+;end
+StopScript
