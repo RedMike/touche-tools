@@ -289,6 +289,7 @@ public class PackagePublishService
         {
             var actionIdMapping = new Dictionary<int, int>(globalActionIdMapping); //new set of actions per program
             var hitboxIdMapping = new Dictionary<(int, int), int>();
+            var areaIdMapping = new Dictionary<(int, int), int>();
             var backgroundIdMapping = new Dictionary<(int, int), int>();
             var program = new ProgramDataModel();
             db.Programs[programId] = program;
@@ -366,10 +367,12 @@ public class PackagePublishService
                         //it's an area
                         var destX = bgArea.DestX ?? 0x4000;
                         var destY = bgArea.DestY ?? 0x4000;
+                        
+                        areaIdMapping[(roomId, bgAreaId)] = program.Areas.Count + 1; //+1 is due to how area IDs start at 1
                         //offset/scaling is ignored
                         program.Areas.Add(new ProgramDataModel.Area()
                         {
-                            Id = bgAreaId, //TODO: mapping?
+                            Id = areaIdMapping[(roomId, bgAreaId)],
                             SrcX = bgArea.SourceX,
                             SrcY = bgArea.SourceY,
                             Rect = new ProgramDataModel.Rect()
@@ -643,6 +646,26 @@ public class PackagePublishService
                     {
                         Num = (short)backgroundIdMapping[(currentRoom, addRoomArea.Num)],
                         Flag = addRoomArea.Flag
+                    };
+                } 
+                else if (instruction is UpdateRoomAreasInstruction updateRoomAreas)
+                {
+                    newInstruction = new UpdateRoomAreasInstruction()
+                    {
+                        Area = (short)areaIdMapping[(currentRoom, updateRoomAreas.Area)]
+                    };
+                } else if (instruction is UpdateRoomInstruction updateRoom)
+                {
+                    newInstruction = new UpdateRoomInstruction()
+                    {
+                        Area = (short)areaIdMapping[(currentRoom, updateRoom.Area)]
+                    };
+                } else if (instruction is SetRoomAreaStateInstruction setRoomAreaState)
+                {
+                    newInstruction = new SetRoomAreaStateInstruction()
+                    {
+                        Num = (short)areaIdMapping[(currentRoom, setRoomAreaState.Num)],
+                        Val = setRoomAreaState.Val
                     };
                 }
                 //TODO: other places text entries are referenced (conversations?)
