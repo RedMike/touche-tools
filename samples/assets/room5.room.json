@@ -136,8 +136,8 @@
       "DestY": 106,
       "Width": 14,
       "Height": 175,
-      "SourceX": 693,
-      "SourceY": 93,
+      "SourceX": 699,
+      "SourceY": 221,
       "ScaledOffset": null,
       "ScaleMul": 1,
       "ScaleDiv": 1,
@@ -154,6 +154,18 @@
       "ScaleMul": 1,
       "ScaleDiv": 1,
       "Dynamic": false
+    },
+    "4": {
+      "DestX": 179,
+      "DestY": 116,
+      "Width": 29,
+      "Height": 146,
+      "SourceX": 684,
+      "SourceY": 2,
+      "ScaledOffset": null,
+      "ScaleMul": 1,
+      "ScaleDiv": 1,
+      "Dynamic": true
     }
   }
 }

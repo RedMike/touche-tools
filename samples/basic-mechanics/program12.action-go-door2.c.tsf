@@ -1,0 +1,139 @@
+;check if the key item is in the inventory or not
+Push
+;this will return 0x20 if no-one has the item, or 0x10 | <inventory> if <inventory> has the item
+;therefore we need to check that the value is not 32 (0x20) therefore show it as taken
+GetInventoryItemFlags 5
+Push
+FetchScriptWord 32
+;if it is 32 (0x20) then skip the adding
+TestEquals
+Jnz :key-not-owned
+
+;disable input
+EnableInput
+
+;check which side of the door we are on via temporary flag
+Push
+GetFlag 230
+Push
+FetchScriptWord 1
+TestEquals
+Jz :left-side
+Jnz :right-side
+
+
+left-side:
+
+;TODO: check if already in point 4
+; first go to the place the door is
+MoveCharToPos 0,4,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 4 (for character 0's movement until moved to point 4)
+SetupWaitingChar 0,1,4
+
+;short delay
+SetCharDelay 2
+
+;show door as open
+SetRoomAreaState 1,3
+
+;short delay
+SetCharDelay 2
+
+;teleport to door walk
+SetCharBox 0,5
+
+; then go to the other side
+MoveCharToPos 0,6,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 6 (for character 0's movement until moved to point 6)
+SetupWaitingChar 0,1,6
+
+;teleport to other side
+SetCharBox 0,7
+
+;short delay
+SetCharDelay 2
+
+;show door as closed
+SetRoomAreaState 1,0
+;redraw area to force it to redraw
+UpdateRoomAreas 4
+
+;short delay
+SetCharDelay 2
+
+;set flag
+Push
+FetchScriptWord 1
+SetFlag 230
+
+Push
+Jz :done
+
+right-side:
+
+
+;TODO: check if already in point 7
+; first go to the place the door is
+MoveCharToPos 0,7,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 7 (for character 0's movement until moved to point 7)
+SetupWaitingChar 0,1,7
+
+;short delay
+SetCharDelay 2
+
+;show door as open
+SetRoomAreaState 1,3
+
+;short delay 
+SetCharDelay 2
+
+;teleport to door walk
+SetCharBox 0,6
+
+; then go to the other side
+MoveCharToPos 0,5,0
+;TODO: lock walk path
+;wait for key char 0 of type 1 with ID 5 (for character 0's movement until moved to point 5)
+SetupWaitingChar 0,1,5
+
+;teleport to other side
+SetCharBox 0,4
+
+;short delay
+SetCharDelay 2
+
+;show door as closed
+SetRoomAreaState 1,0
+;redraw area to force it to redraw
+UpdateRoomAreas 4
+
+;short delay
+SetCharDelay 2
+
+;set flag
+Push
+FetchScriptWord 0
+SetFlag 230
+
+Push
+Jz :done
+
+done:
+
+;enable input
+DisableInput
+
+;end
+StopScript
+
+key-not-owned:
+;say the text lines
+StartTalk 0,4
+;wait for key char 0 of type -1 with IDs 0 (for character 0's animation to be 0 (idle, not speaking))
+SetupWaitingChar 0,-1,0
+
+;end
+StopScript

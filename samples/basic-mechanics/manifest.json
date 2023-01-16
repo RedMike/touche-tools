@@ -103,7 +103,8 @@
     "program11.action-look-at-key-item.c.tsf",
     "program12.action-look-at-door2.c.tsf",
     "program12.action-look-at-key-item.c.tsf",
-    "program90.action-look-at-key-item.c.tsf"
+    "program90.action-look-at-key-item.c.tsf",
+    "program12.action-go-door2.c.tsf"
   ],
   "Images": {
     "action-menu.png": {
@@ -363,6 +364,15 @@
       "Data": [
         1,
         3
+      ]
+    },
+    "program12.action-go-door2.c.tsf": {
+      "Type": 3,
+      "Index": 12,
+      "Target": 2,
+      "Data": [
+        5,
+        1
       ]
     }
   }
