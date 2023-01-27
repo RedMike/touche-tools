@@ -54,13 +54,13 @@ public class MainMenuWindow : BaseWindow
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.MenuItem("Load Folder"))
+                if (ImGui.MenuItem("Load Published Folder"))
                 {
                     _state.FolderToLoad = "";
                     _state.DatFileToLoad = null;
                 }
 
-                if (ImGui.MenuItem("Load DAT file"))
+                if (ImGui.MenuItem("Load Published DAT file"))
                 {
                     _state.FolderToLoad = null;
                     _state.DatFileToLoad = "";
