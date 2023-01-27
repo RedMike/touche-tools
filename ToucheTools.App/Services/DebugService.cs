@@ -14,7 +14,7 @@ public class DebugService
         _game = game;
     }
 
-    public void Run(string publishFolder)
+    public void RunFolder(string publishFolder)
     {
         if (_game.IsLoaded())
         {
@@ -24,6 +24,24 @@ public class DebugService
         
         _log.Info($"Loading in debugger: {publishFolder}");
         var datFile = Path.Combine(publishFolder, "DATABASE", "TOUCHE.DAT"); //TODO: custom filename
+        if (!File.Exists(datFile))
+        {
+            _log.Error($"Failed to find DAT file: {datFile}");
+            return;
+        }
+        
+        Run(datFile);
+    }
+    
+    public void Run(string datFile)
+    {
+        if (_game.IsLoaded())
+        {
+            _log.Error("Game already being debugged.");
+            return;
+        }
+        
+        _log.Info($"Loading in debugger: {datFile}");
         if (!File.Exists(datFile))
         {
             _log.Error($"Failed to find DAT file: {datFile}");

@@ -53,6 +53,18 @@ public class MainMenuWindow : BaseWindow
 
                     ImGui.EndMenu();
                 }
+
+                if (ImGui.MenuItem("Load Folder"))
+                {
+                    _state.FolderToLoad = "";
+                    _state.DatFileToLoad = null;
+                }
+
+                if (ImGui.MenuItem("Load DAT file"))
+                {
+                    _state.FolderToLoad = null;
+                    _state.DatFileToLoad = "";
+                }
             }
 
             if (_openedPackage.IsLoaded())
@@ -119,7 +131,7 @@ public class MainMenuWindow : BaseWindow
                         throw new Exception("Missing publish path");
                     }
                     _state.State = MainWindowState.States.Idle;
-                    _debugService.Run(publishPath);
+                    _debugService.RunFolder(publishPath);
                 }
             }
             
