@@ -31,10 +31,13 @@ Extract the ZIP to a folder on your machine, and run ToucheTools.App.exe. If you
 have ScummVM installed, go to File > Editor Settings and add the path to `scummvm.exe` to 
 enable running it from the editor.
 
-You can load a package or sample by using the options in the File menu.
+You can load a package or sample by using the options in the File menu. The packages are
+stored in the folder with the application, in a `packages` subfolder.
 
 You can also load a published folder/DAT file (an already published one) for debugging/inspecting by 
-using the Load Published option in the File menu.
+using the Load Published option in the File menu. You will not be able to
+modify the file as it has already been published, you need to open
+the source package for this.
 
 After publishing a TOUCHE.DAT file, you can run it in ScummVM by doing the following:
 
