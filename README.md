@@ -8,6 +8,9 @@ Does not include any game assets or functionality from the original game.
 The resulting game files (TOUCHE.DAT) are runnable in both ScummVM and the 
 original game engine (in DOS).
 
+For information on the restrictions present in the game engine, see 
+[the wiki page about restrictions](https://github.com/RedMike/touche-tools/wiki/Engine-Restrictions).
+
 ## Components
 
 A .NET library called ToucheTools is included which is used for the basic
