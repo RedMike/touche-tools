@@ -1,11 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using System.Reflection;
+using Newtonsoft.Json;
 using ToucheTools.App.Config;
 
 namespace ToucheTools.App.Services;
 
 public class ConfigService
 {
-    private const string Path = "config.json";
+    private const string FileName = "config.json";
+    private static readonly string FilePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+    private string ConfigPath => Path.Combine(FilePath, FileName);
 
     private int _cacheId = 0;
     private RunConfig? _cachedConfig = null;
@@ -16,7 +19,7 @@ public class ConfigService
         Exception? failed = null;
         try
         {
-            fileContents = File.ReadAllText(Path);
+            fileContents = File.ReadAllText(ConfigPath);
         }
         catch (Exception e)
         {
@@ -62,7 +65,9 @@ public class ConfigService
 
     public void SaveConfig(RunConfig runConfig)
     {
+        _cachedConfig = null;
+        _cacheId = 0;
         var json = JsonConvert.SerializeObject(runConfig);
-        File.WriteAllText(Path, json);
+        File.WriteAllText(ConfigPath, json);
     }
 }

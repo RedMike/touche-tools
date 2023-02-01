@@ -32,7 +32,7 @@ public class EditorSettingsWindow : BaseWindow
         var exePath = origExePath;
         ImGui.PushID("EditorSettingsExePath");
         ImGui.SetNextItemWidth((ImGui.GetWindowContentRegionMax()-ImGui.GetWindowContentRegionMin()).X);
-        ImGui.InputText("", ref exePath, UInt32.MaxValue);
+        ImGui.InputText("", ref exePath, 512);
         ImGui.PopID();
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.7f, 0.6f, 0.8f, 1.0f));
         ImGui.Text("Path to executable to run when running the game (OS-dependent, absolute path).");
@@ -49,7 +49,7 @@ public class EditorSettingsWindow : BaseWindow
         var exeArgs = origExeArgs;
         ImGui.PushID("EditorSettingsExeArguments");
         ImGui.SetNextItemWidth((ImGui.GetWindowContentRegionMax()-ImGui.GetWindowContentRegionMin()).X);
-        ImGui.InputText("", ref exeArgs, UInt32.MaxValue);
+        ImGui.InputText("", ref exeArgs, 512);
         ImGui.PopID();
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.7f, 0.6f, 0.8f, 1.0f));
         ImGui.Text("Format string where {0} is replaced with the DAT file path in double quotes.");
