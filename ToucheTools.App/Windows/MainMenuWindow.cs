@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.Reflection;
+using ImGuiNET;
 using ToucheTools.App.Services;
 using ToucheTools.App.State;
 using ToucheTools.App.ViewModels;
@@ -7,9 +8,11 @@ namespace ToucheTools.App.Windows;
 
 public class MainMenuWindow : BaseWindow
 {
+    private static readonly string RootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "./";
+    private static readonly string PackagesRootPath = Path.Combine(RootPath, "packages");
     private static readonly List<(string, string)> SampleNamesAndPaths = new List<(string, string)>()
     {
-        ("Basic Mechanics", "./samples/basic-mechanics/")
+        ("Basic Mechanics", Path.Combine(RootPath, "samples", "basic-mechanics"))
     };
     
     private readonly OpenedPackage _openedPackage;
@@ -35,11 +38,48 @@ public class MainMenuWindow : BaseWindow
 
     private void RenderFileMenu()
     {
+        var packages = new List<string>();
+        if (Directory.Exists(PackagesRootPath))
+        {
+            packages = Directory.EnumerateDirectories(PackagesRootPath)
+                .Where(f => !string.IsNullOrWhiteSpace(f))
+                .OrderBy(f => Path.GetFileName(f).StartsWith("package-") ? 1 : 0) //make the default names go to the bottom
+                .ThenBy(f => f)
+                .ToList();
+        }
+        
         if (ImGui.BeginMenu("File"))
         {
             if (!_openedPackage.IsLoaded())
             {
-                //ImGui.MenuItem("New"); //TODO: new package
+                if (ImGui.MenuItem("New Package"))
+                {
+                    if (!Directory.Exists(PackagesRootPath))
+                    {
+                        Directory.CreateDirectory(PackagesRootPath);
+                    }
+
+                    var newName = $"package-{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}";
+                    var newPath = Path.Combine(PackagesRootPath, newName);
+                    Directory.CreateDirectory(newPath);
+                    _openedPath.LoadFolder(newPath);
+                }
+
+                if (packages.Count > 0)
+                {
+                    if (ImGui.BeginMenu("Load Package"))
+                    {
+                        foreach (var path in packages)
+                        {
+                            var name = Path.GetFileName(path);
+                            if (ImGui.MenuItem(name))
+                            {
+                                _openedPath.LoadFolder(path);
+                            }
+                        }
+                        ImGui.EndMenu();
+                    }
+                }
 
                 if (ImGui.BeginMenu("Load Sample"))
                 {

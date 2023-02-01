@@ -24,6 +24,7 @@ public class EditorSettingsWindow : BaseWindow
         }
 
         var config = _configService.LoadConfig();
+        var changed = false;
         
         ImGui.Begin("Editor Settings", ImGuiWindowFlags.NoCollapse);
 
@@ -31,7 +32,7 @@ public class EditorSettingsWindow : BaseWindow
         var exePath = origExePath;
         ImGui.PushID("EditorSettingsExePath");
         ImGui.SetNextItemWidth((ImGui.GetWindowContentRegionMax()-ImGui.GetWindowContentRegionMin()).X);
-        ImGui.InputText("", ref exePath, UInt32.MaxValue);
+        ImGui.InputText("", ref exePath, 512);
         ImGui.PopID();
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.7f, 0.6f, 0.8f, 1.0f));
         ImGui.Text("Path to executable to run when running the game (OS-dependent, absolute path).");
@@ -40,6 +41,7 @@ public class EditorSettingsWindow : BaseWindow
         if (origExePath != exePath)
         {
             config.ExecutablePath = exePath;
+            changed = true;
         }
         ImGui.Text("\n");
 
@@ -47,7 +49,7 @@ public class EditorSettingsWindow : BaseWindow
         var exeArgs = origExeArgs;
         ImGui.PushID("EditorSettingsExeArguments");
         ImGui.SetNextItemWidth((ImGui.GetWindowContentRegionMax()-ImGui.GetWindowContentRegionMin()).X);
-        ImGui.InputText("", ref exeArgs, UInt32.MaxValue);
+        ImGui.InputText("", ref exeArgs, 512);
         ImGui.PopID();
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.7f, 0.6f, 0.8f, 1.0f));
         ImGui.Text("Format string where {0} is replaced with the DAT file path in double quotes.");
@@ -56,17 +58,17 @@ public class EditorSettingsWindow : BaseWindow
         if (origExeArgs != exeArgs)
         {
             config.ExecutableArgumentFormatString = exeArgs;
+            changed = true;
         }
         ImGui.Text("\n");
         ImGui.Text("\n");
         
         ImGui.Separator();
 
-        if (ImGui.Button("Save"))
+        if (changed)
         {
             _configService.SaveConfig(config);
         }
-        ImGui.SameLine();
         if (ImGui.Button("Close"))
         {
             _mainWindowState.ShowingEditorSettings = false;

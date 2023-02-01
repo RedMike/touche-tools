@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{09325D
 		samples\assets\room2.room.json = samples\assets\room2.room.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToucheTools.ModApp", "ToucheTools.ModApp\ToucheTools.ModApp.csproj", "{5BA7DF29-3EED-4537-8484-84B7E201456C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{6A4A3E90-444E-49B2-A727-7E5F8EEDCDF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A4A3E90-444E-49B2-A727-7E5F8EEDCDF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A4A3E90-444E-49B2-A727-7E5F8EEDCDF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BA7DF29-3EED-4537-8484-84B7E201456C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BA7DF29-3EED-4537-8484-84B7E201456C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BA7DF29-3EED-4537-8484-84B7E201456C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BA7DF29-3EED-4537-8484-84B7E201456C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{09325DBB-EC1E-40FD-9857-07296F7CA24E} = {71230617-C343-45E7-9742-272D54E1AD9D}

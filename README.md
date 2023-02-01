@@ -5,38 +5,81 @@ adventure game Touché: The Adventures of the Fifth Musketeer.
 
 Does not include any game assets or functionality from the original game.
 
-## Why?
+The resulting game files (TOUCHE.DAT) are runnable in both ScummVM and the 
+original game engine (in DOS).
 
-The game itself was obscure due to issues around the game's release, 
-but it was actually decent. It is supported by ScummVM, which means it is 
-playable on many modern machines, and through browsing the engine logic 
-in ScummVM I realised that the technical setup of the engine is 
-pretty interesting with the amount of flexibility built into it 
-(and at the same time, it is in fact annoyingly rigid due to realistic
-compromises to get the game released).
+## Components
 
-Making a small hacky (and probably not very stable) fan-game 
-on the engine appealed to me, and I realised that it's not an 
-unreasonably huge project, with how the engine is set up; in fact
-the biggest part (figuring out the data format/logic) was already 
-done by the maintainers of the engine in ScummVM.
+A .NET library called ToucheTools is included which is used for the basic
+data parsing/exporting. This library can be used to create custom scripts
+or applications that need to modify/inspect TOUCHE.DAT files.
 
-## Current State
+ToucheTools.App is the editor application which you can use to create,
+modify, or inspect game packages or TOUCHE.DAT files.
 
-The library is usable to load/inspect the database file correctly. 
-A GUI-based (ImGUI/Veldrid) application has been created to display
-this data, as well as provide a debugger to allow playback
-of the logic. This application is not feature-complete but improving.
+ToucheTools.ModApp is a separate simplified console application which
+can be used to modify a pre-built TOUCHE.DAT file for specific
+purposes: localisation, changing some graphics, etc. This application
+should only really be used when the source package is not available.
 
-Exporting a loaded database file has been implemented and the 
-resulting new DAT file is playable in the original game engine
-as well as in the debugger. There are likely minor bugs in the 
-exported version, but generally it should match pretty closely.
+## Usage
 
-Authoring a new game is possible at this point, although some engine
-features may not be implemented yet to the point of using them.
-All the basic gameplay mechanics are in, although some need complex
-instructions to use (e.g. conversations, giving items, etc).
+To use the editor, download the latest release [from the releases page](https://github.com/RedMike/touche-tools/releases). 
+Extract the ZIP to a folder on your machine, and run ToucheTools.App.exe. 
 
-Current focus is on building the mechanics out via implementing them 
-in the samples, and on improving the actual editor functionality.
+**To enable running the game in ScummVM from editor:** If you
+have ScummVM installed, go to File > Editor Settings and add the path to `scummvm.exe`
+to the first box, and `-p {0} touche:touche` to the second box. This
+will make the `Publish & Run` option correctly launch ScummVM.
+
+You can load a package or sample by using the options in the File menu. The packages are
+stored in the folder with the application, in a `packages` subfolder. The samples are
+stored in the folder with the application, in a `samples` subfolder. You can copy one of the
+samples to the `packages` folder and modify it as desired.
+
+You can also load a published folder/DAT file (an already published one) for debugging/inspecting by 
+using the Load Published options in the File menu. You will not be able to
+modify the file as it has already been published, you need to open
+the source package for this.
+
+After publishing a TOUCHE.DAT file, you can run it in ScummVM outside the editor 
+by doing the following:
+
+1. Create a folder on your machine, e.g. `D:\MyGame\ `
+2. Inside that folder create a new folder called DATABASE, e.g. `D:\MyGame\DATABASE\ `
+3. Place the TOUCHE.DAT you published in the DATABASE folder, e.g. `D:\MyGame\DATABASE\TOUCHE.DAT `
+4. Open Scumm VM
+5. Select "Add Game" and select the original folder, e.g. `D:\MyGame\ `
+6. It should detect the game as "Touche: The Adventures of the Fifth Musketeer - unknown variant"
+
+## Usage of Library
+
+To use the library directly from a .NET project, download the source code and build the 
+ToucheTools DLL. Use `MainLoader` to import an existing DAT file, or otherwise create your own instance
+of `DatabaseModel` to represent your game package. Then use `MainExporter` to save
+that `DatabaseModel` instance to a new DAT file.
+
+## Usage of Simplified Mod App
+
+This application is not recommended to be used unless you're trying to modify
+a package for which you do not have a source package (e.g. the original retail game).
+This application is provided for those limited purposes (localisation, bugfixes, etc).
+
+To use the simplified mod app, download it 
+[from the releases page](https://github.com/RedMike/touche-tools/releases).
+Extract the ZIP to a folder on your machine, and run ToucheTools.ModApp.exe.
+It will ask you for the path to the file you want to modify, e.g.
+`D:\MyGame\DATABASE\TOUCHE.DAT`. Paste it in and hit Enter, then 
+follow the instructions.
+
+In the first step, the app will generate a lot of CSV files 
+that contain the original text in the DAT file you provided. 
+Modify the CSV files with your choice of text editor. Note that
+if the new text strings are consistently too long, it may not
+be possible to run the export because of size limits in the game engine.
+
+In the second step, the app will read in the CSV files generated previously
+and apply any changes you have made in them to the loaded DAT file
+then create a **new** DAT file containing your modifications. The name
+of the new DAT file is based on the CSV file names, so you can re-run
+on the same set of CSV files to replace the DAT file in-place.
