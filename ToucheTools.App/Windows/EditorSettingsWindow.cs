@@ -24,6 +24,7 @@ public class EditorSettingsWindow : BaseWindow
         }
 
         var config = _configService.LoadConfig();
+        var changed = false;
         
         ImGui.Begin("Editor Settings", ImGuiWindowFlags.NoCollapse);
 
@@ -40,6 +41,7 @@ public class EditorSettingsWindow : BaseWindow
         if (origExePath != exePath)
         {
             config.ExecutablePath = exePath;
+            changed = true;
         }
         ImGui.Text("\n");
 
@@ -56,17 +58,17 @@ public class EditorSettingsWindow : BaseWindow
         if (origExeArgs != exeArgs)
         {
             config.ExecutableArgumentFormatString = exeArgs;
+            changed = true;
         }
         ImGui.Text("\n");
         ImGui.Text("\n");
         
         ImGui.Separator();
 
-        if (ImGui.Button("Save"))
+        if (changed)
         {
             _configService.SaveConfig(config);
         }
-        ImGui.SameLine();
         if (ImGui.Button("Close"))
         {
             _mainWindowState.ShowingEditorSettings = false;
