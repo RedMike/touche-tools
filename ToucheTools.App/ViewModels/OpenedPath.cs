@@ -8,6 +8,10 @@ public class OpenedPath : Observable<string>
     
     public void LoadFolder(string folderPath)
     {
+        if (!Path.EndsInDirectorySeparator(folderPath))
+        {
+            folderPath += Path.DirectorySeparatorChar;
+        }
         var path = Path.GetDirectoryName(folderPath);
         if (path == null)
         {
