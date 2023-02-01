@@ -23,10 +23,30 @@ public class ConfigService
             failed = e;
         }
 
-        var cacheId = fileContents.GetHashCode(); //different between restarts but otherwise fairly consistent
-        if (_cachedConfig != null && _cacheId == cacheId)
+        if (failed == null)
         {
-            return _cachedConfig;
+            var cacheId = fileContents.GetHashCode(); //different between restarts but otherwise fairly consistent
+            if (_cachedConfig != null && _cacheId == cacheId)
+            {
+                return _cachedConfig;
+            }
+            
+            try
+            {
+                var obj = JsonConvert.DeserializeObject<RunConfig>(fileContents);
+                if (obj == null)
+                {
+                    throw new Exception("Run config null");
+                }
+
+                _cachedConfig = obj;
+                _cacheId = cacheId;
+                return obj;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Unable to deserialise run config file", e);
+            }
         }
 
         if (failed is FileNotFoundException)
@@ -37,27 +57,7 @@ public class ConfigService
             return _cachedConfig;
         }
 
-        if (failed != null)
-        {
-            throw new Exception("Failed to load run config file", failed);
-        }
-
-        try
-        {
-            var obj = JsonConvert.DeserializeObject<RunConfig>(fileContents);
-            if (obj == null)
-            {
-                throw new Exception("Run config null");
-            }
-
-            _cachedConfig = obj;
-            _cacheId = cacheId;
-            return obj;
-        }
-        catch (Exception e)
-        {
-            throw new Exception("Unable to deserialise run config file", e);
-        }
+        throw new Exception("Failed to load run config file", failed);
     }
 
     public void SaveConfig(RunConfig runConfig)
